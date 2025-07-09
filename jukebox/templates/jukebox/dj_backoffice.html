@@ -1,0 +1,29 @@
+{% extends "jukebox/admin_base.html" %}
+{% block content %}
+    <h1>Backoffice del DJ</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Títol</th>
+                <th>Artista</th>
+                <th>Estat</th>
+                <th>Accions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+            <tr>
+                <td>{{ song.title }}</td>
+                <td>{{ song.artist }}</td>
+                <td>
+                    {% if song.played %}Reproduïda{% else %}Pendent{% endif %}
+                </td>
+                <td>
+                    <!-- Aquí pots posar botons per editar, esborrar, marcar com reproduïda, etc. -->
+                    <a href="#">Editar</a> | <a href="#">Esborrar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

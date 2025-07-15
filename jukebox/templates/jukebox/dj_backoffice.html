@@ -1,29 +1,58 @@
 {% extends "jukebox/admin_base.html" %}
+
 {% block content %}
-    <h1>Backoffice del DJ</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Títol</th>
-                <th>Artista</th>
-                <th>Estat</th>
-                <th>Accions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for song in songs %}
-            <tr>
-                <td>{{ song.title }}</td>
-                <td>{{ song.artist }}</td>
-                <td>
-                    {% if song.played %}Reproduïda{% else %}Pendent{% endif %}
-                </td>
-                <td>
-                    <!-- Aquí pots posar botons per editar, esborrar, marcar com reproduïda, etc. -->
-                    <a href="#">Editar</a> | <a href="#">Esborrar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container mt-4">
+    <h2 class="mb-4">Backoffice del DJ</h2>
+    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#createPartyModal">
+        + Nova Festa
+    </button>
+
+    <div class="row mb-4">
+        {% for party in parties %}
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100 {% if selected_party and party.id == selected_party.id %}border-danger border-2{% endif %}">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">{{ party.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                {{ party.date|date:"d/m/Y H:i" }}
+                            </small>
+                        </p>
+
+                        <a href="{% url 'party_settings' party.id %}" class="stretched-link"></a>
+
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning">No hi ha cap festa creada!</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal per crear festa -->
+    <div class="modal fade" id="createPartyModal" tabindex="-1" aria-labelledby="createPartyModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="post">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title" id="createPartyModalLabel">Crea una nova festa</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Tanca">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              {{ party_form.as_p }}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel·la</button>
+              <button type="submit" class="btn btn-success">Crea festa</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
@@ -12,6 +12,17 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
 
+    # NOVES RUTES
+    path('select-party/', views.select_party, name='select_party'),
+    path('set-party/<int:party_id>/', views.set_party, name='set_party'),
+    path('unset-party/', views.unset_party, name='unset_party'),
+    path('party/<int:party_id>/settings/remove_playlist/', views.remove_playlist, name='remove_playlist'),
+    path('party/<int:party_id>/settings/', views.party_settings, name='party_settings'),
+    path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
+
+
+    # RUTA per a la llista de cançons de la festa seleccionada
+    path('songs/', views.song_list, name='song_list'),
 
     path('buttons/', views.buttons, name='buttons'),
     path('cards/', views.cards, name='cards'),

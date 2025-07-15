@@ -1,27 +1,66 @@
 {% extends "jukebox/admin_base.html" %}
-
-{% block title %}Llista de cançons{% endblock %}
-
 {% block content %}
-<h1 class="h3 mb-4 text-gray-800">Llista de cançons</h1>
+<div class="container-fluid">
+  <h2 class="mb-4">Cançons per a <span class="text-primary">{{ party.name }}</span></h2>
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Cançons pendents de votar</h6>
+  {% if songs %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle w-100">
+        <thead>
+          <tr>
+            <th>Títol</th>
+            <th>Artista</th>
+            <th class="text-center">Vots</th>
+            <th class="text-center">Acció</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for song in songs %}
+            <tr>
+              <td>{{ song.title }}</td>
+              <td>{{ song.artist }}</td>
+              <td class="text-center">{{ song.votes }}</td>
+              <td class="text-center">
+                <form method="post" style="margin:0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                  <button type="submit" class="btn btn-sm btn-primary">
+                    Vota
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div class="card-body p-0">
-        <ul class="list-group list-group-flush">
-            {% for song in songs %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ song.title }}</strong> — <span class="text-muted">{{ song.artist }}</span>
-                    </div>
-                    <span class="badge badge-primary badge-pill">{{ song.votes }} vots</span>
-                </li>
-            {% empty %}
-                <li class="list-group-item">No hi ha cançons pendents!</li>
-            {% endfor %}
-        </ul>
-    </div>
+  {% else %}
+    <div class="alert alert-info">No hi ha cançons per aquesta festa!</div>
+  {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('song-search');
+  if (!input) return;  // si no hi és, no fem res
+
+  input.addEventListener('input', function() {
+    var q = input.value.trim().toLowerCase();
+    var rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(function(row) {
+      // primer i segon <td> són títol i artista
+      var title  = row.cells[0].textContent.toLowerCase();
+      var artist = row.cells[1].textContent.toLowerCase();
+
+      // si coincideix títol o artista, el mostrem, si no l'amaguem
+      if ( title.includes(q) || artist.includes(q) ) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

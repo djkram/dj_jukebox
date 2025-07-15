@@ -1,0 +1,65 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="py-4">
+        <h2 class="mb-4" style="font-size:2.5rem;font-weight:600;">Adreces de correu electrònic</h2>
+        <p>Les següents adreces de correu estan associades amb el teu compte:</p>
+        <ul style="list-style:none;padding-left:0;">
+            {% for emailaddress in emailaddresses %}
+                <li class="mb-2 d-flex align-items-center">
+                    <span>
+                        {% if emailaddress.primary %}
+                            <strong>{{ emailaddress.email }}</strong>
+                        {% else %}
+                            {{ emailaddress.email }}
+                        {% endif %}
+                    </span>
+                    {% if emailaddress.verified %}
+                        <span class="badge bg-success mx-2">Verificada</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark mx-2">No verificada</span>
+                    {% endif %}
+                    {% if emailaddress.primary %}
+                        <span class="badge bg-primary mx-1">Principal</span>
+                    {% else %}
+                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_primary" class="btn btn-sm btn-outline-primary">Fes principal</button>
+                        </form>
+                    {% endif %}
+                    {% if not emailaddress.verified %}
+                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_send" class="btn btn-sm btn-outline-warning">Reenvia verificació</button>
+                        </form>
+                    {% endif %}
+                    {% if not emailaddress.primary %}
+                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                            <button type="submit" name="action_remove" class="btn btn-sm btn-outline-danger">Elimina</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>No tens cap adreça de correu afegida.</li>
+            {% endfor %}
+        </ul>
+
+        <hr class="my-4">
+
+        <h4 class="mb-3">Afegeix una adreça nova</h4>
+        <form method="post" action="{% url 'account_email' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="email" name="email" class="form-control" placeholder="Adreça de correu" required>
+            </div>
+            <button type="submit" name="action_add" class="btn btn-success">Afegeix adreça</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

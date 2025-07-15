@@ -1,8 +1,49 @@
 {% extends "jukebox/admin_base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h1>Perfil d'usuari</h1>
-    <p>Benvingut, {{ user.username }}!</p>
-    <!-- Aquí pots afegir més info del perfil -->
+    <div class="card shadow rounded-4 p-4">
+        <h2 class="mb-3">Perfil d'usuari</h2>
+        <p class="lead">Benvingut, <b>{{ user.username }}</b>!</p>
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-2">Les meves dades</h5>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item"><b>Email:</b> {{ user.email }}</li>
+                    <li class="list-group-item"><b>Usuari:</b> {{ user.username }}</li>
+                </ul>
+                <a class="btn btn-outline-primary mb-2 w-100" href="{% url 'account_email' %}">
+                    Edita el teu email
+                </a>
+                {% if not user.has_usable_password %}
+                    <a class="btn btn-warning mb-2 w-100" href="{% url 'account_set_password' %}">
+                        Estableix una contrasenya
+                    </a>
+                {% else %}
+                    <a class="btn btn-outline-secondary mb-2 w-100" href="{% url 'account_change_password' %}">
+                        Canvia la teva contrasenya
+                    </a>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-2">Integració amb Spotify</h5>
+                {% if not has_spotify %}
+                    <a class="btn btn-success w-100 mb-2" href="{% url 'spotify_login' %}">
+                        <i class="fab fa-spotify"></i> Connecta amb Spotify
+                    </a>
+                    <div class="alert alert-info mt-2">
+                        Encara no tens el teu compte Spotify connectat!
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="fab fa-spotify"></i>
+                        Compte de Spotify <b>ja connectat</b>!
+                    </div>
+                    <a class="btn btn-outline-danger w-100" href="{% url 'socialaccount_connections' %}">
+                        Gestiona connexions socials
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

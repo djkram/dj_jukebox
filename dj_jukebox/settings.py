@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import logging
+import os
+import certifi
 from pathlib import Path
+
+#os.environ['SSL_CERT_FILE'] = certifi.where()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,6 +30,31 @@ SECRET_KEY = 'django-insecure-ca9=grerq8vy+uz-b=k0t$-u1ovz=u%=1%o1va_sngsi4z7sdp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+logging.basicConfig(
+    level=logging.DEBUG,
+)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 ALLOWED_HOSTS = []
 
 
@@ -37,8 +67,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django_extensions',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.spotify',
     'jukebox',
 ]
+
+SITE_ID = 0
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -48,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'dj_jukebox.urls'
@@ -55,13 +94,14 @@ ROOT_URLCONF = 'dj_jukebox.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'jukebox' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'jukebox.context_processors.selected_party',
             ],
         },
     },
@@ -122,8 +162,33 @@ STATICFILES_DIRS = [
 ]
 
 LOGIN_REDIRECT_URL = '/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/'
+
 
 LOGIN_URL = '/login/'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'spotify': {
+        'SCOPE': [
+            'user-read-email',             # email de l'usuari
+            'user-read-private',           # dades bàsiques del perfil
+            'playlist-read-private',       # playlists privades
+            'playlist-read-collaborative', # playlists col·laboratives
+        ],
+        'AUTH_PARAMS': {
+            'show_dialog': True,           # força diàleg per regenerar tokens
+        },
+    }
+}
+
+ACCOUNT_LOGIN_METHODS = {"email", "username"}   # Pots posar només "email" si vols login només amb email
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+
+ACCOUNT_UNIQUE_EMAIL = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_STORE_TOKENS = True
 
 
 # Default primary key field type

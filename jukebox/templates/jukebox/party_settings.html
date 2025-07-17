@@ -1,0 +1,108 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row gx-4">
+    {# ── COL. ESQUERRA: FORMULARI ──────────────────────────────────────── #}
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-4 rounded-4 mb-4">
+        <h2 class="h4 mb-3">Configuració de la festa: {{ party.name }}</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+          </div>
+          <div class="mb-3">
+            {{ form.date.label_tag }}
+            {{ form.date }}
+          </div>
+          <div class="mb-3">
+            {{ form.max_votes_per_user.label_tag }}
+            {{ form.max_votes_per_user }}
+            <small class="form-text text-muted">
+              Número de vots gratuïts que cada usuari podrà fer servir en aquesta festa.
+            </small>
+          </div>
+
+          {# Gestiona la playlist #}
+          {% if party.playlist %}
+            <div class="mb-3">
+              <label class="form-label">Playlist assignada</label>
+              <p class="form-control-plaintext mb-1">
+                {{ party.playlist.name }} ({{ party.playlist.owner }})
+              </p>
+              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm mb-2">
+                Neteja playlist
+              </a>
+            </div>
+          {% else %}
+            <div class="mb-3">
+              {{ form.spotify_playlist.label_tag }}
+              {{ form.spotify_playlist }}
+            </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary me-2">
+            Desa canvis
+          </button>
+          <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary">
+            Torna
+          </a>
+        </form>
+      </div>
+    </div>
+
+    {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
+    <div class="col-lg-8">
+      <div class="card shadow-sm p-4 rounded-4 mb-4">
+        <h3 class="h5 mb-3">Cançons de la playlist</h3>
+        {% if songs %}
+          <input
+            id="song-search"
+            class="form-control mb-3"
+            placeholder="Filtra per títol o artista…"
+          />
+          <table class="table table-striped w-100">
+            <thead>
+              <tr>
+                <th>Títol</th>
+                <th>Artista</th>
+                <th>Vots</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for song in songs %}
+                <tr>
+                  <td>{{ song.title }}</td>
+                  <td>{{ song.artist }}</td>
+                  <td>{{ song.num_votes }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted">No hi ha cançons per mostrar.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('song-search');
+  if (!input) return;
+  input.addEventListener('input', function() {
+    var q = input.value.trim().toLowerCase();
+    var rows = document.querySelectorAll('table tbody tr');
+    rows.forEach(function(row) {
+      var t = row.cells[0].textContent.toLowerCase();
+      var a = row.cells[1].textContent.toLowerCase();
+      row.style.display = (t.includes(q) || a.includes(q)) ? '' : 'none';
+    });
+  });
+});
+</script>
+{% endblock %}

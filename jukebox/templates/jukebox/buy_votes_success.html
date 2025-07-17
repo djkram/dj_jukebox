@@ -1,0 +1,9 @@
+{% extends "jukebox/admin_base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="alert alert-success">
+    Pagament realitzat! Els teus vots s’activaran automàticament (pot trigar uns segons).
+  </div>
+  <a href="{% url 'song_list' %}" class="btn btn-primary">Torna a la festa</a>
+</div>
+{% endblock %}

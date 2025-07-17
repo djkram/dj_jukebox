@@ -1,0 +1,14 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Connecta amb Spotify</h2>
+    <p>Estàs a punt de connectar-te amb el teu compte de Spotify.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">
+        <i class="fab fa-spotify"></i> Continua amb Spotify
+      </button>
+    </form>
+  </div>
+{% endblock %}

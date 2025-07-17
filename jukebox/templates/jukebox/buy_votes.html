@@ -1,0 +1,18 @@
+{% extends "jukebox/admin_base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h2>Comprar vots per la festa: {{ party.name }}</h2>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="votes" class="form-label">Quantitat de vots a comprar</label>
+      <select id="votes" name="votes" class="form-select" required>
+        <option value="5">5 vots (1€)</option>
+        <option value="10">10 vots (2€)</option>
+        <option value="20">20 vots (4€)</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-success">Anar a pagar</button>
+  </form>
+</div>
+{% endblock %}

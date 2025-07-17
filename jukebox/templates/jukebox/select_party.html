@@ -1,0 +1,41 @@
+{% extends "jukebox/admin_base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4" style="font-size:2.5rem; font-weight:600;">Selecciona una festa</h2>
+    {% if parties %}
+        <div class="row">
+            {% for party in parties %}
+                <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                    <a href="{% url 'set_party' party.id %}" style="text-decoration:none;" tabindex="0" aria-label="Selecciona {{ party.name }}">
+                        <div class="card shadow-sm h-100 hover-shadow" style="cursor:pointer; border-radius: 1.2rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ party.name }}</h5>
+                                {% if party.date %}
+                                    <div class="card-text text-muted small">
+                                        {{ party.date|date:"d/m/Y H:i" }}
+                                    </div>
+                                {% endif %}
+                                {% if party.playlist %}
+                                    <div class="text-secondary mt-2">🎶 {{ party.playlist.name }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            No hi ha festes disponibles!
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.hover-shadow:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.14), 0 1.5px 6px rgba(0,0,0,0.14) !important;
+    background: #f0f4fa;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+  <h1>Third-Party Login Failure</h1>
+  <p>An error occurred while attempting to login via your third-party account.</p>
+  {% if auth_error %}
+    <h2>Error details</h2>
+    <pre>{{ auth_error }}</pre>
+  {% endif %}
+  {% if exception %}
+    <h2>Exception</h2>
+    <pre>{{ exception }}</pre>
+  {% endif %}
+  {% if request.GET %}
+    <h2>GET params</h2>
+    <pre>{{ request.GET }}</pre>
+  {% endif %}
+  {% if request.META %}
+    <h2>Request META</h2>
+    <pre>{{ request.META }}</pre>
+  {% endif %}
+  {% if oauth_response %}
+    <h2>OAuth Response</h2>
+    <pre>{{ oauth_response|safe }}</pre>
+  {% endif %}
+  {% if traceback %}
+    <h2>Traceback</h2>
+    <pre>{{ traceback }}</pre>
+  {% endif %}
+  {% if 'certificate verify failed' in auth_error|stringformat:"s" %}
+    <div style="color: red;">
+      <b>Solució ràpida:</b> Sembla que falta el certificat SSL al teu Python.<br>
+      Prova d’executar <code>/Applications/Python\ 3.x/Install\ Certificates.command</code> per instal·lar-los.
+    </div>
+  {% endif %}
+{% endblock %}

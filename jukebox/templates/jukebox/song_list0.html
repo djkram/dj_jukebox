@@ -1,0 +1,27 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block title %}Llista de cançons{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Llista de cançons</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Cançons pendents de votar</h6>
+    </div>
+    <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+            {% for song in songs %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ song.title }}</strong> — <span class="text-muted">{{ song.artist }}</span>
+                    </div>
+                    <span class="badge badge-primary badge-pill">{{ song.votes }} vots</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No hi ha cançons pendents!</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

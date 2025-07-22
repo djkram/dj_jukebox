@@ -11,11 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import logging
 import os
-import certifi
 from pathlib import Path
 
-#os.environ['SSL_CERT_FILE'] = certifi.where()
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ca9=grerq8vy+uz-b=k0t$-u1ovz=u%=1%o1va_sngsi4z7sdp'
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -76,7 +79,9 @@ INSTALLED_APPS = [
     'jukebox',
 ]
 
-SITE_ID = 0
+AUTH_USER_MODEL = 'jukebox.User'
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -143,13 +148,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+    
 
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
+LANGUAGES = [
+    ('ca', 'Català'),
+    ('en', 'English'),
+    # ... altres idiomes
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -187,7 +192,7 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
-ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 SOCIALACCOUNT_STORE_TOKENS = True
 
 
@@ -195,3 +200,12 @@ SOCIALACCOUNT_STORE_TOKENS = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#Email Conf
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('GMAIL_USER')           # millor per seguretat
+EMAIL_HOST_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
+DEFAULT_FROM_EMAIL = 'DJ Jukebox <djkram@gmail.com>'

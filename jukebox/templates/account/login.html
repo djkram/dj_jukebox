@@ -2,6 +2,13 @@
 {% load socialaccount %}
 
 {% block content %}
+
+{% if user.is_authenticated %}
+  <script>
+    window.location.href = "{% url 'main' %}";
+  </script>
+{% endif %}
+
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 text-center">
         <h1 class="mb-4">Login</h1>
@@ -12,7 +19,7 @@
         </form>
 
         <hr>
-        <a href="{% url 'spotify_login' %}" class="btn btn-success mt-2">
+        <a href="{% provider_login_url 'spotify' process='login' next=redirect_url %}" class="btn btn-success mt-2">
             <i class="fab fa-spotify"></i> Connecta't amb Spotify
         </a>
     </div>

@@ -1,7 +1,11 @@
 import uuid
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 
+
+class User(AbstractUser):
+    credits = models.PositiveIntegerField(default=0)
 
 class Playlist(models.Model):
     spotify_id = models.CharField(max_length=128, unique=True)

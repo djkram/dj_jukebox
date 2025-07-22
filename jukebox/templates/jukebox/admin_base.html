@@ -38,12 +38,6 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <li class="nav-item my-2">
-              <a class="nav-link" href="{% url 'buy_votes' %}">
-                <i class="fas fa-coins me-2"></i> Comprar vots
-              </a>
-            </li>
-
             <!-- Festa seleccionada -->
             <li class="nav-item active">
                 <a class="nav-link" href="/songs/">
@@ -63,6 +57,12 @@
             <!-- Secció USUARI -->
             <div class="sidebar-heading">Usuari</div>
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'buy_votes' %}">
+                    <i class="fas fa-coins"></i>
+                    <span>Compra crèdits</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'select_party' %}">
                     <i class="fas fa-fw fa-random"></i>
                     <span>Canvia festa</span>
@@ -75,7 +75,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                <form method="post" action="{% url 'account_logout' %}" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="nav-link btn btn-link" style="color:#fff; text-align:left;">
                         <i class="fas fa-sign-out-alt"></i>
@@ -142,8 +142,8 @@
                 <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Login Screens:</h6>
-                        <a class="collapse-item" href="{% url 'login' %}">Login</a>
-                        <a class="collapse-item" href="{% url 'register' %}">Register</a>
+                        <a class="collapse-item" href="{% url 'account_login' %}">Login</a>
+                        <a class="collapse-item" href="{% url 'account_signup' %}">Register</a>
                         <a class="collapse-item" href="{% url 'forgot-password' %}">Forgot Password</a>
                         <div class="collapse-divider"></div>
                         <h6 class="collapse-header">Other Pages:</h6>
@@ -252,7 +252,7 @@
                                     Profile
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <form method="post" action="{% url 'logout' %}" style="margin:0; padding:0;">
+                                <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
                                         <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -263,10 +263,10 @@
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
                         </li>
                         {% endif %}
                     </ul>

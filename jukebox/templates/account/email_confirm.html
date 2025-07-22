@@ -1,0 +1,14 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="mb-4">Confirma el teu correu electrònic</h1>
+    <p>
+        Si us plau, confirma que <b>{{ email }}</b> és una adreça de correu vàlida pel compte d’usuari <b>{{ confirmation.email_address.user.username }}</b>.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Confirmar</button>
+    </form>
+</div>
+{% endblock %}

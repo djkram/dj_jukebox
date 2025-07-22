@@ -1,0 +1,24 @@
+{% extends "jukebox/admin_base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="mb-4">Verifica el teu correu</h1>
+            <p>
+                T'hem enviat un correu de verificació.<br>
+                Revisa la safata d'entrada i segueix l'enllaç per activar el teu compte.
+            </p>
+            <p class="text-muted">
+                No el trobes? Comprova també el correu brossa (spam).<br>
+                Si tens problemes, contacta amb nosaltres!
+            </p>
+            {% if email %}
+                <div class="alert alert-success mt-4">
+                    Correu enviat a <b>{{ email }}</b>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

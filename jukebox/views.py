@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.csrf import csrf_exempt
 from allauth.account.forms import SignupForm
 from allauth.socialaccount.models import SocialToken, SocialAccount
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
 
 from .models import Song, Party, Vote, VotePackage
 from django.db.models import Count
@@ -11,6 +13,10 @@ from .forms import PartyForm, PartySettingsForm
 from .spotify_api import get_user_playlists
 from .votes import get_user_votes_left
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+import stripe
 
 
 # Create your views here.
@@ -111,41 +117,48 @@ def remove_playlist(request, party_id):
         party.save()
     return redirect('party_settings', party_id=party.id)
 
+
 @login_required
 def song_list(request):
-    # 1) Obtenir la festa seleccionada
     party_id = request.session.get('selected_party_id')
     if not party_id:
         return redirect('select_party')
     party = get_object_or_404(Party, pk=party_id)
+    user = request.user
 
-    # 2) Comprovar vots restants
-    votes_left = get_user_votes_left(request.user, party)
+    # Comprovar vots restants segons límit de la festa
+    votes_left = get_user_votes_left(user, party)
+    credits = user.credits  # crèdits globals de l'usuari
 
-    # 3) Si POST, intentar votar
     if request.method == 'POST' and 'vote_song_id' in request.POST:
         song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
-        if votes_left > 0:
-            # Crear el vot
-            Vote.objects.create(user=request.user, song=song, party=party)
-            # Opcional: pots fer servir un missatge de confirmació (django.contrib.messages)
+        if votes_left > 0 and credits > 0:
+            # Crear el vot i restar crèdit
+            Vote.objects.create(user=user, song=song, party=party)
+            user.credits -= 1
+            user.save()
             return redirect('song_list')
         else:
-            # No té vots restants: mostrar missatge d'error
+            # Mostra error segons el cas
+            if credits == 0:
+                error = "No tens crèdits disponibles!"
+            else:
+                error = "Has esgotat els teus vots per aquesta festa!"
             return render(request, "jukebox/song_list.html", {
                 "party": party,
-                "songs": party.songs.all().order_by('-votes', 'title'),
+                "songs": party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title'),
                 "votes_left": votes_left,
-                "error": "Has esgotat els teus vots per aquesta festa!"
+                "credits": credits,
+                "error": error,
             })
 
-    # 4) Ordena les cançons segons vots reals (comptem vots per cançó!)
     songs = party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title')
 
     return render(request, "jukebox/song_list.html", {
         "party": party,
         "songs": songs,
         "votes_left": votes_left,
+        "credits": credits,
     })
 
 
@@ -173,6 +186,8 @@ def buy_votes(request):
     if not party_id:
         return redirect('select_party')
     party = Party.objects.get(id=party_id)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY  # ← AQUI SEMPRE!
 
     if request.method == 'POST':
         votes_to_buy = int(request.POST.get('votes', 5))
@@ -209,6 +224,32 @@ def buy_votes(request):
 def buy_votes_success(request):
     return render(request, "jukebox/buy_votes_success.html")
 
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except (ValueError, stripe.error.SignatureVerificationError):
+        return HttpResponse(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata']['user_id']
+        credits = int(session['metadata']['votes_purchased'])  # Comprem crèdits, no vots!
+        try:
+            user = User.objects.get(id=user_id)
+            user.credits += credits
+            user.save()
+        except User.DoesNotExist:
+            pass  # Si vols, afegeix log/error
+
+    return HttpResponse(status=200)
 
 @login_required
 def get_spotify_playlists(request):

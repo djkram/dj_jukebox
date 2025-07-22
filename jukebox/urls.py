@@ -1,16 +1,20 @@
-from django.urls import path, include
+from django.views.generic import RedirectView
+from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from .views import stripe_webhook
 from . import views
 
 urlpatterns = [
     path('', views.main, name='main'),
     path('dj/', views.dj_backoffice, name='dj_backoffice'),
-    path('login/', auth_views.LoginView.as_view(template_name='jukebox/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
-    path('register/', views.register, name='register'),
+    #path('login/', auth_views.LoginView.as_view(template_name='jukebox/login.html'), name='login'),    
+    #path('register/', views.register, name='register'),
+    path('login/', RedirectView.as_view(url=reverse_lazy('account_login'), permanent=False)),
+    path('register/', RedirectView.as_view(url=reverse_lazy('account_signup'), permanent=False)),
     path('profile/', views.profile, name='profile'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
 
     # NOVES RUTES
     path('select-party/', views.select_party, name='select_party'),
@@ -21,8 +25,7 @@ urlpatterns = [
     path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
     path('buy-votes/', views.buy_votes, name='buy_votes'),
     path('buy-votes/success/', views.buy_votes_success, name='buy_votes_success'),
-
-
+    path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),
 
 
     # RUTA per a la llista de cançons de la festa seleccionada

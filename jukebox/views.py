@@ -2,13 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from allauth.account.forms import SignupForm
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 
 from .models import Song, Party, Vote, VotePackage
-from django.db.models import Count
+from django.db.models import Sum, Count
 from .forms import PartyForm, PartySettingsForm
 from .spotify_api import get_user_playlists
 from .votes import get_user_votes_left
@@ -179,6 +180,26 @@ def dj_backoffice(request):
         'parties': parties,
         'party_form': party_form,
     })
+
+def dj_dashboard(request):
+    songs = Song.objects.all().order_by('-votes')
+    total_songs = songs.count()
+    total_votes = songs.aggregate(total=Sum('votes'))['total'] or 0
+    played_songs = songs.filter(has_played=True).count()
+    context = {
+        'songs': songs,
+        'total_songs': total_songs,
+        'total_votes': total_votes,
+        'played_songs': played_songs,
+    }
+    return render(request, 'jukebox/dj_dashboard.html', context)
+
+@require_POST
+def mark_song_played(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    song.has_played = True
+    song.save()
+    return redirect('dj_dashboard')
 
 @login_required
 def buy_votes(request):

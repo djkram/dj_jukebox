@@ -9,8 +9,9 @@ from . import views
 urlpatterns = [
     path('', views.main, name='main'),
     path('dj/', views.dj_backoffice, name='dj_backoffice'),
-    #path('login/', auth_views.LoginView.as_view(template_name='jukebox/login.html'), name='login'),    
-    #path('register/', views.register, name='register'),
+    path('dj/dashboard/', views.dj_dashboard, name='dj_dashboard'),
+    path('dj/mark_played/<int:song_id>/', views.mark_song_played, name='mark_song_played'),
+    
     path('login/', RedirectView.as_view(url=reverse_lazy('account_login'), permanent=False)),
     path('register/', RedirectView.as_view(url=reverse_lazy('account_signup'), permanent=False)),
     path('profile/', views.profile, name='profile'),

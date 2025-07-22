@@ -95,6 +95,12 @@
                     <span>DJ Backoffice</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'dj_dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>DJ Dashboard</span>
+                </a>
+            </li>
             {% endif %}
 
             <!-- Manté Components, Utilities, Pages, Charts, Tables -->
@@ -188,7 +194,7 @@
                     </button>
 
                     <!-- Topbar Search (dins admin_base.html) -->
-                    {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'party_settings' %}
+                    {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'dj_dashboard' %}
                     <form method="get" action="" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                       <div class="input-group">
                         <input

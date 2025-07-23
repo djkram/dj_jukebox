@@ -1,3 +1,5 @@
+# forms.py
+
 from django import forms
 from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks
@@ -30,52 +32,58 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'max_votes_per_user']  # ← Afegim el camp!
+        fields = ['name', 'date', 'max_votes_per_user']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local', 'class': 'form-control'},
             ),
-            'max_votes_per_user': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),  # ← Widget!
+            'max_votes_per_user': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 1}
+            ),
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):
         self.request = request
         super().__init__(*args, instance=instance, **kwargs)
 
-        # 1) Només anem a Spotify si NO tenim playlist assignada
+        # 1) Si no hi ha playlist assignada, carreguem opcions de Spotify
         choices = [('', '--- Selecciona una playlist ---')]
         if request and (instance is None or instance.playlist is None):
             for pl in get_user_playlists(request):
                 choices.append((pl['id'], f"{pl['name']} ({pl['owner']})"))
         self.fields['spotify_playlist'].choices = choices
 
-        # 2) Si ja en tenim, posem l’inicial només per controlar el select,
-        #    encara que en el template n’ocultem el form
+        # 2) Si ja existeix playlist, inicialitzem perquè el select la mostri
         if instance and instance.playlist:
             self.fields['spotify_playlist'].initial = instance.playlist.spotify_id
 
     def save(self, commit=True):
-        # ➍ guardem name i date
+        # ➍ Guardem els camps del Party (name, date, max_votes_per_user)
         party = super().save(commit=False)
-
         sp_id = self.cleaned_data.get('spotify_playlist')
+
         if sp_id:
-            # ➎ construïm o recuperem l’objecte Playlist amb aquest spotify_id
-            pl_data = next((p for p in get_user_playlists(self.request) if p['id'] == sp_id), None)
-            defaults = {'name': pl_data['name'], 'owner': pl_data['owner']} if pl_data else {}
+            # ➎ Recuperem o creem l'objecte Playlist
+            pl_data = next(
+                (p for p in get_user_playlists(self.request) if p['id'] == sp_id),
+                None
+            )
+            defaults = {
+                'name': pl_data['name'],
+                'owner': pl_data['owner']
+            } if pl_data else {}
             playlist_obj, _ = Playlist.objects.get_or_create(
                 spotify_id=sp_id,
                 defaults=defaults
             )
-            # ➏ assignem l’objecte (no la cadena) al FK
             party.playlist = playlist_obj
 
         if commit:
             party.save()
 
-            # ➐ si hem triat playlist, eliminem i recreem les cançons
+            # ➐ Si hem seleccionat una nova playlist, netegem i recreem cançons
             if sp_id:
                 party.songs.all().delete()
                 for tr in get_playlist_tracks(self.request, sp_id):
@@ -84,6 +92,8 @@ class PartySettingsForm(forms.ModelForm):
                         title=tr['title'],
                         artist=tr['artist'],
                         spotify_id=tr['id'],
+                        bpm=tr.get('bpm'),
+                        key=tr.get('key'),
                     )
 
         return party

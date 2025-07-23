@@ -1,3 +1,5 @@
+# views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -85,6 +87,7 @@ def unset_party(request):
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
 
+    # Processament del formulari
     if request.method == 'POST':
         form = PartySettingsForm(request.POST, instance=party, request=request)
         if form.is_valid():
@@ -93,20 +96,23 @@ def party_settings(request, party_id):
     else:
         form = PartySettingsForm(instance=party, request=request)
 
-    # Ara anotem els vots totals reals per cançó:
-    songs = party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title')
+    # Annotem els vots totals reals per cançó
+    songs = party.songs.annotate(
+        num_votes=Count('vote')
+    ).order_by('-num_votes', 'title')
 
-    # Si la festa NO té playlist, carreguem-les ara
-    playlists = []
-    if not party.playlist:
+    # Només carreguem playlists de Spotify si NO n'hi ha i hem pitjat el botó
+    playlists = None
+    if not party.playlist and request.GET.get('load_spotify') == '1':
         playlists = get_user_playlists(request)
 
     return render(request, 'jukebox/party_settings.html', {
-        'party': party,
-        'form': form,
-        'songs': songs,
+        'party':     party,
+        'form':      form,
+        'songs':     songs,
         'playlists': playlists,
     })
+
 
 @login_required
 def remove_playlist(request, party_id):

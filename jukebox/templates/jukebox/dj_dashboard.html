@@ -6,24 +6,36 @@
     <div class="col-md-3">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Temes a la festa</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_songs }}</div>
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                    Temes a la festa
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ total_songs }}
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
-                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total de vots</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_votes }}</div>
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    Total de vots
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ total_votes }}
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
-                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Temes ja posats</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ played_songs }}</div>
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                    Temes ja posats
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    {{ played_songs }}
+                </div>
             </div>
         </div>
     </div>
@@ -34,6 +46,8 @@
     <thead>
         <tr>
             <th>Títol</th>
+            <th>BPM</th>
+            <th>Key</th>
             <th>Vots</th>
             <th>Ja ha sonat</th>
             <th></th>
@@ -43,6 +57,14 @@
     {% for song in songs %}
         <tr {% if song.has_played %}class="table-success"{% endif %}>
             <td>{{ song.title }}</td>
+            <td>
+              {% if song.bpm %}
+                {{ song.bpm|floatformat:1 }}
+              {% else %}
+                &mdash;
+              {% endif %}
+            </td>
+            <td>{{ song.key|default:"—" }}</td>
             <td>{{ song.votes }}</td>
             <td>
                 {% if song.has_played %}
@@ -55,15 +77,21 @@
                 {% if not song.has_played %}
                 <form method="post" action="{% url 'mark_song_played' song.id %}">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-success">Ja l'he posat</button>
+                    <button class="btn btn-sm btn-outline-success">
+                      Ja l'he posat
+                    </button>
                 </form>
                 {% else %}
-                    <button class="btn btn-sm btn-outline-secondary" disabled>Ja sonada</button>
+                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                      Ja sonada
+                    </button>
                 {% endif %}
             </td>
         </tr>
     {% empty %}
-        <tr><td colspan="4">Encara no hi ha temes!</td></tr>
+        <tr>
+          <td colspan="6">Encara no hi ha temes!</td>
+        </tr>
     {% endfor %}
     </tbody>
 </table>
@@ -74,15 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!input) return;
   input.addEventListener('input', function() {
     var q = input.value.trim().toLowerCase();
-    var rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(function(row) {
-      var title  = row.cells[0].textContent.toLowerCase();
-      var artist = row.cells[1].textContent.toLowerCase();
-      if ( title.includes(q) || artist.includes(q) ) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
+    document.querySelectorAll('table tbody tr').forEach(function(row) {
+      var title = row.cells[0].textContent.toLowerCase();
+      row.style.display = title.includes(q) ? '' : 'none';
     });
   });
 });

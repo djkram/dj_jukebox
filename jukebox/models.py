@@ -1,3 +1,5 @@
+# models.py
+
 import uuid
 from django.db import models
 from django.conf import settings
@@ -35,6 +37,8 @@ class Song(models.Model):
     title = models.CharField(max_length=200)
     artist = models.CharField(max_length=200)
     spotify_id = models.CharField(max_length=100)
+    bpm = models.FloatField(null=True, blank=True)           # ← Nou camp
+    key = models.CharField(max_length=4, null=True, blank=True)  # ← Nou camp (ex. “8B”)
     has_played = models.BooleanField(default=False)
     votes = models.IntegerField(default=0)
     played = models.BooleanField(default=False)

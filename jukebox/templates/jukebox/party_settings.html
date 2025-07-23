@@ -1,3 +1,4 @@
+{# templates/jukebox/party_settings.html #}
 {% extends "jukebox/admin_base.html" %}
 
 {% block content %}
@@ -9,14 +10,17 @@
         <h2 class="h4 mb-3">Configuració de la festa: {{ party.name }}</h2>
         <form method="post">
           {% csrf_token %}
+
           <div class="mb-3">
             {{ form.name.label_tag }}
             {{ form.name }}
           </div>
+
           <div class="mb-3">
             {{ form.date.label_tag }}
             {{ form.date }}
           </div>
+
           <div class="mb-3">
             {{ form.max_votes_per_user.label_tag }}
             {{ form.max_votes_per_user }}
@@ -25,21 +29,46 @@
             </small>
           </div>
 
-          {# Gestiona la playlist #}
+          {# ── Gestió de la playlist ───────────────────────────────────── #}
           {% if party.playlist %}
+            {# 1) Ja està assignada: mostrar en mode readonly + boto de neteja #}
             <div class="mb-3">
               <label class="form-label">Playlist assignada</label>
               <p class="form-control-plaintext mb-1">
                 {{ party.playlist.name }} ({{ party.playlist.owner }})
               </p>
-              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm mb-2">
+              <a href="{% url 'remove_playlist' party.id %}"
+                 class="btn btn-danger btn-sm">
                 Neteja playlist
               </a>
             </div>
-          {% else %}
+
+          {% elif playlists %}
+            {# 2) Acabem de carregar playlists: mostrar select amb opcions #}
             <div class="mb-3">
-              {{ form.spotify_playlist.label_tag }}
-              {{ form.spotify_playlist }}
+              <label for="id_spotify_playlist" class="form-label">
+                Selecciona una playlist de Spotify
+              </label>
+              <select name="spotify_playlist"
+                      id="id_spotify_playlist"
+                      class="form-control">
+                <option value="">-- Selecciona una playlist --</option>
+                {% for pl in playlists %}
+                  <option value="{{ pl.id }}"
+                    {% if pl.id == party.playlist %}selected{% endif %}>
+                    {{ pl.name }} ({{ pl.owner }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+          {% else %}
+            {# 3) Encara no tenim playlist i no hem carregat: boto verd #}
+            <div class="mb-3">
+              <a href="?load_spotify=1" class="btn btn-success">
+                <i class="fas fa-sync-alt"></i>
+                Carrega playlists de Spotify
+              </a>
             </div>
           {% endif %}
 
@@ -96,11 +125,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!input) return;
   input.addEventListener('input', function() {
     var q = input.value.trim().toLowerCase();
-    var rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(function(row) {
-      var t = row.cells[0].textContent.toLowerCase();
-      var a = row.cells[1].textContent.toLowerCase();
-      row.style.display = (t.includes(q) || a.includes(q)) ? '' : 'none';
+    document.querySelectorAll('table tbody tr').forEach(function(row) {
+      var title = row.cells[0].textContent.toLowerCase();
+      var artist = row.cells[1].textContent.toLowerCase();
+      row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
     });
   });
 });

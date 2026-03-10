@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 .env
 .venv
+.cache
+.cache/
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal

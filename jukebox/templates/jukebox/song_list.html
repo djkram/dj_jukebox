@@ -4,8 +4,55 @@
   <h2 class="mb-4">Cançons per a <span class="text-primary">{{ party.name }}</span></h2>
 
   {% if songs %}
+    <!-- Indicadors de vots i crèdits -->
+    <div class="row mb-4">
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card border-primary">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <i class="fas fa-vote-yea fa-2x text-primary"></i>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0 text-muted">Vots disponibles (festa)</h6>
+                <h3 class="mb-0">{{ votes_left }}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card {% if credits == 0 %}border-danger{% else %}border-success{% endif %}">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <i class="fas fa-coins fa-2x {% if credits == 0 %}text-danger{% else %}text-success{% endif %}"></i>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h6 class="mb-0 text-muted">Crèdits globals</h6>
+                <h3 class="mb-0">{{ credits }}</h3>
+                {% if credits == 0 %}
+                  <small class="text-danger">Necessites crèdits per votar!</small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% if credits == 0 %}
+      <div class="col-md-12 col-lg-4 mb-3">
+        <div class="alert alert-warning mb-0 d-flex align-items-center h-100">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <div>
+            <strong>Sense crèdits!</strong><br>
+            <a href="{% url 'buy_votes' %}" class="alert-link">Compra crèdits aquí</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
     <div class="table-responsive">
-      <p>Vots restants: {{ votes_left }}</p>
       <table class="table table-striped align-middle w-100">
         <thead>
           <tr>
@@ -34,13 +81,19 @@
               <td>{{ song.artist }}</td>
               <td class="text-center">{{ song.num_votes }}</td>
               <td class="text-center">
-                {% if votes_left > 0 %}
+                {% if votes_left > 0 and credits > 0 %}
                   <form method="post" style="display: inline;">{% csrf_token %}
                     <input type="hidden" name="vote_song_id" value="{{ song.id }}">
                     <button type="submit" class="btn btn-outline-primary btn-sm">Vota</button>
                   </form>
+                {% elif credits == 0 %}
+                  <span class="text-muted" data-bs-toggle="tooltip" title="Necessites crèdits per votar">
+                    <i class="fas fa-lock"></i>
+                  </span>
                 {% else %}
-                  <span class="text-muted">—</span>
+                  <span class="text-muted" data-bs-toggle="tooltip" title="Has esgotat els vots per aquesta festa">
+                    <i class="fas fa-ban"></i>
+                  </span>
                 {% endif %}
               </td>
             </tr>
@@ -58,6 +111,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Activar tooltips de Bootstrap
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Filtrat de cançons
   var input = document.getElementById('song-search');
   if (!input) return;
   input.addEventListener('input', function() {

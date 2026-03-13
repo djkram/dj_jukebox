@@ -142,13 +142,18 @@ def get_user_playlists(request_or_user):
     token = _get_user_token(request_or_user)
     if not token:
         return []
-    sp = Spotify(auth=token)
-    resp = sp.current_user_playlists(limit=50)
-    logger.info(f"[SPOTIFY] Llistes de reproducció carregades: {len(resp['items'])}")
-    return [
-        {"id": p["id"], "name": p["name"], "owner": p["owner"]["display_name"]}
-        for p in resp["items"]
-    ]
+
+    try:
+        sp = Spotify(auth=token)
+        resp = sp.current_user_playlists(limit=50)
+        logger.info(f"[SPOTIFY] Llistes de reproducció carregades: {len(resp['items'])}")
+        return [
+            {"id": p["id"], "name": p["name"], "owner": p["owner"]["display_name"]}
+            for p in resp["items"]
+        ]
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al carregar playlists: {e}")
+        return []
 
 
 def _chunked(lst, n):
@@ -164,7 +169,11 @@ def get_playlist_tracks(request_or_user, playlist_id):
         logger.warning("[SPOTIFY] No s'ha trobat token d'usuari per accedir a la playlist.")
         return []
 
-    sp_user = Spotify(auth=user_token)
+    try:
+        sp_user = Spotify(auth=user_token)
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
+        return []
     all_items = []
     results = sp_user.playlist_items(
         playlist_id,

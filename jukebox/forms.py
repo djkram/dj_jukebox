@@ -51,8 +51,13 @@ class PartySettingsForm(forms.ModelForm):
         # 1) Si no hi ha playlist assignada, carreguem opcions de Spotify
         choices = [('', '--- Selecciona una playlist ---')]
         if request and (instance is None or instance.playlist is None):
-            for pl in get_user_playlists(request):
-                choices.append((pl['id'], f"{pl['name']} ({pl['owner']})"))
+            playlists = get_user_playlists(request)
+            if not playlists and request.user.is_authenticated:
+                # Si no hi ha playlists, potser el token ha expirat
+                choices.append(('', '⚠️ Reconnecta Spotify per veure playlists'))
+            else:
+                for pl in playlists:
+                    choices.append((pl['id'], f"{pl['name']} ({pl['owner']})"))
         self.fields['spotify_playlist'].choices = choices
 
         # 2) Si ja existeix playlist, inicialitzem perquè el select la mostri

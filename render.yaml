@@ -3,7 +3,7 @@ services:
     name: dj-jukebox-dev
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py sync_site
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py sync_site && python manage.py setup_production
     startCommand: gunicorn dj_jukebox.wsgi:application
     envVars:
       - key: PYTHON_VERSION
@@ -35,6 +35,12 @@ services:
       - key: GMAIL_USER
         sync: false
       - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
         sync: false
 
 databases:

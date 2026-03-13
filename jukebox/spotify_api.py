@@ -100,11 +100,24 @@ def _pick_getsongbpm_match(results, title, artist):
     return exact_match or title_match or fallback
 
 
-def _get_getsongbpm_features(title, artist):
-    api_key = os.environ.get("GETSONGBPM_API_KEY")
-    if not api_key:
-        return {"bpm": None, "key": None}
+def _simplify_title(title):
+    """Simplifica un títol eliminant text entre parèntesis, guions, etc."""
+    import re
+    # Eliminar text entre parèntesis
+    simplified = re.sub(r'\s*\([^)]*\)', '', title)
+    # Eliminar text després de guió (com "- Radio Edit")
+    simplified = re.sub(r'\s*-\s*.*$', '', simplified)
+    return simplified.strip()
 
+
+def _simplify_artist(artist):
+    """Simplifica l'artista agafant només el primer si n'hi ha múltiples."""
+    # Si hi ha múltiples artistes separats per comes, agafar només el primer
+    return artist.split(',')[0].strip()
+
+
+def _search_getsongbpm(title, artist, api_key):
+    """Realitza una cerca a GetSongBPM amb els paràmetres donats."""
     params = {
         "api_key": api_key,
         "type": "both",
@@ -120,20 +133,79 @@ def _get_getsongbpm_features(title, artist):
         )
         response.raise_for_status()
         payload = response.json()
-    except requests.RequestException as exc:
-        logger.warning("[GETSONGBPM] Search failed for %s - %s: %s", artist, title, exc)
-        return {"bpm": None, "key": None}
-    except (ValueError, KeyError) as exc:
-        logger.warning("[GETSONGBPM] Invalid JSON response for %s - %s: %s", artist, title, exc)
+
+        if not isinstance(payload, dict):
+            return None
+
+        results = payload.get("search", [])
+        if not results:
+            return None
+
+        match = _pick_getsongbpm_match(results, title, artist)
+        if match and isinstance(match, dict):
+            return match
+
+    except (requests.RequestException, ValueError, KeyError):
+        pass
+
+    return None
+
+
+def _get_getsongbpm_features(title, artist):
+    api_key = os.environ.get("GETSONGBPM_API_KEY")
+    if not api_key:
         return {"bpm": None, "key": None}
 
-    if not isinstance(payload, dict):
-        logger.warning("[GETSONGBPM] Unexpected response format for %s - %s", artist, title)
-        return {"bpm": None, "key": None}
+    # Estratègia 1: Cerca amb títol i artista complets
+    match = _search_getsongbpm(title, artist, api_key)
 
-    match = _pick_getsongbpm_match(payload.get("search", []), title, artist)
-    if not match or not isinstance(match, dict):
-        logger.info("[GETSONGBPM] No valid match for %s - %s", artist, title)
+    # Estratègia 2: Si no funciona, simplificar el títol
+    if not match:
+        simplified_title = _simplify_title(title)
+        if simplified_title != title:
+            logger.debug(f"[GETSONGBPM] Retry with simplified title: {simplified_title}")
+            match = _search_getsongbpm(simplified_title, artist, api_key)
+
+    # Estratègia 3: Si no funciona, usar només el primer artista
+    if not match and ',' in artist:
+        simplified_artist = _simplify_artist(artist)
+        logger.debug(f"[GETSONGBPM] Retry with first artist only: {simplified_artist}")
+        match = _search_getsongbpm(title, simplified_artist, api_key)
+
+    # Estratègia 4: Títol simplificat + primer artista
+    if not match and (',' in artist or '(' in title):
+        simplified_title = _simplify_title(title)
+        simplified_artist = _simplify_artist(artist)
+        logger.debug(f"[GETSONGBPM] Retry with both simplified: {simplified_title} - {simplified_artist}")
+        match = _search_getsongbpm(simplified_title, simplified_artist, api_key)
+
+    # Estratègia 5: Només títol (sense artista)
+    if not match:
+        simplified_title = _simplify_title(title)
+        logger.debug(f"[GETSONGBPM] Retry with title only: {simplified_title}")
+        params = {
+            "api_key": api_key,
+            "type": "song",
+            "lookup": f"song:{simplified_title}",
+            "limit": 10,
+        }
+        try:
+            response = requests.get(
+                f"{GETSONGBPM_BASE_URL}/search/",
+                params=params,
+                timeout=GETSONGBPM_TIMEOUT,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if isinstance(payload, dict):
+                results = payload.get("search", [])
+                if results:
+                    match = _pick_getsongbpm_match(results, simplified_title, "")
+        except (requests.RequestException, ValueError, KeyError):
+            pass
+
+    if not match:
+        logger.info("[GETSONGBPM] No match found after all strategies for %s - %s", artist, title)
         return {"bpm": None, "key": None}
 
     bpm = match.get("tempo")
@@ -141,6 +213,8 @@ def _get_getsongbpm_features(title, artist):
         bpm = float(bpm) if bpm is not None else None
     except (TypeError, ValueError):
         bpm = None
+
+    logger.info(f"[GETSONGBPM] Match found for {title}: BPM={bpm}, Key={match.get('key_of')}")
 
     return {
         "bpm": bpm,

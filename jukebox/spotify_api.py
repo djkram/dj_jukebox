@@ -75,6 +75,8 @@ def _pick_getsongbpm_match(results, title, artist):
     normalized_title = _normalize_lookup(title)
     normalized_artist = _normalize_lookup(artist)
 
+    logger.debug(f"[GETSONGBPM] Comparant amb {len(results)} resultats")
+
     exact_match = None
     title_match = None
     fallback = None
@@ -82,22 +84,45 @@ def _pick_getsongbpm_match(results, title, artist):
     for result in results:
         # Skip non-dictionary results
         if not isinstance(result, dict):
+            logger.debug(f"[GETSONGBPM]   - Resultat invàlid (no és diccionari): {type(result)} = {result}")
             continue
 
         result_title = _normalize_lookup(result.get("title"))
-        result_artist = _normalize_lookup(result.get("artist", {}).get("name"))
+        result_artist_obj = result.get("artist", {})
+        if isinstance(result_artist_obj, dict):
+            result_artist = _normalize_lookup(result_artist_obj.get("name"))
+        else:
+            result_artist = _normalize_lookup(str(result_artist_obj)) if result_artist_obj else ""
+
+        logger.debug(f"[GETSONGBPM]   - '{result.get('title')}' by {result_artist_obj.get('name') if isinstance(result_artist_obj, dict) else result_artist_obj}")
+
         if fallback is None:
             fallback = result
         if result_title == normalized_title:
             if title_match is None:
                 title_match = result
+                logger.debug(f"[GETSONGBPM]     → Title match!")
             if normalized_artist and (
                 normalized_artist in result_artist or result_artist in normalized_artist
             ):
                 exact_match = result
+                logger.debug(f"[GETSONGBPM]     → Exact match!")
                 break
 
-    return exact_match or title_match or fallback
+    selected = exact_match or title_match or fallback
+    if selected:
+        logger.debug(f"[GETSONGBPM] Seleccionat: '{selected.get('title')}' - Match type: {'exact' if exact_match else 'title' if title_match else 'fallback'}")
+    return selected
+
+
+def _remove_accents(text):
+    """Elimina accents i diacrítics d'un text."""
+    import unicodedata
+    if not text:
+        return text
+    # Normalitzar a NFD (forma descomposta) i eliminar marques diacritiques
+    nfd = unicodedata.normalize('NFD', text)
+    return ''.join(char for char in nfd if unicodedata.category(char) != 'Mn')
 
 
 def _simplify_title(title):
@@ -107,6 +132,18 @@ def _simplify_title(title):
     simplified = re.sub(r'\s*\([^)]*\)', '', title)
     # Eliminar text després de guió (com "- Radio Edit")
     simplified = re.sub(r'\s*-\s*.*$', '', simplified)
+    return simplified.strip()
+
+
+def _ultra_simplify_title(title):
+    """Simplificació ultra-agressiva: sense accents, parèntesis, guions, només paraules principals."""
+    import re
+    # Primer simplificar normalment
+    simplified = _simplify_title(title)
+    # Eliminar accents
+    simplified = _remove_accents(simplified)
+    # Eliminar feat., ft., with, etc.
+    simplified = re.sub(r'\s+(feat\.|ft\.|featuring|with|con)\s+.*$', '', simplified, flags=re.IGNORECASE)
     return simplified.strip()
 
 
@@ -135,12 +172,15 @@ def _search_getsongbpm(title, artist, api_key):
         payload = response.json()
 
         if not isinstance(payload, dict):
+            logger.debug(f"[GETSONGBPM] Payload no és diccionari: {type(payload)}")
             return None
 
         results = payload.get("search", [])
         if not results:
+            logger.debug(f"[GETSONGBPM] No hi ha resultats a la cerca")
             return None
 
+        logger.debug(f"[GETSONGBPM] API retorna {len(results)} resultats")
         match = _pick_getsongbpm_match(results, title, artist)
         if match and isinstance(match, dict):
             return match
@@ -156,33 +196,44 @@ def _get_getsongbpm_features(title, artist):
     if not api_key:
         return {"bpm": None, "key": None}
 
+    logger.info(f"[GETSONGBPM] Buscant: '{title}' - '{artist}'")
+
     # Estratègia 1: Cerca amb títol i artista complets
+    logger.debug(f"[GETSONGBPM] Estratègia 1: Títol i artista complets")
     match = _search_getsongbpm(title, artist, api_key)
+    if match:
+        logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 1")
 
     # Estratègia 2: Si no funciona, simplificar el títol
     if not match:
         simplified_title = _simplify_title(title)
         if simplified_title != title:
-            logger.debug(f"[GETSONGBPM] Retry with simplified title: {simplified_title}")
+            logger.debug(f"[GETSONGBPM] Estratègia 2: Títol simplificat '{simplified_title}'")
             match = _search_getsongbpm(simplified_title, artist, api_key)
+            if match:
+                logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 2")
 
     # Estratègia 3: Si no funciona, usar només el primer artista
     if not match and ',' in artist:
         simplified_artist = _simplify_artist(artist)
-        logger.debug(f"[GETSONGBPM] Retry with first artist only: {simplified_artist}")
+        logger.debug(f"[GETSONGBPM] Estratègia 3: Primer artista '{simplified_artist}'")
         match = _search_getsongbpm(title, simplified_artist, api_key)
+        if match:
+            logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 3")
 
     # Estratègia 4: Títol simplificat + primer artista
     if not match and (',' in artist or '(' in title):
         simplified_title = _simplify_title(title)
         simplified_artist = _simplify_artist(artist)
-        logger.debug(f"[GETSONGBPM] Retry with both simplified: {simplified_title} - {simplified_artist}")
+        logger.debug(f"[GETSONGBPM] Estratègia 4: Ambdós simplificats '{simplified_title}' - '{simplified_artist}'")
         match = _search_getsongbpm(simplified_title, simplified_artist, api_key)
+        if match:
+            logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 4")
 
     # Estratègia 5: Només títol (sense artista)
     if not match:
         simplified_title = _simplify_title(title)
-        logger.debug(f"[GETSONGBPM] Retry with title only: {simplified_title}")
+        logger.debug(f"[GETSONGBPM] Estratègia 5: Només títol '{simplified_title}'")
         params = {
             "api_key": api_key,
             "type": "song",
@@ -201,11 +252,68 @@ def _get_getsongbpm_features(title, artist):
                 results = payload.get("search", [])
                 if results:
                     match = _pick_getsongbpm_match(results, simplified_title, "")
+                    if match:
+                        logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 5")
         except (requests.RequestException, ValueError, KeyError):
             pass
 
+    # Estratègia 6: Ultra-simplificat (sense accents, feat., etc.)
     if not match:
-        logger.info("[GETSONGBPM] No match found after all strategies for %s - %s", artist, title)
+        ultra_title = _ultra_simplify_title(title)
+        ultra_artist = _simplify_artist(artist)
+        if ultra_title != _simplify_title(title) or artist != ultra_artist:
+            logger.debug(f"[GETSONGBPM] Estratègia 6: Ultra-simplificat '{ultra_title}' - '{ultra_artist}'")
+            match = _search_getsongbpm(ultra_title, ultra_artist, api_key)
+            if match:
+                logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 6")
+
+    # Estratègia 7: Ultra-simplificat només títol
+    if not match:
+        ultra_title = _ultra_simplify_title(title)
+        if ultra_title != _simplify_title(title):
+            logger.debug(f"[GETSONGBPM] Estratègia 7: Ultra-simplificat només títol '{ultra_title}'")
+            params = {
+                "api_key": api_key,
+                "type": "song",
+                "lookup": f"song:{ultra_title}",
+                "limit": 10,
+            }
+            try:
+                response = requests.get(
+                    f"{GETSONGBPM_BASE_URL}/search/",
+                    params=params,
+                    timeout=GETSONGBPM_TIMEOUT,
+                )
+                response.raise_for_status()
+                payload = response.json()
+                if isinstance(payload, dict):
+                    results = payload.get("search", [])
+                    if results:
+                        match = _pick_getsongbpm_match(results, ultra_title, "")
+                        if match:
+                            logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 7")
+            except (requests.RequestException, ValueError, KeyError):
+                pass
+
+    # Estratègia 8: Buscar text dins dels parèntesis (noms alternatius)
+    if not match and '(' in title:
+        import re
+        parenthesis_content = re.findall(r'\(([^)]+)\)', title)
+        if parenthesis_content:
+            # Agafar el contingut més llarg dels parèntesis
+            alt_name = max(parenthesis_content, key=len)
+            # Netejar "feat.", "with", etc.
+            alt_name = re.sub(r'^(feat\.|ft\.|featuring|with|con)\s+', '', alt_name, flags=re.IGNORECASE).strip()
+            # Si encara té contingut significatiu (més de 3 paraules), buscar-lo
+            if len(alt_name.split()) >= 3:
+                logger.debug(f"[GETSONGBPM] Estratègia 8: Nom alternatiu dels parèntesis '{alt_name}'")
+                simplified_artist = _simplify_artist(artist)
+                match = _search_getsongbpm(alt_name, simplified_artist, api_key)
+                if match:
+                    logger.info(f"[GETSONGBPM] ✓ Match trobat amb estratègia 8 (nom alternatiu)")
+
+    if not match:
+        logger.warning(f"[GETSONGBPM] ✗ Cap match després de totes les estratègies: '{title}' - '{artist}'")
         return {"bpm": None, "key": None}
 
     bpm = match.get("tempo")
@@ -214,11 +322,13 @@ def _get_getsongbpm_features(title, artist):
     except (TypeError, ValueError):
         bpm = None
 
-    logger.info(f"[GETSONGBPM] Match found for {title}: BPM={bpm}, Key={match.get('key_of')}")
+    key_str = match.get('key_of')
+    camelot_key = _camelot_from_key_string(key_str)
+    logger.info(f"[GETSONGBPM] ✓ Resultat final '{title}': BPM={bpm}, Key={key_str} ({camelot_key})")
 
     return {
         "bpm": bpm,
-        "key": _camelot_from_key_string(match.get("key_of")),
+        "key": camelot_key,
     }
 
 

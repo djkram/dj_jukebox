@@ -97,6 +97,7 @@ class PartySettingsForm(forms.ModelForm):
                         title=tr['title'],
                         artist=tr['artist'],
                         spotify_id=tr['id'],
+                        album_image_url=tr.get('album_image_url'),
                         bpm=tr.get('bpm'),
                         key=tr.get('key'),
                     )

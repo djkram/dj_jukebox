@@ -169,6 +169,7 @@ def process_playlist_songs(request, party_id):
                 title=tr['title'],
                 artist=tr['artist'],
                 spotify_id=tr['id'],
+                album_image_url=tr.get('album_image_url'),
                 bpm=None,
                 key=None,
             )

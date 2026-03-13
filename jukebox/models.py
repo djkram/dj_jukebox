@@ -37,6 +37,7 @@ class Song(models.Model):
     title = models.CharField(max_length=200)
     artist = models.CharField(max_length=200)
     spotify_id = models.CharField(max_length=100)
+    album_image_url = models.URLField(max_length=500, null=True, blank=True)  # URL de la caràtula
     bpm = models.FloatField(null=True, blank=True)           # ← Nou camp
     key = models.CharField(max_length=4, null=True, blank=True)  # ← Nou camp (ex. “8B”)
     has_played = models.BooleanField(default=False)

@@ -266,7 +266,7 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
     all_items = []
     results = sp_user.playlist_items(
         playlist_id,
-        fields="items.track.id,items.track.name,items.track.artists,next",
+        fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
         additional_types=["track"]
     )
     all_items.extend(results["items"])
@@ -282,10 +282,20 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
         sid = tr["id"]
         if not sid:
             continue
+
+        # Obtenir la imatge de l'àlbum (normalment hi ha 3 mides, agafem la mitjana)
+        album_image_url = None
+        if tr.get("album") and tr["album"].get("images"):
+            images = tr["album"]["images"]
+            if images:
+                # Agafar la imatge mitjana (normalment 300x300)
+                album_image_url = images[1]["url"] if len(images) > 1 else images[0]["url"]
+
         out.append({
             "id": sid,
             "title": tr["name"],
             "artist": ", ".join(a["name"] for a in tr["artists"]),
+            "album_image_url": album_image_url,
             "bpm": None,
             "key": None,
         })
@@ -309,7 +319,7 @@ def get_playlist_tracks(request_or_user, playlist_id):
     all_items = []
     results = sp_user.playlist_items(
         playlist_id,
-        fields="items.track.id,items.track.name,items.track.artists,next",
+        fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
         additional_types=["track"]
     )
     all_items.extend(results["items"])
@@ -325,9 +335,18 @@ def get_playlist_tracks(request_or_user, playlist_id):
         if not sid:
             continue
         ids.append(sid)
+
+        # Obtenir la imatge de l'àlbum
+        album_image_url = None
+        if tr.get("album") and tr["album"].get("images"):
+            images = tr["album"]["images"]
+            if images:
+                album_image_url = images[1]["url"] if len(images) > 1 else images[0]["url"]
+
         meta[sid] = {
             "title": tr["name"],
-            "artist": ", ".join(a["name"] for a in tr["artists"])
+            "artist": ", ".join(a["name"] for a in tr["artists"]),
+            "album_image_url": album_image_url
         }
 
     logger.debug(f"[SPOTIFY] Track IDs extrets: {len(ids)}")
@@ -358,6 +377,7 @@ def get_playlist_tracks(request_or_user, playlist_id):
             "id": sid,
             "title": meta[sid]["title"],
             "artist": meta[sid]["artist"],
+            "album_image_url": meta[sid].get("album_image_url"),
             "bpm": feature_data.get("bpm"),
             "key": feature_data.get("key"),
         })

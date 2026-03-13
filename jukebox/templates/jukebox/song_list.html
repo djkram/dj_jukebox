@@ -9,6 +9,7 @@
       <table class="table table-striped align-middle w-100">
         <thead>
           <tr>
+            <th style="width: 80px;"></th>
             <th>Títol</th>
             <th>Artista</th>
             <th class="text-center">Vots</th>
@@ -18,6 +19,17 @@
         <tbody>
           {% for song in songs %}
             <tr>
+              <td>
+                {% if song.album_image_url %}
+                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                       class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                {% else %}
+                  <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                       style="width: 60px; height: 60px;">
+                    <i class="fas fa-music text-white"></i>
+                  </div>
+                {% endif %}
+              </td>
               <td>{{ song.title }}</td>
               <td>{{ song.artist }}</td>
               <td class="text-center">{{ song.num_votes }}</td>
@@ -52,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var q = input.value.trim().toLowerCase();
     var rows = document.querySelectorAll('table tbody tr');
     rows.forEach(function(row) {
-      var title  = row.cells[0].textContent.toLowerCase();
-      var artist = row.cells[1].textContent.toLowerCase();
+      var title  = row.cells[1].textContent.toLowerCase();
+      var artist = row.cells[2].textContent.toLowerCase();
       if ( title.includes(q) || artist.includes(q) ) {
         row.style.display = '';
       } else {

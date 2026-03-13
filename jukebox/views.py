@@ -13,7 +13,7 @@ from django.conf import settings
 from .models import Song, Party, Vote, VotePackage
 from django.db.models import Sum, Count
 from .forms import PartyForm, PartySettingsForm
-from .spotify_api import get_user_playlists
+from .spotify_api import get_user_playlists, get_playlist_tracks
 from .votes import get_user_votes_left
 
 from django.contrib.auth import get_user_model
@@ -93,6 +93,9 @@ def party_settings(request, party_id):
         form = PartySettingsForm(request.POST, instance=party, request=request)
         if form.is_valid():
             form.save()
+            # Si és una petició AJAX, retornar JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
             return redirect('party_settings', party_id=party.id)
     else:
         form = PartySettingsForm(instance=party, request=request)
@@ -125,6 +128,52 @@ def remove_playlist(request, party_id):
         party.songs.all().delete()   # opcional: neteja també les cançons
         party.save()
     return redirect('party_settings', party_id=party.id)
+
+
+@login_required
+@require_POST
+def process_playlist_songs(request, party_id):
+    """
+    Processa les cançons d'una playlist de manera progressiva.
+    Retorna el progrés en temps real via JSON.
+    """
+    from .models import Playlist
+
+    party = get_object_or_404(Party, pk=party_id)
+    spotify_playlist_id = request.POST.get('spotify_playlist_id')
+
+    if not spotify_playlist_id:
+        return JsonResponse({'error': 'No playlist ID provided'}, status=400)
+
+    try:
+        # Obtenir les cançons de Spotify
+        tracks = get_playlist_tracks(request, spotify_playlist_id)
+        total = len(tracks)
+
+        # Esborrar cançons antigues
+        party.songs.all().delete()
+
+        # Crear les cançons
+        for idx, tr in enumerate(tracks, start=1):
+            Song.objects.create(
+                party=party,
+                title=tr['title'],
+                artist=tr['artist'],
+                spotify_id=tr['id'],
+                bpm=tr.get('bpm'),
+                key=tr.get('key'),
+            )
+
+        return JsonResponse({
+            'success': True,
+            'total': total,
+            'message': f'{total} cançons importades correctament'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
 
 
 @login_required

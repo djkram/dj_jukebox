@@ -81,13 +81,25 @@
             </div>
           {% endif %}
 
-          <button type="submit" class="btn btn-primary me-2">
+          <button type="submit" class="btn btn-primary me-2" id="saveButton">
             Desa canvis
           </button>
           <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary">
             Torna
           </a>
         </form>
+
+        {# Barra de progrés #}
+        <div id="loadingProgress" class="mt-4" style="display: none;">
+          <div class="alert alert-info">
+            <h5><i class="fas fa-spinner fa-spin"></i> Carregant playlist...</h5>
+            <p id="progressText">Processant cançons amb BPM i clau musical...</p>
+            <div class="progress">
+              <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                   role="progressbar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -130,16 +142,93 @@
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Filtrat de cançons
   var input = document.getElementById('song-search');
-  if (!input) return;
-  input.addEventListener('input', function() {
-    var q = input.value.trim().toLowerCase();
-    document.querySelectorAll('table tbody tr').forEach(function(row) {
-      var title = row.cells[0].textContent.toLowerCase();
-      var artist = row.cells[1].textContent.toLowerCase();
-      row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+  if (input) {
+    input.addEventListener('input', function() {
+      var q = input.value.trim().toLowerCase();
+      document.querySelectorAll('table tbody tr').forEach(function(row) {
+        var title = row.cells[0].textContent.toLowerCase();
+        var artist = row.cells[1].textContent.toLowerCase();
+        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+      });
     });
-  });
+  }
+
+  // Gestió del submit amb barra de progrés
+  var form = document.querySelector('form');
+  var playlistSelect = document.getElementById('id_spotify_playlist');
+
+  if (form && playlistSelect) {
+    form.addEventListener('submit', function(e) {
+      var selectedPlaylist = playlistSelect.value;
+
+      // Si s'ha seleccionat una playlist, processar amb AJAX
+      if (selectedPlaylist) {
+        e.preventDefault();
+
+        var saveButton = document.getElementById('saveButton');
+        var loadingDiv = document.getElementById('loadingProgress');
+        var progressBar = document.getElementById('progressBar');
+        var progressText = document.getElementById('progressText');
+
+        // Deshabilitar botó i mostrar progrés
+        saveButton.disabled = true;
+        loadingDiv.style.display = 'block';
+        progressBar.style.width = '10%';
+        progressText.textContent = 'Guardant configuració...';
+
+        // Primer, guardar el formulari
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error al guardar');
+          progressBar.style.width = '30%';
+          progressText.textContent = 'Carregant cançons de Spotify...';
+
+          // Ara processar la playlist
+          var processData = new FormData();
+          processData.append('spotify_playlist_id', selectedPlaylist);
+          processData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+          return fetch('{% url "process_playlist_songs" party.id %}', {
+            method: 'POST',
+            body: processData
+          });
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            progressBar.style.width = '100%';
+            progressText.textContent = data.message;
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-success');
+
+            // Recarregar la pàgina després de 2 segons
+            setTimeout(function() {
+              window.location.reload();
+            }, 2000);
+          } else {
+            throw new Error(data.error || 'Error desconegut');
+          }
+        })
+        .catch(error => {
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-danger');
+          progressText.textContent = 'Error: ' + error.message;
+          saveButton.disabled = false;
+        });
+      }
+      // Si no hi ha playlist seleccionada, deixar submit normal
+    });
+  }
 });
 </script>
 {% endblock %}

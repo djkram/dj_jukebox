@@ -92,7 +92,19 @@ def party_settings(request, party_id):
     if request.method == 'POST':
         form = PartySettingsForm(request.POST, instance=party, request=request)
         if form.is_valid():
-            form.save()
+            # Si es crida via AJAX i hi ha playlist, no carregar cançons
+            # (es carregaran després via process_playlist_songs)
+            has_playlist = bool(form.cleaned_data.get('spotify_playlist'))
+            is_ajax = (
+                request.headers.get('X-Requested-With') == 'XMLHttpRequest' or
+                request.POST.get('ajax_request') == '1'
+            )
+            load_songs = not (has_playlist and is_ajax)
+
+            form.save(load_songs=load_songs)
+
+            if is_ajax:
+                return JsonResponse({'success': True})
             return redirect('party_settings', party_id=party.id)
     else:
         form = PartySettingsForm(instance=party, request=request)

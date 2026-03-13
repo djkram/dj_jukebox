@@ -64,7 +64,7 @@ class PartySettingsForm(forms.ModelForm):
         if instance and instance.playlist:
             self.fields['spotify_playlist'].initial = instance.playlist.spotify_id
 
-    def save(self, commit=True):
+    def save(self, commit=True, load_songs=True):
         # ➍ Guardem els camps del Party (name, date, max_votes_per_user)
         party = super().save(commit=False)
         sp_id = self.cleaned_data.get('spotify_playlist')
@@ -88,8 +88,8 @@ class PartySettingsForm(forms.ModelForm):
         if commit:
             party.save()
 
-            # ➐ Si hem seleccionat una nova playlist, netegem i recreem cançons
-            if sp_id:
+            # ➐ Si hem seleccionat una nova playlist i load_songs=True, carregar cançons
+            if sp_id and load_songs:
                 party.songs.all().delete()
                 for tr in get_playlist_tracks(self.request, sp_id):
                     Song.objects.create(

@@ -218,8 +218,10 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
       var selectedPlaylist = playlistSelect.value;
 
-      // Si s'ha seleccionat una playlist, mostrar indicador
+      // Si s'ha seleccionat una playlist, fer la càrrega via AJAX
       if (selectedPlaylist) {
+        e.preventDefault(); // Evitar submit normal
+
         var saveButton = document.getElementById('saveButton');
         var loadingDiv = document.getElementById('loadingProgress');
         var progressBar = document.getElementById('progressBar');
@@ -227,9 +229,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         saveButton.disabled = true;
         loadingDiv.style.display = 'block';
-        progressBar.style.width = '50%';
-        progressText.textContent = 'Processant playlist amb BPM i clau musical... Això pot trigar uns minuts.';
+        progressBar.style.width = '30%';
+        progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+
+        // Primer desar els canvis bàsics del formulari
+        var formData = new FormData(form);
+        formData.append('ajax_request', '1');
+
+        fetch(window.location.href, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error al desar el formulari');
+
+          progressBar.style.width = '50%';
+          progressText.textContent = 'Processant cançons amb BPM i clau musical...';
+
+          // Ara carregar les cançons
+          var playlistFormData = new FormData();
+          playlistFormData.append('spotify_playlist_id', selectedPlaylist);
+          playlistFormData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+          return fetch('{% url "process_playlist_songs" party.id %}', {
+            method: 'POST',
+            body: playlistFormData
+          });
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            progressBar.style.width = '100%';
+            progressText.textContent = data.message;
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-success');
+
+            setTimeout(function() {
+              window.location.reload();
+            }, 2000);
+          } else {
+            throw new Error(data.error || 'Error desconegut');
+          }
+        })
+        .catch(error => {
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-danger');
+          progressBar.style.width = '100%';
+          progressText.textContent = 'Error: ' + error.message;
+          saveButton.disabled = false;
+        });
       }
+      // Si no hi ha playlist seleccionada, deixar que el submit sigui normal
     });
   }
 });

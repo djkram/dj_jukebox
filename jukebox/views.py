@@ -86,6 +86,7 @@ def unset_party(request):
 @login_required
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
+    has_spotify = SocialAccount.objects.filter(user=request.user, provider="spotify").exists()
 
     # Processament del formulari
     if request.method == 'POST':
@@ -103,7 +104,7 @@ def party_settings(request, party_id):
 
     # Només carreguem playlists de Spotify si NO n'hi ha i hem pitjat el botó
     playlists = None
-    if not party.playlist and request.GET.get('load_spotify') == '1':
+    if has_spotify and not party.playlist and request.GET.get('load_spotify') == '1':
         playlists = get_user_playlists(request)
 
     return render(request, 'jukebox/party_settings.html', {
@@ -111,6 +112,7 @@ def party_settings(request, party_id):
         'form':      form,
         'songs':     songs,
         'playlists': playlists,
+        'has_spotify': has_spotify,
     })
 
 

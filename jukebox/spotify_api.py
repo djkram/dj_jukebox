@@ -2,8 +2,12 @@ import os
 import logging
 from allauth.socialaccount.models import SocialToken
 from spotipy import Spotify
+import requests
 
 logger = logging.getLogger(__name__)
+
+GETSONGBPM_BASE_URL = "https://api.getsong.co"
+GETSONGBPM_TIMEOUT = 5
 
 
 def _get_user_token(request_or_user):
@@ -29,6 +33,109 @@ def _camelot_from_key_mode(key, mode):
         (5, 0): "4A", (0, 0): "5A", (7, 0): "6A", (2, 0): "7A",
     }
     return mapping.get((key, mode))
+
+
+def _camelot_from_key_string(key_string):
+    if not key_string:
+        return None
+
+    normalized = key_string.strip()
+    mode = 0 if normalized.endswith("m") else 1
+    note = normalized[:-1] if mode == 0 else normalized
+    note_map = {
+        "C": 0,
+        "C#": 1,
+        "Db": 1,
+        "D": 2,
+        "D#": 3,
+        "Eb": 3,
+        "E": 4,
+        "F": 5,
+        "F#": 6,
+        "Gb": 6,
+        "G": 7,
+        "G#": 8,
+        "Ab": 8,
+        "A": 9,
+        "A#": 10,
+        "Bb": 10,
+        "B": 11,
+    }
+    key_value = note_map.get(note)
+    if key_value is None:
+        return None
+    return _camelot_from_key_mode(key_value, mode)
+
+
+def _normalize_lookup(value):
+    return " ".join((value or "").strip().lower().split())
+
+
+def _pick_getsongbpm_match(results, title, artist):
+    normalized_title = _normalize_lookup(title)
+    normalized_artist = _normalize_lookup(artist)
+
+    exact_match = None
+    title_match = None
+    fallback = None
+
+    for result in results:
+        result_title = _normalize_lookup(result.get("title"))
+        result_artist = _normalize_lookup(result.get("artist", {}).get("name"))
+        if fallback is None:
+            fallback = result
+        if result_title == normalized_title:
+            if title_match is None:
+                title_match = result
+            if normalized_artist and (
+                normalized_artist in result_artist or result_artist in normalized_artist
+            ):
+                exact_match = result
+                break
+
+    return exact_match or title_match or fallback
+
+
+def _get_getsongbpm_features(title, artist):
+    api_key = os.environ.get("GETSONGBPM_API_KEY")
+    if not api_key:
+        return {"bpm": None, "key": None}
+
+    params = {
+        "type": "both",
+        "lookup": f"song:{title} artist:{artist}",
+        "limit": 10,
+    }
+    headers = {"X-API-KEY": api_key}
+
+    try:
+        response = requests.get(
+            f"{GETSONGBPM_BASE_URL}/search/",
+            params=params,
+            headers=headers,
+            timeout=GETSONGBPM_TIMEOUT,
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        logger.warning("[GETSONGBPM] Search failed for %s - %s: %s", artist, title, exc)
+        return {"bpm": None, "key": None}
+
+    payload = response.json()
+    match = _pick_getsongbpm_match(payload.get("search", []), title, artist)
+    if not match:
+        logger.info("[GETSONGBPM] No match for %s - %s", artist, title)
+        return {"bpm": None, "key": None}
+
+    bpm = match.get("tempo")
+    try:
+        bpm = float(bpm) if bpm is not None else None
+    except (TypeError, ValueError):
+        bpm = None
+
+    return {
+        "bpm": bpm,
+        "key": _camelot_from_key_string(match.get("key_of")),
+    }
 
 
 def get_user_playlists(request_or_user):
@@ -102,12 +209,16 @@ def get_playlist_tracks(request_or_user, playlist_id):
 
     out = []
     for sid in ids:
+        feature_data = features_map.get(sid, {})
+        if not feature_data.get("bpm") and not feature_data.get("key"):
+            feature_data = _get_getsongbpm_features(meta[sid]["title"], meta[sid]["artist"])
+
         out.append({
             "id": sid,
             "title": meta[sid]["title"],
             "artist": meta[sid]["artist"],
-            "bpm": features_map.get(sid, {}).get("bpm"),
-            "key": features_map.get(sid, {}).get("key"),
+            "bpm": feature_data.get("bpm"),
+            "key": feature_data.get("key"),
         })
 
     logger.info(f"[SPOTIFY] Resultat final: {len(out)} tracks amb metadades")

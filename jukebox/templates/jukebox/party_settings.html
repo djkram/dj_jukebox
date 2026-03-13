@@ -32,12 +32,16 @@
 
           {# ── Gestió de la playlist ───────────────────────────────────── #}
           {% if party.playlist %}
-            {# 1) Ja està assignada: mostrar en mode readonly + boto de neteja #}
+            {# 1) Ja està assignada: mostrar en mode readonly + botons #}
             <div class="mb-3">
               <label class="form-label">Playlist assignada</label>
               <p class="form-control-plaintext mb-1">
                 {{ party.playlist.name }} ({{ party.playlist.owner }})
               </p>
+              <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm me-2">
+                <i class="fas fa-sync-alt"></i>
+                Recarregar cançons
+              </button>
               <a href="{% url 'remove_playlist' party.id %}"
                  class="btn btn-danger btn-sm">
                 Neteja playlist
@@ -155,7 +159,53 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Gestió del submit amb barra de progrés
+  // Gestió del botó "Recarregar cançons"
+  var reloadBtn = document.getElementById('reloadSongsBtn');
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', function() {
+      var loadingDiv = document.getElementById('loadingProgress');
+      var progressBar = document.getElementById('progressBar');
+      var progressText = document.getElementById('progressText');
+
+      reloadBtn.disabled = true;
+      loadingDiv.style.display = 'block';
+      progressBar.style.width = '30%';
+      progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+
+      var formData = new FormData();
+      formData.append('spotify_playlist_id', '{{ party.playlist.spotify_id }}');
+      formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+      fetch('{% url "process_playlist_songs" party.id %}', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          progressBar.style.width = '100%';
+          progressText.textContent = data.message;
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-success');
+
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000);
+        } else {
+          throw new Error(data.error || 'Error desconegut');
+        }
+      })
+      .catch(error => {
+        progressBar.classList.remove('progress-bar-animated');
+        progressBar.classList.add('bg-danger');
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Error: ' + error.message;
+        reloadBtn.disabled = false;
+      });
+    });
+  }
+
+  // Gestió del submit amb indicador de càrrega
   var form = document.querySelector('form');
   var playlistSelect = document.getElementById('id_spotify_playlist');
 
@@ -163,70 +213,18 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
       var selectedPlaylist = playlistSelect.value;
 
-      // Si s'ha seleccionat una playlist, processar amb AJAX
+      // Si s'ha seleccionat una playlist, mostrar indicador
       if (selectedPlaylist) {
-        e.preventDefault();
-
         var saveButton = document.getElementById('saveButton');
         var loadingDiv = document.getElementById('loadingProgress');
         var progressBar = document.getElementById('progressBar');
         var progressText = document.getElementById('progressText');
 
-        // Deshabilitar botó i mostrar progrés
         saveButton.disabled = true;
         loadingDiv.style.display = 'block';
-        progressBar.style.width = '10%';
-        progressText.textContent = 'Guardant configuració...';
-
-        // Primer, guardar el formulari
-        var formData = new FormData(form);
-
-        fetch(form.action, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
-        .then(response => {
-          if (!response.ok) throw new Error('Error al guardar');
-          progressBar.style.width = '30%';
-          progressText.textContent = 'Carregant cançons de Spotify...';
-
-          // Ara processar la playlist
-          var processData = new FormData();
-          processData.append('spotify_playlist_id', selectedPlaylist);
-          processData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-          return fetch('{% url "process_playlist_songs" party.id %}', {
-            method: 'POST',
-            body: processData
-          });
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            progressBar.style.width = '100%';
-            progressText.textContent = data.message;
-            progressBar.classList.remove('progress-bar-animated');
-            progressBar.classList.add('bg-success');
-
-            // Recarregar la pàgina després de 2 segons
-            setTimeout(function() {
-              window.location.reload();
-            }, 2000);
-          } else {
-            throw new Error(data.error || 'Error desconegut');
-          }
-        })
-        .catch(error => {
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-danger');
-          progressText.textContent = 'Error: ' + error.message;
-          saveButton.disabled = false;
-        });
+        progressBar.style.width = '50%';
+        progressText.textContent = 'Processant playlist amb BPM i clau musical... Això pot trigar uns minuts.';
       }
-      // Si no hi ha playlist seleccionada, deixar submit normal
     });
   }
 });

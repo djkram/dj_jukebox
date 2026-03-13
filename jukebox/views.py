@@ -93,9 +93,6 @@ def party_settings(request, party_id):
         form = PartySettingsForm(request.POST, instance=party, request=request)
         if form.is_valid():
             form.save()
-            # Si és una petició AJAX, retornar JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
             return redirect('party_settings', party_id=party.id)
     else:
         form = PartySettingsForm(instance=party, request=request)

@@ -83,7 +83,17 @@ class PartySettingsForm(forms.ModelForm):
         if commit:
             party.save()
 
-            # ➐ Les cançons es processaran via AJAX amb barra de progrés
-            # No les creem aquí per no bloquejar la resposta
+            # ➐ Si hem seleccionat una nova playlist, netegem i recreem cançons
+            if sp_id:
+                party.songs.all().delete()
+                for tr in get_playlist_tracks(self.request, sp_id):
+                    Song.objects.create(
+                        party=party,
+                        title=tr['title'],
+                        artist=tr['artist'],
+                        spotify_id=tr['id'],
+                        bpm=tr.get('bpm'),
+                        key=tr.get('key'),
+                    )
 
         return party

@@ -364,6 +364,10 @@ def forgot_password(request):
 def blank(request):
     return render(request, 'jukebox/blank.html')
 
+def about(request):
+    """Pàgina pública amb informació i backlink per GetSongBPM"""
+    return render(request, 'jukebox/about.html')
+
 def page_404(request):
     return render(request, 'jukebox/404.html')
 

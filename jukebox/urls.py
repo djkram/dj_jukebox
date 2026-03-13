@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = [
     path('', views.main, name='main'),
+    path('about/', views.about, name='about'),
     path('dj/', views.dj_backoffice, name='dj_backoffice'),
     path('dj/dashboard/', views.dj_dashboard, name='dj_dashboard'),
     path('dj/mark_played/<int:song_id>/', views.mark_song_played, name='mark_song_played'),

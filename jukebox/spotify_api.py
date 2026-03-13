@@ -102,17 +102,16 @@ def _get_getsongbpm_features(title, artist):
         return {"bpm": None, "key": None}
 
     params = {
+        "api_key": api_key,
         "type": "both",
         "lookup": f"song:{title} artist:{artist}",
         "limit": 10,
     }
-    headers = {"X-API-KEY": api_key}
 
     try:
         response = requests.get(
             f"{GETSONGBPM_BASE_URL}/search/",
             params=params,
-            headers=headers,
             timeout=GETSONGBPM_TIMEOUT,
         )
         response.raise_for_status()

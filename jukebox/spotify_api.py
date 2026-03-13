@@ -171,6 +171,54 @@ def _chunked(lst, n):
         yield lst[i:i + n]
 
 
+def get_playlist_tracks_basic(request_or_user, playlist_id):
+    """
+    Obté només la metadata bàsica de les cançons (títol, artista, ID)
+    sense processar BPM ni clau musical. Molt més ràpid.
+    """
+    logger.info(f"[SPOTIFY] Carregant tracks bàsics de la playlist {playlist_id}")
+
+    user_token = _get_user_token(request_or_user)
+    if not user_token:
+        logger.warning("[SPOTIFY] No s'ha trobat token d'usuari per accedir a la playlist.")
+        return []
+
+    try:
+        sp_user = Spotify(auth=user_token)
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
+        return []
+
+    all_items = []
+    results = sp_user.playlist_items(
+        playlist_id,
+        fields="items.track.id,items.track.name,items.track.artists,next",
+        additional_types=["track"]
+    )
+    all_items.extend(results["items"])
+    while results.get("next"):
+        results = sp_user.next(results)
+        all_items.extend(results["items"])
+
+    logger.info(f"[SPOTIFY] {len(all_items)} tracks trobats a la playlist")
+
+    out = []
+    for it in all_items:
+        tr = it["track"]
+        sid = tr["id"]
+        if not sid:
+            continue
+        out.append({
+            "id": sid,
+            "title": tr["name"],
+            "artist": ", ".join(a["name"] for a in tr["artists"]),
+            "bpm": None,
+            "key": None,
+        })
+
+    return out
+
+
 def get_playlist_tracks(request_or_user, playlist_id):
     logger.info(f"[SPOTIFY] Carregant tracks de la playlist {playlist_id}")
 
@@ -242,3 +290,67 @@ def get_playlist_tracks(request_or_user, playlist_id):
 
     logger.info(f"[SPOTIFY] Resultat final: {len(out)} tracks amb metadades")
     return out
+
+
+def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
+    """
+    Obté BPM i clau musical per una llista de cançons.
+
+    Args:
+        song_ids_with_metadata: List[dict] amb 'id', 'title', 'artist'
+
+    Returns:
+        dict: {spotify_id: {'bpm': float, 'key': str}}
+    """
+    if not song_ids_with_metadata:
+        return {}
+
+    user_token = _get_user_token(request_or_user)
+    if not user_token:
+        return {}
+
+    try:
+        sp_user = Spotify(auth=user_token)
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
+        return {}
+
+    ids = [s['id'] for s in song_ids_with_metadata]
+    meta = {s['id']: {'title': s['title'], 'artist': s['artist']}
+            for s in song_ids_with_metadata}
+
+    features_map = {}
+
+    # Intentar obtenir features de Spotify en chunks de 50
+    for idx, chunk in enumerate(_chunked(ids, 50)):
+        try:
+            logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks)")
+            feats = sp_user.audio_features(tracks=chunk)
+            for f in feats:
+                if not f:
+                    continue
+                features_map[f["id"]] = {
+                    "bpm": f.get("tempo"),
+                    "key": _camelot_from_key_mode(f.get("key"), f.get("mode"))
+                }
+        except Exception as e:
+            logger.error(f"[SPOTIFY] ERROR al carregar audio features per chunk {idx+1}: {e}")
+            # Si falla Spotify, utilitzar GetSongBPM per aquest chunk
+            for sid in chunk:
+                if sid not in features_map:
+                    features_map[sid] = _get_getsongbpm_features(
+                        meta[sid]["title"],
+                        meta[sid]["artist"]
+                    )
+
+    # Per les cançons sense features, intentar GetSongBPM
+    for sid in ids:
+        if sid not in features_map or (
+            not features_map[sid].get("bpm") and not features_map[sid].get("key")
+        ):
+            features_map[sid] = _get_getsongbpm_features(
+                meta[sid]["title"],
+                meta[sid]["artist"]
+            )
+
+    return features_map

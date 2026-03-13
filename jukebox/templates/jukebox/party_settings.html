@@ -164,6 +164,53 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Funció per processar features en chunks
+  function processFeatures(offset) {
+    var loadingDiv = document.getElementById('loadingProgress');
+    var progressBar = document.getElementById('progressBar');
+    var progressText = document.getElementById('progressText');
+
+    var formData = new FormData();
+    formData.append('offset', offset);
+    formData.append('chunk_size', 10);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+    return fetch('{% url "process_song_features" party.id %}', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) {
+        throw new Error(data.error || 'Error processant features');
+      }
+
+      // Actualitzar progrés
+      var total = data.total_songs || 1;
+      var processed = total - data.total_pending;
+      var percentage = Math.round((processed / total) * 100);
+      var displayPercentage = Math.max(20, Math.min(percentage, 95)); // Entre 20% i 95%
+
+      progressBar.style.width = displayPercentage + '%';
+      progressText.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
+
+      if (data.completed) {
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Totes les cançons processades correctament!';
+        progressBar.classList.remove('progress-bar-animated');
+        progressBar.classList.add('bg-success');
+
+        setTimeout(function() {
+          window.location.reload();
+        }, 2000);
+        return null;
+      } else {
+        // Processar següent chunk
+        return processFeatures(offset + 10);
+      }
+    });
+  }
+
   // Gestió del botó "Recarregar cançons"
   var reloadBtn = document.getElementById('reloadSongsBtn');
   if (reloadBtn) {
@@ -174,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
       reloadBtn.disabled = true;
       loadingDiv.style.display = 'block';
-      progressBar.style.width = '30%';
-      progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+      progressBar.style.width = '10%';
+      progressText.textContent = 'Carregant llista de cançons de Spotify...';
 
       var formData = new FormData();
       formData.append('spotify_playlist_id', '{{ party.playlist.spotify_id }}');
@@ -188,14 +235,11 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          progressBar.style.width = '100%';
+          progressBar.style.width = '20%';
           progressText.textContent = data.message;
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-success');
 
-          setTimeout(function() {
-            window.location.reload();
-          }, 2000);
+          // Ara processar features en chunks
+          return processFeatures(0);
         } else {
           throw new Error(data.error || 'Error desconegut');
         }
@@ -245,11 +289,15 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
           if (!response.ok) throw new Error('Error al desar el formulari');
+          return response.json();
+        })
+        .then(data => {
+          if (!data.success) throw new Error('Error al desar el formulari');
 
-          progressBar.style.width = '50%';
-          progressText.textContent = 'Processant cançons amb BPM i clau musical...';
+          progressBar.style.width = '10%';
+          progressText.textContent = 'Carregant llista de cançons de Spotify...';
 
-          // Ara carregar les cançons
+          // Ara carregar les cançons (només metadata)
           var playlistFormData = new FormData();
           playlistFormData.append('spotify_playlist_id', selectedPlaylist);
           playlistFormData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
@@ -262,14 +310,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            progressBar.style.width = '100%';
+            progressBar.style.width = '20%';
             progressText.textContent = data.message;
-            progressBar.classList.remove('progress-bar-animated');
-            progressBar.classList.add('bg-success');
 
-            setTimeout(function() {
-              window.location.reload();
-            }, 2000);
+            // Ara processar features en chunks
+            return processFeatures(0);
           } else {
             throw new Error(data.error || 'Error desconegut');
           }

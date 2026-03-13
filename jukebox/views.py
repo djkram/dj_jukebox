@@ -13,7 +13,7 @@ from django.conf import settings
 from .models import Song, Party, Vote, VotePackage
 from django.db.models import Sum, Count
 from .forms import PartyForm, PartySettingsForm
-from .spotify_api import get_user_playlists, get_playlist_tracks
+from .spotify_api import get_user_playlists, get_playlist_tracks, get_playlist_tracks_basic, get_audio_features_for_songs
 from .votes import get_user_votes_left
 
 from django.contrib.auth import get_user_model
@@ -143,8 +143,8 @@ def remove_playlist(request, party_id):
 @require_POST
 def process_playlist_songs(request, party_id):
     """
-    Processa les cançons d'una playlist de manera progressiva.
-    Retorna el progrés en temps real via JSON.
+    Processa les cançons d'una playlist de manera ràpida (només metadata bàsica).
+    El BPM i clau musical es processaran després amb process_song_features.
     """
     from .models import Playlist
 
@@ -155,33 +155,96 @@ def process_playlist_songs(request, party_id):
         return JsonResponse({'error': 'No playlist ID provided'}, status=400)
 
     try:
-        # Obtenir les cançons de Spotify
-        tracks = get_playlist_tracks(request, spotify_playlist_id)
+        # Obtenir les cançons de Spotify (ràpid, només metadata)
+        tracks = get_playlist_tracks_basic(request, spotify_playlist_id)
         total = len(tracks)
 
         # Esborrar cançons antigues
         party.songs.all().delete()
 
-        # Crear les cançons
-        for idx, tr in enumerate(tracks, start=1):
+        # Crear les cançons (sense BPM/clau de moment)
+        for tr in tracks:
             Song.objects.create(
                 party=party,
                 title=tr['title'],
                 artist=tr['artist'],
                 spotify_id=tr['id'],
-                bpm=tr.get('bpm'),
-                key=tr.get('key'),
+                bpm=None,
+                key=None,
             )
 
         return JsonResponse({
             'success': True,
             'total': total,
-            'message': f'{total} cançons importades correctament'
+            'message': f'{total} cançons carregades. Processant BPM i clau musical...'
         })
 
     except Exception as e:
         return JsonResponse({
             'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_POST
+def process_song_features(request, party_id):
+    """
+    Processa BPM i clau musical per un chunk de cançons.
+    """
+    party = get_object_or_404(Party, pk=party_id)
+    chunk_size = int(request.POST.get('chunk_size', 10))
+    offset = int(request.POST.get('offset', 0))
+
+    try:
+        # Obtenir cançons sense features
+        songs_to_process = party.songs.filter(bpm__isnull=True)[offset:offset+chunk_size]
+        total_pending = party.songs.filter(bpm__isnull=True).count()
+
+        if not songs_to_process:
+            return JsonResponse({
+                'success': True,
+                'completed': True,
+                'processed': 0,
+                'total_pending': 0,
+                'message': 'Totes les cançons processades correctament'
+            })
+
+        # Preparar metadata per obtenir features
+        songs_metadata = [
+            {'id': song.spotify_id, 'title': song.title, 'artist': song.artist}
+            for song in songs_to_process
+        ]
+
+        # Obtenir features
+        features_map = get_audio_features_for_songs(request, songs_metadata)
+
+        # Actualitzar cançons
+        processed = 0
+        for song in songs_to_process:
+            features = features_map.get(song.spotify_id, {})
+            if features.get('bpm') or features.get('key'):
+                song.bpm = features.get('bpm')
+                song.key = features.get('key')
+                song.save()
+                processed += 1
+
+        # Recalcular total pending després de processar
+        total_pending_after = party.songs.filter(bpm__isnull=True).count()
+
+        return JsonResponse({
+            'success': True,
+            'completed': total_pending_after == 0,
+            'processed': processed,
+            'total_pending': total_pending_after,
+            'total_songs': party.songs.count(),
+            'message': f'Processat chunk: {processed}/{len(songs_to_process)} cançons amb features'
+        })
+
+    except Exception as e:
+        import traceback
+        return JsonResponse({
+            'error': str(e),
+            'traceback': traceback.format_exc()
         }, status=500)
 
 

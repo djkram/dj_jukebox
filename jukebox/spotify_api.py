@@ -80,6 +80,10 @@ def _pick_getsongbpm_match(results, title, artist):
     fallback = None
 
     for result in results:
+        # Skip non-dictionary results
+        if not isinstance(result, dict):
+            continue
+
         result_title = _normalize_lookup(result.get("title"))
         result_artist = _normalize_lookup(result.get("artist", {}).get("name"))
         if fallback is None:
@@ -115,14 +119,21 @@ def _get_getsongbpm_features(title, artist):
             timeout=GETSONGBPM_TIMEOUT,
         )
         response.raise_for_status()
+        payload = response.json()
     except requests.RequestException as exc:
         logger.warning("[GETSONGBPM] Search failed for %s - %s: %s", artist, title, exc)
         return {"bpm": None, "key": None}
+    except (ValueError, KeyError) as exc:
+        logger.warning("[GETSONGBPM] Invalid JSON response for %s - %s: %s", artist, title, exc)
+        return {"bpm": None, "key": None}
 
-    payload = response.json()
+    if not isinstance(payload, dict):
+        logger.warning("[GETSONGBPM] Unexpected response format for %s - %s", artist, title)
+        return {"bpm": None, "key": None}
+
     match = _pick_getsongbpm_match(payload.get("search", []), title, artist)
-    if not match:
-        logger.info("[GETSONGBPM] No match for %s - %s", artist, title)
+    if not match or not isinstance(match, dict):
+        logger.info("[GETSONGBPM] No valid match for %s - %s", artist, title)
         return {"bpm": None, "key": None}
 
     bpm = match.get("tempo")

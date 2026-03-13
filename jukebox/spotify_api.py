@@ -6,7 +6,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-GETSONGBPM_BASE_URL = "https://api.getsong.co"
+GETSONGBPM_BASE_URL = "https://api.getsongbpm.com"
 GETSONGBPM_TIMEOUT = 5
 
 

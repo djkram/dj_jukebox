@@ -10,6 +10,7 @@ idna==3.10
 psycopg2-binary==2.9.10
 python-dotenv==1.1.1
 requests==2.32.4
+spotipy==2.24.0
 sqlparse==0.5.3
 stripe==12.3.0
 truststore==0.10.4

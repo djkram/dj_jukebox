@@ -97,23 +97,23 @@
             Torna
           </a>
         </form>
-
-        {# Barra de progrés #}
-        <div id="loadingProgress" class="mt-4" style="display: none;">
-          <div class="alert alert-info">
-            <h5><i class="fas fa-spinner fa-spin"></i> Carregant playlist...</h5>
-            <p id="progressText">Processant cançons amb BPM i clau musical...</p>
-            <div class="progress">
-              <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                   role="progressbar" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
     {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
     <div class="col-lg-8">
+      {# Barra de progrés #}
+      <div id="loadingProgress" class="mb-3" style="display: none;">
+        <div class="alert alert-info">
+          <h5><i class="fas fa-spinner fa-spin"></i> Carregant playlist...</h5>
+          <p id="progressText">Processant cançons amb BPM i clau musical...</p>
+          <div class="progress">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                 role="progressbar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="card shadow-sm p-4 rounded-4 mb-4">
         <h3 class="h5 mb-3">Cançons de la playlist</h3>
         {% if songs %}

@@ -3,15 +3,51 @@
 
 {% block content %}
 <div class="container mt-5">
+    <!-- Crèdits disponibles -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card {% if user.credits == 0 %}border-danger{% else %}border-success{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-coins fa-3x {% if user.credits == 0 %}text-danger{% else %}text-success{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted">Crèdits disponibles</h6>
+                            <h2 class="mb-0">{{ user.credits }}</h2>
+                            {% if user.credits == 0 %}
+                                <small class="text-danger">Sense crèdits per votar</small>
+                            {% else %}
+                                <small class="text-success">Pots votar {{ user.credits }} vegades</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8">
+            <div class="alert alert-info mb-0 h-100 d-flex align-items-center">
+                <div>
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Els crèdits són globals</strong><br>
+                    Pots utilitzar-los a qualsevol festa. Cada vot consumeix 1 crèdit.
+                    {% if user.credits < 5 %}
+                        <a href="{% url 'buy_votes' %}" class="alert-link ms-2">Compra més crèdits</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow rounded-4 p-4">
         <h2 class="mb-3">Perfil d'usuari</h2>
-        <p class="lead">Benvingut, <b>{{ user.username }}</b>!</p>
+        <p class="lead">Benvingut, <b>{{ user_display_name|default:user.username }}</b>!</p>
         <div class="row">
             <div class="col-md-6">
                 <h5 class="mb-2">Les meves dades</h5>
                 <ul class="list-group mb-3">
                     <li class="list-group-item"><b>Email:</b> {{ user.email }}</li>
-                    <li class="list-group-item"><b>Usuari:</b> {{ user.username }}</li>
+                    <li class="list-group-item"><b>Usuari:</b> {{ user_display_name|default:user.username }}</li>
                 </ul>
                 <a class="btn btn-outline-primary mb-2 w-100" href="{% url 'account_email' %}">
                     Edita el teu email

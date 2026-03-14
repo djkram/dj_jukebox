@@ -374,7 +374,10 @@ def buy_votes(request):
         )
         return redirect(session.url, code=303)
 
-    return render(request, "jukebox/buy_votes.html", {"party": party})
+    return render(request, "jukebox/buy_votes.html", {
+        "party": party,
+        "credits": request.user.credits,
+    })
 
 @login_required
 def buy_votes_success(request):

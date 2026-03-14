@@ -4,48 +4,42 @@
   <h2 class="mb-4">Cançons per a <span class="text-primary">{{ party.name }}</span></h2>
 
   {% if songs %}
-    <!-- Indicadors de vots i crèdits -->
+    <!-- Indicador de vots disponibles -->
     <div class="row mb-4">
       <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card border-primary">
+        <div class="card {% if votes_left == 0 or credits == 0 %}border-danger{% else %}border-primary{% endif %}">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0">
-                <i class="fas fa-vote-yea fa-2x text-primary"></i>
+                <i class="fas fa-vote-yea fa-3x {% if votes_left == 0 or credits == 0 %}text-danger{% else %}text-primary{% endif %}"></i>
               </div>
               <div class="flex-grow-1 ms-3">
-                <h6 class="mb-0 text-muted">Vots disponibles (festa)</h6>
-                <h3 class="mb-0">{{ votes_left }}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card {% if credits == 0 %}border-danger{% else %}border-success{% endif %}">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="flex-shrink-0">
-                <i class="fas fa-coins fa-2x {% if credits == 0 %}text-danger{% else %}text-success{% endif %}"></i>
-              </div>
-              <div class="flex-grow-1 ms-3">
-                <h6 class="mb-0 text-muted">Crèdits globals</h6>
-                <h3 class="mb-0">{{ credits }}</h3>
+                <h6 class="mb-0 text-muted">Vots disponibles</h6>
+                <h2 class="mb-0">{{ votes_left }}</h2>
                 {% if credits == 0 %}
-                  <small class="text-danger">Necessites crèdits per votar!</small>
+                  <small class="text-danger">Sense crèdits per votar</small>
+                {% elif votes_left == 0 %}
+                  <small class="text-danger">Sense vots per aquesta festa</small>
+                {% else %}
+                  <small class="text-success">Pots votar en aquesta festa</small>
                 {% endif %}
               </div>
             </div>
           </div>
         </div>
       </div>
-      {% if credits == 0 %}
-      <div class="col-md-12 col-lg-4 mb-3">
+      {% if credits == 0 or votes_left == 0 %}
+      <div class="col-md-6 col-lg-8 mb-3">
         <div class="alert alert-warning mb-0 d-flex align-items-center h-100">
           <i class="fas fa-exclamation-triangle me-2"></i>
           <div>
-            <strong>Sense crèdits!</strong><br>
-            <a href="{% url 'buy_votes' %}" class="alert-link">Compra crèdits aquí</a>
+            {% if credits == 0 %}
+              <strong>Sense crèdits!</strong> Necessites crèdits globals per poder votar.<br>
+              <a href="{% url 'buy_votes' %}" class="alert-link">Compra crèdits aquí</a>
+            {% elif votes_left == 0 %}
+              <strong>Sense vots!</strong> Has esgotat els teus vots per aquesta festa.<br>
+              Encara tens <strong>{{ credits }} crèdits</strong> disponibles per altres festes.
+            {% endif %}
           </div>
         </div>
       </div>

@@ -237,7 +237,8 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # Canviat de "mandatory" per evitar timeouts SMTP
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"  # No verificar emails de logins socials (ja verificats)
 SOCIALACCOUNT_STORE_TOKENS = True
 
 

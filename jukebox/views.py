@@ -333,12 +333,17 @@ def mark_song_played(request, song_id):
 
 @login_required
 def buy_votes(request):
+    import logging
+    logger = logging.getLogger(__name__)
+
     party_id = request.session.get('selected_party_id')
     if not party_id:
         return redirect('select_party')
     party = Party.objects.get(id=party_id)
 
     stripe.api_key = settings.STRIPE_SECRET_KEY  # ← AQUI SEMPRE!
+    logger.info(f"[BUY_VOTES] Stripe API key length: {len(stripe.api_key)}")
+    logger.info(f"[BUY_VOTES] Stripe API key starts with: {stripe.api_key[:7]}")
 
     if request.method == 'POST':
         votes_to_buy = int(request.POST.get('votes', 5))

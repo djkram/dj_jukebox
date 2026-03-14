@@ -27,13 +27,21 @@ urlpatterns = [
     path('party/<int:party_id>/process-playlist/', views.process_playlist_songs, name='process_playlist_songs'),
     path('party/<int:party_id>/process-features/', views.process_song_features, name='process_song_features'),
     path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
-    path('buy-votes/', views.buy_votes, name='buy_votes'),
-    path('buy-votes/success/', views.buy_votes_success, name='buy_votes_success'),
+    path('buy-coins/', views.buy_votes, name='buy_votes'),
+    path('buy-coins/success/', views.buy_votes_success, name='buy_votes_success'),
     path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),
 
 
     # RUTA per a la llista de cançons de la festa seleccionada
     path('songs/', views.song_list, name='song_list'),
+    path('songs/swipe/', views.song_swipe, name='song_swipe'),
+    path('songs/request/', views.request_song, name='request_song'),
+    path('dj/manage-requests/', views.manage_song_requests, name='manage_song_requests'),
+
+    # Notificacions
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/read-all/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
 
     path('buttons/', views.buttons, name='buttons'),
     path('cards/', views.cards, name='cards'),

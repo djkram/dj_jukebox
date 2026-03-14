@@ -23,6 +23,7 @@ class Party(models.Model):
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=False, default='')
     max_votes_per_user = models.PositiveIntegerField(default=5)  # NOVETAT
+    song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -60,3 +61,51 @@ class VotePackage(models.Model):
     votes_purchased = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     payment_id = models.CharField(max_length=128, blank=True, null=True)  # per Stripe/Paypal
+
+
+class SongRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pendent'),
+        ('accepted', 'Acceptada'),
+        ('rejected', 'Rebutjada'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    artist = models.CharField(max_length=200)
+    spotify_id = models.CharField(max_length=100)
+    album_image_url = models.URLField(max_length=500, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    coins_cost = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    processed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_requests')
+
+    def __str__(self):
+        return f"{self.title} - {self.artist} ({self.status})"
+
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('song_accepted', 'Cançó acceptada'),
+        ('song_played', 'Cançó reproduïda'),
+        ('coins_purchased', 'Coins comprats'),
+        ('coins_received', 'Coins rebuts'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    song = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True, blank=True)
+    song_request = models.ForeignKey(SongRequest, on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.IntegerField(null=True, blank=True)  # Per Coins
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"

@@ -1,9 +1,20 @@
 {% extends "jukebox/admin_base.html" %}
 {% block content %}
 <div class="container py-5">
-  <div class="alert alert-success">
-    Pagament realitzat! Els teus vots s’activaran automàticament (pot trigar uns segons).
+  <div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+      <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+      <h2 class="mb-3">Pagament realitzat amb èxit!</h2>
+      <p class="lead mb-4">
+        Els teus Coins s'activaran automàticament (pot trigar uns segons).
+      </p>
+      <p class="text-muted mb-4">
+        Ara pots convertir els teus Coins en Vots per votar les teves cançons favorites!
+      </p>
+      <a href="{% url 'song_list' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-arrow-left me-2"></i>Torna a la festa
+      </a>
+    </div>
   </div>
-  <a href="{% url 'song_list' %}" class="btn btn-primary">Torna a la festa</a>
 </div>
 {% endblock %}

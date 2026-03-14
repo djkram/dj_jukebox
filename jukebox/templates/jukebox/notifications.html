@@ -1,0 +1,110 @@
+{% extends "jukebox/admin_base.html" %}
+{% block page_title %}Notificacions{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  {% if notifications %}
+    <div class="row">
+      <div class="col-lg-8">
+        {% for notification in notifications %}
+          <div class="card mb-3 {% if not notification.is_read %}border-primary{% endif %}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  {% if notification.type == 'song_accepted' %}
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+                      <div>
+                        <h5 class="mb-1">{{ notification.title }}</h5>
+                        <p class="mb-0">{{ notification.message }}</p>
+                        <small class="text-muted">Cost: {{ notification.amount }} Coins</small>
+                      </div>
+                    </div>
+                  {% elif notification.type == 'song_played' %}
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-play-circle fa-2x text-primary me-3"></i>
+                      <div>
+                        <h5 class="mb-1">{{ notification.title }}</h5>
+                        <p class="mb-0">{{ notification.message }}</p>
+                        {% if notification.song.album_image_url %}
+                          <img src="{{ notification.song.album_image_url }}" alt="{{ notification.song.title }}"
+                               class="rounded mt-2" style="width: 60px; height: 60px; object-fit: cover;">
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% elif notification.type == 'coins_purchased' %}
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-shopping-cart fa-2x text-warning me-3"></i>
+                      <div>
+                        <h5 class="mb-1">{{ notification.title }}</h5>
+                        <p class="mb-0">{{ notification.message }}</p>
+                        <span class="badge bg-warning text-dark">+{{ notification.amount }} Coins</span>
+                      </div>
+                    </div>
+                  {% elif notification.type == 'coins_received' %}
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="fas fa-gift fa-2x text-info me-3"></i>
+                      <div>
+                        <h5 class="mb-1">{{ notification.title }}</h5>
+                        <p class="mb-0">{{ notification.message }}</p>
+                        <span class="badge bg-info">+{{ notification.amount }} Coins</span>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="text-end ms-3">
+                  <small class="text-muted d-block">{{ notification.created_at|timesince }} enrere</small>
+                  {% if not notification.is_read %}
+                    <span class="badge bg-primary mt-2">Nou</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card border-info sticky-top" style="top: 20px;">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              Sobre les notificacions
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Rebràs notificacions quan:</p>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="fas fa-check text-success me-2"></i>
+                Accepten una cançó que has demanat
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-play text-primary me-2"></i>
+                Una cançó que has votat s'ha reproduït
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-shopping-cart text-warning me-2"></i>
+                Has comprat Coins
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-gift text-info me-2"></i>
+                Has rebut Coins de regal
+              </li>
+            </ul>
+            <hr>
+            <p class="text-muted mb-0">
+              <small>Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina.</small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      <i class="fas fa-bell-slash fa-3x mb-3"></i>
+      <h4>No tens notificacions</h4>
+      <p class="mb-0">Quan succeixin esdeveniments importants, apareixeran aquí!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

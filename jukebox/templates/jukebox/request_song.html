@@ -1,0 +1,262 @@
+{% extends "jukebox/admin_base.html" %}
+{% block page_title %}Demanar cançó{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <!-- Missatges -->
+  <div id="message-area" class="mb-3"></div>
+
+  <!-- Info i Coins -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card border-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-coins fa-3x text-warning me-3"></i>
+            <div>
+              <h6 class="mb-0 text-muted">Els teus Coins</h6>
+              <h3 class="mb-0 text-warning">{{ user_credits }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert alert-info mb-0 h-100 d-flex align-items-center">
+        <div>
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Cost de petició: {{ request_cost }} Coins</strong><br>
+          Només es cobra si el DJ accepta la teva cançó. Si la rebutja, no pagues res.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cercador de cançons -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h4 class="card-title mb-3">
+        <i class="fas fa-search me-2"></i>Cerca una cançó a Spotify
+      </h4>
+      <div class="input-group mb-3">
+        <input type="text" id="search-input" class="form-control form-control-lg"
+               placeholder="Títol de la cançó o artista...">
+        <button class="btn btn-primary" type="button" id="search-btn">
+          <i class="fas fa-search"></i> Cercar
+        </button>
+      </div>
+
+      <!-- Resultats de cerca -->
+      <div id="search-results" class="mt-4"></div>
+    </div>
+  </div>
+
+  <!-- Les meves peticions -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="card-title mb-3">
+        <i class="fas fa-clock me-2"></i>Les meves peticions
+      </h4>
+
+      {% if user_requests %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th style="width: 60px;"></th>
+                <th>Cançó</th>
+                <th>Artista</th>
+                <th>Estat</th>
+                <th>Cost</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in user_requests %}
+                <tr>
+                  <td>
+                    {% if req.album_image_url %}
+                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
+                           class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                           style="width: 50px; height: 50px;">
+                        <i class="fas fa-music text-white"></i>
+                      </div>
+                    {% endif %}
+                  </td>
+                  <td>{{ req.title }}</td>
+                  <td>{{ req.artist }}</td>
+                  <td>
+                    {% if req.status == 'pending' %}
+                      <span class="badge bg-warning">Pendent</span>
+                    {% elif req.status == 'accepted' %}
+                      <span class="badge bg-success">Acceptada</span>
+                    {% else %}
+                      <span class="badge bg-danger">Rebutjada</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if req.status == 'accepted' %}
+                      {{ req.coins_cost }} Coins
+                    {% elif req.status == 'rejected' %}
+                      <span class="text-muted">0 Coins</span>
+                    {% else %}
+                      {{ req.coins_cost }} Coins (si s'accepta)
+                    {% endif %}
+                  </td>
+                  <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">Encara no has demanat cap cançó per aquesta festa.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-input');
+  const searchBtn = document.getElementById('search-btn');
+  const resultsDiv = document.getElementById('search-results');
+  const messageArea = document.getElementById('message-area');
+
+  function showMessage(message, type = 'success') {
+    messageArea.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+    // Scroll to top per veure el missatge
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Auto-hide després de 5 segons
+    setTimeout(() => {
+      const alert = messageArea.querySelector('.alert');
+      if (alert) {
+        alert.classList.remove('show');
+        setTimeout(() => messageArea.innerHTML = '', 150);
+      }
+    }, 5000);
+  }
+
+  function searchSongs() {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+    fetch(`{% url "request_song" %}?search=${encodeURIComponent(query)}`)
+      .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+      .then(data => {
+        if (!data.ok) {
+          if (data.status === 401 && data.data.reconnect_url) {
+            window.location.href = data.data.reconnect_url;
+            return;
+          }
+          throw new Error(data.data.error || 'Error connectant amb Spotify');
+        }
+
+        if (data.data.tracks && data.data.tracks.length > 0) {
+          let html = '<div class="row g-3">';
+          data.data.tracks.forEach(track => {
+            html += `
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex">
+                      <div class="flex-shrink-0 me-3">
+                        ${track.album_image_url ?
+                          `<img src="${track.album_image_url}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">` :
+                          `<div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-music text-white fa-2x"></i>
+                          </div>`
+                        }
+                      </div>
+                      <div class="flex-grow-1">
+                        <h5 class="mb-1">${track.title}</h5>
+                        <p class="text-muted mb-2">${track.artist}</p>
+                        <button class="btn btn-success btn-sm request-song-btn"
+                                data-id="${track.id}"
+                                data-title="${track.title.replace(/"/g, '&quot;')}"
+                                data-artist="${track.artist.replace(/"/g, '&quot;')}"
+                                data-image="${track.album_image_url || ''}">
+                          <i class="fas fa-plus me-1"></i>Demanar ({{ request_cost }} Coins)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          resultsDiv.innerHTML = html;
+
+          // Afegir event listeners als botons
+          document.querySelectorAll('.request-song-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              requestSong(this.dataset.id, this.dataset.title, this.dataset.artist, this.dataset.image);
+            });
+          });
+        } else {
+          resultsDiv.innerHTML = '<div class="alert alert-warning">No s\'han trobat resultats</div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        resultsDiv.innerHTML = `<div class="alert alert-danger">${error.message || 'Error al cercar cançons'}</div>`;
+      });
+  }
+
+  function requestSong(spotifyId, title, artist, albumImageUrl) {
+    const formData = new FormData();
+    formData.append('spotify_id', spotifyId);
+    formData.append('title', title);
+    formData.append('artist', artist);
+    formData.append('album_image_url', albumImageUrl);
+
+    fetch('{% url "request_song" %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: formData
+    })
+    .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+    .then(result => {
+      if (!result.ok) {
+        if (result.status === 401 && result.data.reconnect_url) {
+          window.location.href = result.data.reconnect_url;
+          return;
+        }
+        throw new Error(result.data.error || 'Error al enviar la petició');
+      }
+
+      const data = result.data;
+      if (data.success) {
+        showMessage(data.message, 'success');
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        throw new Error(data.error || 'Error al enviar la petició');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage(error.message || 'Error al enviar la petició', 'danger');
+    });
+  }
+
+  searchBtn.addEventListener('click', searchSongs);
+  searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchSongs();
+    }
+  });
+});
+</script>
+{% endblock %}

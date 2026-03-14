@@ -1,0 +1,228 @@
+{% extends "jukebox/admin_base.html" %}
+{% block page_title %}Gestionar peticions{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <!-- Missatges -->
+  <div id="message-area" class="mb-3"></div>
+
+  <!-- Peticions pendents -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+      <h4 class="mb-0">
+        <i class="fas fa-clock me-2"></i>
+        Peticions pendents ({{ pending_requests.count }})
+      </h4>
+    </div>
+    <div class="card-body">
+      {% if pending_requests %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th style="width: 80px;"></th>
+                <th>Cançó</th>
+                <th>Artista</th>
+                <th>Demanat per</th>
+                <th>Cost</th>
+                <th>Data</th>
+                <th class="text-center" style="width: 200px;">Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in pending_requests %}
+                <tr id="request-{{ req.id }}">
+                  <td>
+                    {% if req.album_image_url %}
+                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
+                           class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                           style="width: 60px; height: 60px;">
+                        <i class="fas fa-music text-white"></i>
+                      </div>
+                    {% endif %}
+                  </td>
+                  <td><strong>{{ req.title }}</strong></td>
+                  <td>{{ req.artist }}</td>
+                  <td>
+                    <i class="fas fa-user me-1"></i>{{ req.user.username }}
+                    <br>
+                    <small class="text-muted">Coins disponibles: {{ req.user.credits }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-warning text-dark">{{ req.coins_cost }} Coins</span>
+                  </td>
+                  <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
+                  <td class="text-center">
+                    <button class="btn btn-success btn-sm me-2 accept-btn"
+                            data-id="{{ req.id }}"
+                            data-user-credits="{{ req.user.credits }}"
+                            data-cost="{{ req.coins_cost }}">
+                      <i class="fas fa-check me-1"></i>Acceptar
+                    </button>
+                    <button class="btn btn-danger btn-sm reject-btn"
+                            data-id="{{ req.id }}">
+                      <i class="fas fa-times me-1"></i>Rebutjar
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-info mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          No hi ha peticions pendents en aquest moment.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Peticions processades (últimes 20) -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h4 class="mb-0">
+        <i class="fas fa-history me-2"></i>
+        Historial de peticions
+      </h4>
+    </div>
+    <div class="card-body">
+      {% if processed_requests %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th style="width: 60px;"></th>
+                <th>Cançó</th>
+                <th>Artista</th>
+                <th>Usuari</th>
+                <th>Estat</th>
+                <th>Processat per</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in processed_requests %}
+                <tr>
+                  <td>
+                    {% if req.album_image_url %}
+                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
+                           class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                           style="width: 40px; height: 40px;">
+                        <i class="fas fa-music text-white fa-xs"></i>
+                      </div>
+                    {% endif %}
+                  </td>
+                  <td>{{ req.title }}</td>
+                  <td>{{ req.artist }}</td>
+                  <td>{{ req.user.username }}</td>
+                  <td>
+                    {% if req.status == 'accepted' %}
+                      <span class="badge bg-success">Acceptada</span>
+                    {% else %}
+                      <span class="badge bg-danger">Rebutjada</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ req.processed_by.username|default:"-" }}</td>
+                  <td>{{ req.processed_at|date:"d/m/Y H:i" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Encara no s'ha processat cap petició.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const messageArea = document.getElementById('message-area');
+
+  function showMessage(message, type = 'success') {
+    messageArea.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      const alert = messageArea.querySelector('.alert');
+      if (alert) {
+        alert.classList.remove('show');
+        setTimeout(() => messageArea.innerHTML = '', 150);
+      }
+    }, 5000);
+  }
+
+  // Acceptar petició
+  document.querySelectorAll('.accept-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const requestId = this.dataset.id;
+      const userCredits = parseInt(this.dataset.userCredits);
+      const cost = parseInt(this.dataset.cost);
+
+      if (userCredits < cost) {
+        if (!confirm(`L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment? (No es cobrarà)`)) {
+          return;
+        }
+      } else {
+        if (!confirm(`Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`)) {
+          return;
+        }
+      }
+
+      processRequest(requestId, 'accept');
+    });
+  });
+
+  // Rebutjar petició
+  document.querySelectorAll('.reject-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const requestId = this.dataset.id;
+
+      if (!confirm('Rebutjar aquesta petició? No es cobrarà cap Coin.')) {
+        return;
+      }
+
+      processRequest(requestId, 'reject');
+    });
+  });
+
+  function processRequest(requestId, action) {
+    const formData = new FormData();
+    formData.append('request_id', requestId);
+    formData.append('action', action);
+
+    fetch('{% url "manage_song_requests" %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showMessage(data.message, 'success');
+        // Recarregar la pàgina després de 1.5 segons per actualitzar tot
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showMessage(data.error || 'Error al processar la petició', 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('Error al processar la petició', 'danger');
+    });
+  }
+});
+</script>
+{% endblock %}

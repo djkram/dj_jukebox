@@ -1,4 +1,4 @@
-from .models import Party
+from .models import Party, Notification
 from allauth.socialaccount.models import SocialAccount
 
 
@@ -39,3 +39,11 @@ def user_avatar(request):
         "user_avatar_initial": avatar_initial,
         "user_display_name": display_name,
     }
+
+
+def unread_notifications_count(request):
+    """Retorna el nombre de notificacions no llegides"""
+    count = 0
+    if request.user.is_authenticated:
+        count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return {'unread_notifications_count': count}

@@ -2,14 +2,15 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount %}
 
+{% block page_title %}Settings festa{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
   <div class="row gx-4">
     {# ── COL. ESQUERRA: FORMULARI ──────────────────────────────────────── #}
     <div class="col-lg-4">
       <div class="card shadow-sm p-4 rounded-4 mb-4">
-        <h2 class="h4 mb-3">Configuració de la festa: {{ party.name }}</h2>
-        <form method="post">
+        <form method="post" id="partySettingsForm">
           {% csrf_token %}
 
           <div class="mb-3">
@@ -51,9 +52,23 @@
           {% elif playlists %}
             {# 2) Acabem de carregar playlists: mostrar select amb opcions #}
             <div class="mb-3">
-              <label for="id_spotify_playlist" class="form-label">
-                Selecciona una playlist de Spotify
-              </label>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="id_spotify_playlist" class="form-label mb-0">
+                  Selecciona una playlist de Spotify
+                </label>
+                <button type="button" id="reloadPlaylistsBtn" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-sync-alt"></i> Recarrega
+                </button>
+              </div>
+              <div class="mb-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded"
+                         {% if only_owned %}checked{% endif %}>
+                  <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
+                    Només les meves playlists
+                  </label>
+                </div>
+              </div>
               <select name="spotify_playlist"
                       id="id_spotify_playlist"
                       class="form-control">
@@ -71,7 +86,16 @@
             {# 3) Encara no tenim playlist i no hem carregat: boto verd #}
             <div class="mb-3">
               {% if has_spotify %}
-                <a href="?load_spotify=1" class="btn btn-success me-2">
+                <div class="mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox"
+                           {% if only_owned %}checked{% endif %}>
+                    <label class="form-check-label" for="onlyOwnedCheckbox">
+                      Només les meves playlists
+                    </label>
+                  </div>
+                </div>
+                <a href="?load_spotify=1" class="btn btn-success me-2" id="loadPlaylistsBtn">
                   <i class="fas fa-sync-alt"></i>
                   Carrega playlists de Spotify
                 </a>
@@ -151,6 +175,22 @@
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  var settingsForm = document.getElementById('partySettingsForm');
+
+  function parseJsonResponse(response) {
+    return response.json().then(function(data) {
+      return { ok: response.ok, status: response.status, data: data };
+    });
+  }
+
+  function maybeReconnectSpotify(result, fallbackMessage) {
+    if (result.status === 401 && result.data && result.data.reconnect_url) {
+      window.location.href = result.data.reconnect_url;
+      return true;
+    }
+    throw new Error((result.data && result.data.error) || fallbackMessage || 'Error desconegut');
+  }
+
   // Filtrat de cançons
   var input = document.getElementById('song-search');
   if (input) {
@@ -173,17 +213,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var formData = new FormData();
     formData.append('offset', offset);
     formData.append('chunk_size', 10);
-    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    formData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
 
     return fetch('{% url "process_song_features" party.id %}', {
       method: 'POST',
       body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-      if (!data.success) {
-        throw new Error(data.error || 'Error processant features');
+    .then(parseJsonResponse)
+    .then(result => {
+      if (!result.ok) {
+        if (maybeReconnectSpotify(result, 'Error processant features')) {
+          return null;
+        }
       }
+      var data = result.data;
 
       // Actualitzar progrés
       var total = data.total_songs || 1;
@@ -226,14 +269,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var formData = new FormData();
       formData.append('spotify_playlist_id', '{{ party.playlist.spotify_id }}');
-      formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+      formData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
 
       fetch('{% url "process_playlist_songs" party.id %}', {
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
+      .then(parseJsonResponse)
+      .then(result => {
+        if (!result.ok) {
+          if (maybeReconnectSpotify(result, 'Error desconegut')) {
+            return;
+          }
+        }
+        var data = result.data;
         if (data.success) {
           progressBar.style.width = '20%';
           progressText.textContent = data.message;
@@ -255,11 +304,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Gestió del submit amb indicador de càrrega
-  var form = document.querySelector('form');
   var playlistSelect = document.getElementById('id_spotify_playlist');
 
-  if (form && playlistSelect) {
-    form.addEventListener('submit', function(e) {
+  if (settingsForm && playlistSelect) {
+    settingsForm.addEventListener('submit', function(e) {
       var selectedPlaylist = playlistSelect.value;
 
       // Si s'ha seleccionat una playlist, fer la càrrega via AJAX
@@ -277,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
 
         // Primer desar els canvis bàsics del formulari
-        var formData = new FormData(form);
+        var formData = new FormData(settingsForm);
         formData.append('ajax_request', '1');
 
         fetch(window.location.href, {
@@ -300,15 +348,21 @@ document.addEventListener('DOMContentLoaded', function() {
           // Ara carregar les cançons (només metadata)
           var playlistFormData = new FormData();
           playlistFormData.append('spotify_playlist_id', selectedPlaylist);
-          playlistFormData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+          playlistFormData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
 
           return fetch('{% url "process_playlist_songs" party.id %}', {
             method: 'POST',
             body: playlistFormData
           });
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(parseJsonResponse)
+        .then(result => {
+          if (!result.ok) {
+            if (maybeReconnectSpotify(result, 'Error desconegut')) {
+              return;
+            }
+          }
+          var data = result.data;
           if (data.success) {
             progressBar.style.width = '20%';
             progressText.textContent = data.message;
@@ -328,6 +382,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       // Si no hi ha playlist seleccionada, deixar que el submit sigui normal
+    });
+  }
+
+  // Gestió del checkbox "Només les meves playlists" (quan no hi ha playlists carregades)
+  var loadPlaylistsBtn = document.getElementById('loadPlaylistsBtn');
+  var onlyOwnedCheckbox = document.getElementById('onlyOwnedCheckbox');
+
+  if (loadPlaylistsBtn && onlyOwnedCheckbox) {
+    loadPlaylistsBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var onlyOwned = onlyOwnedCheckbox.checked ? '1' : '0';
+      window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
+    });
+  }
+
+  // Gestió del botó "Recarrega" (quan les playlists ja estan carregades)
+  var reloadPlaylistsBtn = document.getElementById('reloadPlaylistsBtn');
+  var onlyOwnedCheckboxLoaded = document.getElementById('onlyOwnedCheckboxLoaded');
+
+  if (reloadPlaylistsBtn && onlyOwnedCheckboxLoaded) {
+    reloadPlaylistsBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var onlyOwned = onlyOwnedCheckboxLoaded.checked ? '1' : '0';
+      window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
     });
   }
 });

@@ -9,12 +9,27 @@ from allauth.account.forms import SignupForm
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
+from django.urls import reverse
+from urllib.parse import urlencode
 
-from .models import Song, Party, Vote, VotePackage
+from .models import Song, Party, Vote, VotePackage, SongRequest, Notification
 from django.db.models import Sum, Count
 from .forms import PartyForm, PartySettingsForm
-from .spotify_api import get_user_playlists, get_playlist_tracks, get_playlist_tracks_basic, get_audio_features_for_songs
+from .notifications import (
+    create_song_accepted_notification,
+    create_song_played_notification,
+    create_coins_purchased_notification,
+)
+from .spotify_api import (
+    SpotifyAuthError,
+    get_user_playlists,
+    get_playlist_tracks,
+    get_playlist_tracks_basic,
+    get_audio_features_for_songs,
+    search_spotify_tracks,
+)
 from .votes import get_user_votes_left
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -23,6 +38,14 @@ import stripe
 
 
 # Create your views here.
+
+
+def _spotify_reconnect_url(request):
+    query = urlencode({
+        "process": "connect",
+        "next": request.get_full_path(),
+    })
+    return f"{reverse('spotify_login')}?{query}"
 
 # def song_list(request):
 #     songs = Song.objects.filter(played=False).order_by('-votes')
@@ -116,8 +139,12 @@ def party_settings(request, party_id):
 
     # Només carreguem playlists de Spotify si NO n'hi ha i hem pitjat el botó
     playlists = None
+    only_owned = request.GET.get('only_owned') == '1'
     if has_spotify and not party.playlist and request.GET.get('load_spotify') == '1':
-        playlists = get_user_playlists(request)
+        try:
+            playlists = get_user_playlists(request, only_owned=only_owned)
+        except SpotifyAuthError:
+            return redirect(_spotify_reconnect_url(request))
 
     return render(request, 'jukebox/party_settings.html', {
         'party':     party,
@@ -125,6 +152,7 @@ def party_settings(request, party_id):
         'songs':     songs,
         'playlists': playlists,
         'has_spotify': has_spotify,
+        'only_owned': only_owned,
     })
 
 
@@ -179,6 +207,11 @@ def process_playlist_songs(request, party_id):
             'total': total,
             'message': f'{total} cançons carregades. Processant BPM i clau musical...'
         })
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
 
     except Exception as e:
         return JsonResponse({
@@ -241,6 +274,12 @@ def process_song_features(request, party_id):
             'message': f'Processat chunk: {processed}/{len(songs_to_process)} cançons amb features'
         })
 
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
+
     except Exception as e:
         import traceback
         return JsonResponse({
@@ -259,37 +298,72 @@ def song_list(request):
 
     # Comprovar vots restants segons límit de la festa
     votes_left = get_user_votes_left(user, party)
-    credits = user.credits  # crèdits globals de l'usuari
+    credits = user.credits  # Coins globals de l'usuari
 
-    if request.method == 'POST' and 'vote_song_id' in request.POST:
-        song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
-        if votes_left > 0 and credits > 0:
-            # Crear el vot i restar crèdit
-            Vote.objects.create(user=user, song=song, party=party)
-            user.credits -= 1
-            user.save()
-            return redirect('song_list')
-        else:
-            # Mostra error segons el cas
-            if credits == 0:
-                error = "No tens crèdits disponibles!"
+    if request.method == 'POST':
+        # Conversió de Coins a Vots amb bonificació per volum
+        if 'action' in request.POST and request.POST['action'] == 'convert_coins':
+            coins_to_convert = int(request.POST.get('coins_to_convert', 0))
+            if coins_to_convert > 0 and coins_to_convert <= user.credits:
+                # Calcular vots amb bonificació
+                if coins_to_convert >= 20:
+                    votes_to_add = int(coins_to_convert * 3.0)   # 20 Coins -> 60 Vots
+                elif coins_to_convert >= 10:
+                    votes_to_add = int(coins_to_convert * 2.5)   # 10 Coins -> 25 Vots
+                elif coins_to_convert >= 5:
+                    votes_to_add = int(coins_to_convert * 2.2)   # 5 Coins -> 11 Vots
+                elif coins_to_convert >= 3:
+                    votes_to_add = int(coins_to_convert * 2.0)   # 3 Coins -> 6 Vots
+                else:
+                    votes_to_add = coins_to_convert * 2          # 1-2 Coins -> 2x
+
+                # Crear un VotePackage per registrar la conversió
+                VotePackage.objects.create(
+                    user=user,
+                    party=party,
+                    votes_purchased=votes_to_add
+                )
+                # Restar els Coins utilitzats
+                user.credits -= coins_to_convert
+                user.save()
+                return redirect('song_list')
+
+        # Votar una cançó
+        elif 'vote_song_id' in request.POST:
+            song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
+            if votes_left > 0:
+                # Crear el vot (consumeix 1 Vot)
+                Vote.objects.create(user=user, song=song, party=party)
+                return redirect('song_list')
             else:
-                error = "Has esgotat els teus vots per aquesta festa!"
-            return render(request, "jukebox/song_list.html", {
-                "party": party,
-                "songs": party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title'),
-                "votes_left": votes_left,
-                "credits": credits,
-                "error": error,
-            })
+                # Mostra error segons el cas
+                if credits > 0:
+                    error = "No tens vots! Converteix Coins a Vots per votar."
+                else:
+                    error = "No tens Coins! Compra Coins i converteix-los a Vots."
+                return render(request, "jukebox/song_list.html", {
+                    "party": party,
+                    "songs": party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title'),
+                    "votes_left": votes_left,
+                    "credits": credits,
+                    "error": error,
+                })
 
     songs = party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title')
+
+    # Estadístiques per a la vista
+    songs_played = party.songs.filter(played=True).count()
+    user_votes_count = Vote.objects.filter(user=user, party=party).count()
+    total_songs = party.songs.count()
 
     return render(request, "jukebox/song_list.html", {
         "party": party,
         "songs": songs,
         "votes_left": votes_left,
         "credits": credits,
+        "songs_played": songs_played,
+        "user_votes_count": user_votes_count,
+        "total_songs": total_songs,
     })
 
 
@@ -312,15 +386,33 @@ def dj_backoffice(request):
     })
 
 def dj_dashboard(request):
-    songs = Song.objects.all().order_by('-votes')
-    total_songs = songs.count()
-    total_votes = songs.aggregate(total=Sum('votes'))['total'] or 0
-    played_songs = songs.filter(has_played=True).count()
+    from .recommendation import get_recommended_songs
+
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return redirect('select_party')
+
+    party = get_object_or_404(Party, pk=party_id)
+
+    # Separar cançons pendents i ja posades
+    pending_songs = party.songs.filter(has_played=False).annotate(num_votes=Count('vote')).order_by('-num_votes')
+    played_songs_list = party.songs.filter(has_played=True).annotate(num_votes=Count('vote')).order_by('-id')
+
+    total_songs = party.songs.count()
+    total_votes = party.songs.aggregate(total=Sum('vote'))['total'] or 0
+    played_songs_count = played_songs_list.count()
+
+    # Obtenir recomanacions intel·ligents
+    recommended_songs = get_recommended_songs(party, limit=5)
+
     context = {
-        'songs': songs,
+        'party': party,
+        'pending_songs': pending_songs,
+        'played_songs_list': played_songs_list,
         'total_songs': total_songs,
         'total_votes': total_votes,
-        'played_songs': played_songs,
+        'played_songs': played_songs_count,
+        'recommended_songs': recommended_songs,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
 
@@ -329,6 +421,10 @@ def mark_song_played(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
     song.has_played = True
     song.save()
+
+    # Notificar a tots els que van votar aquesta cançó
+    create_song_played_notification(song)
+
     return redirect('dj_dashboard')
 
 @login_required
@@ -340,73 +436,194 @@ def buy_votes(request):
     if not party_id:
         return redirect('select_party')
     party = Party.objects.get(id=party_id)
+    user = request.user
 
     stripe.api_key = settings.STRIPE_SECRET_KEY  # ← AQUI SEMPRE!
     logger.info(f"[BUY_VOTES] Stripe API key length: {len(stripe.api_key)}")
     logger.info(f"[BUY_VOTES] Stripe API key starts with: {stripe.api_key[:7]}")
 
     if request.method == 'POST':
-        votes_to_buy = int(request.POST.get('votes', 5))
-        # Calcula el preu (ex: 1€ cada 5 vots)
-        price_eur = 1 * (votes_to_buy // 5)
-        if price_eur == 0:
-            price_eur = 1  # mínim 1€
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'eur',
-                    'product_data': {
-                        'name': f'Paquet de {votes_to_buy} vots per {party.name}',
+        # Conversió de Coins a Vots
+        if 'action' in request.POST and request.POST['action'] == 'convert_coins':
+            coins_to_convert = int(request.POST.get('coins_to_convert', 0))
+            if coins_to_convert > 0 and coins_to_convert <= user.credits:
+                # Calcular vots amb bonificació
+                if coins_to_convert >= 20:
+                    votes_to_add = int(coins_to_convert * 3.0)   # 20 Coins -> 60 Vots
+                elif coins_to_convert >= 10:
+                    votes_to_add = int(coins_to_convert * 2.5)   # 10 Coins -> 25 Vots
+                elif coins_to_convert >= 5:
+                    votes_to_add = int(coins_to_convert * 2.2)   # 5 Coins -> 11 Vots
+                elif coins_to_convert >= 3:
+                    votes_to_add = int(coins_to_convert * 2.0)   # 3 Coins -> 6 Vots
+                else:
+                    votes_to_add = coins_to_convert * 2          # 1-2 Coins -> 2x
+
+                # Crear un VotePackage per registrar la conversió
+                VotePackage.objects.create(
+                    user=user,
+                    party=party,
+                    votes_purchased=votes_to_add
+                )
+                # Restar els Coins utilitzats
+                user.credits -= coins_to_convert
+                user.save()
+                return redirect('buy_votes')
+
+        # Compra de Coins amb Stripe
+        else:
+            coins_to_buy = int(request.POST.get('votes', 5))  # 'votes' param name per compatibilitat
+            # Calcula el preu (1€ cada 5 coins, 2€ per 10, 4€ per 20)
+            if coins_to_buy == 5:
+                price_eur = 1
+            elif coins_to_buy == 10:
+                price_eur = 2
+            elif coins_to_buy == 20:
+                price_eur = 4
+            else:
+                price_eur = 1 * (coins_to_buy // 5)
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'eur',
+                        'product_data': {
+                            'name': f'Paquet de {coins_to_buy} Coins - DJ Jukebox',
+                            'description': f'Moneda virtual per votar a les festes',
+                        },
+                        'unit_amount': int(price_eur * 100),
                     },
-                    'unit_amount': int(price_eur * 100),
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url=request.build_absolute_uri('/buy-votes/success/'),
-            cancel_url=request.build_absolute_uri('/buy-votes/'),
-            metadata={
-                'user_id': request.user.id,
-                'party_id': party.id,
-                'votes_purchased': votes_to_buy,
-            }
-        )
-        return redirect(session.url, code=303)
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri('/buy-coins/success/') + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=request.build_absolute_uri('/buy-coins/'),
+                metadata={
+                    'user_id': request.user.id,
+                    'party_id': party.id,
+                    'votes_purchased': coins_to_buy,  # ara són Coins
+                }
+            )
+            return redirect(session.url, code=303)
+
+    votes_left = get_user_votes_left(user, party)
 
     return render(request, "jukebox/buy_votes.html", {
         "party": party,
-        "credits": request.user.credits,
+        "credits": user.credits,
+        "votes_left": votes_left,
     })
 
 @login_required
 def buy_votes_success(request):
+    # En desenvolupament, simular el webhook si no s'ha rebut
+    if settings.DEBUG:
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # Comprovar si hi ha session_id a la URL
+        session_id = request.GET.get('session_id')
+        if session_id:
+            try:
+                stripe.api_key = settings.STRIPE_SECRET_KEY
+                session = stripe.checkout.Session.retrieve(session_id)
+
+                # Comprovar si ja s'ha processat aquest pagament
+                already_processed = VotePackage.objects.filter(payment_id=session_id).exists()
+
+                if session.payment_status == 'paid' and not already_processed:
+                    user_id = int(session.metadata['user_id'])
+                    coins = int(session.metadata['votes_purchased'])
+                    party_id = int(session.metadata['party_id'])
+
+                    if user_id == request.user.id:
+                        # Afegir Coins
+                        user = request.user
+                        logger.info(f"[DEV_WEBHOOK] Simulant webhook per session {session_id}: +{coins} Coins")
+                        user.credits += coins
+                        user.save()
+
+                        # Registrar la transacció per evitar duplicats
+                        party = Party.objects.get(id=party_id)
+                        VotePackage.objects.create(
+                            user=user,
+                            party=party,
+                            votes_purchased=0,  # És una compra de Coins, no vots directes
+                            payment_id=session_id
+                        )
+
+                        # Crear notificació
+                        create_coins_purchased_notification(user, coins)
+
+                        logger.info(f"[DEV_WEBHOOK] ✓ {coins} Coins afegits a {user.username} (total: {user.credits})")
+                elif already_processed:
+                    logger.info(f"[DEV_WEBHOOK] Pagament {session_id} ja processat anteriorment")
+            except Exception as e:
+                logger.error(f"[DEV_WEBHOOK] Error: {e}")
+
     return render(request, "jukebox/buy_votes_success.html")
 
 
 @csrf_exempt
 def stripe_webhook(request):
+    import logging
+    logger = logging.getLogger(__name__)
+
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     event = None
+
+    logger.info(f"[STRIPE_WEBHOOK] Rebut webhook de Stripe")
 
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except (ValueError, stripe.error.SignatureVerificationError):
+        logger.info(f"[STRIPE_WEBHOOK] Event verificat: {event['type']}")
+    except (ValueError, stripe.error.SignatureVerificationError) as e:
+        logger.error(f"[STRIPE_WEBHOOK] Error de verificació: {e}")
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
+        session_id = session['id']
         user_id = session['metadata']['user_id']
-        credits = int(session['metadata']['votes_purchased'])  # Comprem crèdits, no vots!
+        coins = int(session['metadata']['votes_purchased'])  # Comprem Coins!
+        party_id = session['metadata']['party_id']
+
+        logger.info(f"[STRIPE_WEBHOOK] Processant pagament: session={session_id}, user_id={user_id}, coins={coins}")
+
+        # Comprovar si ja s'ha processat
+        already_processed = VotePackage.objects.filter(payment_id=session_id).exists()
+        if already_processed:
+            logger.warning(f"[STRIPE_WEBHOOK] Pagament {session_id} ja processat anteriorment")
+            return HttpResponse(status=200)
+
         try:
             user = User.objects.get(id=user_id)
-            user.credits += credits
+            party = Party.objects.get(id=party_id)
+
+            # Afegir Coins
+            user.credits += coins  # credits field stores Coins
             user.save()
+
+            # Registrar la transacció
+            VotePackage.objects.create(
+                user=user,
+                party=party,
+                votes_purchased=0,  # És una compra de Coins, no vots directes
+                payment_id=session_id
+            )
+
+            # Crear notificació
+            create_coins_purchased_notification(user, coins)
+
+            logger.info(f"[STRIPE_WEBHOOK] ✓ {coins} Coins afegits a l'usuari {user.username} (total: {user.credits})")
         except User.DoesNotExist:
-            pass  # Si vols, afegeix log/error
+            logger.error(f"[STRIPE_WEBHOOK] ✗ Usuari {user_id} no trobat")
+        except Party.DoesNotExist:
+            logger.error(f"[STRIPE_WEBHOOK] ✗ Party {party_id} no trobada")
 
     return HttpResponse(status=200)
 
@@ -416,7 +633,16 @@ def get_spotify_playlists(request):
     Retorna JSON amb la llista de playlists de l'usuari logat a Spotify.
     Si no està enllaçat o no hi ha playlists, retorna error 400.
     """
-    playlists = get_user_playlists(request)
+    try:
+        playlists = get_user_playlists(request)
+    except SpotifyAuthError:
+        return JsonResponse(
+            {
+                'error': 'La sessió de Spotify ha caducat.',
+                'reconnect_url': _spotify_reconnect_url(request),
+            },
+            status=401
+        )
     if not playlists:
         return JsonResponse(
             {'error': 'No Spotify account linked or no playlists found.'},
@@ -466,3 +692,213 @@ def utilities_animation(request):
 
 def utilities_other(request):
     return render(request, 'jukebox/utilities-other.html')
+
+
+@login_required
+def notifications(request):
+    """Vista per veure totes les notificacions de l'usuari"""
+    user_notifications = request.user.notifications.all()[:50]  # Últimes 50
+
+    # Marcar totes com a llegides quan visites la pàgina
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+
+    return render(request, 'jukebox/notifications.html', {
+        'notifications': user_notifications,
+    })
+
+
+@login_required
+@require_POST
+def mark_notification_read(request, notification_id):
+    """API per marcar una notificació com a llegida"""
+    notification = get_object_or_404(Notification, pk=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return JsonResponse({'success': True})
+
+
+@login_required
+def mark_all_notifications_read(request):
+    """Marca totes les notificacions com a llegides"""
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return JsonResponse({'success': True})
+
+
+@login_required
+def song_swipe(request):
+    """Vista Busca Match per votar cançons amb like/next"""
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return redirect('select_party')
+
+    party = get_object_or_404(Party, pk=party_id)
+    user = request.user
+
+    votes_left = get_user_votes_left(user, party)
+    credits = user.credits
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        song_id = request.POST.get('song_id')
+
+        if action == 'like' and song_id:
+            song = get_object_or_404(Song, pk=song_id, party=party)
+
+            # Només necessita vots disponibles per aquesta festa
+            if votes_left > 0:
+                # Crear el vot (consumeix 1 Vot)
+                Vote.objects.create(user=user, song=song, party=party)
+
+                return JsonResponse({
+                    'success': True,
+                    'votes_left': get_user_votes_left(user, party),
+                    'credits': user.credits
+                })
+            else:
+                # No té vots disponibles
+                if credits > 0:
+                    return JsonResponse({'success': False, 'error': 'No tens vots! Converteix Coins a Vots per fer like.'}, status=400)
+                else:
+                    return JsonResponse({'success': False, 'error': 'No tens Coins! Compra Coins i converteix-los a Vots.'}, status=400)
+
+        elif action == 'skip':
+            return JsonResponse({'success': True})
+
+    # Obtenir cançons que l'usuari encara no ha votat
+    voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)
+    songs = party.songs.exclude(id__in=voted_song_ids).order_by('?')  # Ordre aleatori
+
+    return render(request, 'jukebox/song_swipe.html', {
+        'party': party,
+        'songs': songs,
+        'votes_left': votes_left,
+        'credits': credits,
+    })
+
+
+@login_required
+def request_song(request):
+    """Vista per demanar cançons noves"""
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return redirect('select_party')
+
+    party = get_object_or_404(Party, pk=party_id)
+    user = request.user
+
+    # Cerca de cançons
+    if request.method == 'GET' and 'search' in request.GET:
+        query = request.GET.get('search', '').strip()
+        if query:
+            try:
+                tracks = search_spotify_tracks(request, query, limit=20)
+            except SpotifyAuthError:
+                return JsonResponse({
+                    'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per buscar cançons.',
+                    'reconnect_url': _spotify_reconnect_url(request),
+                }, status=401)
+            return JsonResponse({'tracks': tracks})
+        return JsonResponse({'tracks': []})
+
+    # Enviar petició
+    if request.method == 'POST':
+        spotify_id = request.POST.get('spotify_id')
+        title = request.POST.get('title')
+        artist = request.POST.get('artist')
+        album_image_url = request.POST.get('album_image_url', '')
+
+        if not spotify_id or not title or not artist:
+            return JsonResponse({'success': False, 'error': 'Dades incompletes'}, status=400)
+
+        # Comprovar si la cançó ja està a la llista
+        if party.songs.filter(spotify_id=spotify_id).exists():
+            return JsonResponse({'success': False, 'error': 'Aquesta cançó ja està a la llista!'}, status=400)
+
+        # Comprovar si ja s'ha demanat
+        if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status='pending').exists():
+            return JsonResponse({'success': False, 'error': 'Aquesta cançó ja ha estat demanada i està pendent'}, status=400)
+
+        # Crear petició
+        SongRequest.objects.create(
+            user=user,
+            party=party,
+            title=title,
+            artist=artist,
+            spotify_id=spotify_id,
+            album_image_url=album_image_url,
+            coins_cost=party.song_request_cost,
+            status='pending'
+        )
+
+        return JsonResponse({'success': True, 'message': f'Petició enviada! Cost: {party.song_request_cost} Coins (només si s\'accepta)'})
+
+    # Llistar peticions de l'usuari per aquesta festa
+    user_requests = SongRequest.objects.filter(user=user, party=party).order_by('-created_at')
+
+    return render(request, 'jukebox/request_song.html', {
+        'party': party,
+        'user_requests': user_requests,
+        'request_cost': party.song_request_cost,
+        'user_credits': user.credits,
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def manage_song_requests(request):
+    """Vista per DJs per gestionar peticions de cançons"""
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return redirect('select_party')
+
+    party = get_object_or_404(Party, pk=party_id)
+
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        action = request.POST.get('action')  # 'accept' o 'reject'
+
+        song_request = get_object_or_404(SongRequest, pk=request_id, party=party)
+
+        if action == 'accept':
+            # Cobrar els Coins a l'usuari
+            if song_request.user.credits >= song_request.coins_cost:
+                song_request.user.credits -= song_request.coins_cost
+                song_request.user.save()
+
+                # Afegir la cançó a la festa
+                Song.objects.create(
+                    party=party,
+                    title=song_request.title,
+                    artist=song_request.artist,
+                    spotify_id=song_request.spotify_id,
+                    album_image_url=song_request.album_image_url,
+                )
+
+                song_request.status = 'accepted'
+                song_request.processed_at = timezone.now()
+                song_request.processed_by = request.user
+                song_request.save()
+
+                # Crear notificació per l'usuari
+                create_song_accepted_notification(song_request)
+
+                return JsonResponse({'success': True, 'message': f'Cançó acceptada i afegida! S\'han cobrat {song_request.coins_cost} Coins'})
+            else:
+                return JsonResponse({'success': False, 'error': f'L\'usuari no té prou Coins ({song_request.user.credits}/{song_request.coins_cost})'}, status=400)
+
+        elif action == 'reject':
+            song_request.status = 'rejected'
+            song_request.processed_at = timezone.now()
+            song_request.processed_by = request.user
+            song_request.save()
+
+            return JsonResponse({'success': True, 'message': 'Cançó rebutjada (sense càrrec)'})
+
+    # Llistar totes les peticions pendents
+    pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')
+    processed_requests = SongRequest.objects.filter(party=party).exclude(status='pending').order_by('-processed_at')[:20]
+
+    return render(request, 'jukebox/manage_song_requests.html', {
+        'party': party,
+        'pending_requests': pending_requests,
+        'processed_requests': processed_requests,
+    })

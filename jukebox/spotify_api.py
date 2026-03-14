@@ -1,26 +1,112 @@
 import os
 import logging
+from datetime import timedelta
+
 from allauth.socialaccount.models import SocialToken
+from django.utils import timezone
 from spotipy import Spotify
+from spotipy.exceptions import SpotifyException
 import requests
+import musicbrainzngs
 
 logger = logging.getLogger(__name__)
+
+# Configurar MusicBrainz
+musicbrainzngs.set_useragent("DJJukebox", "1.0", "https://github.com/yourusername/dj_jukebox")
 
 GETSONGBPM_BASE_URL = "https://api.getsong.co"
 GETSONGBPM_TIMEOUT = 5
 
 
-def _get_user_token(request_or_user):
+class SpotifyAuthError(Exception):
+    """No hi ha un token usable de Spotify i no s'ha pogut refrescar."""
+
+
+def _get_social_token_obj(request_or_user):
     user = getattr(request_or_user, 'user', request_or_user)
     tok = SocialToken.objects.filter(
         account__user=user,
         account__provider='spotify'
-    ).first()
+    ).select_related("app").first()
     if tok:
         logger.debug(f"[SPOTIFY] Token trobat per l'usuari {user}")
     else:
         logger.warning(f"[SPOTIFY] No s'ha trobat cap token per l'usuari {user}")
+    return tok
+
+
+def _get_user_token(request_or_user):
+    tok = _get_social_token_obj(request_or_user)
     return tok.token if tok else None
+
+
+def _refresh_social_token(tok):
+    refresh_token = tok.token_secret
+    if not refresh_token:
+        raise SpotifyAuthError("No refresh token available for Spotify")
+
+    if not tok.app or not tok.app.client_id or not tok.app.secret:
+        raise SpotifyAuthError("Spotify app credentials are missing")
+
+    logger.info("[SPOTIFY] Refrescant access token caducat")
+    response = requests.post(
+        "https://accounts.spotify.com/api/token",
+        data={
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": tok.app.client_id,
+            "client_secret": tok.app.secret,
+        },
+        timeout=10,
+    )
+    response.raise_for_status()
+    payload = response.json()
+
+    new_access_token = payload.get("access_token")
+    if not new_access_token:
+        raise SpotifyAuthError("Spotify token refresh did not return an access token")
+
+    tok.token = new_access_token
+    if payload.get("refresh_token"):
+        tok.token_secret = payload["refresh_token"]
+    expires_in = payload.get("expires_in")
+    if expires_in:
+        tok.expires_at = timezone.now() + timedelta(seconds=int(expires_in))
+    tok.save(update_fields=["token", "token_secret", "expires_at"])
+    logger.info("[SPOTIFY] Access token refrescat correctament")
+    return tok.token
+
+
+def _ensure_valid_user_token(request_or_user, force_refresh=False):
+    tok = _get_social_token_obj(request_or_user)
+    if not tok:
+        raise SpotifyAuthError("Spotify account not connected")
+
+    now = timezone.now()
+    expires_soon = bool(tok.expires_at and tok.expires_at <= now + timedelta(seconds=60))
+
+    if force_refresh or expires_soon:
+        try:
+            return _refresh_social_token(tok)
+        except requests.RequestException as exc:
+            logger.error(f"[SPOTIFY] Error refrescant token: {exc}")
+            raise SpotifyAuthError("Unable to refresh Spotify token") from exc
+
+    return tok.token
+
+
+def _run_spotify_call(request_or_user, operation_name, callback):
+    token = _ensure_valid_user_token(request_or_user)
+    sp = Spotify(auth=token)
+    try:
+        return callback(sp)
+    except SpotifyException as exc:
+        if exc.http_status == 401:
+            logger.warning(f"[SPOTIFY] {operation_name}: token invàlid o caducat, reintentant amb refresh")
+            token = _ensure_valid_user_token(request_or_user, force_refresh=True)
+            sp = Spotify(auth=token)
+            return callback(sp)
+        raise
 
 
 def _camelot_from_key_mode(key, mode):
@@ -332,19 +418,165 @@ def _get_getsongbpm_features(title, artist):
     }
 
 
-def get_user_playlists(request_or_user):
-    token = _get_user_token(request_or_user)
-    if not token:
-        return []
+def _get_musicbrainz_features(title, artist):
+    """
+    Busca BPM i key a MusicBrainz com a últim recurs.
+    MusicBrainz no té BPM directament, però podem buscar
+    tags d'usuaris o metadades alternatives.
+    """
+    logger.info(f"[MUSICBRAINZ] Buscant: '{title}' - '{artist}'")
 
     try:
-        sp = Spotify(auth=token)
-        resp = sp.current_user_playlists(limit=50)
-        logger.info(f"[SPOTIFY] Llistes de reproducció carregades: {len(resp['items'])}")
-        return [
-            {"id": p["id"], "name": p["name"], "owner": p["owner"]["display_name"]}
-            for p in resp["items"]
-        ]
+        # Buscar recordings que coincideixin
+        result = musicbrainzngs.search_recordings(
+            artist=artist,
+            recording=title,
+            limit=5,
+            strict=False
+        )
+
+        if not result or 'recording-list' not in result:
+            logger.warning(f"[MUSICBRAINZ] No s'han trobat resultats per '{title}' - '{artist}'")
+            return {"bpm": None, "key": None}
+
+        recordings = result['recording-list']
+        if not recordings:
+            logger.warning(f"[MUSICBRAINZ] Llista de recordings buida")
+            return {"bpm": None, "key": None}
+
+        # Agafar el primer resultat (més rellevant)
+        recording = recordings[0]
+        recording_id = recording['id']
+        recording_title = recording.get('title', 'Unknown')
+
+        logger.debug(f"[MUSICBRAINZ] Recording trobat: '{recording_title}' (ID: {recording_id})")
+
+        # Intentar obtenir detalls del recording incloent tags
+        try:
+            detailed = musicbrainzngs.get_recording_by_id(
+                recording_id,
+                includes=['tags', 'artist-credits']
+            )
+
+            recording_data = detailed.get('recording', {})
+            tags = recording_data.get('tag-list', [])
+
+            # Buscar BPM als tags
+            bpm = None
+            for tag in tags:
+                tag_name = tag.get('name', '').lower()
+                # Alguns usuaris etiqueten amb "bpm: 120" o "120 bpm"
+                if 'bpm' in tag_name:
+                    import re
+                    # Extreure número del tag
+                    match = re.search(r'(\d+)', tag_name)
+                    if match:
+                        try:
+                            bpm = float(match.group(1))
+                            logger.info(f"[MUSICBRAINZ] BPM trobat als tags: {bpm}")
+                            break
+                        except ValueError:
+                            pass
+
+            # Buscar key als tags (alguns usuaris ho etiqueten)
+            key = None
+            for tag in tags:
+                tag_name = tag.get('name', '').strip()
+                # Buscar tags que semblin claus musicals (C, D#, Em, etc.)
+                if len(tag_name) <= 3 and tag_name[0].isupper():
+                    # Podria ser una clau musical
+                    camelot = _camelot_from_key_string(tag_name)
+                    if camelot:
+                        key = camelot
+                        logger.info(f"[MUSICBRAINZ] Key trobada als tags: {tag_name} ({camelot})")
+                        break
+
+            if bpm or key:
+                logger.info(f"[MUSICBRAINZ] Resultat: BPM={bpm}, Key={key}")
+                return {"bpm": bpm, "key": key}
+            else:
+                logger.warning(f"[MUSICBRAINZ] Recording trobat però sense BPM/key als tags")
+                return {"bpm": None, "key": None}
+
+        except Exception as e:
+            logger.warning(f"[MUSICBRAINZ] Error obtenint detalls del recording: {e}")
+            return {"bpm": None, "key": None}
+
+    except musicbrainzngs.WebServiceError as e:
+        logger.warning(f"[MUSICBRAINZ] Error de servei web: {e}")
+        return {"bpm": None, "key": None}
+    except Exception as e:
+        logger.error(f"[MUSICBRAINZ] Error inesperat: {e}")
+        return {"bpm": None, "key": None}
+
+
+def get_user_playlists(request_or_user, only_owned=False):
+    """
+    Obté les playlists de Spotify de l'usuari.
+
+    Args:
+        request_or_user: Request object o User
+        only_owned: Si True, només retorna playlists propietat de l'usuari.
+                   Si False, retorna totes les playlists (incloses les que segueix).
+
+    Returns:
+        List[dict]: Llista de playlists amb id, name i owner
+    """
+    try:
+        # Obtenir TOTES les playlists amb paginació
+        def fetch_all_playlists(sp):
+            all_items = []
+            results = sp.current_user_playlists(limit=50)
+            all_items.extend(results["items"])
+
+            # Paginar fins a obtenir-les totes
+            while results.get("next"):
+                results = sp.next(results)
+                all_items.extend(results["items"])
+
+            logger.info(f"[SPOTIFY] Total playlists obtingudes: {len(all_items)}")
+            return all_items
+
+        all_items = _run_spotify_call(
+            request_or_user,
+            "current_user_playlists",
+            fetch_all_playlists,
+        )
+
+        # Log de debug per veure totes les playlists
+        for p in all_items:
+            logger.debug(f"[SPOTIFY] Playlist: '{p['name']}' (Owner: {p['owner']['id']}, Type: {p.get('type', 'N/A')}, Collaborative: {p.get('collaborative', False)})")
+
+        if only_owned:
+            # Obtenir informació de l'usuari actual per filtrar
+            current_user = _run_spotify_call(
+                request_or_user,
+                "current_user",
+                lambda sp: sp.current_user(),
+            )
+            current_user_id = current_user.get('id')
+            logger.info(f"[SPOTIFY] Usuari actual: {current_user_id}")
+
+            # Filtrar només les playlists que són propietat de l'usuari actual
+            filtered_playlists = [
+                {"id": p["id"], "name": p["name"], "owner": p["owner"]["display_name"]}
+                for p in all_items
+                if p["owner"]["id"] == current_user_id
+            ]
+
+            logger.info(f"[SPOTIFY] Playlists totals: {len(all_items)}, propietat de l'usuari: {len(filtered_playlists)}")
+            return filtered_playlists
+        else:
+            # Retornar totes les playlists
+            all_playlists = [
+                {"id": p["id"], "name": p["name"], "owner": p["owner"]["display_name"]}
+                for p in all_items
+            ]
+            logger.info(f"[SPOTIFY] Playlists totals: {len(all_playlists)}")
+            return all_playlists
+
+    except SpotifyAuthError:
+        raise
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al carregar playlists: {e}")
         return []
@@ -362,27 +594,26 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
     """
     logger.info(f"[SPOTIFY] Carregant tracks bàsics de la playlist {playlist_id}")
 
-    user_token = _get_user_token(request_or_user)
-    if not user_token:
-        logger.warning("[SPOTIFY] No s'ha trobat token d'usuari per accedir a la playlist.")
-        return []
-
     try:
-        sp_user = Spotify(auth=user_token)
-    except Exception as e:
-        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
-        return []
+        def fetch_tracks(sp_user):
+            all_items = []
+            results = sp_user.playlist_items(
+                playlist_id,
+                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
+                additional_types=["track"]
+            )
+            all_items.extend(results["items"])
+            while results.get("next"):
+                results = sp_user.next(results)
+                all_items.extend(results["items"])
+            return all_items
 
-    all_items = []
-    results = sp_user.playlist_items(
-        playlist_id,
-        fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
-        additional_types=["track"]
-    )
-    all_items.extend(results["items"])
-    while results.get("next"):
-        results = sp_user.next(results)
-        all_items.extend(results["items"])
+        all_items = _run_spotify_call(request_or_user, "playlist_items_basic", fetch_tracks)
+    except SpotifyAuthError:
+        raise
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al carregar tracks bàsics: {e}")
+        return []
 
     logger.info(f"[SPOTIFY] {len(all_items)} tracks trobats a la playlist")
 
@@ -416,26 +647,26 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
 def get_playlist_tracks(request_or_user, playlist_id):
     logger.info(f"[SPOTIFY] Carregant tracks de la playlist {playlist_id}")
 
-    user_token = _get_user_token(request_or_user)
-    if not user_token:
-        logger.warning("[SPOTIFY] No s'ha trobat token d'usuari per accedir a la playlist.")
-        return []
-
     try:
-        sp_user = Spotify(auth=user_token)
+        def fetch_tracks(sp_user):
+            all_items = []
+            results = sp_user.playlist_items(
+                playlist_id,
+                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
+                additional_types=["track"]
+            )
+            all_items.extend(results["items"])
+            while results.get("next"):
+                results = sp_user.next(results)
+                all_items.extend(results["items"])
+            return all_items
+
+        all_items = _run_spotify_call(request_or_user, "playlist_items", fetch_tracks)
+    except SpotifyAuthError:
+        raise
     except Exception as e:
-        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
+        logger.error(f"[SPOTIFY] Error al carregar tracks de playlist: {e}")
         return []
-    all_items = []
-    results = sp_user.playlist_items(
-        playlist_id,
-        fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
-        additional_types=["track"]
-    )
-    all_items.extend(results["items"])
-    while results.get("next"):
-        results = sp_user.next(results)
-        all_items.extend(results["items"])
     logger.info(f"[SPOTIFY] Tracks trobats a la playlist: {len(all_items)}")
 
     ids, meta = [], {}
@@ -480,8 +711,16 @@ def get_playlist_tracks(request_or_user, playlist_id):
     out = []
     for sid in ids:
         feature_data = features_map.get(sid, {})
+
+        # Fallback 1: GetSongBPM
         if not feature_data.get("bpm") and not feature_data.get("key"):
+            logger.debug(f"[FALLBACK] Spotify no té features per '{meta[sid]['title']}', provant GetSongBPM")
             feature_data = _get_getsongbpm_features(meta[sid]["title"], meta[sid]["artist"])
+
+        # Fallback 2: MusicBrainz
+        if not feature_data.get("bpm") and not feature_data.get("key"):
+            logger.debug(f"[FALLBACK] GetSongBPM no té features per '{meta[sid]['title']}', provant MusicBrainz")
+            feature_data = _get_musicbrainz_features(meta[sid]["title"], meta[sid]["artist"])
 
         out.append({
             "id": sid,
@@ -509,52 +748,111 @@ def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
     if not song_ids_with_metadata:
         return {}
 
-    user_token = _get_user_token(request_or_user)
-    if not user_token:
-        return {}
-
     try:
-        sp_user = Spotify(auth=user_token)
-    except Exception as e:
-        logger.error(f"[SPOTIFY] Error al inicialitzar client: {e}")
-        return {}
+        def fetch_audio_features(sp_user, chunk):
+            return sp_user.audio_features(tracks=chunk)
 
-    ids = [s['id'] for s in song_ids_with_metadata]
-    meta = {s['id']: {'title': s['title'], 'artist': s['artist']}
-            for s in song_ids_with_metadata}
+        ids = [s['id'] for s in song_ids_with_metadata]
+        meta = {s['id']: {'title': s['title'], 'artist': s['artist']}
+                for s in song_ids_with_metadata}
 
-    features_map = {}
+        features_map = {}
 
-    # Intentar obtenir features de Spotify en chunks de 50
-    for idx, chunk in enumerate(_chunked(ids, 50)):
-        try:
-            logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks)")
-            feats = sp_user.audio_features(tracks=chunk)
-            for f in feats:
-                if not f:
-                    continue
-                features_map[f["id"]] = {
-                    "bpm": f.get("tempo"),
-                    "key": _camelot_from_key_mode(f.get("key"), f.get("mode"))
-                }
-        except Exception as e:
-            logger.error(f"[SPOTIFY] ERROR al carregar audio features per chunk {idx+1}: {e}")
-            # Si falla Spotify, utilitzar GetSongBPM per aquest chunk
-            for sid in chunk:
-                if sid not in features_map:
-                    features_map[sid] = _get_getsongbpm_features(
+        # Intentar obtenir features de Spotify en chunks de 50
+        for idx, chunk in enumerate(_chunked(ids, 50)):
+            try:
+                logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks)")
+                feats = _run_spotify_call(
+                    request_or_user,
+                    f"audio_features chunk {idx+1}",
+                    lambda sp_user, c=chunk: fetch_audio_features(sp_user, c),
+                )
+                for f in feats:
+                    if not f:
+                        continue
+                    features_map[f["id"]] = {
+                        "bpm": f.get("tempo"),
+                        "key": _camelot_from_key_mode(f.get("key"), f.get("mode"))
+                    }
+            except SpotifyAuthError:
+                raise
+            except Exception as e:
+                logger.error(f"[SPOTIFY] ERROR al carregar audio features per chunk {idx+1}: {e}")
+                # Si falla Spotify, utilitzar GetSongBPM per aquest chunk
+                for sid in chunk:
+                    if sid not in features_map:
+                        features_map[sid] = _get_getsongbpm_features(
+                            meta[sid]["title"],
+                            meta[sid]["artist"]
+                        )
+
+        # Per les cançons sense features, intentar GetSongBPM i després MusicBrainz
+        for sid in ids:
+            if sid not in features_map or (
+                not features_map[sid].get("bpm") and not features_map[sid].get("key")
+            ):
+                # Fallback 1: GetSongBPM
+                logger.debug(f"[FALLBACK] Spotify no té features, provant GetSongBPM")
+                features_map[sid] = _get_getsongbpm_features(
+                    meta[sid]["title"],
+                    meta[sid]["artist"]
+                )
+
+                # Fallback 2: MusicBrainz si GetSongBPM tampoc ho té
+                if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
+                    logger.debug(f"[FALLBACK] GetSongBPM no té features, provant MusicBrainz")
+                    features_map[sid] = _get_musicbrainz_features(
                         meta[sid]["title"],
                         meta[sid]["artist"]
                     )
 
-    # Per les cançons sense features, intentar GetSongBPM
-    for sid in ids:
-        if sid not in features_map or (
-            not features_map[sid].get("bpm") and not features_map[sid].get("key")
-        ):
-            features_map[sid] = _get_getsongbpm_features(
-                meta[sid]["title"],
-                meta[sid]["artist"]
-            )
+        return features_map
+    except SpotifyAuthError:
+        raise
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al inicialitzar client d'audio features: {e}")
+        return {}
 
-    return features_map
+
+def search_spotify_tracks(request_or_user, query, limit=10):
+    """
+    Cerca cançons a Spotify.
+
+    Args:
+        request_or_user: Request object o User
+        query: Text de cerca
+        limit: Màxim de resultats
+
+    Returns:
+        List[dict]: Llista de cançons amb id, title, artist, album_image_url
+    """
+    try:
+        results = _run_spotify_call(
+            request_or_user,
+            "track_search",
+            lambda sp: sp.search(q=query, type='track', limit=limit),
+        )
+
+        tracks = []
+        for item in results['tracks']['items']:
+            album_image_url = None
+            if item.get('album') and item['album'].get('images'):
+                images = item['album']['images']
+                if images:
+                    album_image_url = images[1]['url'] if len(images) > 1 else images[0]['url']
+
+            tracks.append({
+                'id': item['id'],
+                'title': item['name'],
+                'artist': ', '.join(a['name'] for a in item['artists']),
+                'album_image_url': album_image_url,
+            })
+
+        logger.info(f"[SPOTIFY] Cerca '{query}': {len(tracks)} resultats")
+        return tracks
+
+    except SpotifyAuthError:
+        raise
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error al cercar '{query}': {e}")
+        return []

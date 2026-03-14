@@ -1,0 +1,302 @@
+{% extends "jukebox/admin_base.html" %}
+{% block page_title %}Busca Match{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <!-- Indicadors de Coins i Vots -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card border-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-coins fa-2x text-warning me-3"></i>
+            <div>
+              <h6 class="mb-0 text-muted">Coins</h6>
+              <h3 class="mb-0 text-warning" id="credits-count">{{ credits }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-vote-yea fa-2x text-primary me-3"></i>
+            <div>
+              <h6 class="mb-0 text-muted">Vots disponibles</h6>
+              <h3 class="mb-0" id="votes-count">{{ votes_left }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'song_list' %}" class="btn btn-outline-secondary w-100 h-100 d-flex align-items-center justify-content-center">
+        <i class="fas fa-list me-2"></i>Torna a la llista
+      </a>
+    </div>
+  </div>
+
+  <!-- Carta de cançó Busca Match -->
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      {% if songs %}
+        <!-- Contenidor de cartes -->
+        <div id="card-stack" class="position-relative mb-4" style="height: 550px;">
+          {% for song in songs %}
+            <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
+                 data-song-id="{{ song.id }}"
+                 style="position: absolute; width: 100%; transition: all 0.3s; top: 0;">
+              <div class="card shadow-lg">
+                <div class="card-body text-center p-4">
+                  {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                         class="rounded mb-3" style="width: 100%; max-width: 280px; height: 280px; object-fit: cover;">
+                  {% else %}
+                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-3 mx-auto"
+                         style="width: 280px; height: 280px;">
+                      <i class="fas fa-music fa-5x text-white"></i>
+                    </div>
+                  {% endif %}
+                  <h4 class="mb-2">{{ song.title }}</h4>
+                  <h6 class="text-muted mb-3">{{ song.artist }}</h6>
+                  <div class="d-flex justify-content-center gap-3 text-muted">
+                    {% if song.bpm %}
+                      <small><i class="fas fa-drum me-1"></i>{{ song.bpm|floatformat:0 }} BPM</small>
+                    {% endif %}
+                    {% if song.key %}
+                      <small><i class="fas fa-music me-1"></i>{{ song.key }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Botons d'acció (completament separats de les cartes) -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+          <button id="btn-skip" class="btn btn-outline-secondary btn-lg" style="width: 160px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <i class="fas fa-times fa-3x mb-2"></i>
+            <span>Next</span>
+          </button>
+          <button id="btn-like" class="btn btn-success btn-lg" style="width: 160px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <i class="fas fa-heart fa-3x mb-2"></i>
+            <span>Like (1 Vot)</span>
+          </button>
+        </div>
+
+        <div id="message-area" class="text-center mt-3"></div>
+
+        {% if votes_left == 0 %}
+        <div class="alert alert-warning mt-3 text-center">
+          {% if credits == 0 %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sense Coins!</strong> Compra Coins i converteix-los a Vots per fer like.
+            <a href="{% url 'buy_votes' %}" class="alert-link">Compra Coins</a>
+          {% else %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sense vots!</strong> Converteix els teus {{ credits }} Coins a Vots per continuar.
+            <a href="{% url 'song_list' %}" class="alert-link">Convertir Coins</a>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="alert alert-info text-center">
+          <i class="fas fa-check-circle fa-3x mb-3"></i>
+          <h4>Has fet match amb totes les cançons disponibles!</h4>
+          <p>Torna a la llista per veure els resultats</p>
+          <a href="{% url 'song_list' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-list me-2"></i>Veure llista
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('.swipe-card');
+  const btnSkip = document.getElementById('btn-skip');
+  const btnLike = document.getElementById('btn-like');
+  const messageArea = document.getElementById('message-area');
+  const votesCount = document.getElementById('votes-count');
+  const creditsCount = document.getElementById('credits-count');
+
+  let currentIndex = 0;
+
+  if (cards.length === 0) return;
+
+  // Inicialitzar cartes: primera visible, resta ocultes
+  cards.forEach((card, index) => {
+    if (index === 0) {
+      card.classList.remove('d-none');
+      card.style.zIndex = '10';
+    } else {
+      card.classList.add('d-none');
+    }
+  });
+
+  function showMessage(text, isSuccess = true) {
+    messageArea.innerHTML = `<div class="alert ${isSuccess ? 'alert-success' : 'alert-danger'}">${text}</div>`;
+    setTimeout(() => {
+      messageArea.innerHTML = '';
+    }, 2000);
+  }
+
+  function nextCard() {
+    if (currentIndex >= cards.length) {
+      // No més cançons
+      document.getElementById('card-stack').innerHTML = `
+        <div class="alert alert-info text-center">
+          <i class="fas fa-check-circle fa-3x mb-3"></i>
+          <h4>Has fet match amb totes les cançons disponibles!</h4>
+          <a href="{% url 'song_list' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-list me-2"></i>Veure llista
+          </a>
+        </div>
+      `;
+      btnSkip.disabled = true;
+      btnLike.disabled = true;
+      return;
+    }
+
+    // Mostrar la següent carta
+    const nextCardElement = cards[currentIndex];
+    nextCardElement.classList.remove('d-none');
+    nextCardElement.style.zIndex = currentIndex + 10;
+    nextCardElement.style.transform = '';
+    nextCardElement.style.opacity = '1';
+  }
+
+  function animateCardOut(direction) {
+    const card = cards[currentIndex];
+    const transform = direction === 'left' ? 'translateX(-150%) rotate(-30deg)' : 'translateX(150%) rotate(30deg)';
+
+    // Animar la carta cap a fora
+    card.style.transform = transform;
+    card.style.opacity = '0';
+    card.style.zIndex = '1'; // Enviar al fons
+
+    setTimeout(() => {
+      // Ocultar completament i resetar
+      card.classList.add('d-none');
+      card.style.transform = '';
+      card.style.opacity = '1';
+
+      // Avançar a la següent
+      currentIndex++;
+      nextCard();
+    }, 300);
+  }
+
+  btnSkip.addEventListener('click', function() {
+    if (currentIndex >= cards.length) return;
+
+    const songId = cards[currentIndex].dataset.songId;
+
+    // Deshabilitar botons mentre processa
+    btnSkip.disabled = true;
+    btnLike.disabled = true;
+
+    fetch('{% url "song_swipe" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: new URLSearchParams({
+        action: 'skip',
+        song_id: songId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      animateCardOut('left');
+      // Reactivar botons després de l'animació
+      setTimeout(() => {
+        btnSkip.disabled = false;
+        btnLike.disabled = false;
+      }, 350);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('Error al saltar la cançó', false);
+      btnSkip.disabled = false;
+      btnLike.disabled = false;
+    });
+  });
+
+  btnLike.addEventListener('click', function() {
+    if (currentIndex >= cards.length) return;
+
+    const songId = cards[currentIndex].dataset.songId;
+
+    // Deshabilitar botons mentre processa
+    btnSkip.disabled = true;
+    btnLike.disabled = true;
+
+    fetch('{% url "song_swipe" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: new URLSearchParams({
+        action: 'like',
+        song_id: songId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        votesCount.textContent = data.votes_left;
+        creditsCount.textContent = data.credits;
+        showMessage('Match! ❤️ (-1 Vot)', true);
+        animateCardOut('right');
+        // Reactivar botons després de l'animació
+        setTimeout(() => {
+          btnSkip.disabled = false;
+          btnLike.disabled = false;
+        }, 350);
+      } else {
+        showMessage(data.error || 'Error al fer match', false);
+        btnSkip.disabled = false;
+        btnLike.disabled = false;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showMessage('Error al votar', false);
+      btnSkip.disabled = false;
+      btnLike.disabled = false;
+    });
+  });
+
+  // Suport per gestos de lliscament en mòbil
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.getElementById('card-stack').addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  document.getElementById('card-stack').addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  });
+
+  function handleSwipe() {
+    const diff = touchEndX - touchStartX;
+    if (Math.abs(diff) > 100) { // Mínim 100px de desplaçament
+      if (diff > 0) {
+        btnLike.click();
+      } else {
+        btnSkip.click();
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

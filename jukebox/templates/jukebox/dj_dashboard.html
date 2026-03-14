@@ -1,7 +1,51 @@
 {% extends "jukebox/admin_base.html" %}
 
+{% block page_title %}DJ Dashboard{% endblock %}
+
 {% block content %}
-<h1 class="mb-4">DJ Dashboard</h1>
+<style>
+  .dj-song-cell {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    min-width: 0;
+  }
+  .dj-song-cover {
+    width: 54px;
+    height: 54px;
+    border-radius: .85rem;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .14);
+  }
+  .dj-song-cover-fallback {
+    width: 54px;
+    height: 54px;
+    border-radius: .85rem;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #edf2ff, #dbe7ff);
+    color: #4e73df;
+    font-size: 1.2rem;
+    box-shadow: inset 0 0 0 1px rgba(78, 115, 223, .12);
+  }
+  .dj-song-meta {
+    min-width: 0;
+  }
+  .dj-song-title {
+    font-weight: 700;
+    color: #4b5563;
+    line-height: 1.2;
+    margin-bottom: .2rem;
+  }
+  .dj-song-artist {
+    color: #8a93a6;
+    font-size: .92rem;
+    line-height: 1.2;
+  }
+</style>
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card border-left-primary shadow h-100 py-2">
@@ -41,60 +85,191 @@
     </div>
 </div>
 
-<h2 class="mb-3">Llista de temes</h2>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Títol</th>
-            <th>BPM</th>
-            <th>Key</th>
-            <th>Vots</th>
-            <th>Ja ha sonat</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for song in songs %}
-        <tr {% if song.has_played %}class="table-success"{% endif %}>
-            <td>{{ song.title }}</td>
-            <td>
-              {% if song.bpm %}
-                {{ song.bpm|floatformat:1 }}
-              {% else %}
-                &mdash;
-              {% endif %}
-            </td>
-            <td>{{ song.key|default:"—" }}</td>
-            <td>{{ song.votes }}</td>
-            <td>
-                {% if song.has_played %}
-                    <span class="badge badge-success">Sí</span>
-                {% else %}
-                    <span class="badge badge-secondary">No</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if not song.has_played %}
-                <form method="post" action="{% url 'mark_song_played' song.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-success">
-                      Ja l'he posat
-                    </button>
-                </form>
-                {% else %}
-                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                      Ja sonada
-                    </button>
-                {% endif %}
-            </td>
-        </tr>
-    {% empty %}
-        <tr>
-          <td colspan="6">Encara no hi ha temes!</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<!-- Recomanacions intel·ligents -->
+{% if recommended_songs %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-gradient-primary">
+        <h6 class="m-0 font-weight-bold text-white">
+            <i class="fas fa-lightbulb me-2"></i>Recomanacions intel·ligents per a la propera cançó
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for song in recommended_songs %}
+            <div class="col-md-2 col-sm-4 col-6">
+                <div class="text-center">
+                    {% if song.album_image_url %}
+                        <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="img-fluid rounded shadow-sm mb-2" style="width: 100%; aspect-ratio: 1; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded shadow-sm mb-2 d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 1;">
+                            <i class="fas fa-music text-white fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <div class="fw-bold small text-truncate" title="{{ song.title }}">{{ song.title }}</div>
+                    <div class="text-muted small text-truncate" title="{{ song.artist }}">{{ song.artist }}</div>
+                    <div class="mt-1">
+                        {% if song.bpm %}
+                            <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
+                        {% endif %}
+                        {% if song.key %}
+                            <span class="badge bg-success text-white small">{{ song.key }}</span>
+                        {% endif %}
+                    </div>
+                    {% if song.recommendation_reasons %}
+                    <div class="mt-2">
+                        {% for reason in song.recommendation_reasons %}
+                            <div class="badge bg-light text-dark border small d-block mb-1">
+                                <i class="fas fa-check-circle text-success me-1"></i>{{ reason }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post" action="{% url 'mark_song_played' song.id %}" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success w-100">
+                            <i class="fas fa-play me-1"></i>Ja l'he posat
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Temes pendents de posar -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-warning text-dark">
+        <h6 class="m-0 font-weight-bold">
+            <i class="fas fa-list me-2"></i>Temes a la maleta (pendents de posar)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Cançó</th>
+                        <th>BPM</th>
+                        <th>Key</th>
+                        <th>Vots</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for song in pending_songs %}
+                    <tr>
+                        <td>
+                            <div class="dj-song-cell">
+                                {% if song.album_image_url %}
+                                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="dj-song-cover">
+                                {% else %}
+                                    <div class="dj-song-cover-fallback" aria-hidden="true">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="dj-song-meta">
+                                    <div class="dj-song-title">{{ song.title }}</div>
+                                    <div class="dj-song-artist">{{ song.artist }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                          {% if song.bpm %}
+                            {{ song.bpm|floatformat:1 }}
+                          {% else %}
+                            &mdash;
+                          {% endif %}
+                        </td>
+                        <td>{{ song.key|default:"—" }}</td>
+                        <td>
+                            <span class="badge badge-primary">{{ song.num_votes }}</span>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'mark_song_played' song.id %}">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-success">
+                                  <i class="fas fa-play me-1"></i>Ja l'he posat
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center py-4 text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <div>Tots els temes ja s'han posat!</div>
+                      </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Temes ja posats -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-success text-white">
+        <h6 class="m-0 font-weight-bold">
+            <i class="fas fa-check-circle me-2"></i>Temes ja posats
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Cançó</th>
+                        <th>BPM</th>
+                        <th>Key</th>
+                        <th>Vots</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for song in played_songs_list %}
+                    <tr class="table-success">
+                        <td>
+                            <div class="dj-song-cell">
+                                {% if song.album_image_url %}
+                                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="dj-song-cover">
+                                {% else %}
+                                    <div class="dj-song-cover-fallback" aria-hidden="true">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="dj-song-meta">
+                                    <div class="dj-song-title">{{ song.title }}</div>
+                                    <div class="dj-song-artist">{{ song.artist }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                          {% if song.bpm %}
+                            {{ song.bpm|floatformat:1 }}
+                          {% else %}
+                            &mdash;
+                          {% endif %}
+                        </td>
+                        <td>{{ song.key|default:"—" }}</td>
+                        <td>
+                            <span class="badge badge-success">{{ song.num_votes }}</span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">
+                        <i class="fas fa-hourglass-start fa-2x mb-2"></i>
+                        <div>Encara no s'ha posat cap tema</div>
+                      </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

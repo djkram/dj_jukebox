@@ -133,6 +133,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'jukebox.context_processors.selected_party',
                 'jukebox.context_processors.user_avatar',
+                'jukebox.context_processors.unread_notifications_count',
             ],
         },
     },

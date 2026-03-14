@@ -30,6 +30,196 @@
             font-size: 0.875rem;
             text-transform: uppercase;
         }
+        #accordionSidebar {
+            background: linear-gradient(180deg, #4d74e6 0%, #355fd6 100%);
+            box-shadow: inset -1px 0 0 rgba(255,255,255,.08);
+        }
+        #accordionSidebar .sidebar-brand {
+            height: auto;
+            padding: 1.5rem 1.25rem 1rem;
+            justify-content: flex-start !important;
+            gap: .7rem;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .sidebar-brand-logo {
+            display: block;
+            width: 240px;
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 6px 18px rgba(0,0,0,.12));
+        }
+        .sidebar-brand-icon-logo {
+            display: none;
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 18px rgba(0,0,0,.12));
+        }
+        #accordionSidebar.toggled .sidebar-brand {
+            justify-content: center !important;
+            padding-left: .75rem;
+            padding-right: .75rem;
+        }
+        #accordionSidebar.toggled .sidebar-brand-logo {
+            display: none;
+        }
+        #accordionSidebar.toggled .sidebar-brand-icon-logo {
+            display: block;
+        }
+        #accordionSidebar.toggled .sidebar-heading,
+        #accordionSidebar.toggled .sidebar-panel,
+        #accordionSidebar.toggled .sidebar-subtle {
+            display: none;
+        }
+        #accordionSidebar.toggled .nav-item {
+            margin-left: .35rem;
+            margin-right: .35rem;
+        }
+        #accordionSidebar.toggled .nav-item .nav-link,
+        #accordionSidebar.toggled .nav-item .nav-link.btn-link {
+            justify-content: center;
+            padding: .8rem 0;
+            border-radius: .9rem;
+        }
+        #accordionSidebar.toggled .nav-item .nav-link span:not(.sidebar-emoji-icon),
+        #accordionSidebar.toggled .nav-item .nav-link.btn-link span:not(.sidebar-emoji-icon) {
+            display: none;
+        }
+        #accordionSidebar.toggled .nav-item .nav-link i,
+        #accordionSidebar.toggled .nav-item .nav-link.btn-link i {
+            width: auto;
+            font-size: 1.05rem;
+        }
+        .sidebar-panel {
+            margin: 0 .95rem 1rem;
+            padding: .9rem;
+            border-radius: 1.15rem;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.14);
+            backdrop-filter: blur(8px);
+        }
+        .sidebar-party-label {
+            color: rgba(255,255,255,.62);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: .45rem;
+        }
+        .sidebar-party-name {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.25;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            margin-bottom: .75rem;
+        }
+        .sidebar-party-actions {
+            display: flex;
+            gap: .5rem;
+        }
+        .sidebar-party-actions .btn {
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .38rem .7rem;
+        }
+        #accordionSidebar .sidebar-divider {
+            margin: .6rem 1rem .9rem;
+            border-top-color: rgba(255,255,255,.12);
+        }
+        #accordionSidebar .sidebar-heading {
+            color: rgba(255,255,255,.52);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 0 1.45rem;
+            margin: .15rem 0 .45rem;
+        }
+        #accordionSidebar .nav-item {
+            margin: 0 .8rem .2rem;
+        }
+        #accordionSidebar .nav-item .nav-link,
+        #accordionSidebar .nav-item .nav-link.btn-link {
+            width: auto;
+            padding: .72rem .9rem;
+            border-radius: .95rem;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            color: rgba(255,255,255,.86);
+            font-weight: 600;
+            transition: background-color .18s ease, transform .18s ease, color .18s ease;
+        }
+        #accordionSidebar .nav-item .nav-link:hover,
+        #accordionSidebar .nav-item .nav-link.btn-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,.09);
+            transform: translateX(2px);
+            text-decoration: none;
+        }
+        #accordionSidebar .nav-item .nav-link i,
+        #accordionSidebar .nav-item .nav-link.btn-link i {
+            width: 1.1rem;
+            text-align: center;
+            color: rgba(255,255,255,.72);
+            font-size: .98rem;
+            margin-right: 0;
+        }
+        .sidebar-emoji-icon {
+            width: 1.1rem;
+            text-align: center;
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1;
+            display: inline-block;
+            filter: grayscale(1) brightness(2.25);
+        }
+        #accordionSidebar .nav-item .nav-link span,
+        #accordionSidebar .nav-item .nav-link.btn-link span {
+            font-size: 1rem;
+        }
+        #accordionSidebar .nav-item.active .nav-link,
+        #accordionSidebar .nav-item.active .nav-link.btn-link {
+            background: rgba(255,255,255,.16);
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+        }
+        #accordionSidebar .nav-item.active .nav-link i,
+        #accordionSidebar .nav-item.active .nav-link.btn-link i {
+            color: #fff;
+        }
+        #accordionSidebar.toggled .sidebar-emoji-icon {
+            width: auto;
+            font-size: 1.05rem;
+        }
+        .sidebar-subtle {
+            margin: .9rem 1rem 0;
+            padding-top: .9rem;
+            border-top: 1px solid rgba(255,255,255,.1);
+        }
+        .sidebar-subtle .nav-link,
+        .sidebar-subtle .nav-link.btn-link {
+            opacity: .88;
+        }
+        .topbar-page-title {
+            margin: 0 1.25rem 0 0;
+            color: #6f7487;
+            font-size: 2rem;
+            font-weight: 300;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+        @media (max-width: 991.98px) {
+            .topbar-page-title {
+                font-size: 1.55rem;
+                margin-right: .75rem;
+            }
+        }
     </style>
 
 </head>
@@ -44,145 +234,103 @@
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'main' %}">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">DJ<sup>2</sup>ukebox</div>
+                <img
+                    src="{% static 'jukebox/img/DJJukebox_logo.png' %}"
+                    alt="DJJukebox"
+                    class="sidebar-brand-logo"
+                >
+                <img
+                    src="{% static 'jukebox/img/DJJ_icon.png' %}"
+                    alt="DJJ"
+                    class="sidebar-brand-icon-logo"
+                >
             </a>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Festa seleccionada -->
-            <li class="nav-item active">
-                <a class="nav-link" href="/songs/">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>
-                      {% if selected_party %}
-                        {{ selected_party.name }}
-                      {% else %}
-                        Cap festa seleccionada
-                      {% endif %}
-                    </span>
-                </a>
-            </li>
-
-            <hr class="sidebar-divider">
-
-            <!-- Secció USUARI -->
-            <div class="sidebar-heading">Usuari</div>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'buy_votes' %}">
-                    <i class="fas fa-coins"></i>
-                    <span>Compra crèdits</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'select_party' %}">
-                    <i class="fas fa-fw fa-random"></i>
-                    <span>Canvia festa</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'profile' %}">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Perfil</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <form method="post" action="{% url 'account_logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link" style="color:#fff; text-align:left;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </li>
-
-            <hr class="sidebar-divider">
-
-            <!-- Secció ADMIN només per superuser -->
             {% if user.is_superuser %}
-            <div class="sidebar-heading">Admin</div>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'dj_backoffice' %}">
-                    <i class="fas fa-fw fa-user-cog"></i>
-                    <span>DJ Backoffice</span>
+            <div class="sidebar-heading">DJ Tools</div>
+            <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'dj_dashboard' %}">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Dashboard DJ</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'dj_dashboard' %}">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>DJ Dashboard</span>
+            <li class="nav-item {% if request.resolver_match.url_name == 'manage_song_requests' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'manage_song_requests' %}">
+                    <i class="fas fa-inbox"></i>
+                    <span>Gestionar peticions</span>
+                </a>
+            </li>
+            {% if selected_party %}
+            <li class="nav-item {% if request.resolver_match.url_name == 'party_settings' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings festa</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'dj_backoffice' %}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Backoffice</span>
                 </a>
             </li>
             {% endif %}
 
-            <!-- Manté Components, Utilities, Pages, Charts, Tables -->
-            <div class="sidebar-heading">Interface</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Components</span>
+            <div class="sidebar-heading">Festa</div>
+            <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'song_list' %}">
+                    <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
+                    <span>
+                      {% if selected_party %}
+                        {{ selected_party.name }}
+                      {% else %}
+                        Festa activa
+                      {% endif %}
+                    </span>
                 </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Custom Components:</h6>
-                        <a class="collapse-item" href="{% url 'buttons' %}">Buttons</a>
-                        <a class="collapse-item" href="{% url 'cards' %}">Cards</a>
-                    </div>
-                </div>
             </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-                    aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Utilities</span>
+            <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'song_swipe' %}">
+                    <i class="fas fa-heart"></i>
+                    <span>Busca Match</span>
                 </a>
-                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Custom Utilities:</h6>
-                        <a class="collapse-item" href="{% url 'utilities-color' %}">Colors</a>
-                        <a class="collapse-item" href="{% url 'utilities-border' %}">Borders</a>
-                        <a class="collapse-item" href="{% url 'utilities-animation' %}">Animations</a>
-                        <a class="collapse-item" href="{% url 'utilities-other' %}">Other</a>
-                    </div>
-                </div>
             </li>
-
-            <div class="sidebar-heading">Addons</div>
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                    aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-folder"></i>
-                    <span>Pages</span>
+            <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'request_song' %}">
+                    <i class="fas fa-microphone-alt"></i>
+                    <span>Demanar cançó</span>
                 </a>
-                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Login Screens:</h6>
-                        <a class="collapse-item" href="{% url 'account_login' %}">Login</a>
-                        <a class="collapse-item" href="{% url 'account_signup' %}">Register</a>
-                        <a class="collapse-item" href="{% url 'forgot-password' %}">Forgot Password</a>
-                        <div class="collapse-divider"></div>
-                        <h6 class="collapse-header">Other Pages:</h6>
-                        <a class="collapse-item" href="{% url '404' %}">404 Page</a>
-                        <a class="collapse-item" href="{% url 'blank' %}">Blank Page</a>
-                    </div>
-                </div>
+            </li>
+            <div class="sidebar-heading">General</div>
+            <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'buy_votes' %}">
+                    <i class="fas fa-coins"></i>
+                    <span>Compra Coins</span>
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'charts' %}">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Charts</span></a>
+                <a class="nav-link" href="{% url 'select_party' %}">
+                    <i class="fas fa-random"></i>
+                    <span>Tria una altra festa</span>
+                </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'tables' %}">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span></a>
+            <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'profile' %}">
+                    <i class="fas fa-user"></i>
+                    <span>Perfil</span>
+                </a>
             </li>
+            <div class="sidebar-subtle">
+                <li class="nav-item">
+                    <form method="post" action="{% url 'account_logout' %}" style="display:block;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Tancar sessió</span>
+                        </button>
+                    </form>
+                </li>
+            </div>
 
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -207,6 +355,12 @@
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
+
+                    {% block page_title_wrapper %}
+                    <div class="topbar-page-title">
+                        {% block page_title %}{% endblock %}
+                    </div>
+                    {% endblock %}
 
                     <!-- Topbar Search (dins admin_base.html) -->
                     {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'dj_dashboard' %}
@@ -233,29 +387,18 @@
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <!-- Nav Item - Alerts -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <!-- Nav Item - Notificacions -->
+                        {% if user.is_authenticated %}
+                        <li class="nav-item no-arrow mx-1">
+                            <a class="nav-link" href="{% url 'notifications' %}">
                                 <i class="fas fa-bell fa-fw"></i>
-                                <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter">3+</span>
+                                <!-- Counter - Notificacions no llegides -->
+                                {% if unread_notifications_count > 0 %}
+                                <span class="badge badge-danger badge-counter">{{ unread_notifications_count }}{% if unread_notifications_count > 9 %}+{% endif %}</span>
+                                {% endif %}
                             </a>
-                            <!-- Dropdown - Alerts -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">Alerts Center</h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a>
-                            </div>
                         </li>
+                        {% endif %}
 
                         <!-- Nav Item - User Information -->
                         {% if user.is_authenticated %}

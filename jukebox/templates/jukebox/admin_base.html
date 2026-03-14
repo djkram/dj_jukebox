@@ -494,7 +494,9 @@
 
                     <!-- Logo DJJ en mòbil (substitueix hamburger) -->
                     <div class="d-md-none mr-3">
-                        <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 40px; width: auto;">
+                        <div style="background: linear-gradient(135deg, #4e73df, #355fd6); padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(78, 115, 223, 0.3);">
+                            <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 32px; width: auto; display: block;">
+                        </div>
                     </div>
 
                     {% block page_title_wrapper %}

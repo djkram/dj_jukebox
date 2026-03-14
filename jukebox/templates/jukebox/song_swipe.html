@@ -3,35 +3,29 @@
 {% block content %}
 <div class="container-fluid">
   <!-- Indicadors de Coins i Vots -->
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="card border-warning">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-coins fa-2x text-warning me-3"></i>
-            <div>
-              <h6 class="mb-0 text-muted">Coins</h6>
-              <h3 class="mb-0 text-warning" id="credits-count">{{ credits }}</h3>
-            </div>
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-4">
+      <div class="card shadow-sm" style="border-left: 4px solid {% if credits == 0 %}#dc3545{% else %}#f6c23e{% endif %}; border-top: none; border-right: none; border-bottom: none;">
+        <div class="card-body p-2">
+          <div class="{% if credits == 0 %}text-danger{% else %}text-warning{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
+            COINS
           </div>
+          <div class="fs-2 fw-bold" style="line-height: 1;" id="credits-count">{{ credits }}</div>
         </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card border-primary">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-vote-yea fa-2x text-primary me-3"></i>
-            <div>
-              <h6 class="mb-0 text-muted">Vots disponibles</h6>
-              <h3 class="mb-0" id="votes-count">{{ votes_left }}</h3>
-            </div>
+    <div class="col-6 col-md-4">
+      <div class="card shadow-sm" style="border-left: 4px solid {% if votes_left == 0 %}#dc3545{% else %}#4e73df{% endif %}; border-top: none; border-right: none; border-bottom: none;">
+        <div class="card-body p-2">
+          <div class="{% if votes_left == 0 %}text-danger{% else %}text-primary{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
+            VOTS DISPONIBLES
           </div>
+          <div class="fs-2 fw-bold" style="line-height: 1;" id="votes-count">{{ votes_left }}</div>
         </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <a href="{% url 'song_list' %}" class="btn btn-outline-secondary w-100 h-100 d-flex align-items-center justify-content-center">
+    <div class="col-12 col-md-4">
+      <a href="{% url 'song_list' %}" class="btn btn-outline-secondary w-100 h-100 d-flex align-items-center justify-content-center py-2">
         <i class="fas fa-list me-2"></i>Torna a la llista
       </a>
     </div>
@@ -42,23 +36,39 @@
     <div class="col-lg-6">
       {% if songs %}
         <!-- Contenidor de cartes -->
-        <div id="card-stack" class="position-relative mb-4" style="height: 550px;">
+        <div id="card-stack" class="position-relative mb-4" style="height: 600px;">
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
                  style="position: absolute; width: 100%; transition: all 0.3s; top: 0;">
-              <div class="card shadow-lg">
-                <div class="card-body text-center p-4">
-                  {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                         class="rounded mb-3" style="width: 100%; max-width: 280px; height: 280px; object-fit: cover;">
-                  {% else %}
-                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-3 mx-auto"
-                         style="width: 280px; height: 280px;">
-                      <i class="fas fa-music fa-5x text-white"></i>
+              <div class="card shadow-lg" style="border-radius: 1.5rem; overflow: hidden;">
+                <div class="card-body text-center p-4 position-relative">
+                  <!-- Imatge de fons amb overlay -->
+                  <div class="position-relative" style="margin: -1rem -1rem 1rem -1rem;">
+                    {% if song.album_image_url %}
+                      <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                           class="w-100" style="height: 400px; object-fit: cover;">
+                    {% else %}
+                      <div class="bg-secondary d-flex align-items-center justify-content-center"
+                           style="height: 400px;">
+                        <i class="fas fa-music fa-5x text-white"></i>
+                      </div>
+                    {% endif %}
+
+                    <!-- Botons superposats sobre la imatge -->
+                    <div class="position-absolute w-100 d-flex justify-content-center gap-3" style="bottom: 20px; left: 0; z-index: 10;">
+                      <button class="btn-skip-card btn btn-lg shadow-lg"
+                              style="width: 70px; height: 70px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 3px solid #dc3545; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-times fa-2x text-danger"></i>
+                      </button>
+                      <button class="btn-like-card btn btn-lg shadow-lg"
+                              style="width: 70px; height: 70px; border-radius: 50%; background: rgba(40, 167, 69, 0.95); border: 3px solid #28a745; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-heart fa-2x text-white"></i>
+                      </button>
                     </div>
-                  {% endif %}
-                  <h4 class="mb-2">{{ song.title }}</h4>
+                  </div>
+
+                  <h4 class="mb-2 fw-bold">{{ song.title }}</h4>
                   <h6 class="text-muted mb-3">{{ song.artist }}</h6>
                   <div class="d-flex justify-content-center gap-3 text-muted">
                     {% if song.bpm %}
@@ -72,18 +82,6 @@
               </div>
             </div>
           {% endfor %}
-        </div>
-
-        <!-- Botons d'acció (completament separats de les cartes) -->
-        <div class="d-flex justify-content-center gap-3 mb-4">
-          <button id="btn-skip" class="btn btn-outline-secondary btn-lg" style="width: 160px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <i class="fas fa-times fa-3x mb-2"></i>
-            <span>Next</span>
-          </button>
-          <button id="btn-like" class="btn btn-success btn-lg" style="width: 160px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <i class="fas fa-heart fa-3x mb-2"></i>
-            <span>Like (1 Vot)</span>
-          </button>
         </div>
 
         <div id="message-area" class="text-center mt-3"></div>
@@ -118,8 +116,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const cards = document.querySelectorAll('.swipe-card');
-  const btnSkip = document.getElementById('btn-skip');
-  const btnLike = document.getElementById('btn-like');
   const messageArea = document.getElementById('message-area');
   const votesCount = document.getElementById('votes-count');
   const creditsCount = document.getElementById('credits-count');
@@ -136,6 +132,24 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       card.classList.add('d-none');
     }
+
+    // Afegir event listeners als botons dins de cada carta
+    const btnSkip = card.querySelector('.btn-skip-card');
+    const btnLike = card.querySelector('.btn-like-card');
+
+    if (btnSkip) {
+      btnSkip.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleSkip();
+      });
+    }
+
+    if (btnLike) {
+      btnLike.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleLike();
+      });
+    }
   });
 
   function showMessage(text, isSuccess = true) {
@@ -149,16 +163,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentIndex >= cards.length) {
       // No més cançons
       document.getElementById('card-stack').innerHTML = `
-        <div class="alert alert-info text-center">
-          <i class="fas fa-check-circle fa-3x mb-3"></i>
-          <h4>Has fet match amb totes les cançons disponibles!</h4>
-          <a href="{% url 'song_list' %}" class="btn btn-primary mt-3">
-            <i class="fas fa-list me-2"></i>Veure llista
-          </a>
+        <div class="card shadow-lg" style="border-radius: 1.5rem;">
+          <div class="card-body text-center p-5">
+            <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+            <h4 class="mb-3">Has fet match amb totes les cançons disponibles!</h4>
+            <p class="text-muted mb-4">Torna a la llista per veure els resultats</p>
+            <a href="{% url 'song_list' %}" class="btn btn-primary btn-lg">
+              <i class="fas fa-list me-2"></i>Veure llista
+            </a>
+          </div>
         </div>
       `;
-      btnSkip.disabled = true;
-      btnLike.disabled = true;
       return;
     }
 
@@ -191,14 +206,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300);
   }
 
-  btnSkip.addEventListener('click', function() {
+  function disableCurrentButtons(disabled) {
+    const currentCard = cards[currentIndex];
+    if (!currentCard) return;
+    const btnSkip = currentCard.querySelector('.btn-skip-card');
+    const btnLike = currentCard.querySelector('.btn-like-card');
+    if (btnSkip) btnSkip.disabled = disabled;
+    if (btnLike) btnLike.disabled = disabled;
+  }
+
+  function handleSkip() {
     if (currentIndex >= cards.length) return;
 
     const songId = cards[currentIndex].dataset.songId;
 
     // Deshabilitar botons mentre processa
-    btnSkip.disabled = true;
-    btnLike.disabled = true;
+    disableCurrentButtons(true);
 
     fetch('{% url "song_swipe" %}', {
       method: 'POST',
@@ -216,26 +239,23 @@ document.addEventListener('DOMContentLoaded', function() {
       animateCardOut('left');
       // Reactivar botons després de l'animació
       setTimeout(() => {
-        btnSkip.disabled = false;
-        btnLike.disabled = false;
+        disableCurrentButtons(false);
       }, 350);
     })
     .catch(error => {
       console.error('Error:', error);
       showMessage('Error al saltar la cançó', false);
-      btnSkip.disabled = false;
-      btnLike.disabled = false;
+      disableCurrentButtons(false);
     });
-  });
+  }
 
-  btnLike.addEventListener('click', function() {
+  function handleLike() {
     if (currentIndex >= cards.length) return;
 
     const songId = cards[currentIndex].dataset.songId;
 
     // Deshabilitar botons mentre processa
-    btnSkip.disabled = true;
-    btnLike.disabled = true;
+    disableCurrentButtons(true);
 
     fetch('{% url "song_swipe" %}', {
       method: 'POST',
@@ -257,46 +277,134 @@ document.addEventListener('DOMContentLoaded', function() {
         animateCardOut('right');
         // Reactivar botons després de l'animació
         setTimeout(() => {
-          btnSkip.disabled = false;
-          btnLike.disabled = false;
+          disableCurrentButtons(false);
         }, 350);
       } else {
         showMessage(data.error || 'Error al fer match', false);
-        btnSkip.disabled = false;
-        btnLike.disabled = false;
+        disableCurrentButtons(false);
       }
     })
     .catch(error => {
       console.error('Error:', error);
       showMessage('Error al votar', false);
-      btnSkip.disabled = false;
-      btnLike.disabled = false;
+      disableCurrentButtons(false);
     });
-  });
-
-  // Suport per gestos de lliscament en mòbil
-  let touchStartX = 0;
-  let touchEndX = 0;
-
-  document.getElementById('card-stack').addEventListener('touchstart', function(e) {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
-  document.getElementById('card-stack').addEventListener('touchend', function(e) {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  });
-
-  function handleSwipe() {
-    const diff = touchEndX - touchStartX;
-    if (Math.abs(diff) > 100) { // Mínim 100px de desplaçament
-      if (diff > 0) {
-        btnLike.click();
-      } else {
-        btnSkip.click();
-      }
-    }
   }
+
+  // Suport per gestos de lliscament en mòbil amb feedback visual
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchCurrentX = 0;
+  let isDragging = false;
+
+  const cardStack = document.getElementById('card-stack');
+
+  cardStack.addEventListener('touchstart', function(e) {
+    if (currentIndex >= cards.length) return;
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  cardStack.addEventListener('touchmove', function(e) {
+    if (!isDragging || currentIndex >= cards.length) return;
+
+    touchCurrentX = e.changedTouches[0].clientX;
+    const touchCurrentY = e.changedTouches[0].clientY;
+    const diffX = touchCurrentX - touchStartX;
+    const diffY = touchCurrentY - touchStartY;
+
+    // Només fer swipe si el moviment és més horitzontal que vertical
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+      e.preventDefault();
+
+      const card = cards[currentIndex];
+      const rotation = diffX / 20; // Rotació proporcional al desplaçament
+      const opacity = 1 - Math.abs(diffX) / 400;
+
+      card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+      card.style.opacity = Math.max(0.5, opacity);
+    }
+  }, { passive: false });
+
+  cardStack.addEventListener('touchend', function(e) {
+    if (!isDragging || currentIndex >= cards.length) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+
+    isDragging = false;
+
+    const card = cards[currentIndex];
+
+    // Si el desplaçament és suficient (> 100px), fer swipe
+    if (Math.abs(diff) > 100) {
+      if (diff > 0) {
+        // Swipe a la dreta = Like
+        handleLike();
+      } else {
+        // Swipe a l'esquerra = Skip
+        handleSkip();
+      }
+    } else {
+      // Si no, tornar la carta a la posició original
+      card.style.transform = '';
+      card.style.opacity = '1';
+    }
+  }, { passive: true });
+
+  // També suportar mouse drag per desktop
+  let mouseStartX = 0;
+  let isMouseDragging = false;
+
+  cardStack.addEventListener('mousedown', function(e) {
+    if (currentIndex >= cards.length) return;
+    mouseStartX = e.clientX;
+    isMouseDragging = true;
+  });
+
+  cardStack.addEventListener('mousemove', function(e) {
+    if (!isMouseDragging || currentIndex >= cards.length) return;
+
+    const diffX = e.clientX - mouseStartX;
+    const card = cards[currentIndex];
+    const rotation = diffX / 20;
+    const opacity = 1 - Math.abs(diffX) / 400;
+
+    if (Math.abs(diffX) > 10) {
+      card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+      card.style.opacity = Math.max(0.5, opacity);
+    }
+  });
+
+  cardStack.addEventListener('mouseup', function(e) {
+    if (!isMouseDragging || currentIndex >= cards.length) return;
+
+    const diffX = e.clientX - mouseStartX;
+    isMouseDragging = false;
+
+    const card = cards[currentIndex];
+
+    if (Math.abs(diffX) > 100) {
+      if (diffX > 0) {
+        handleLike();
+      } else {
+        handleSkip();
+      }
+    } else {
+      card.style.transform = '';
+      card.style.opacity = '1';
+    }
+  });
+
+  cardStack.addEventListener('mouseleave', function() {
+    if (isMouseDragging && currentIndex < cards.length) {
+      const card = cards[currentIndex];
+      card.style.transform = '';
+      card.style.opacity = '1';
+    }
+    isMouseDragging = false;
+  });
 });
 </script>
 {% endblock %}

@@ -31,6 +31,26 @@
     </div>
   </div>
 
+  <!-- Indicador de progrés -->
+  <div class="row justify-content-center mb-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-2 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-layer-group text-primary"></i>
+            <span class="fw-bold" id="progress-text">0 de {{ songs|length }}</span>
+          </div>
+          <div class="flex-grow-1 mx-3">
+            <div class="progress" style="height: 8px;">
+              <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+            </div>
+          </div>
+          <span class="badge bg-primary" id="remaining-count">{{ songs|length }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Carta de cançó Busca Match -->
   <div class="row justify-content-center">
     <div class="col-lg-6">
@@ -86,6 +106,11 @@
 
         <div id="message-area" class="text-center mt-3"></div>
 
+        <!-- Botó flotant Undo -->
+        <button id="undo-btn" class="btn btn-warning shadow-lg" style="position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%; display: none; z-index: 1000; padding: 0;">
+          <i class="fas fa-undo fa-lg"></i>
+        </button>
+
         {% if votes_left == 0 %}
         <div class="alert alert-warning mt-3 text-center">
           {% if credits == 0 %}
@@ -119,10 +144,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const messageArea = document.getElementById('message-area');
   const votesCount = document.getElementById('votes-count');
   const creditsCount = document.getElementById('credits-count');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const remainingCount = document.getElementById('remaining-count');
+  const undoBtn = document.getElementById('undo-btn');
 
   let currentIndex = 0;
+  let lastAction = null; // { type: 'like'|'skip', songId: X, index: Y }
+  const totalCards = cards.length;
 
   if (cards.length === 0) return;
+
+  // Actualitzar progrés
+  function updateProgress() {
+    const progress = (currentIndex / totalCards) * 100;
+    const remaining = totalCards - currentIndex;
+
+    if (progressBar) progressBar.style.width = progress + '%';
+    if (progressText) progressText.textContent = `${currentIndex} de ${totalCards}`;
+    if (remainingCount) remainingCount.textContent = remaining;
+  }
 
   // Inicialitzar cartes: primera visible, resta ocultes
   cards.forEach((card, index) => {
@@ -185,9 +226,29 @@ document.addEventListener('DOMContentLoaded', function() {
     nextCardElement.style.opacity = '1';
   }
 
-  function animateCardOut(direction) {
+  function animateCardOut(direction, songId, actionType) {
     const card = cards[currentIndex];
     const transform = direction === 'left' ? 'translateX(-150%) rotate(-30deg)' : 'translateX(150%) rotate(30deg)';
+
+    // Guardar acció per undo
+    lastAction = {
+      type: actionType,
+      songId: songId,
+      index: currentIndex,
+      card: card
+    };
+
+    // Mostrar botó undo
+    if (undoBtn) {
+      undoBtn.style.display = 'block';
+      // Ocultar després de 3 segons
+      setTimeout(() => {
+        if (lastAction && lastAction.index === currentIndex - 1) {
+          undoBtn.style.display = 'none';
+          lastAction = null;
+        }
+      }, 3000);
+    }
 
     // Animar la carta cap a fora
     card.style.transform = transform;
@@ -202,8 +263,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Avançar a la següent
       currentIndex++;
+      updateProgress();
       nextCard();
     }, 300);
+  }
+
+  // Funcionalitat Undo
+  if (undoBtn) {
+    undoBtn.addEventListener('click', function() {
+      if (!lastAction) return;
+
+      // Tornar a l'índex anterior
+      currentIndex = lastAction.index;
+
+      // Mostrar la carta anterior
+      const card = lastAction.card;
+      card.classList.remove('d-none');
+      card.style.zIndex = currentIndex + 10;
+      card.style.transform = '';
+      card.style.opacity = '1';
+
+      // Ocultar la següent carta si existeix
+      if (cards[currentIndex + 1]) {
+        cards[currentIndex + 1].classList.add('d-none');
+      }
+
+      // Actualitzar progrés
+      updateProgress();
+
+      // Ocultar botó undo
+      undoBtn.style.display = 'none';
+      showMessage('Acció desfeta', true);
+      lastAction = null;
+    });
   }
 
   function disableCurrentButtons(disabled) {
@@ -236,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      animateCardOut('left');
+      animateCardOut('left', songId, 'skip');
       // Reactivar botons després de l'animació
       setTimeout(() => {
         disableCurrentButtons(false);
@@ -274,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
         votesCount.textContent = data.votes_left;
         creditsCount.textContent = data.credits;
         showMessage('Match! ❤️ (-1 Vot)', true);
-        animateCardOut('right');
+        animateCardOut('right', songId, 'like');
         // Reactivar botons després de l'animació
         setTimeout(() => {
           disableCurrentButtons(false);

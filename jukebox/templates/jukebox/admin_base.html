@@ -270,6 +270,34 @@
             font-size: .7rem;
             font-weight: 600;
         }
+        /* Pull-to-refresh styles */
+        .ptr-element {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fc;
+            transform: translateY(-100%);
+            transition: transform 0.2s;
+            z-index: 10;
+        }
+        .ptr-element.ptr-refresh {
+            transform: translateY(0);
+        }
+        .ptr-element .ptr-icon {
+            font-size: 1.5rem;
+            color: #4e73df;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 767.98px) {
             .mobile-bottom-nav {
                 display: block;
@@ -287,10 +315,16 @@
             .sticky-footer {
                 display: none;
             }
-            /* Botó hamburger més gran i accessible */
-            #sidebarToggleTop {
-                padding: .6rem;
-                font-size: 1.2rem;
+            /* Ocultar sidebar en mòbil */
+            #accordionSidebar {
+                display: none !important;
+            }
+            #wrapper {
+                display: block !important;
+            }
+            #content-wrapper {
+                width: 100% !important;
+                margin-left: 0 !important;
             }
             /* Ocultar search en mòbil molt petit */
             @media (max-width: 575.98px) {
@@ -458,10 +492,10 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
+                    <!-- Logo DJJ en mòbil (substitueix hamburger) -->
+                    <div class="d-md-none mr-3">
+                        <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 40px; width: auto;">
+                    </div>
 
                     {% block page_title_wrapper %}
                     <div class="topbar-page-title">
@@ -632,20 +666,63 @@
     <script src="{% static 'jukebox/js/demo/chart-area-demo.js' %}"></script>
     <script src="{% static 'jukebox/js/demo/chart-pie-demo.js' %}"></script>
 
-    <!-- Menú replegat per defecte en mòbil -->
+    <!-- Pull-to-refresh global per mòbil -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Detectar si és mòbil (menys de 768px)
-        if (window.innerWidth < 768) {
-            const sidebar = document.getElementById('accordionSidebar');
-            const body = document.body;
+        // Només en mòbil
+        if (window.innerWidth >= 768) return;
 
-            // Activar mode replegat
-            if (sidebar && !sidebar.classList.contains('toggled')) {
-                sidebar.classList.add('toggled');
-                body.classList.add('sidebar-toggled');
-            }
+        let ptrStartY = 0;
+        let ptrCurrentY = 0;
+        let isPulling = false;
+        let ptrElement = null;
+
+        // Crear element pull-to-refresh
+        const content = document.getElementById('content');
+        if (content) {
+            ptrElement = document.createElement('div');
+            ptrElement.className = 'ptr-element';
+            ptrElement.innerHTML = '<i class="fas fa-sync-alt ptr-icon"></i>';
+            content.style.position = 'relative';
+            content.insertBefore(ptrElement, content.firstChild);
         }
+
+        document.addEventListener('touchstart', function(e) {
+            if (window.scrollY === 0) {
+                ptrStartY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!isPulling) return;
+
+            ptrCurrentY = e.touches[0].clientY;
+            const pullDistance = ptrCurrentY - ptrStartY;
+
+            if (pullDistance > 0 && pullDistance < 100) {
+                ptrElement.style.transform = `translateY(${pullDistance - 100}%)`;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', function() {
+            if (!isPulling) return;
+
+            const pullDistance = ptrCurrentY - ptrStartY;
+
+            if (pullDistance > 80) {
+                // Activar refresh
+                ptrElement.classList.add('ptr-refresh');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } else {
+                // Tornar a posició original
+                ptrElement.style.transform = 'translateY(-100%)';
+            }
+
+            isPulling = false;
+        }, { passive: true });
     });
     </script>
 

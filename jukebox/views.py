@@ -483,29 +483,46 @@ def buy_votes(request):
             else:
                 price_eur = 1 * (coins_to_buy // 5)
 
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'eur',
-                        'product_data': {
-                            'name': f'Paquet de {coins_to_buy} Coins - DJ Jukebox',
-                            'description': f'Moneda virtual per votar a les festes',
+            try:
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price_data': {
+                            'currency': 'eur',
+                            'product_data': {
+                                'name': f'Paquet de {coins_to_buy} Coins - DJ Jukebox',
+                                'description': f'Moneda virtual per votar a les festes',
+                            },
+                            'unit_amount': int(price_eur * 100),
                         },
-                        'unit_amount': int(price_eur * 100),
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=request.build_absolute_uri('/buy-coins/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=request.build_absolute_uri('/buy-coins/'),
-                metadata={
-                    'user_id': request.user.id,
-                    'party_id': party.id,
-                    'votes_purchased': coins_to_buy,  # ara són Coins
-                }
-            )
-            return redirect(session.url, code=303)
+                        'quantity': 1,
+                    }],
+                    mode='payment',
+                    success_url=request.build_absolute_uri('/buy-coins/success/') + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=request.build_absolute_uri('/buy-coins/'),
+                    metadata={
+                        'user_id': request.user.id,
+                        'party_id': party.id,
+                        'votes_purchased': coins_to_buy,  # ara són Coins
+                    }
+                )
+                return redirect(session.url, code=303)
+            except stripe.error.AuthenticationError as e:
+                logger.error(f"[STRIPE] Error d'autenticació: {e}")
+                return render(request, "jukebox/buy_votes.html", {
+                    "party": party,
+                    "credits": user.credits,
+                    "votes_left": votes_left,
+                    "error": "Error de configuració de pagament. Contacta amb l'administrador."
+                })
+            except stripe.error.StripeError as e:
+                logger.error(f"[STRIPE] Error de Stripe: {e}")
+                return render(request, "jukebox/buy_votes.html", {
+                    "party": party,
+                    "credits": user.credits,
+                    "votes_left": votes_left,
+                    "error": "Error processant el pagament. Si us plau, torna-ho a provar més tard."
+                })
 
     votes_left = get_user_votes_left(user, party)
 

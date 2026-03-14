@@ -220,6 +220,113 @@
                 margin-right: .75rem;
             }
         }
+        /* Bottom Navigation Bar per mòbil */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,.1);
+            z-index: 1030;
+            padding: .5rem 0;
+            border-top: 1px solid #e3e6f0;
+        }
+        .mobile-bottom-nav .nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .mobile-bottom-nav .nav-item-bottom {
+            flex: 1;
+            text-align: center;
+            padding: .4rem 0;
+        }
+        .mobile-bottom-nav .nav-item-bottom a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #858796;
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .mobile-bottom-nav .nav-item-bottom.active a,
+        .mobile-bottom-nav .nav-item-bottom a:hover {
+            color: #4e73df;
+        }
+        .mobile-bottom-nav .nav-item-bottom i {
+            font-size: 1.4rem;
+            margin-bottom: .2rem;
+        }
+        .mobile-bottom-nav .nav-item-bottom .emoji-icon {
+            font-size: 1.5rem;
+            margin-bottom: .2rem;
+            display: block;
+        }
+        .mobile-bottom-nav .nav-item-bottom span {
+            font-size: .7rem;
+            font-weight: 600;
+        }
+        @media (max-width: 767.98px) {
+            .mobile-bottom-nav {
+                display: block;
+            }
+            #content-wrapper {
+                padding-bottom: 70px;
+            }
+            .topbar {
+                margin-bottom: 1rem !important;
+                padding: .5rem 1rem !important;
+            }
+            .topbar-page-title {
+                font-size: 1.3rem;
+            }
+            .sticky-footer {
+                display: none;
+            }
+            /* Botó hamburger més gran i accessible */
+            #sidebarToggleTop {
+                padding: .6rem;
+                font-size: 1.2rem;
+            }
+            /* Ocultar search en mòbil molt petit */
+            @media (max-width: 575.98px) {
+                .navbar-search {
+                    display: none !important;
+                }
+            }
+            /* Contenidor més compacte */
+            .container-fluid {
+                padding-left: .75rem !important;
+                padding-right: .75rem !important;
+            }
+            /* Botons més grans per tap fàcil */
+            .btn-sm {
+                padding: .5rem 1rem;
+                font-size: .9rem;
+            }
+            .btn-lg {
+                padding: .75rem 1.5rem;
+                font-size: 1.1rem;
+            }
+            /* Cards més compactes */
+            .card {
+                margin-bottom: .75rem !important;
+            }
+            /* Títols més petits */
+            h1, h2, h3 {
+                font-size: 1.5rem !important;
+            }
+            h4 {
+                font-size: 1.2rem !important;
+            }
+            h5, h6 {
+                font-size: 1rem !important;
+            }
+        }
     </style>
 
 </head>
@@ -463,6 +570,43 @@
             <!-- End of Footer -->
         </div>
         <!-- End of Content Wrapper -->
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <div class="nav-items">
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
+                    <a href="{% url 'song_list' %}">
+                        <span class="emoji-icon">🎉</span>
+                        <span>Llista</span>
+                    </a>
+                </div>
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
+                    <a href="{% url 'song_swipe' %}">
+                        <i class="fas fa-heart"></i>
+                        <span>Match</span>
+                    </a>
+                </div>
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
+                    <a href="{% url 'request_song' %}">
+                        <i class="fas fa-microphone-alt"></i>
+                        <span>Demanar</span>
+                    </a>
+                </div>
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
+                    <a href="{% url 'buy_votes' %}">
+                        <i class="fas fa-coins"></i>
+                        <span>Coins</span>
+                    </a>
+                </div>
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-user"></i>
+                        <span>Perfil</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <!-- End Mobile Bottom Navigation -->
     </div>
     <!-- End of Page Wrapper -->
 
@@ -487,6 +631,23 @@
     <!-- Page level custom scripts -->
     <script src="{% static 'jukebox/js/demo/chart-area-demo.js' %}"></script>
     <script src="{% static 'jukebox/js/demo/chart-pie-demo.js' %}"></script>
+
+    <!-- Menú replegat per defecte en mòbil -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Detectar si és mòbil (menys de 768px)
+        if (window.innerWidth < 768) {
+            const sidebar = document.getElementById('accordionSidebar');
+            const body = document.body;
+
+            // Activar mode replegat
+            if (sidebar && !sidebar.classList.contains('toggled')) {
+                sidebar.classList.add('toggled');
+                body.classList.add('sidebar-toggled');
+            }
+        }
+    });
+    </script>
 
 </body>
 </html>

@@ -1,14 +1,35 @@
 {% extends "jukebox/admin_base.html" %}
 
 {% block content %}
-  <div class="container mt-5">
-    <h2>Connecta amb Spotify</h2>
-    <p>Estàs a punt de connectar-te amb el teu compte de Spotify.</p>
+  <div class="container mt-5 d-none d-md-block text-center">
+    <h2>Connecta amb {{ provider.name }}</h2>
+    <p>Estàs a punt de connectar-te amb el teu compte de {{ provider.name }}.</p>
     <form method="post">
       {% csrf_token %}
-      <button type="submit" class="btn btn-success">
-        <i class="fab fa-spotify"></i> Continua amb Spotify
+      <button type="submit" class="btn {% if provider.id == 'spotify' %}btn-success{% elif provider.id == 'google' %}btn-danger{% else %}btn-primary{% endif %}">
+        <i class="fab fa-{{ provider.id }}"></i> Continua amb {{ provider.name }}
       </button>
     </form>
+  </div>
+
+  <!-- Vista Mòbil - Auto-submit -->
+  <div class="d-md-none">
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 100vh; background: #f8f9fe;">
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="sr-only">Carregant...</span>
+        </div>
+        <p style="color: #747688;">Redirigint a {{ provider.name }}...</p>
+      </div>
+    </div>
+    <form id="auto-submit-form" method="post" style="display: none;">
+      {% csrf_token %}
+    </form>
+    <script>
+      // Auto-submit el formulari en mòbil
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('auto-submit-form').submit();
+      });
+    </script>
   </div>
 {% endblock %}

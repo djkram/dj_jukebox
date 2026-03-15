@@ -352,9 +352,13 @@ def song_list(request):
     songs = party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title')
 
     # Estadístiques per a la vista
-    songs_played = party.songs.filter(played=True).count()
+    songs_played = party.songs.filter(has_played=True).count()
     user_votes_count = Vote.objects.filter(user=user, party=party).count()
     total_songs = party.songs.count()
+    total_votes = Vote.objects.filter(party=party).count()
+
+    # Cançó que està sonant (la propera en la cua)
+    now_playing = party.songs.filter(has_played=False).annotate(num_votes=Count('vote')).order_by('-num_votes').first()
 
     return render(request, "jukebox/song_list.html", {
         "party": party,
@@ -364,6 +368,8 @@ def song_list(request):
         "songs_played": songs_played,
         "user_votes_count": user_votes_count,
         "total_songs": total_songs,
+        "total_votes": total_votes,
+        "now_playing": now_playing,
     })
 
 

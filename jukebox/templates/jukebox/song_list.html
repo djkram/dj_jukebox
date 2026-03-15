@@ -126,31 +126,6 @@
 
     <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
     <div class="mobile-songs-grid d-md-none px-3">
-      <!-- Party Info Card -->
-      <section class="mb-6">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden" style="border-left: 4px solid #0040e0;">
-          <!-- Party Header -->
-          <div class="p-4" style="background: linear-gradient(135deg, #f8f9fe 0%, #eceef3 100%);">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="font-headline font-bold text-xl mb-0" style="color: #191c1f;">🎉 {{ party.name }}</h2>
-            </div>
-            {% if party.date %}
-              <p class="text-sm mb-0" style="color: #747688;">
-                <i class="fas fa-calendar-alt"></i> {{ party.date|date:"d/m/Y H:i" }}
-              </p>
-            {% endif %}
-          </div>
-
-          <!-- Change Party Button -->
-          <div class="p-3 border-t" style="background: #f8f9fe;">
-            <a href="{% url 'select_party' %}" class="btn w-100 d-flex align-items-center justify-content-center gap-2" style="background: white; border: 1px solid #c4c5d9; color: #191c1f; font-size: 0.875rem; font-weight: 600; padding: 0.75rem;">
-              <i class="fas fa-random"></i>
-              Canviar de festa
-            </a>
-          </div>
-        </div>
-      </section>
-
       <!-- Stats Grid - 3 columnes -->
       <section class="grid grid-cols-3 gap-2 mb-6">
         <div class="bg-white p-3 rounded-lg shadow-sm text-center">

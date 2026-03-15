@@ -10,12 +10,77 @@
 
     <title>DJukebox</title>
 
-    <!-- Custom fonts for this template-->
-    <link href="{% static 'jukebox/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
-    <!-- Custom styles for this template-->
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'jukebox/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template (legacy) -->
     <link href="{% static 'jukebox/css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "brand-blue": "#0040e0",
+                        "brand-blue-light": "#2e5bff",
+                        "brand-cyan": "#00daf3",
+                        "brand-purple": "#5e24e1",
+                        "surface": "#f8f9fe",
+                        "surface-container": "#eceef3",
+                        "on-surface": "#191c1f",
+                        "outline": "#747688",
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* Base typography */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8f9fe;
+            color: #191c1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .headline-font {
+            font-family: 'Epilogue', sans-serif;
+        }
+
+        .glass-nav {
+            background: rgba(248, 249, 254, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
     <style>
         .user-avatar-fallback {
             width: 2rem;
@@ -220,18 +285,20 @@
                 margin-right: .75rem;
             }
         }
-        /* Bottom Navigation Bar per mòbil */
+        /* Bottom Navigation Bar per mòbil - Nou disseny */
         .mobile-bottom-nav {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: #fff;
-            box-shadow: 0 -2px 10px rgba(0,0,0,.1);
+            background: rgba(248, 249, 254, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
             z-index: 1030;
-            padding: .5rem 0;
-            border-top: 1px solid #e3e6f0;
+            padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(116, 118, 136, 0.1);
         }
         .mobile-bottom-nav .nav-items {
             display: flex;
@@ -239,36 +306,41 @@
             align-items: center;
             max-width: 600px;
             margin: 0 auto;
+            padding: 0 1rem;
         }
         .mobile-bottom-nav .nav-item-bottom {
             flex: 1;
             text-align: center;
-            padding: .4rem 0;
         }
         .mobile-bottom-nav .nav-item-bottom a {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #858796;
+            gap: 0.25rem;
+            color: #747688;
             text-decoration: none;
-            transition: color .2s;
+            transition: all 0.2s ease;
+            padding: 0.5rem;
+            border-radius: 1rem;
         }
-        .mobile-bottom-nav .nav-item-bottom.active a,
-        .mobile-bottom-nav .nav-item-bottom a:hover {
-            color: #4e73df;
+        .mobile-bottom-nav .nav-item-bottom.active a {
+            color: #0040e0;
+            background: rgba(0, 64, 224, 0.08);
         }
         .mobile-bottom-nav .nav-item-bottom i {
-            font-size: 1.4rem;
-            margin-bottom: .2rem;
+            font-size: 1.5rem;
         }
         .mobile-bottom-nav .nav-item-bottom .emoji-icon {
             font-size: 1.5rem;
-            margin-bottom: .2rem;
-            display: block;
+            filter: none;
         }
         .mobile-bottom-nav .nav-item-bottom span {
-            font-size: .7rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .mobile-bottom-nav .nav-item-bottom.active span {
+            font-weight: 700;
         }
         /* Pull-to-refresh styles */
         .ptr-element {
@@ -305,12 +377,11 @@
             #content-wrapper {
                 padding-bottom: 70px;
             }
-            .topbar {
-                margin-bottom: 1rem !important;
-                padding: .5rem 1rem !important;
+            .glass-nav {
+                padding: 0.75rem 1rem !important;
             }
-            .topbar-page-title {
-                font-size: 1.3rem;
+            .glass-nav h1 {
+                font-size: 1.25rem;
             }
             .sticky-footer {
                 display: none;
@@ -489,21 +560,25 @@
             <!-- Main Content -->
             <div id="content">
                 <!-- Topbar -->
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-                    <!-- Logo DJJ en mòbil (substitueix hamburger) -->
-                    <div class="d-md-none mr-3">
-                        <div style="background: linear-gradient(135deg, #4e73df, #355fd6); padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(78, 115, 223, 0.3);">
-                            <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 32px; width: auto; display: block;">
+                <!-- Topbar - Nou Disseny -->
+                <nav class="glass-nav sticky top-0 z-40 px-4 py-3 mb-4">
+                    <div class="flex items-center justify-between max-w-screen-xl mx-auto">
+                        <!-- Hamburger Menu (Desktop) / Logo (Mobile) -->
+                        <div class="flex items-center gap-3">
+                            <button class="d-none d-md-block text-brand-blue p-2">
+                                <i class="fas fa-bars text-2xl"></i>
+                            </button>
+                            <div class="d-md-none">
+                                <button class="text-brand-blue p-2">
+                                    <i class="fas fa-bars text-xl"></i>
+                                </button>
+                            </div>
+                            {% block page_title_wrapper %}
+                            <h1 class="headline-font font-bold text-xl md:text-2xl text-on-surface">
+                                {% block page_title %}{% endblock %}
+                            </h1>
+                            {% endblock %}
                         </div>
-                    </div>
-
-                    {% block page_title_wrapper %}
-                    <div class="topbar-page-title">
-                        {% block page_title %}{% endblock %}
-                    </div>
-                    {% endblock %}
 
                     <!-- Topbar Search (dins admin_base.html) -->
                     {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'dj_dashboard' %}
@@ -528,60 +603,18 @@
                     {% endif %}
 
 
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Nav Item - Notificacions -->
-                        {% if user.is_authenticated %}
-                        <li class="nav-item no-arrow mx-1">
-                            <a class="nav-link" href="{% url 'notifications' %}">
-                                <i class="fas fa-bell fa-fw"></i>
-                                <!-- Counter - Notificacions no llegides -->
+                        <!-- Right Side - Notifications -->
+                        <div class="flex items-center gap-2">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
+                                <i class="fas fa-bell text-xl text-brand-blue"></i>
                                 {% if unread_notifications_count > 0 %}
-                                <span class="badge badge-danger badge-counter">{{ unread_notifications_count }}{% if unread_notifications_count > 9 %}+{% endif %}</span>
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                                 {% endif %}
                             </a>
-                        </li>
-                        {% endif %}
-
-                        <!-- Nav Item - User Information -->
-                        {% if user.is_authenticated %}
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user_display_name|default:user.username }}</span>
-                                {% if user_avatar_url %}
-                                <img class="img-profile rounded-circle"
-                                     src="{{ user_avatar_url }}"
-                                     alt="{{ user.username }}">
-                                {% else %}
-                                <span class="user-avatar-fallback">{{ user_avatar_initial|default:"U" }}</span>
-                                {% endif %}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Logout
-                                    </button>
-                                </form>
-                            </div>
-                        </li>
-                        {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
-                        </li>
-                        {% endif %}
-                    </ul>
+                            {% endif %}
+                        </div>
+                    </div>
                 </nav>
                 <!-- End of Topbar -->
 
@@ -607,37 +640,31 @@
         </div>
         <!-- End of Content Wrapper -->
 
-        <!-- Mobile Bottom Navigation -->
+        <!-- Mobile Bottom Navigation - Nou Disseny -->
         <nav class="mobile-bottom-nav">
             <div class="nav-items">
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
                     <a href="{% url 'song_list' %}">
-                        <span class="emoji-icon">🎉</span>
-                        <span>Llista</span>
+                        <i class="fas fa-music"></i>
+                        <span>Songs</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                     <a href="{% url 'song_swipe' %}">
-                        <i class="fas fa-heart"></i>
+                        <i class="fas fa-random"></i>
                         <span>Match</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                     <a href="{% url 'request_song' %}">
-                        <i class="fas fa-microphone-alt"></i>
-                        <span>Demanar</span>
-                    </a>
-                </div>
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
-                    <a href="{% url 'buy_votes' %}">
-                        <i class="fas fa-coins"></i>
-                        <span>Coins</span>
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Request</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <a href="{% url 'profile' %}">
                         <i class="fas fa-user"></i>
-                        <span>Perfil</span>
+                        <span>Profile</span>
                     </a>
                 </div>
             </div>

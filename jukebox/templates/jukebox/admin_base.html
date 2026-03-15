@@ -658,11 +658,11 @@
                 <!-- Topbar Mòbil (nou disseny glass) -->
                 <nav class="glass-nav d-md-none sticky top-0 z-40 px-4 py-3 mb-4">
                     <div class="flex items-center justify-between">
-                        <!-- Hamburger + Title -->
+                        <!-- Logo + Title -->
                         <div class="flex items-center gap-3">
-                            <button class="text-brand-blue p-2">
-                                <i class="fas fa-bars text-xl"></i>
-                            </button>
+                            <div style="background: linear-gradient(135deg, #4e73df, #355fd6); padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(78, 115, 223, 0.3);">
+                                <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 32px; width: auto; display: block;">
+                            </div>
                             <h1 class="headline-font font-bold text-lg text-on-surface mb-0">
                                 {{ selected_party.name|default:"Party Name" }}
                             </h1>

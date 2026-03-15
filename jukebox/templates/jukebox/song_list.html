@@ -57,9 +57,27 @@
   }
 </style>
 <div class="container-fluid">
-  <h2 class="mb-4">Maleta de cançons</h2>
+  <!-- INFO DE LA FESTA -->
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="mb-0">🎉 {{ party.name }}</h2>
+        {% if party.date %}
+          <span class="badge badge-primary">{{ party.date|date:"d/m/Y H:i" }}</span>
+        {% endif %}
+      </div>
+      {% if party.playlist %}
+        <p class="text-muted mb-0">
+          <i class="fas fa-list-ul"></i> Playlist: <strong>{{ party.playlist.name }}</strong>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ESTADÍSTIQUES DE LA FESTA -->
+  <h3 class="mb-3">Estadístiques</h3>
   {% if songs %}
-    <div class="row g-2 mb-3">
+    <div class="row g-2 mb-4">
       <!-- Caixa de VOTS -->
       <div class="col-md-6 col-lg-3">
         <div class="card shadow-sm" style="border-left: 4px solid {% if votes_left == 0 %}#dc3545{% else %}#4e73df{% endif %}; border-top: none; border-right: none; border-bottom: none;">
@@ -127,6 +145,9 @@
       </div>
     </div>
 
+    <!-- MALETA DE CANÇONS -->
+    <h3 class="mb-3 mt-4">🎵 Maleta de cançons</h3>
+
     <!-- Vista de taula per desktop -->
     <div class="table-responsive d-none d-md-block">
       <table class="table table-striped align-middle w-100">
@@ -180,8 +201,28 @@
 
     <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
     <div class="mobile-songs-grid d-md-none px-3">
+      <!-- Party Info Card -->
+      <section class="mb-6">
+        <div class="bg-white p-4 rounded-xl shadow-sm" style="border-left: 4px solid #0040e0;">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-headline font-bold text-xl mb-0" style="color: #191c1f;">🎉 {{ party.name }}</h2>
+          </div>
+          {% if party.date %}
+            <p class="text-sm mb-2" style="color: #747688;">
+              <i class="fas fa-calendar-alt"></i> {{ party.date|date:"d/m/Y H:i" }}
+            </p>
+          {% endif %}
+          {% if party.playlist %}
+            <p class="text-sm mb-0" style="color: #747688;">
+              <i class="fas fa-list-ul"></i> Playlist: <strong>{{ party.playlist.name }}</strong>
+            </p>
+          {% endif %}
+        </div>
+      </section>
+
       <!-- Stats Grid (Votes & Coins) -->
-      <section class="grid grid-cols-2 gap-3 mb-4">
+      <h3 class="font-headline text-lg font-bold mb-3" style="color: #191c1f;">Estadístiques</h3>
+      <section class="grid grid-cols-2 gap-3 mb-6">
         <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border-b-4" style="border-color: rgba(0, 64, 224, 0.1);">
           <div class="flex items-center justify-between mb-2">
             <i class="fas fa-vote-yea text-xl" style="color: #0040e0;"></i>
@@ -199,12 +240,32 @@
             <a href="{% url 'buy_votes' %}" class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-tighter" style="background: #0040e0; color: white;">Compra</a>
           </div>
         </div>
+        <div class="bg-surface-container-lowest p-3 rounded-lg shadow-sm">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fas fa-music text-sm" style="color: #5a5c69;"></i>
+            <span class="text-xs font-semibold" style="color: #747688;">Total cançons</span>
+          </div>
+          <p class="font-headline text-xl font-bold mb-0" style="color: #191c1f;">{{ total_songs }}</p>
+        </div>
+        <div class="bg-surface-container-lowest p-3 rounded-lg shadow-sm">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fas fa-play-circle text-sm" style="color: #1cc88a;"></i>
+            <span class="text-xs font-semibold" style="color: #747688;">Sonades</span>
+          </div>
+          <p class="font-headline text-xl font-bold mb-0" style="color: #191c1f;">{{ songs_played }}</p>
+        </div>
+        <div class="bg-surface-container-lowest p-3 rounded-lg shadow-sm" style="grid-column: span 2;">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fas fa-check-circle text-sm" style="color: #36b9cc;"></i>
+            <span class="text-xs font-semibold" style="color: #747688;">Vots emesos per tu</span>
+          </div>
+          <p class="font-headline text-xl font-bold mb-0" style="color: #191c1f;">{{ user_votes_count }}</p>
+        </div>
       </section>
 
-      <!-- Song List Header -->
-      <section class="flex items-center justify-between mb-4">
-        <h3 class="font-headline text-xl font-bold" style="color: #191c1f;">Properes</h3>
-        <i class="fas fa-filter text-lg cursor-pointer" style="color: #747688;"></i>
+      <!-- Song Bag Header -->
+      <section class="mb-4">
+        <h3 class="font-headline text-xl font-bold" style="color: #191c1f;">🎵 Maleta de cançons</h3>
       </section>
 
       <!-- Song List -->

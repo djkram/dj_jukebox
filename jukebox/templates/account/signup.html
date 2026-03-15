@@ -9,7 +9,8 @@
   </script>
 {% endif %}
 
-<div class="row justify-content-center mt-5">
+<!-- Vista Desktop (ORIGINAL) -->
+<div class="row justify-content-center mt-5 d-none d-md-flex">
     <div class="col-md-6 text-center">
         <h1 class="mb-4">Registra't</h1>
         <form method="post">
@@ -36,5 +37,69 @@
         </a>
         <p class="mt-3">Ja tens compte? <a href="{% url 'account_login' %}">Fes login</a></p>
     </div>
+</div>
+
+<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
+  <main class="px-4 pt-6 pb-32 mx-auto" style="max-width: 32rem;">
+    <!-- Signup Form -->
+    <section class="mb-8">
+      <h1 class="font-headline font-extrabold text-center mb-6" style="font-size: 2rem; color: #191c1f; letter-spacing: -0.025em;">Registra't</h1>
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-2" style="color: #191c1f; font-size: 0.875rem;">{{ field.label }}</label>
+            <input
+              type="{{ field.field.widget.input_type }}"
+              name="{{ field.name }}"
+              id="{{ field.id_for_label }}"
+              {% if field.value %}value="{{ field.value }}"{% endif %}
+              class="w-100 px-4 py-3 rounded-xl border"
+              style="border: 1px solid #c4c5d9; font-size: 1rem; background: white;"
+              placeholder="{{ field.label }}"
+            >
+            {% if field.help_text %}
+              <p class="mt-1" style="font-size: 0.75rem; color: #747688;">{{ field.help_text }}</p>
+            {% endif %}
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <p class="text-danger mt-1" style="font-size: 0.875rem;">{{ error }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="w-100 py-3 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); font-size: 1rem;">
+          Registra't
+        </button>
+      </form>
+    </section>
+
+    <!-- Social Signup -->
+    <section class="space-y-3">
+      <div class="text-center mb-3">
+        <span style="color: #747688; font-size: 0.875rem;">o registra't amb</span>
+      </div>
+
+      <a href="{% provider_login_url 'spotify' process='signup' next=redirect_url %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3); font-size: 1rem;">
+        <i class="fab fa-spotify" style="font-size: 1.25rem;"></i>
+        Registra't amb Spotify
+      </a>
+
+      <a href="{% provider_login_url 'google' process='signup' next=redirect_url %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 12px rgba(219, 68, 55, 0.3); font-size: 1rem;">
+        <i class="fab fa-google" style="font-size: 1.25rem;"></i>
+        Registra't amb Google
+      </a>
+    </section>
+
+    <!-- Login Link -->
+    <div class="text-center mt-6">
+      <p style="color: #747688; font-size: 0.875rem;">
+        Ja tens compte? <a href="{% url 'account_login' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">Fes login</a>
+      </p>
+    </div>
+  </main>
 </div>
 {% endblock %}

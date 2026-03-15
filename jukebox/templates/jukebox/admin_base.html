@@ -342,6 +342,16 @@
         .mobile-bottom-nav .nav-item-bottom.active span {
             font-weight: 700;
         }
+        /* Ajust per 5 items (quan l'usuari és admin) */
+        .mobile-bottom-nav .nav-items:has(.nav-item-bottom:nth-child(5)) .nav-item-bottom {
+            flex: 0 1 20%;
+        }
+        .mobile-bottom-nav .nav-items:has(.nav-item-bottom:nth-child(5)) .nav-item-bottom i {
+            font-size: 1.35rem;
+        }
+        .mobile-bottom-nav .nav-items:has(.nav-item-bottom:nth-child(5)) .nav-item-bottom span {
+            font-size: 0.7rem;
+        }
         /* Pull-to-refresh styles */
         .ptr-element {
             position: absolute;
@@ -720,6 +730,14 @@
                         <span>Profile</span>
                     </a>
                 </div>
+                {% if user.is_superuser %}
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'dj_dashboard' or request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
+                    <a href="{% url 'dj_dashboard' %}">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Control</span>
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </nav>
         <!-- End Mobile Bottom Navigation -->

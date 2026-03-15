@@ -4,7 +4,9 @@
 {% block page_title %}Perfil{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+
+<!-- Vista Desktop (ORIGINAL) -->
+<div class="container mt-5 d-none d-md-block">
     <!-- Coins disponibles -->
     <div class="row mb-4">
         <div class="col-md-6 col-lg-4">
@@ -90,5 +92,127 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<div class="d-md-none flex-column pb-32" style="background: #f8f9fe; min-height: 100vh; display: flex;">
+  <!-- Main Content Canvas -->
+  <main class="flex-1 px-4 pb-32">
+    <!-- Hero Profile Section -->
+    <section class="mt-6 d-flex flex-column align-items-center">
+      <div class="position-relative">
+        <div class="rounded-xl overflow-hidden" style="width: 8rem; height: 8rem; box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08); border: 4px solid white;">
+          {% if user_avatar_url %}
+            <img src="{{ user_avatar_url }}" alt="{{ user.username }}" class="w-100 h-100" style="object-fit: cover;">
+          {% else %}
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
+              <span class="text-white" style="font-size: 3rem; font-weight: 800;">{{ user_avatar_initial|default:"U" }}</span>
+            </div>
+          {% endif %}
+        </div>
+        {% if has_spotify %}
+          <div class="position-absolute d-flex align-items-center justify-content-center rounded-circle border border-4" style="bottom: -0.5rem; right: -0.5rem; width: 2.5rem; height: 2.5rem; background: #00e3fd; border-color: #f8f9fe !important;">
+            <i class="fas fa-check-circle" style="font-size: 1.125rem; color: #00616d;"></i>
+          </div>
+        {% endif %}
+      </div>
+      <div class="mt-4 text-center">
+        <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">
+          {% if user.credits > 50 %}Premium Member{% else %}Member{% endif %}
+        </span>
+        <h2 class="font-headline font-extrabold" style="font-size: 1.875rem; color: #191c1f; letter-spacing: -0.025em;">{{ user_display_name|default:user.username }}</h2>
+        <p class="font-body mt-1" style="color: #747688;">{{ user.email }}</p>
+      </div>
+    </section>
+
+    <!-- Connection Status Bento Card -->
+    <section class="mt-8">
+      <div class="rounded-xl p-4 d-flex flex-column gap-3 position-relative overflow-hidden" style="background: #f2f3f8;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2rem; height: 2rem; background: #1DB954;">
+            <i class="fab fa-spotify text-white" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 1.125rem;">Spotify Status</span>
+        </div>
+        <div class="d-flex flex-column gap-1">
+          <p class="font-body font-medium mb-0" style="font-size: 1.125rem; color: #191c1f;">
+            {% if has_spotify %}Currently Connected{% else %}Currently Disconnected{% endif %}
+          </p>
+          <p class="font-body mb-0" style="font-size: 0.875rem; color: #747688; line-height: 1.5;">
+            {% if has_spotify %}
+              Your Spotify account is connected and synced.
+            {% else %}
+              Connect to sync your playlists and share your groove with the party.
+            {% endif %}
+          </p>
+        </div>
+        {% if not has_spotify %}
+          <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="text-white px-6 py-3 rounded-pill font-headline font-bold d-flex align-items-center justify-content-center gap-2 mt-2 text-decoration-none" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08);">
+            Connect Spotify
+            <i class="fas fa-external-link-alt" style="font-size: 1.25rem;"></i>
+          </a>
+        {% endif %}
+        <!-- Asymmetric Decorative Element -->
+        <div class="position-absolute" style="top: -2.5rem; right: -2.5rem; width: 10rem; height: 10rem; background: rgba(0, 64, 224, 0.03); border-radius: 50%; filter: blur(3rem);"></div>
+      </div>
+    </section>
+
+    <!-- Settings List (No-Line Grid) -->
+    <section class="mt-10 d-flex flex-column gap-2">
+      <h3 class="font-headline font-bold px-2 mb-4" style="font-size: 1.25rem;">Preferences</h3>
+
+      <a href="{% url 'account_email' %}" class="w-100 d-flex align-items-center justify-content-between p-4 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #eceef3;">
+            <i class="fas fa-envelope" style="color: #0040e0;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Edit Email</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
+      </a>
+
+      <a href="{% if not user.has_usable_password %}{% url 'account_set_password' %}{% else %}{% url 'account_change_password' %}{% endif %}" class="w-100 d-flex align-items-center justify-content-between p-4 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #eceef3;">
+            <i class="fas fa-lock" style="color: #0040e0;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">
+            {% if not user.has_usable_password %}Set Password{% else %}Change Password{% endif %}
+          </span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
+      </a>
+
+      {% if has_spotify %}
+        <a href="{% url 'socialaccount_connections' %}" class="w-100 d-flex align-items-center justify-content-between p-4 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
+          <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #eceef3;">
+              <i class="fab fa-spotify" style="color: #0040e0;"></i>
+            </div>
+            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Social Connections</span>
+          </div>
+          <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
+        </a>
+      {% endif %}
+
+      <form method="post" action="{% url 'account_logout' %}" class="mt-6">
+        {% csrf_token %}
+        <button type="submit" class="w-100 d-flex align-items-center justify-content-between p-4 bg-white rounded-lg transition-colors" style="border: none;">
+          <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #ffdad6;">
+              <i class="fas fa-sign-out-alt" style="color: #ba1a1a;"></i>
+            </div>
+            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #ba1a1a;">Log Out</span>
+          </div>
+          <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- Branding Footer -->
+    <section class="mt-12 text-center opacity-40 grayscale">
+      <p class="font-label" style="font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.25rem; font-weight: 900;">DJJukebox v2.4.0</p>
+    </section>
+  </main>
 </div>
 {% endblock %}

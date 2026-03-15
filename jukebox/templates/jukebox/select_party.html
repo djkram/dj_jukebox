@@ -1,7 +1,9 @@
 {% extends "jukebox/admin_base.html" %}
 {% block page_title %}Selecciona una festa{% endblock %}
 {% block content %}
-<div class="container mt-4">
+
+<!-- Vista Desktop (ORIGINAL) -->
+<div class="container mt-4 d-none d-md-block">
     {% if parties %}
         <div class="row">
             {% for party in parties %}
@@ -29,6 +31,99 @@
             No hi ha festes disponibles!
         </div>
     {% endif %}
+</div>
+
+<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #191c1f;">
+  <main class="pt-6 pb-32 px-4 mx-auto" style="max-width: 32rem;">
+    <!-- Brand Logo Area -->
+    <section class="mb-10 text-center">
+      <div class="d-inline-flex align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center justify-center rounded-circle shadow-lg" style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2);">
+          <i class="fas fa-music text-white" style="font-size: 1.875rem;"></i>
+        </div>
+        <h1 class="font-headline font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; color: #191c1f;">DJJukebox</h1>
+      </div>
+      <p class="font-medium" style="color: #434656; opacity: 0.8;">Choose your vibe. Join the pulse.</p>
+    </section>
+
+    {% if parties %}
+      <!-- Featured Section (First Party - Bento Style) -->
+      {% with parties.0 as featured %}
+        <div class="mb-8">
+          <span class="d-block font-headline font-bold text-uppercase mb-3 ms-1" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">Live Now</span>
+          <a href="{% url 'set_party' featured.id %}" class="text-decoration-none">
+            <div class="position-relative overflow-hidden rounded-xl p-4 text-white shadow-xl cursor-pointer" style="background: #2e5bff; box-shadow: 0 10px 40px rgba(0, 64, 224, 0.1);">
+              <div class="position-absolute" style="top: 0; right: 0; margin-top: -4rem; margin-right: -4rem; width: 16rem; height: 16rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
+              <div class="position-relative" style="z-index: 10;">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                  <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">High Energy</div>
+                  <i class="fas fa-signal" style="color: rgba(255, 255, 255, 0.5);"></i>
+                </div>
+                <h2 class="font-headline font-bold mb-2" style="font-size: 1.875rem; letter-spacing: -0.01em;">{{ featured.name }}</h2>
+                <p class="mb-4" style="color: #efefff; opacity: 0.8; font-size: 0.875rem;">
+                  {% if featured.playlist %}Playlist: {{ featured.playlist.name }}{% else %}No playlist assigned{% endif %}
+                </p>
+                <div class="w-100 text-center fw-bold py-3 rounded-pill d-flex align-items-center justify-content-center gap-2 shadow-lg" style="background: white; color: #0040e0; transition: transform 0.2s;">
+                  Join Party
+                  <i class="fas fa-arrow-right" style="font-size: 0.875rem;"></i>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endwith %}
+
+      <!-- Party Selection List (Rest of parties) -->
+      {% if parties|length > 1 %}
+        <section class="d-flex flex-column gap-4">
+          <h3 class="font-headline font-bold mb-3 ms-1" style="font-size: 1.25rem;">Upcoming Parties</h3>
+
+          {% for party in parties %}
+            {% if not forloop.first %}
+              <!-- Party Card -->
+              <a href="{% url 'set_party' party.id %}" class="text-decoration-none">
+                <div class="bg-white rounded-lg p-4 d-flex flex-column gap-3 shadow-sm transition-all" style="border: 1px solid rgba(196, 197, 217, 0.1);">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="rounded-circle overflow-hidden flex-shrink-0" style="width: 3.5rem; height: 3.5rem; background: #eceef3;">
+                      <i class="fas fa-music d-flex align-items-center justify-center w-100 h-100" style="color: #0040e0; font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <h4 class="font-headline font-bold mb-0" style="font-size: 1.125rem; line-height: 1.2;">{{ party.name }}</h4>
+                      <div class="d-flex align-items-center gap-2 mt-1">
+                        <i class="fas fa-calendar-alt" style="color: #0040e0; font-size: 0.75rem;"></i>
+                        <span style="font-size: 0.75rem; color: #434656;">
+                          {% if party.date %}{{ party.date|date:"M d • h:i A" }}{% else %}Date TBD{% endif %}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-between py-2 px-3 rounded-md" style="background: #f2f3f8;">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="fas fa-list-ul" style="color: #006875; font-size: 0.875rem;"></i>
+                      <span class="fw-semibold" style="font-size: 0.75rem; color: #434656;">
+                        {% if party.playlist %}{{ party.playlist.name }}{% else %}No playlist{% endif %}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="w-100 text-center fw-bold py-3 rounded-pill transition-colors" style="background: #e7e8ed; color: #191c1f; font-size: 0.875rem;">
+                    Join Party
+                  </div>
+                </div>
+              </a>
+            {% endif %}
+          {% endfor %}
+        </section>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-calendar-times mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>
+        <h4 class="fw-bold mb-2" style="color: #191c1f;">No parties available</h4>
+        <p class="mb-0" style="color: #434656;">Check back soon for upcoming events!</p>
+      </div>
+    {% endif %}
+  </main>
 </div>
 
 <style>

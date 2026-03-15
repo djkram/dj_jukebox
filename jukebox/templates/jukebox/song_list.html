@@ -74,77 +74,7 @@
     </div>
   </div>
 
-  <!-- ESTADÍSTIQUES DE LA FESTA -->
-  <h3 class="mb-3">Estadístiques</h3>
   {% if songs %}
-    <div class="row g-2 mb-4">
-      <!-- Caixa de VOTS -->
-      <div class="col-md-6 col-lg-3">
-        <div class="card shadow-sm" style="border-left: 4px solid {% if votes_left == 0 %}#dc3545{% else %}#4e73df{% endif %}; border-top: none; border-right: none; border-bottom: none;">
-          <div class="card-body p-2">
-            <div class="{% if votes_left == 0 %}text-danger{% else %}text-primary{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-              VOTS DISPONIBLES
-            </div>
-            <div class="fs-2 fw-bold mb-1" style="line-height: 1;">{{ votes_left }}</div>
-            <a href="{% url 'buy_votes' %}" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
-              <i class="fas fa-arrow-up"></i> Obtén vots
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Caixa de COINS -->
-      <div class="col-md-6 col-lg-3">
-        <div class="card shadow-sm" style="border-left: 4px solid {% if credits == 0 %}#dc3545{% else %}#f6c23e{% endif %}; border-top: none; border-right: none; border-bottom: none;">
-          <div class="card-body p-2">
-            <div class="{% if credits == 0 %}text-danger{% else %}text-warning{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-              COINS DISPONIBLES
-            </div>
-            <div class="fs-2 fw-bold mb-1" style="line-height: 1;">{{ credits }}</div>
-            <a href="{% url 'buy_votes' %}" class="btn btn-outline-warning btn-sm py-0 px-2" style="font-size: 0.75rem;">
-              <i class="fas fa-shopping-cart"></i> Comprar Coins
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Caixa de CANÇONS SONADES -->
-      <div class="col-md-4 col-lg-2">
-        <div class="card shadow-sm" style="border-left: 4px solid #1cc88a; border-top: none; border-right: none; border-bottom: none;">
-          <div class="card-body p-2">
-            <div class="text-success fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-              CANÇONS SONADES
-            </div>
-            <div class="fs-2 fw-bold" style="line-height: 1;">{{ songs_played }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Caixa de VOTS EMESOS -->
-      <div class="col-md-4 col-lg-2">
-        <div class="card shadow-sm" style="border-left: 4px solid #36b9cc; border-top: none; border-right: none; border-bottom: none;">
-          <div class="card-body p-2">
-            <div class="text-info fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-              VOTS EMESOS TEUS
-            </div>
-            <div class="fs-2 fw-bold" style="line-height: 1;">{{ user_votes_count }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Caixa de TEMES A LA MALETA -->
-      <div class="col-md-4 col-lg-2">
-        <div class="card shadow-sm" style="border-left: 4px solid #5a5c69; border-top: none; border-right: none; border-bottom: none;">
-          <div class="card-body p-2">
-            <div class="text-secondary fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-              TEMES A LA MALETA
-            </div>
-            <div class="fs-2 fw-bold" style="line-height: 1;">{{ total_songs }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- MALETA DE CANÇONS -->
     <h3 class="mb-3 mt-4">🎵 Maleta de temes per la festa</h3>
 

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Party Name - Notifications</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-container": "#efefff",
+              "inverse-on-surface": "#eff0f5",
+              "surface-dim": "#d8dadf",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#b8c3ff",
+              "surface-container-highest": "#e1e2e7",
+              "on-surface": "#191c1f",
+              "outline": "#747688",
+              "surface-container-lowest": "#ffffff",
+              "error": "#ba1a1a",
+              "secondary-fixed-dim": "#00daf3",
+              "on-secondary-fixed": "#001f24",
+              "tertiary": "#5e24e1",
+              "background": "#f8f9fe",
+              "on-tertiary-container": "#f5edff",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3134",
+              "primary-fixed": "#dde1ff",
+              "surface-tint": "#124af0",
+              "on-secondary-fixed-variant": "#004f58",
+              "on-primary-fixed": "#001356",
+              "on-secondary-container": "#00616d",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e7e8ed",
+              "surface-variant": "#e1e2e7",
+              "on-background": "#191c1f",
+              "on-tertiary-fixed": "#20005f",
+              "primary": "#0040e0",
+              "on-error-container": "#93000a",
+              "secondary": "#006875",
+              "primary-fixed-dim": "#b8c3ff",
+              "on-surface-variant": "#434656",
+              "on-secondary": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface": "#f8f9fe",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "surface-container-low": "#f2f3f8",
+              "tertiary-fixed-dim": "#cdbdff",
+              "tertiary-container": "#7747fa",
+              "surface-bright": "#f8f9fe",
+              "surface-container": "#eceef3",
+              "on-primary-fixed-variant": "#0035be",
+              "tertiary-fixed": "#e8deff",
+              "outline-variant": "#c4c5d9",
+              "secondary-container": "#00e3fd",
+              "secondary-fixed": "#9cf0ff",
+              "primary-container": "#2e5bff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #f8f9fe;
+        color: #191c1f;
+      }
+      .font-headline { font-family: 'Epilogue', sans-serif; }
+      .glass-nav {
+        background: rgba(248, 249, 254, 0.7);
+        backdrop-filter: blur(20px);
+      }
+      .pulse-shadow {
+        box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<nav class="sticky top-0 z-50 glass-nav px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-primary">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline text-xl tracking-tight text-on-surface">Party Name</h1>
+</div>
+<div class="flex items-center">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container text-on-primary-container relative">
+<span class="material-symbols-outlined" data-icon="notifications" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+</div>
+</nav>
+<main class="px-6 pt-8 max-w-2xl mx-auto">
+<!-- Header Section -->
+<header class="mb-10">
+<span class="text-tertiary font-semibold text-xs uppercase tracking-widest mb-2 block">Updates</span>
+<h2 class="font-headline text-4xl font-extrabold tracking-tighter leading-none mb-2">Activity</h2>
+<p class="text-on-surface-variant text-sm">Stay in the loop with the pulse of the party.</p>
+</header>
+<!-- Notifications Bento-ish List -->
+<div class="space-y-6">
+<!-- Notification Item: Song Accepted -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-xl pulse-shadow flex items-start gap-5 border border-transparent hover:border-primary/10 transition-all duration-300">
+<div class="flex-shrink-0 w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-2xl" data-icon="library_add_check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">library_add_check</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="text-sm font-bold text-on-surface tracking-tight">Song "Levitating" accepted!</p>
+<span class="text-[10px] font-medium text-outline">2m ago</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed mb-4">The DJ just added your request to the main queue. Get ready to dance!</p>
+<div class="flex items-center gap-2">
+<div class="h-8 px-4 rounded-full bg-surface-container flex items-center gap-2 text-xs font-semibold text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="play_circle">play_circle</span>
+                             Up Next
+                        </div>
+</div>
+</div>
+</div>
+<!-- Notification Item: Vote -->
+<div class="group relative bg-surface-container-low p-6 rounded-xl flex items-start gap-5 border border-transparent transition-all duration-300">
+<div class="flex-shrink-0 w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-2xl" data-icon="thumb_up" data-weight="fill" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="text-sm font-bold text-on-surface tracking-tight">Someone voted for your request</p>
+<span class="text-[10px] font-medium text-outline">15m ago</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">Your request "Starboy" gained 5 new upvotes from the crowd.</p>
+</div>
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover" data-alt="User profile avatar circle small" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdzYR4B-Q1XXoxXZ5yR0bOB-Vf87Nk8KEdzAelgS9vyopalRrxY39213CuCIxcbBPBCfimS7s1s9Ww_LFH_cSobbUOHKRcQN__G2QRcjz4GD-YN9j9mC67WL01S8105znyT0kZQdzbav7HlwWZScv6XsiuQaxNeaospucZHIS5qR75h6puytCjtJmHlkv2u2IX3TojcstUfL44dxbpLS0i9D_oBPxD9EOINs3F-NrzTcY9MwQaSayXlPa3Zq1qk8ezzeB2oBIqHmI"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover" data-alt="User profile avatar circle small" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALujrtXOEdZ8lvtcCnOgdjuJheHw8Rt2hvCnfrwrIrikL7fySCoJqUEV46H9gZhrebOw_apb5QhmD7Rtu879jNWrLlUQrl1aD_QsdYeBWoIj3S9kCnJJhfPlvTcfbkwbZNJgBB8W8gZaEs-iXzjf9gbWMFzBUJ-YFoKg_AKwOzqRpxYoOftVum4B5iN-6wCLeCZpO1sGIahN3jlzvaDMJo9bchh_5EjlebGtBH7cvJKGgODzdJoKR2vuvdINO6q05qULHoUS9EAmw"/>
+</div>
+</div>
+<!-- Notification Item: Coins -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-xl pulse-shadow flex items-start gap-5 border border-transparent hover:border-tertiary/10 transition-all duration-300">
+<div class="flex-shrink-0 w-14 h-14 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined text-2xl" data-icon="toll" data-weight="fill" style="font-variation-settings: 'FILL' 1;">toll</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="text-sm font-bold text-on-surface tracking-tight">You earned 10 bonus coins</p>
+<span class="text-[10px] font-medium text-outline">1h ago</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">Early Bird Reward: You arrived before the main set started!</p>
+</div>
+<div class="bg-tertiary/5 px-3 py-1 rounded-lg">
+<span class="text-tertiary font-bold text-sm">+10</span>
+</div>
+</div>
+<!-- Section Label for older -->
+<div class="pt-4 pb-2">
+<h3 class="text-xs font-bold text-outline uppercase tracking-widest">Yesterday</h3>
+</div>
+<!-- Older Activity -->
+<div class="group relative bg-surface-container p-6 rounded-xl flex items-start gap-5 opacity-80 hover:opacity-100 transition-all">
+<div class="flex-shrink-0 w-14 h-14 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl" data-icon="person_add">person_add</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="text-sm font-bold text-on-surface tracking-tight">New follower: Alex River</p>
+<span class="text-[10px] font-medium text-outline">24h ago</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">Your music taste is gaining traction. 12 people now follow your requests.</p>
+</div>
+</div>
+</div>
+<!-- Call to Action / Featured Card -->
+<div class="mt-12 p-8 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary pulse-shadow relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline text-2xl font-bold mb-2">Request a Jam</h3>
+<p class="text-on-primary-container/80 text-sm mb-6 max-w-[200px]">Got a song in mind? Be the life of the party.</p>
+<button class="bg-white text-primary px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    Create Request
+                </button>
+</div>
+<!-- Decorative circle -->
+<div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute right-6 top-6 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="music_note">music_note</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 h-20 glass-nav border-t border-outline-variant/15 flex items-center justify-around px-4 z-50">
+<a class="flex flex-col items-center gap-1 text-outline transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="music_note">music_note</span>
+<span class="text-[10px] font-medium">Songs</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-outline transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="swipe">swipe</span>
+<span class="text-[10px] font-medium">Match</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="text-[10px] font-medium">Request</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-outline transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

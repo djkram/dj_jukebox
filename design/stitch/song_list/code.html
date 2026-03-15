@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8f9fe;
+            color: #191c1f;
+            -webkit-font-smoothing: antialiased;
+        }
+        .headline-font { font-family: 'Epilogue', sans-serif; }
+        .glass-nav {
+            background: rgba(248, 249, 254, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .pulse-shadow {
+            box-shadow: 0 10px 20px -5px rgba(0, 64, 224, 0.08);
+        }
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-container": "#efefff",
+                        "inverse-on-surface": "#eff0f5",
+                        "surface-dim": "#d8dadf",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#b8c3ff",
+                        "surface-container-highest": "#e1e2e7",
+                        "on-surface": "#191c1f",
+                        "outline": "#747688",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#00daf3",
+                        "on-secondary-fixed": "#001f24",
+                        "tertiary": "#5e24e1",
+                        "background": "#f8f9fe",
+                        "on-tertiary-container": "#f5edff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3134",
+                        "primary-fixed": "#dde1ff",
+                        "surface-tint": "#124af0",
+                        "on-secondary-fixed-variant": "#004f58",
+                        "on-primary-fixed": "#001356",
+                        "on-secondary-container": "#00616d",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e7e8ed",
+                        "surface-variant": "#e1e2e7",
+                        "on-background": "#191c1f",
+                        "on-tertiary-fixed": "#20005f",
+                        "primary": "#0040e0",
+                        "on-error-container": "#93000a",
+                        "secondary": "#006875",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "on-surface-variant": "#434656",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9fe",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "surface-container-low": "#f2f3f8",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "tertiary-container": "#7747fa",
+                        "surface-bright": "#f8f9fe",
+                        "surface-container": "#eceef3",
+                        "on-primary-fixed-variant": "#0035be",
+                        "tertiary-fixed": "#e8deff",
+                        "outline-variant": "#c4c5d9",
+                        "secondary-container": "#00e3fd",
+                        "secondary-fixed": "#9cf0ff",
+                        "primary-container": "#2e5bff"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- Top App Bar (Shared Component - Shell) -->
+<header class="sticky top-0 z-50 glass-nav px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="menu">menu</span>
+<h1 class="headline-font text-xl font-bold tracking-tight">Party Name</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="notifications">notifications</span>
+</div>
+</header>
+<main class="px-6 space-y-8 mt-4">
+<!-- Welcome & Branding -->
+<section class="space-y-1">
+<span class="text-tertiary font-bold text-xs uppercase tracking-widest headline-font">Now Streaming</span>
+<h2 class="headline-font text-4xl font-extrabold tracking-tighter leading-none">Friday Night Live</h2>
+</section>
+<!-- Stats Grid (Votes & Coins) -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-5 rounded-lg pulse-shadow border-b-4 border-primary/10">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="how_to_vote" style="font-variation-settings: 'FILL' 1;">how_to_vote</span>
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Available</span>
+</div>
+<p class="headline-font text-2xl font-bold">3 Votes</p>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-lg pulse-shadow border-b-4 border-secondary-container/30">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary" data-icon="monetization_on" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-xs font-bold text-outline uppercase tracking-wider">Wallet</span>
+</div>
+<div class="flex items-center justify-between gap-2">
+<p class="headline-font text-2xl font-bold">50 Coins</p>
+<button class="bg-primary text-on-primary rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-tighter">Get More</button>
+</div>
+</div>
+</section>
+<!-- Search Bar -->
+<section>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+<input class="w-full bg-surface-container text-on-surface-variant placeholder:text-outline border-none rounded-full py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 transition-all outline-none body-md" placeholder="Search songs, artists, or genres..." type="text"/>
+</div>
+</section>
+<!-- Song List Header -->
+<section class="flex items-center justify-between">
+<h3 class="headline-font text-xl font-bold">Up Next</h3>
+<span class="material-symbols-outlined text-outline cursor-pointer" data-icon="filter_list">filter_list</span>
+</section>
+<!-- Song List -->
+<section class="space-y-4">
+<!-- Song Card 1 (Active/Trending) -->
+<div class="group bg-surface-container-lowest p-4 rounded-lg flex items-center gap-4 pulse-shadow border-l-4 border-primary transition-all">
+<div class="relative h-16 w-16 flex-shrink-0">
+<img alt="Album Cover" class="h-full w-full object-cover rounded-md" data-alt="Vibrant neon electronic music album cover artwork" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATYLs4CRQ7Qgq_qdyNTW_KitenzVuLmtTPdtOLc7xw2SOvq1J2MUvxA_JwfVY1zdDE-IJZ7uQ8gaiEvNibJDPgKxpKcvOeztQ9Gne2GyQ2WxuOk8JhO47i8UVhLQJ3jPKSF656EK0Pv7HY4Ekl_BKcPw89WdaWFwPtVDOlRc_ToxOntta7lzcN215TJTG6YCetb0un0AtqT9gK4KxA-OeqjCDKlJ5AIb3tvEtK1HpwMRXQeQVC3IWVTw0oRjS8YzQ227WIgeU116k"/>
+<div class="absolute inset-0 bg-primary/20 rounded-md flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="bar_chart" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+</div>
+</div>
+<div class="flex-grow min-w-0">
+<h4 class="font-bold text-on-surface truncate body-md">Midnight City</h4>
+<p class="text-outline text-sm truncate">M83 • Electronic</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="material-symbols-outlined text-primary text-xs" data-icon="trending_up">trending_up</span>
+<span class="text-xs font-bold text-primary">128 Votes</span>
+</div>
+</div>
+<button class="flex-shrink-0 bg-gradient-to-br from-primary to-primary-container text-on-primary px-5 py-2 rounded-full font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                    Vote
+                </button>
+</div>
+<!-- Song Card 2 -->
+<div class="group bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container">
+<div class="h-16 w-16 flex-shrink-0">
+<img alt="Album Cover" class="h-full w-full object-cover rounded-md grayscale group-hover:grayscale-0 transition-all" data-alt="Abstract cinematic music album cover with dark tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrv1F2R5CzbltXMpUPjHGGl3LxZ43oWnxUQbKwQ9p3UCOeUW-MoKxGjzv6lGMPsf2rc4MulinRtn3-RovuiwXLI3PD-i5HsO_vqufpr2k6zkMPtnaLSb28dQsnsP2nf6i6s9UJt-yFGBkiw3dihOERvPyog_bIMTnXu-QfcT_n332Isvuv5mXlJKV8NfvkbiB3nIxcUHUei_WGrkXarhP0qAyoq9zCshS4K9jWXMqS0HZI74CMKXpUD970MgKyVHFpGgpkVdzCOao"/>
+</div>
+<div class="flex-grow min-w-0">
+<h4 class="font-bold text-on-surface truncate body-md">Levitating</h4>
+<p class="text-outline text-sm truncate">Dua Lipa • Pop</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-bold text-outline">85 Votes</span>
+</div>
+</div>
+<button class="flex-shrink-0 border-2 border-outline-variant text-primary px-5 py-2 rounded-full font-bold text-sm hover:border-primary transition-colors">
+                    Vote
+                </button>
+</div>
+<!-- Song Card 3 -->
+<div class="group bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container">
+<div class="h-16 w-16 flex-shrink-0">
+<img alt="Album Cover" class="h-full w-full object-cover rounded-md grayscale group-hover:grayscale-0 transition-all" data-alt="Modern jazz album cover with golden lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrifD6gEQQWCIrCJKgJbQPc_OMUp6DBKPcA6TcIs_k3HHZdteyj_DkH8UJfHOOog_WA8MHM6GyrbMmadzLqYhLwJnbQ1rNcOlM_GmCsdYHq8Uu0zMNuFw51NGo1-3vvvQm9yD3XqYv55apqzwA4TmA1Wve6Avo_0958DqRc_EFEYMZo4bo0PRt-dUo5p33LwNL6OZhEAsrs5SaeLIevImPbLCM8cVSGLjFEMDf44k0N7WBgK0BptPTjStRU0A1jqlUKiLcxMPE-Ng"/>
+</div>
+<div class="flex-grow min-w-0">
+<h4 class="font-bold text-on-surface truncate body-md">Save Your Tears</h4>
+<p class="text-outline text-sm truncate">The Weeknd • R&amp;B</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-bold text-outline">62 Votes</span>
+</div>
+</div>
+<button class="flex-shrink-0 border-2 border-outline-variant text-primary px-5 py-2 rounded-full font-bold text-sm hover:border-primary transition-colors">
+                    Vote
+                </button>
+</div>
+<!-- Song Card 4 -->
+<div class="group bg-surface-container-low p-4 rounded-lg flex items-center gap-4 transition-all hover:bg-surface-container">
+<div class="h-16 w-16 flex-shrink-0">
+<img alt="Album Cover" class="h-full w-full object-cover rounded-md grayscale group-hover:grayscale-0 transition-all" data-alt="Minimalist indie rock album cover art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlgmEvGYhRHg1ZKoknPU9Te7xRD1XvaBjhhM84qrpsOHNyZUBQxq633__Bjzg0f8UhaxYhsIqoP1RLtRfr2CiyUGahACaQezEYQg6qhvSKP7O2N-vay1I1XJyNSTA3DlzJonxdbStLDv-lHMTiQIia5R_hvgGwRNyNu9L6_Ho4ZRTGtcuqom8VN5FpzCZ3Y2UiPLoTG5gJXhA4HwD-FGPXo5hrZgB5Hcj_0uBx8PqsIpqzE4fN_VESxrVkFLndNoxGIZvQj-LVIxA"/>
+</div>
+<div class="flex-grow min-w-0">
+<h4 class="font-bold text-on-surface truncate body-md">Heat Waves</h4>
+<p class="text-outline text-sm truncate">Glass Animals • Alt</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs font-bold text-outline">41 Votes</span>
+</div>
+</div>
+<button class="flex-shrink-0 border-2 border-outline-variant text-primary px-5 py-2 rounded-full font-bold text-sm hover:border-primary transition-colors">
+                    Vote
+                </button>
+</div>
+</section>
+</main>
+<!-- Floating Player (Innovation Zone) -->
+<div class="fixed bottom-24 left-6 right-6 z-40 bg-on-surface/95 backdrop-blur-xl p-4 rounded-lg flex items-center gap-4 shadow-2xl shadow-primary/40">
+<div class="h-12 w-12 bg-primary rounded-md flex items-center justify-center animate-pulse">
+<span class="material-symbols-outlined text-white" data-icon="music_note" style="font-variation-settings: 'FILL' 1;">music_note</span>
+</div>
+<div class="flex-grow overflow-hidden">
+<p class="text-[10px] text-primary-fixed uppercase font-bold tracking-widest">Playing Now</p>
+<h5 class="text-white font-bold text-sm truncate leading-tight">Blinding Lights</h5>
+<p class="text-white/60 text-xs truncate">The Weeknd</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-white/40" data-icon="skip_previous">skip_previous</span>
+<span class="material-symbols-outlined text-white text-3xl" data-icon="pause_circle" style="font-variation-settings: 'FILL' 1;">pause_circle</span>
+<span class="material-symbols-outlined text-white/40" data-icon="skip_next">skip_next</span>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Shared Component - Shell) -->
+<nav class="fixed bottom-0 left-0 right-0 glass-nav border-t border-outline-variant/10 px-6 py-4 flex items-center justify-between z-50">
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="music_note" style="font-variation-settings: 'FILL' 1;">music_note</span>
+<span class="text-[10px] font-bold text-primary">Songs</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="swipe">swipe</span>
+<span class="text-[10px] font-bold">Match</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] font-bold">Request</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</div>
+</nav>
+</body></html>

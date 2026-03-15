@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-container": "#efefff",
+              "inverse-on-surface": "#eff0f5",
+              "surface-dim": "#d8dadf",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#b8c3ff",
+              "surface-container-highest": "#e1e2e7",
+              "on-surface": "#191c1f",
+              "outline": "#747688",
+              "surface-container-lowest": "#ffffff",
+              "error": "#ba1a1a",
+              "secondary-fixed-dim": "#00daf3",
+              "on-secondary-fixed": "#001f24",
+              "tertiary": "#5e24e1",
+              "background": "#f8f9fe",
+              "on-tertiary-container": "#f5edff",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3134",
+              "primary-fixed": "#dde1ff",
+              "surface-tint": "#124af0",
+              "on-secondary-fixed-variant": "#004f58",
+              "on-primary-fixed": "#001356",
+              "on-secondary-container": "#00616d",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e7e8ed",
+              "surface-variant": "#e1e2e7",
+              "on-background": "#191c1f",
+              "on-tertiary-fixed": "#20005f",
+              "primary": "#0040e0",
+              "on-error-container": "#93000a",
+              "secondary": "#006875",
+              "primary-fixed-dim": "#b8c3ff",
+              "on-surface-variant": "#434656",
+              "on-secondary": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface": "#f8f9fe",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "surface-container-low": "#f2f3f8",
+              "tertiary-fixed-dim": "#cdbdff",
+              "tertiary-container": "#7747fa",
+              "surface-bright": "#f8f9fe",
+              "surface-container": "#eceef3",
+              "on-primary-fixed-variant": "#0035be",
+              "tertiary-fixed": "#e8deff",
+              "outline-variant": "#c4c5d9",
+              "secondary-container": "#00e3fd",
+              "secondary-fixed": "#9cf0ff",
+              "primary-container": "#2e5bff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fe; color: #191c1f; }
+        h1, h2, h3 { font-family: 'Epilogue', sans-serif; }
+        .glass-nav {
+            background: rgba(248, 249, 254, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+        }
+        .shadow-pulse {
+            box-shadow: 0 10px 20px -5px rgba(0, 64, 224, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 glass-nav h-16 flex items-center px-6 justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer">menu</span>
+<h1 class="text-on-surface font-headline font-bold text-lg leading-none">Party Name</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-primary cursor-pointer">notifications</span>
+</div>
+</header>
+<main class="px-6 py-8 max-w-md mx-auto">
+<!-- Editorial Header -->
+<section class="mb-10">
+<span class="text-tertiary font-label font-bold text-xs uppercase tracking-widest mb-2 block">Admin Panel</span>
+<h2 class="text-4xl font-headline font-extrabold tracking-tight leading-tight -ml-1">Control the Rhythm.</h2>
+</section>
+<div class="space-y-6">
+<!-- Settings Card: Toggles -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-pulse border border-outline-variant/10">
+<div class="flex items-center justify-between">
+<div class="space-y-1">
+<p class="font-headline font-bold text-lg">Auto-Accept Requests</p>
+<p class="text-on-surface-variant text-sm font-body">Skip the queue approval</p>
+</div>
+<!-- Toggle Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:start-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Settings Card: Stepper -->
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/5">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
+<p class="font-headline font-bold text-lg">Vote Cost</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-2 rounded-full border border-outline-variant/10">
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="text-2xl font-headline font-bold">5</span>
+<span class="text-[10px] uppercase tracking-tighter text-on-surface-variant font-bold">Credits</span>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-full primary-gradient text-white shadow-lg">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<p class="text-on-surface-variant text-xs font-body italic px-2 text-center">Standard cost for guests to prioritize a song</p>
+</div>
+</div>
+<!-- Settings Card: Integration -->
+<div class="bg-surface-container p-6 rounded-xl relative overflow-hidden group">
+<!-- Abstract Accent Background -->
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+<div class="relative z-10 flex flex-col gap-5">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-on-surface flex items-center justify-center">
+<img alt="Spotify" class="w-6 h-6" data-alt="Green circular Spotify icon logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG9ek8rPF6zfBWOHBzLhm1hG-lINZdQj-dp6ZuM5dM30tjq8-dDlB7LxEV-a0vRK1ntZFhHm3mwjxerxxsk0aYEPqa3iiQKIunrQuhIb7JaQK4alAB5XkNi3qkR16qXGPETY3g0EAPC2NnKHipOEFXXiX70mKf2nC32pBGKKebUcOWDPDOCsAu5NAIswCN6piKlyloBCezvzkm3fmHSMHTEm4dXP8fzXk9oQvlMoqbzT_7IjH5ewxEjth6PDDsKrlKkJgvWPuEeEE"/>
+</div>
+<div>
+<p class="font-headline font-bold text-lg">Import Spotify Playlist</p>
+<p class="text-on-surface-variant text-sm">Sync your library instantly</p>
+</div>
+</div>
+<!-- Button with Loading State (Mocked via styling) -->
+<button class="w-full h-14 primary-gradient text-white rounded-full font-bold flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-all">
+<svg class="animate-spin h-5 w-5 text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+<span>Importing Library...</span>
+</button>
+</div>
+</div>
+<!-- Secondary Action Bento Block -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-high/50 p-4 rounded-lg flex flex-col items-center justify-center text-center gap-2 aspect-square">
+<span class="material-symbols-outlined text-primary scale-125">share</span>
+<span class="font-headline font-bold text-sm">Party Code</span>
+<span class="text-xs text-on-surface-variant">#JKBX24</span>
+</div>
+<div class="bg-surface-container-high/50 p-4 rounded-lg flex flex-col items-center justify-center text-center gap-2 aspect-square">
+<span class="material-symbols-outlined text-error scale-125">stop_circle</span>
+<span class="font-headline font-bold text-sm">End Party</span>
+<span class="text-xs text-on-surface-variant">Archive session</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 glass-nav border-t border-outline-variant/10 px-4 py-3 pb-8 z-50">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<div class="flex flex-col items-center gap-1 group cursor-pointer px-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">music_note</span>
+<span class="text-[10px] font-label font-medium text-on-surface-variant group-hover:text-primary">Songs</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer px-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">swipe</span>
+<span class="text-[10px] font-label font-medium text-on-surface-variant group-hover:text-primary">Match</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer px-4">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">add_circle</span>
+<span class="text-[10px] font-label font-medium text-on-surface-variant group-hover:text-primary">Request</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer px-4">
+<div class="bg-primary/10 rounded-full px-4 py-1 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[10px] font-label font-bold text-primary">Profile</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Floating Player Mini (Glassmorphism) -->
+<div class="fixed bottom-24 left-6 right-6 h-16 glass-nav border border-white/20 rounded-full flex items-center px-2 shadow-2xl z-40 max-w-md mx-auto">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-primary-container shrink-0">
+<img alt="Album Art" data-alt="Abstract colorful light leak pattern album cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqibGvnoo4hnXGv5ZCyePpZFH8OKEGRmE0LtcEz7J0P5-sGQJRK_3VoLtX9awct1APB2J2OCHjqAHaPWrsw0qECijqEDlsrjJV3F9q1q0PwronD_pGwUTCsqjNIuxiUQgSUpOs7mLk9LHztFXbvvEd8xniG3tOo6jhf4uaEa4piKomQcxjUbusstt5JNUk8xhh1YCanI0vhGk8H5pA50-9of3k0fzayEEArxquSKwmCn48Szk-2gibD0I4LQkr8RhYVPY7xDyxiVc"/>
+</div>
+<div class="ml-3 flex-grow min-w-0">
+<p class="text-xs font-bold truncate">Neon Afterglow</p>
+<p class="text-[10px] text-on-surface-variant truncate">The Electric Collective</p>
+</div>
+<div class="flex items-center gap-2 pr-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">skip_next</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full primary-gradient text-white shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+</div>
+</div>
+</body></html>

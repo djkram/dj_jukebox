@@ -709,25 +709,19 @@
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
                     <a href="{% url 'song_list' %}">
                         <i class="fas fa-music"></i>
-                        <span>Songs</span>
+                        <span>Cançons</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                     <a href="{% url 'song_swipe' %}">
                         <i class="fas fa-random"></i>
-                        <span>Match</span>
+                        <span>Cercar</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                     <a href="{% url 'request_song' %}">
                         <i class="fas fa-plus-circle"></i>
-                        <span>Request</span>
-                    </a>
-                </div>
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <a href="{% url 'profile' %}">
-                        <i class="fas fa-user"></i>
-                        <span>Profile</span>
+                        <span>Petició</span>
                     </a>
                 </div>
                 {% if user.is_superuser %}
@@ -738,6 +732,12 @@
                     </a>
                 </div>
                 {% endif %}
+                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-user"></i>
+                        <span>Perfil</span>
+                    </a>
+                </div>
             </div>
         </nav>
         <!-- End Mobile Bottom Navigation -->

@@ -192,18 +192,18 @@
         <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border-b-4" style="border-color: rgba(0, 227, 253, 0.3);">
           <div class="flex items-center justify-between mb-2">
             <i class="fas fa-coins text-xl" style="color: #006875;"></i>
-            <span class="text-xs font-bold uppercase tracking-wider" style="color: #747688;">Wallet</span>
+            <span class="text-xs font-bold uppercase tracking-wider" style="color: #747688;">Moneder</span>
           </div>
           <div class="flex items-center justify-between gap-2">
             <p class="font-headline text-2xl font-bold mb-0" style="color: #191c1f;">{{ credits }}</p>
-            <a href="{% url 'buy_votes' %}" class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-tighter" style="background: #0040e0; color: white;">Get</a>
+            <a href="{% url 'buy_votes' %}" class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-tighter" style="background: #0040e0; color: white;">Compra</a>
           </div>
         </div>
       </section>
 
       <!-- Song List Header -->
       <section class="flex items-center justify-between mb-4">
-        <h3 class="font-headline text-xl font-bold" style="color: #191c1f;">Up Next</h3>
+        <h3 class="font-headline text-xl font-bold" style="color: #191c1f;">Properes</h3>
         <i class="fas fa-filter text-lg cursor-pointer" style="color: #747688;"></i>
       </section>
 
@@ -236,7 +236,7 @@
                   {% if forloop.first %}
                     <i class="fas fa-trending-up text-xs" style="color: #0040e0;"></i>
                   {% endif %}
-                  <span class="text-xs font-bold" style="color: {% if forloop.first %}#0040e0{% else %}#747688{% endif %};">{{ song.num_votes }} Votes</span>
+                  <span class="text-xs font-bold" style="color: {% if forloop.first %}#0040e0{% else %}#747688{% endif %};">{{ song.num_votes }} Vots</span>
                   {% if song.bpm %}
                     <span class="text-xs" style="color: #747688;">• {{ song.bpm|floatformat:0 }} BPM</span>
                   {% endif %}
@@ -247,16 +247,16 @@
                   <form method="post">{% csrf_token %}
                     <input type="hidden" name="vote_song_id" value="{{ song.id }}">
                     <button type="submit" class="px-5 py-2 rounded-full font-bold text-sm shadow-lg transition-transform active:scale-95" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2);">
-                      Vote
+                      Vota
                     </button>
                   </form>
                 {% elif credits == 0 %}
                   <button class="border-2 px-5 py-2 rounded-full font-bold text-sm" style="border-color: #c4c5d9; color: #747688;" disabled>
-                    <i class="fas fa-lock me-1"></i>Locked
+                    <i class="fas fa-lock me-1"></i>Bloquejat
                   </button>
                 {% else %}
                   <a href="{% url 'buy_votes' %}" class="border-2 px-5 py-2 rounded-full font-bold text-sm hover:border-primary transition-colors" style="border-color: #c4c5d9; color: #0040e0; text-decoration: none;">
-                    Get Votes
+                    Obtenir Vots
                   </a>
                 {% endif %}
               </div>

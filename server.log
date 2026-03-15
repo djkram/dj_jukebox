@@ -1,0 +1,13 @@
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+[BUY_VOTES] Stripe API key length: 107
+[BUY_VOTES] Stripe API key starts with: sk_test
+[13/Mar/2026 19:57:36] "GET /buy-coins/ HTTP/1.1" 200 21335
+[13/Mar/2026 19:57:52] "GET /songs/ HTTP/1.1" 200 27337
+[BUY_VOTES] Stripe API key length: 107
+[BUY_VOTES] Stripe API key starts with: sk_test
+[13/Mar/2026 19:57:57] "GET /buy-coins/ HTTP/1.1" 200 21335
+[BUY_VOTES] Stripe API key length: 107
+[BUY_VOTES] Stripe API key starts with: sk_test
+[13/Mar/2026 19:58:07] "GET /buy-coins/ HTTP/1.1" 200 21335
+[13/Mar/2026 19:58:09] "GET /songs/ HTTP/1.1" 200 27337

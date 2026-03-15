@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-container": "#efefff",
+              "inverse-on-surface": "#eff0f5",
+              "surface-dim": "#d8dadf",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#b8c3ff",
+              "surface-container-highest": "#e1e2e7",
+              "on-surface": "#191c1f",
+              "outline": "#747688",
+              "surface-container-lowest": "#ffffff",
+              "error": "#ba1a1a",
+              "secondary-fixed-dim": "#00daf3",
+              "on-secondary-fixed": "#001f24",
+              "tertiary": "#5e24e1",
+              "background": "#f8f9fe",
+              "on-tertiary-container": "#f5edff",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3134",
+              "primary-fixed": "#dde1ff",
+              "surface-tint": "#124af0",
+              "on-secondary-fixed-variant": "#004f58",
+              "on-primary-fixed": "#001356",
+              "on-secondary-container": "#00616d",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e7e8ed",
+              "surface-variant": "#e1e2e7",
+              "on-background": "#191c1f",
+              "on-tertiary-fixed": "#20005f",
+              "primary": "#0040e0",
+              "on-error-container": "#93000a",
+              "secondary": "#006875",
+              "primary-fixed-dim": "#b8c3ff",
+              "on-surface-variant": "#434656",
+              "on-secondary": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface": "#f8f9fe",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "surface-container-low": "#f2f3f8",
+              "tertiary-fixed-dim": "#cdbdff",
+              "tertiary-container": "#7747fa",
+              "surface-bright": "#f8f9fe",
+              "surface-container": "#eceef3",
+              "on-primary-fixed-variant": "#0035be",
+              "tertiary-fixed": "#e8deff",
+              "outline-variant": "#c4c5d9",
+              "secondary-container": "#00e3fd",
+              "secondary-fixed": "#9cf0ff",
+              "primary-container": "#2e5bff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fe; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .text-glow {
+            text-shadow: 0 0 15px rgba(0, 64, 224, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 glass-nav px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-headline text-xl font-bold tracking-tight text-on-surface">Party Name</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center px-6 py-4 max-w-md mx-auto w-full">
+<!-- Stats Row: Votes & Coins -->
+<div class="w-full flex justify-between items-center mb-8">
+<div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">how_to_vote</span>
+<span class="text-label-md font-bold text-on-surface">12 Votes</span>
+</div>
+<div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+<span class="text-label-md font-bold text-on-surface">450</span>
+</div>
+</div>
+<!-- Match Card Container (Tinder-like) -->
+<div class="relative w-full aspect-[3/4] group">
+<!-- Background Stack Effect -->
+<div class="absolute inset-0 bg-surface-container-high rounded-xl rotate-3 scale-95 translate-y-2 opacity-40"></div>
+<div class="absolute inset-0 bg-surface-container-low rounded-xl -rotate-2 scale-[0.98] translate-y-1 opacity-70"></div>
+<!-- Main Card -->
+<div class="relative h-full w-full bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,64,224,0.06)] overflow-hidden flex flex-col">
+<!-- Album Art -->
+<div class="relative flex-1 overflow-hidden">
+<img alt="Album Cover" class="w-full h-full object-cover" data-alt="Vibrant abstract electronic music album cover art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkITS_Oqe86LuGhVIUEpKbbm7UZsdwgGPEoGZsbndbxNKJJTKIdkitwCSBrckxPUZB70ODGX91MEEOY-hF5KcFBTx8caHpbZdPFkd5GNLxDe2BxQwfxcyKYkjRegFItEcakqoWeknd67fzKE2AwFLCHmYRPEUXDNeCqzbArxs79vCwY1PlXeNZO5rIHZipK_d734iR0SODg0TbgKuj6hkf1h9i1I9HJn8i9JAzeoILKJyl1AVvQ1xxmIdyF5vL7qNaB_IOM7xGBHk"/>
+<!-- Live Badge -->
+<div class="absolute top-4 left-4 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 uppercase tracking-widest">
+<span class="w-1.5 h-1.5 rounded-full bg-on-secondary-container animate-pulse"></span>
+                        Trending
+                    </div>
+</div>
+<!-- Song Info -->
+<div class="p-6 flex flex-col gap-4">
+<div>
+<span class="text-tertiary font-bold text-xs uppercase tracking-widest mb-1 block">Electronic • Deep House</span>
+<h2 class="font-headline text-2xl font-extrabold text-on-surface leading-tight tracking-tight">Midnight Mirage</h2>
+<p class="font-body text-on-surface-variant font-medium">Solaris Pulse</p>
+</div>
+<!-- Audio Metadata -->
+<div class="flex items-center gap-6 py-2 border-t border-outline-variant/10">
+<div class="flex flex-col">
+<span class="text-[10px] text-outline font-bold uppercase tracking-tighter">Tempo</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-lg">speed</span>
+<span class="font-headline text-lg font-bold">124</span>
+<span class="text-xs font-medium text-outline">BPM</span>
+</div>
+</div>
+<div class="w-px h-8 bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-outline font-bold uppercase tracking-tighter">Harmonic Key</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-lg">music_note</span>
+<span class="font-headline text-lg font-bold">C minor</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-10 flex items-center justify-center gap-8 w-full">
+<!-- Skip Button -->
+<button class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface shadow-md hover:scale-110 transition-transform active:scale-95 group">
+<span class="material-symbols-outlined text-3xl group-hover:text-error transition-colors">close</span>
+</button>
+<!-- Play/Preview Toggle (Small) -->
+<button class="w-12 h-12 rounded-full border-2 border-primary/20 flex items-center justify-center text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<!-- Like Button -->
+<button class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-white shadow-[0_10px_30px_rgba(0,64,224,0.3)] hover:scale-110 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="glass-nav border-t border-outline-variant/10 px-4 pb-6 pt-3 grid grid-cols-4 w-full">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">music_note</span>
+<span class="text-[10px] font-bold">Songs</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">swipe</span>
+<span class="text-[10px] font-bold">Match</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-[10px] font-bold">Request</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+</body></html>

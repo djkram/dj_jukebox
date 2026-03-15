@@ -118,7 +118,7 @@
       </div>
       <div class="mt-4 text-center">
         <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">
-          {% if user.credits > 50 %}Premium Member{% else %}Member{% endif %}
+          {% if user.credits > 50 %}Membre Premium{% else %}Membre{% endif %}
         </span>
         <h2 class="font-headline font-extrabold" style="font-size: 1.875rem; color: #191c1f; letter-spacing: -0.025em;">{{ user_display_name|default:user.username }}</h2>
         <p class="font-body mt-1" style="color: #747688;">{{ user.email }}</p>
@@ -132,23 +132,23 @@
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2rem; height: 2rem; background: #1DB954;">
             <i class="fab fa-spotify text-white" style="font-size: 1.25rem;"></i>
           </div>
-          <span class="font-headline font-semibold" style="font-size: 1.125rem;">Spotify Status</span>
+          <span class="font-headline font-semibold" style="font-size: 1.125rem;">Estat Spotify</span>
         </div>
         <div class="d-flex flex-column gap-1">
           <p class="font-body font-medium mb-0" style="font-size: 1.125rem; color: #191c1f;">
-            {% if has_spotify %}Currently Connected{% else %}Currently Disconnected{% endif %}
+            {% if has_spotify %}Connectat Actualment{% else %}Desconnectat Actualment{% endif %}
           </p>
           <p class="font-body mb-0" style="font-size: 0.875rem; color: #747688; line-height: 1.5;">
             {% if has_spotify %}
-              Your Spotify account is connected and synced.
+              El teu compte de Spotify està connectat i sincronitzat.
             {% else %}
-              Connect to sync your playlists and share your groove with the party.
+              Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb la festa.
             {% endif %}
           </p>
         </div>
         {% if not has_spotify %}
           <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="text-white px-6 py-3 rounded-pill font-headline font-bold d-flex align-items-center justify-content-center gap-2 mt-2 text-decoration-none" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08);">
-            Connect Spotify
+            Connectar Spotify
             <i class="fas fa-external-link-alt" style="font-size: 1.25rem;"></i>
           </a>
         {% endif %}
@@ -159,14 +159,14 @@
 
     <!-- Settings List (No-Line Grid) -->
     <section class="mt-10 d-flex flex-column gap-2">
-      <h3 class="font-headline font-bold px-2 mb-4" style="font-size: 1.25rem;">Preferences</h3>
+      <h3 class="font-headline font-bold px-2 mb-4" style="font-size: 1.25rem;">Preferències</h3>
 
       <a href="{% url 'account_email' %}" class="w-100 d-flex align-items-center justify-content-between p-4 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
         <div class="d-flex align-items-center gap-3">
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #eceef3;">
             <i class="fas fa-envelope" style="color: #0040e0;"></i>
           </div>
-          <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Edit Email</span>
+          <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Editar Email</span>
         </div>
         <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
       </a>
@@ -177,7 +177,7 @@
             <i class="fas fa-lock" style="color: #0040e0;"></i>
           </div>
           <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">
-            {% if not user.has_usable_password %}Set Password{% else %}Change Password{% endif %}
+            {% if not user.has_usable_password %}Establir Contrasenya{% else %}Canviar Contrasenya{% endif %}
           </span>
         </div>
         <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
@@ -189,7 +189,7 @@
             <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #eceef3;">
               <i class="fab fa-spotify" style="color: #0040e0;"></i>
             </div>
-            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Social Connections</span>
+            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #191c1f;">Connexions Socials</span>
           </div>
           <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
         </a>
@@ -202,7 +202,7 @@
             <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 3rem; height: 3rem; background: #ffdad6;">
               <i class="fas fa-sign-out-alt" style="color: #ba1a1a;"></i>
             </div>
-            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #ba1a1a;">Log Out</span>
+            <span class="font-headline font-semibold" style="font-size: 1.125rem; color: #ba1a1a;">Tancar Sessió</span>
           </div>
           <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
         </button>

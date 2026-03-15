@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if recommended_songs %}
       {% with recommended_songs.0 as now_playing %}
         <section>
-          <span class="d-block font-bold text-uppercase mb-3" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">NOW SPINNING</span>
+          <span class="d-block font-bold text-uppercase mb-3" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">ARA SONANT</span>
           <div class="bg-white rounded-xl overflow-hidden d-flex flex-column" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
             <div class="d-flex p-3 gap-3">
               <div class="rounded-lg overflow-hidden flex-shrink-0" style="width: 6rem; height: 6rem; background: #eceef3;">
@@ -324,12 +324,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="p-3 border-top d-flex align-items-center justify-content-between" style="background: rgba(0, 64, 224, 0.05); border-color: rgba(196, 197, 217, 0.1) !important;">
               <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-heart" style="color: #0040e0; font-size: 0.875rem;"></i>
-                <span class="fw-bold" style="color: #0040e0;">{{ now_playing.num_votes }} Votes</span>
+                <span class="fw-bold" style="color: #0040e0;">{{ now_playing.num_votes }} Vots</span>
               </div>
               <form method="post" action="{% url 'mark_song_played' now_playing.id %}" class="mb-0">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 border-0" style="background: linear-gradient(to right, #0040e0, #2e5bff); color: white; font-size: 0.875rem;">
-                  PLAY NEXT <i class="fas fa-step-forward" style="font-size: 0.875rem;"></i>
+                  SEGÜENT <i class="fas fa-step-forward" style="font-size: 0.875rem;"></i>
                 </button>
               </form>
             </div>
@@ -342,8 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <section>
       <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
-          <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">UP NEXT</span>
-          <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Live Queue</h2>
+          <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">PROPERES</span>
+          <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Cua en Directe</h2>
         </div>
       </div>
       <div class="d-flex flex-column gap-3">
@@ -367,13 +367,13 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="d-flex flex-column align-items-end gap-0">
               <span class="fw-bold" style="color: #0040e0;">{{ song.num_votes }}</span>
-              <span class="text-uppercase fw-bold" style="font-size: 0.625rem; color: #747688;">VOTES</span>
+              <span class="text-uppercase fw-bold" style="font-size: 0.625rem; color: #747688;">VOTS</span>
             </div>
           </div>
         {% empty %}
           <div class="text-center py-4" style="color: #747688;">
             <i class="fas fa-inbox fa-2x mb-2"></i>
-            <p class="mb-0">No songs in queue</p>
+            <p class="mb-0">Sense cançons a la cua</p>
           </div>
         {% endfor %}
       </div>
@@ -382,15 +382,15 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Stats Grid -->
     <section class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
       <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Songs</div>
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Cançons</div>
         <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ total_songs }}</div>
       </div>
       <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Votes</div>
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Vots</div>
         <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ total_votes }}</div>
       </div>
       <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Played</div>
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Posades</div>
         <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ played_songs }}</div>
       </div>
     </section>
@@ -399,8 +399,8 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if recommended_songs|length > 1 %}
     <section>
       <div class="mb-4">
-        <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">SMART PICKS</span>
-        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Recommendations</h2>
+        <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">SELECCIONS INTEL·LIGENTS</span>
+        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Recomanacions</h2>
       </div>
       <div class="d-flex gap-3 overflow-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
         {% for song in recommended_songs|slice:"1:6" %}
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <form method="post" action="{% url 'mark_song_played' song.id %}">
               {% csrf_token %}
               <button type="submit" class="w-100 py-2 rounded-pill fw-bold border-0" style="background: #e7e8ed; color: #191c1f; font-size: 0.75rem;">
-                <i class="fas fa-play me-1"></i>Play
+                <i class="fas fa-play me-1"></i>Posa
               </button>
             </form>
           </div>
@@ -432,8 +432,8 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if played_songs_list %}
     <section>
       <div class="mb-4">
-        <span class="d-block font-bold text-uppercase mb-1" style="color: #1cc88a; font-size: 0.75rem; letter-spacing: 0.15em;">HISTORY</span>
-        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Recently Played</h2>
+        <span class="d-block font-bold text-uppercase mb-1" style="color: #1cc88a; font-size: 0.75rem; letter-spacing: 0.15em;">HISTORIAL</span>
+        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Sonades Recentment</h2>
       </div>
       <div class="d-flex flex-column gap-2">
         {% for song in played_songs_list|slice:":5" %}

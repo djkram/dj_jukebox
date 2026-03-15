@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-container": "#efefff",
+              "inverse-on-surface": "#eff0f5",
+              "surface-dim": "#d8dadf",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#b8c3ff",
+              "surface-container-highest": "#e1e2e7",
+              "on-surface": "#191c1f",
+              "outline": "#747688",
+              "surface-container-lowest": "#ffffff",
+              "error": "#ba1a1a",
+              "secondary-fixed-dim": "#00daf3",
+              "on-secondary-fixed": "#001f24",
+              "tertiary": "#5e24e1",
+              "background": "#f8f9fe",
+              "on-tertiary-container": "#f5edff",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3134",
+              "primary-fixed": "#dde1ff",
+              "surface-tint": "#124af0",
+              "on-secondary-fixed-variant": "#004f58",
+              "on-primary-fixed": "#001356",
+              "on-secondary-container": "#00616d",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e7e8ed",
+              "surface-variant": "#e1e2e7",
+              "on-background": "#191c1f",
+              "on-tertiary-fixed": "#20005f",
+              "primary": "#0040e0",
+              "on-error-container": "#93000a",
+              "secondary": "#006875",
+              "primary-fixed-dim": "#b8c3ff",
+              "on-surface-variant": "#434656",
+              "on-secondary": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface": "#f8f9fe",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "surface-container-low": "#f2f3f8",
+              "tertiary-fixed-dim": "#cdbdff",
+              "tertiary-container": "#7747fa",
+              "surface-bright": "#f8f9fe",
+              "surface-container": "#eceef3",
+              "on-primary-fixed-variant": "#0035be",
+              "tertiary-fixed": "#e8deff",
+              "outline-variant": "#c4c5d9",
+              "secondary-container": "#00e3fd",
+              "secondary-fixed": "#9cf0ff",
+              "primary-container": "#2e5bff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fe; }
+        h1, h2, h3 { font-family: 'Epilogue', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 glass">
+<div class="flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<h1 class="text-lg font-bold tracking-tight">Party Name</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</div>
+</div>
+</div>
+</header>
+<main class="px-6 pt-4 pb-32 space-y-8">
+<!-- Now Playing (Floating Pulse Card) -->
+<section>
+<span class="text-tertiary font-bold text-xs tracking-widest uppercase mb-3 block">NOW SPINNING</span>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden ambient-shadow flex flex-col">
+<div class="flex p-4 gap-4">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img alt="Album Cover" class="w-full h-full object-cover" data-alt="High contrast colorful electronic music album art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9HPWgX93AAXWVfRptDviSn32_dQ7kimznEZh6tZWoZphC2ZKwANHKtkb7uEoxnbwRdl9nWHRysDepmNadfpy_L6tH16hOKp8sd3L7Nj0WdOSpnNoutj36Fo6DB5cUW_LrVwPHZnxbGVZ2ZcV0rc2xRBKFPHnn4uhYJkWEYOfqJqWQJNlEEqmZeaWhrtWbubhF5hh08KWjgNHa1Dy4eagadn0ojFvixx0Sf6ljqAo8jQDAGWKdVg1QzSRr5FBu4BDFZWERHp3CeYw"/>
+</div>
+<div class="flex flex-col justify-center overflow-hidden">
+<h2 class="text-xl font-bold truncate">Midnight City</h2>
+<p class="text-on-surface-variant text-sm truncate">M83 • Synth-Pop</p>
+<div class="flex gap-3 mt-2">
+<span class="bg-secondary-container px-2 py-0.5 rounded text-[10px] font-bold text-on-secondary-container">126 BPM</span>
+<span class="bg-surface-container-high px-2 py-0.5 rounded text-[10px] font-bold text-on-surface-variant">4A (C#m)</span>
+</div>
+</div>
+</div>
+<div class="bg-primary-container/10 p-4 border-t border-outline-variant/10 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="favorite" data-weight="fill">favorite</span>
+<span class="font-bold text-primary">124 Votes</span>
+</div>
+<button class="bg-gradient-to-r from-primary to-primary-container text-white px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2">
+                        PLAY NEXT <span class="material-symbols-outlined text-sm" data-icon="skip_next">skip_next</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Live Queue Section -->
+<section>
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="text-tertiary font-bold text-xs tracking-widest uppercase block mb-1">UP NEXT</span>
+<h2 class="text-3xl font-bold tracking-tighter">Live Queue</h2>
+</div>
+<button class="text-primary font-bold text-sm">View All</button>
+</div>
+<div class="space-y-4">
+<!-- Queue Item 1 -->
+<div class="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg group">
+<div class="w-14 h-14 rounded-md overflow-hidden flex-shrink-0">
+<img alt="Queue Cover" class="w-full h-full object-cover" data-alt="Atmospheric stage lighting with purple hues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaPBHUeFVVbwJFxbUkWzgZca0xWS3J-m5aRKg3f3rOC-A7LPTHMz5V3sJUSkR_NhTKVQTsMETjjWOdM7XxPl-wUUCi0CNRDNTozx5buiRUot5H3pqyfJtf_ZaMGJGcdBceB7jScAtaVhcW6UZyfeedkaTVEfvUS077bTmREnv9oB3IMclYWRtiM-ZylR3OsptbP5QNkLqEKS3z-_56pTYZrUD2nfUWYYU-Ro6gW6ObbMQY23vMfYnLuTJkFBJtw2lTax9dInCU2lU"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">One More Time</h3>
+<p class="text-on-surface-variant text-xs truncate">Daft Punk • 123 BPM</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-bold text-primary">89</span>
+<span class="text-[10px] text-outline uppercase font-bold">VOTES</span>
+</div>
+</div>
+<!-- Queue Item 2 -->
+<div class="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg">
+<div class="w-14 h-14 rounded-md overflow-hidden flex-shrink-0">
+<img alt="Queue Cover" class="w-full h-full object-cover" data-alt="Vintage microphone in a smoky club" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLb4bLZT6v4-e15SZPIHEkbFw6_l6qKyNEvCXWthWr2BwZ-Rlm_QkWNAORNl9RSELOhsb-6UGzlu_xHwvMDhdiaULWdKb35PsXgCweJ_Lbce-o9fVjQSpmoP2cdlUyY1tMdMXzcUKaPBAqavtupPP38lS5Cd2apW-XOvHoyj72DoVRb84l9-63Fellqb-DJrDK93-8NQX7iMcMVFwjkNtUoAW81hPUDJRvwxWQXEuQUsDb19av_QO1aI_RVv8XQhHUQjQrO0wAP5A"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">Levitating</h3>
+<p class="text-on-surface-variant text-xs truncate">Dua Lipa • 103 BPM</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-bold text-primary">64</span>
+<span class="text-[10px] text-outline uppercase font-bold">VOTES</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Requests - Asymmetric Bento Style -->
+<section>
+<div class="mb-6">
+<span class="text-tertiary font-bold text-xs tracking-widest uppercase block mb-1">CROWD INPUT</span>
+<h2 class="text-3xl font-bold tracking-tighter">Active Requests</h2>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Large Request Card -->
+<div class="bg-surface-container-highest p-5 rounded-lg border-l-4 border-primary">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<div>
+<h4 class="font-bold">Sarah wants to hear:</h4>
+<p class="text-sm text-on-surface-variant">2 mins ago</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest px-3 py-1 rounded-full text-xs font-bold text-primary border border-outline-variant/20">
+                            $5 Tip
+                        </div>
+</div>
+<div class="mb-6">
+<p class="text-xl font-bold tracking-tight">Blinding Lights</p>
+<p class="text-on-surface-variant">The Weeknd</p>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-primary text-white py-4 rounded-full font-bold flex items-center justify-center gap-2 thumb-active">
+<span class="material-symbols-outlined" data-icon="check">check</span> ACCEPT
+                        </button>
+<button class="w-16 bg-surface-container-lowest text-error py-4 rounded-full font-bold flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+<!-- Secondary Request -->
+<div class="bg-surface-container p-4 rounded-lg flex items-center justify-between">
+<div class="flex-1 min-w-0">
+<p class="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Request by Alex</p>
+<p class="font-bold truncate">Starboy</p>
+</div>
+<div class="flex gap-2 ml-4">
+<button class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="check">check</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-error shadow-sm">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Persistent Destination) -->
+<nav class="fixed bottom-0 left-0 right-0 glass border-t border-outline-variant/10 px-6 pb-8 pt-4">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<div class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="music_note">music_note</span>
+<span class="text-[10px] font-bold text-on-surface-variant">Songs</span>
+</div>
+<div class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-primary" data-icon="swipe" data-weight="fill">swipe</span>
+<span class="text-[10px] font-bold text-primary">Match</span>
+</div>
+<div class="flex flex-col items-center gap-1 group relative -top-6">
+<div class="w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-tertiary flex items-center justify-center ambient-shadow border-4 border-surface">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="add_circle">add_circle</span>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant mt-1">Request</span>
+</div>
+<div class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="person">person</span>
+<span class="text-[10px] font-bold text-on-surface-variant">Profile</span>
+</div>
+<div class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+<span class="text-[10px] font-bold text-on-surface-variant">Panel</span>
+</div>
+</div>
+</nav>
+</body></html>

@@ -147,7 +147,7 @@
     <div class="w-full flex justify-between items-center mb-6">
       <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
         <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.875rem;"></i>
-        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="votes-count">{{ votes_left }} Votes</span>
+        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="votes-count">{{ votes_left }} Vots</span>
       </div>
       <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
         <i class="fas fa-coins" style="color: #006875; font-size: 0.875rem;"></i>
@@ -183,7 +183,7 @@
                 {% if forloop.first %}
                   <div class="position-absolute d-flex align-items-center gap-1 px-3 py-1 rounded-pill text-xs font-bold uppercase" style="top: 1rem; left: 1rem; background: #00e3fd; color: #00616d; letter-spacing: 0.05em; font-size: 0.75rem;">
                     <span class="rounded-circle animate-pulse" style="width: 0.375rem; height: 0.375rem; background: #00616d;"></span>
-                    Trending
+                    Tendència
                   </div>
                 {% endif %}
               </div>
@@ -191,7 +191,7 @@
               <!-- Song Info -->
               <div class="p-4 d-flex flex-column gap-3" style="background: white;">
                 <div>
-                  <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.1em;">{% if song.genre %}{{ song.genre }}{% else %}Music{% endif %}</span>
+                  <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.1em;">{% if song.genre %}{{ song.genre }}{% else %}Música{% endif %}</span>
                   <h2 class="font-headline font-extrabold mb-1" style="font-size: 1.5rem; line-height: 1.2; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
                   <p class="font-medium" style="color: #434656;">{{ song.artist }}</p>
                 </div>
@@ -212,7 +212,7 @@
                     {% if song.key %}
                       <div style="width: 1px; height: 2rem; background: rgba(196, 197, 217, 0.2);"></div>
                       <div class="d-flex flex-column">
-                        <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Key</span>
+                        <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Tonalitat</span>
                         <div class="d-flex align-items-center gap-1">
                           <i class="fas fa-music" style="color: #0040e0; font-size: 1.125rem;"></i>
                           <span class="font-headline font-bold" style="font-size: 1.125rem;">{{ song.key }}</span>
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       if (data.success) {
         // Actualitzar comptadors (mòbil i desktop)
-        if (votesCount) votesCount.textContent = isMobile ? (data.votes_left + ' Votes') : data.votes_left;
+        if (votesCount) votesCount.textContent = isMobile ? (data.votes_left + ' Vots') : data.votes_left;
         if (creditsCount) creditsCount.textContent = data.credits;
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');

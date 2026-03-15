@@ -18,3 +18,5 @@ truststore==0.10.4
 typing_extensions==4.14.1
 urllib3==2.5.0
 whitenoise==6.9.0
+cryptography==46.0.5
+PyJWT==2.12.1

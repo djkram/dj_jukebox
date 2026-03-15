@@ -1,4 +1,5 @@
 {% extends "jukebox/admin_base.html" %}
+{% load static %}
 {% block page_title %}Selecciona una festa{% endblock %}
 {% block content %}
 
@@ -38,13 +39,10 @@
   <main class="pt-6 pb-32 px-4 mx-auto" style="max-width: 32rem;">
     <!-- Brand Logo Area -->
     <section class="mb-10 text-center">
-      <div class="d-inline-flex align-items-center gap-2 mb-3">
-        <div class="d-flex align-items-center justify-center rounded-circle shadow-lg" style="width: 3rem; height: 3rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2);">
-          <i class="fas fa-music text-white" style="font-size: 1.875rem;"></i>
-        </div>
-        <h1 class="font-headline font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; color: #191c1f;">DJJukebox</h1>
+      <div class="d-inline-block mb-3 p-3 shadow-lg" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
+        <img src="{% static 'jukebox/img/DJJukebox_logo.png' %}" alt="DJ Jukebox" style="height: 48px; width: auto; display: block;">
       </div>
-      <p class="font-medium" style="color: #434656; opacity: 0.8;">Tria el teu ambient. Uneix-te al pols.</p>
+      <p class="font-medium" style="color: #434656; opacity: 0.8;">Escull la teva festa i fes sentir les teves preferències.</p>
     </section>
 
     {% if parties %}

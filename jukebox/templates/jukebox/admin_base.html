@@ -560,27 +560,15 @@
             <!-- Main Content -->
             <div id="content">
                 <!-- Topbar -->
-                <!-- Topbar - Nou Disseny -->
-                <nav class="glass-nav sticky top-0 z-40 px-4 py-3 mb-4">
-                    <div class="flex items-center justify-between max-w-screen-xl mx-auto">
-                        <!-- Hamburger Menu (Desktop) / Logo (Mobile) -->
-                        <div class="flex items-center gap-3">
-                            <button class="d-none d-md-block text-brand-blue p-2">
-                                <i class="fas fa-bars text-2xl"></i>
-                            </button>
-                            <div class="d-md-none">
-                                <button class="text-brand-blue p-2">
-                                    <i class="fas fa-bars text-xl"></i>
-                                </button>
-                            </div>
-                            {% block page_title_wrapper %}
-                            <h1 class="headline-font font-bold text-xl md:text-2xl text-on-surface">
-                                {% block page_title %}{% endblock %}
-                            </h1>
-                            {% endblock %}
-                        </div>
+                <!-- Topbar Desktop (original amb foto usuari) -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow d-none d-md-flex">
+                    {% block page_title_wrapper %}
+                    <div class="topbar-page-title">
+                        {% block page_title %}{% endblock %}
+                    </div>
+                    {% endblock %}
 
-                    <!-- Topbar Search (dins admin_base.html) -->
+                    <!-- Topbar Search -->
                     {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'dj_dashboard' %}
                     <form method="get" action="" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                       <div class="input-group">
@@ -602,18 +590,83 @@
                     </form>
                     {% endif %}
 
-
-                        <!-- Right Side - Notifications -->
-                        <div class="flex items-center gap-2">
-                            {% if user.is_authenticated %}
-                            <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
-                                <i class="fas fa-bell text-xl text-brand-blue"></i>
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - Notificacions -->
+                        {% if user.is_authenticated %}
+                        <li class="nav-item no-arrow mx-1">
+                            <a class="nav-link" href="{% url 'notifications' %}">
+                                <i class="fas fa-bell fa-fw"></i>
                                 {% if unread_notifications_count > 0 %}
-                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                                <span class="badge badge-danger badge-counter">{{ unread_notifications_count }}{% if unread_notifications_count > 9 %}+{% endif %}</span>
                                 {% endif %}
                             </a>
-                            {% endif %}
+                        </li>
+                        {% endif %}
+
+                        <!-- Nav Item - User Information -->
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user_display_name|default:user.username }}</span>
+                                {% if user_avatar_url %}
+                                <img class="img-profile rounded-circle"
+                                     src="{{ user_avatar_url }}"
+                                     alt="{{ user.username }}">
+                                {% else %}
+                                <span class="user-avatar-fallback">{{ user_avatar_initial|default:"U" }}</span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                 aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <!-- Topbar Mòbil (nou disseny glass) -->
+                <nav class="glass-nav d-md-none sticky top-0 z-40 px-4 py-3 mb-4">
+                    <div class="flex items-center justify-between">
+                        <!-- Hamburger + Title -->
+                        <div class="flex items-center gap-3">
+                            <button class="text-brand-blue p-2">
+                                <i class="fas fa-bars text-xl"></i>
+                            </button>
+                            <h1 class="headline-font font-bold text-lg text-on-surface mb-0">
+                                {{ selected_party.name|default:"Party Name" }}
+                            </h1>
                         </div>
+
+                        <!-- Notifications -->
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
+                            <i class="fas fa-bell text-xl text-brand-blue"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            {% endif %}
+                        </a>
+                        {% endif %}
                     </div>
                 </nav>
                 <!-- End of Topbar -->

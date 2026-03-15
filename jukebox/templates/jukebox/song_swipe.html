@@ -1,7 +1,9 @@
 {% extends "jukebox/admin_base.html" %}
 {% block page_title %}Busca Match{% endblock %}
 {% block content %}
-<div class="container-fluid">
+
+<!-- Vista Desktop (ORIGINAL) -->
+<div class="container-fluid d-none d-md-block">
   <!-- Indicadors de Coins i Vots -->
   <div class="row g-2 mb-3">
     <div class="col-6 col-md-4">
@@ -10,7 +12,7 @@
           <div class="{% if credits == 0 %}text-danger{% else %}text-warning{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
             COINS
           </div>
-          <div class="fs-2 fw-bold" style="line-height: 1;" id="credits-count">{{ credits }}</div>
+          <div class="fs-2 fw-bold" style="line-height: 1;" id="credits-count-desktop">{{ credits }}</div>
         </div>
       </div>
     </div>
@@ -20,7 +22,7 @@
           <div class="{% if votes_left == 0 %}text-danger{% else %}text-primary{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
             VOTS DISPONIBLES
           </div>
-          <div class="fs-2 fw-bold" style="line-height: 1;" id="votes-count">{{ votes_left }}</div>
+          <div class="fs-2 fw-bold" style="line-height: 1;" id="votes-count-desktop">{{ votes_left }}</div>
         </div>
       </div>
     </div>
@@ -38,14 +40,14 @@
         <div class="card-body p-2 d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
             <i class="fas fa-layer-group text-primary"></i>
-            <span class="fw-bold" id="progress-text">0 de {{ songs|length }}</span>
+            <span class="fw-bold" id="progress-text-desktop">0 de {{ songs|length }}</span>
           </div>
           <div class="flex-grow-1 mx-3">
             <div class="progress" style="height: 8px;">
-              <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+              <div id="progress-bar-desktop" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
             </div>
           </div>
-          <span class="badge bg-primary" id="remaining-count">{{ songs|length }}</span>
+          <span class="badge bg-primary" id="remaining-count-desktop">{{ songs|length }}</span>
         </div>
       </div>
     </div>
@@ -56,7 +58,7 @@
     <div class="col-lg-6">
       {% if songs %}
         <!-- Contenidor de cartes -->
-        <div id="card-stack" class="position-relative mb-4" style="height: 600px;">
+        <div id="card-stack-desktop" class="position-relative mb-4" style="height: 600px;">
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
@@ -104,7 +106,7 @@
           {% endfor %}
         </div>
 
-        <div id="message-area" class="text-center mt-3"></div>
+        <div id="message-area-desktop" class="text-center mt-3"></div>
 
         <!-- Botó flotant Undo -->
         <button id="undo-btn" class="btn btn-warning shadow-lg" style="position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%; display: none; z-index: 1000; padding: 0;">
@@ -138,15 +140,153 @@
   </div>
 </div>
 
+<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; display: flex; flex-direction: column;">
+  <main class="flex-1 flex flex-col items-center justify-center px-4 py-4" style="max-width: 28rem; margin: 0 auto; width: 100%;">
+    <!-- Stats Row: Votes & Coins -->
+    <div class="w-full flex justify-between items-center mb-6">
+      <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
+        <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.875rem;"></i>
+        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="votes-count">{{ votes_left }} Votes</span>
+      </div>
+      <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
+        <i class="fas fa-coins" style="color: #006875; font-size: 0.875rem;"></i>
+        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="credits-count">{{ credits }}</span>
+      </div>
+    </div>
+
+    {% if songs %}
+      <!-- Match Card Container (Tinder-like) -->
+      <div class="relative w-full mb-6" style="aspect-ratio: 3/4;">
+        <!-- Background Stack Effect -->
+        <div class="absolute inset-0 rounded-xl" style="background: #e7e8ed; transform: rotate(3deg) scale(0.95) translateY(0.5rem); opacity: 0.4;"></div>
+        <div class="absolute inset-0 rounded-xl" style="background: #f2f3f8; transform: rotate(-2deg) scale(0.98) translateY(0.25rem); opacity: 0.7;"></div>
+
+        <!-- Main Card -->
+        <div id="card-stack" class="relative h-full w-full bg-white rounded-xl overflow-hidden flex flex-col" style="box-shadow: 0 20px 40px rgba(0,64,224,0.06);">
+          {% for song in songs %}
+            <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
+                 data-song-id="{{ song.id }}"
+                 style="position: absolute; width: 100%; height: 100%; top: 0; display: flex; flex-direction: column;">
+              <!-- Album Art -->
+              <div class="relative" style="flex: 1; overflow: hidden;">
+                {% if song.album_image_url %}
+                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                       class="w-100 h-100" style="object-fit: cover;">
+                {% else %}
+                  <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
+                    <i class="fas fa-music fa-5x text-white"></i>
+                  </div>
+                {% endif %}
+
+                <!-- Live Badge -->
+                {% if forloop.first %}
+                  <div class="position-absolute d-flex align-items-center gap-1 px-3 py-1 rounded-pill text-xs font-bold uppercase" style="top: 1rem; left: 1rem; background: #00e3fd; color: #00616d; letter-spacing: 0.05em; font-size: 0.75rem;">
+                    <span class="rounded-circle animate-pulse" style="width: 0.375rem; height: 0.375rem; background: #00616d;"></span>
+                    Trending
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Song Info -->
+              <div class="p-4 d-flex flex-column gap-3" style="background: white;">
+                <div>
+                  <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.1em;">{% if song.genre %}{{ song.genre }}{% else %}Music{% endif %}</span>
+                  <h2 class="font-headline font-extrabold mb-1" style="font-size: 1.5rem; line-height: 1.2; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
+                  <p class="font-medium" style="color: #434656;">{{ song.artist }}</p>
+                </div>
+
+                <!-- Audio Metadata -->
+                {% if song.bpm or song.key %}
+                  <div class="d-flex align-items-center gap-4 py-2" style="border-top: 1px solid rgba(196, 197, 217, 0.1);">
+                    {% if song.bpm %}
+                      <div class="d-flex flex-column">
+                        <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Tempo</span>
+                        <div class="d-flex align-items-center gap-1">
+                          <i class="fas fa-drum" style="color: #0040e0; font-size: 1.125rem;"></i>
+                          <span class="font-headline font-bold" style="font-size: 1.125rem;">{{ song.bpm|floatformat:0 }}</span>
+                          <span class="text-xs font-medium" style="color: #747688;">BPM</span>
+                        </div>
+                      </div>
+                    {% endif %}
+                    {% if song.key %}
+                      <div style="width: 1px; height: 2rem; background: rgba(196, 197, 217, 0.2);"></div>
+                      <div class="d-flex flex-column">
+                        <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Key</span>
+                        <div class="d-flex align-items-center gap-1">
+                          <i class="fas fa-music" style="color: #0040e0; font-size: 1.125rem;"></i>
+                          <span class="font-headline font-bold" style="font-size: 1.125rem;">{{ song.key }}</span>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex items-center justify-center gap-6 w-full">
+        <!-- Skip Button -->
+        <button class="btn-skip-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 4rem; height: 4rem; background: #e7e8ed; color: #191c1f; border: none;">
+          <i class="fas fa-times" style="font-size: 1.875rem;"></i>
+        </button>
+
+        <!-- Play/Preview Toggle (Small) -->
+        <button class="flex items-center justify-center rounded-circle transition-colors" style="width: 3rem; height: 3rem; border: 2px solid rgba(0, 64, 224, 0.2); background: transparent; color: #0040e0;">
+          <i class="fas fa-play" style="font-size: 1rem;"></i>
+        </button>
+
+        <!-- Like Button -->
+        <button class="btn-like-card flex items-center justify-center rounded-circle transition-transform" style="width: 5rem; height: 5rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(0,64,224,0.3);">
+          <i class="fas fa-heart" style="font-size: 2.5rem;"></i>
+        </button>
+      </div>
+
+      <div id="message-area" class="text-center mt-3"></div>
+
+      {% if votes_left == 0 %}
+        <div class="alert alert-warning mt-3 text-center">
+          {% if credits == 0 %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sense Coins!</strong> Compra Coins i converteix-los a Vots per fer like.
+            <a href="{% url 'buy_votes' %}" class="alert-link">Compra Coins</a>
+          {% else %}
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Sense vots!</strong> Converteix els teus {{ credits }} Coins a Vots per continuar.
+            <a href="{% url 'buy_votes' %}" class="alert-link">Convertir Coins</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="card shadow-lg" style="border-radius: 1.5rem; background: white;">
+        <div class="card-body text-center p-5">
+          <i class="fas fa-check-circle text-success mb-4" style="font-size: 5rem;"></i>
+          <h4 class="mb-3">Has fet match amb totes les cançons!</h4>
+          <p class="text-muted mb-4">Torna a la llista per veure els resultats</p>
+          <a href="{% url 'song_list' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-list me-2"></i>Veure llista
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Detectar si és mòbil o desktop
+  const isMobile = window.innerWidth < 768;
+
   const cards = document.querySelectorAll('.swipe-card');
-  const messageArea = document.getElementById('message-area');
+  const messageArea = document.getElementById(isMobile ? 'message-area' : 'message-area-desktop');
   const votesCount = document.getElementById('votes-count');
   const creditsCount = document.getElementById('credits-count');
-  const progressBar = document.getElementById('progress-bar');
-  const progressText = document.getElementById('progress-text');
-  const remainingCount = document.getElementById('remaining-count');
+  const progressBar = document.getElementById(isMobile ? 'progress-bar' : 'progress-bar-desktop');
+  const progressText = document.getElementById(isMobile ? 'progress-text' : 'progress-text-desktop');
+  const remainingCount = document.getElementById(isMobile ? 'remaining-count' : 'remaining-count-desktop');
   const undoBtn = document.getElementById('undo-btn');
 
   let currentIndex = 0;
@@ -170,13 +310,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (index === 0) {
       card.classList.remove('d-none');
       card.style.zIndex = '10';
+      if (isMobile) {
+        card.style.display = 'flex';
+      }
     } else {
       card.classList.add('d-none');
+      if (isMobile) {
+        card.style.display = 'none';
+      }
     }
+  });
 
-    // Afegir event listeners als botons dins de cada carta
-    const btnSkip = card.querySelector('.btn-skip-card');
-    const btnLike = card.querySelector('.btn-like-card');
+  // Afegir event listeners als botons (fora de cada carta en mòbil, dins en desktop)
+  if (isMobile) {
+    const btnSkip = document.querySelector('.btn-skip-card');
+    const btnLike = document.querySelector('.btn-like-card');
 
     if (btnSkip) {
       btnSkip.addEventListener('click', function(e) {
@@ -191,7 +339,27 @@ document.addEventListener('DOMContentLoaded', function() {
         handleLike();
       });
     }
-  });
+  } else {
+    // Desktop: botons dins de cada carta
+    cards.forEach((card) => {
+      const btnSkip = card.querySelector('.btn-skip-card');
+      const btnLike = card.querySelector('.btn-like-card');
+
+      if (btnSkip) {
+        btnSkip.addEventListener('click', function(e) {
+          e.stopPropagation();
+          handleSkip();
+        });
+      }
+
+      if (btnLike) {
+        btnLike.addEventListener('click', function(e) {
+          e.stopPropagation();
+          handleLike();
+        });
+      }
+    });
+  }
 
   function showMessage(text, isSuccess = true) {
     messageArea.innerHTML = `<div class="alert ${isSuccess ? 'alert-success' : 'alert-danger'}">${text}</div>`;
@@ -203,7 +371,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function nextCard() {
     if (currentIndex >= cards.length) {
       // No més cançons
-      document.getElementById('card-stack').innerHTML = `
+      const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
+      if (cardStack) {
+        cardStack.innerHTML = `
         <div class="card shadow-lg" style="border-radius: 1.5rem;">
           <div class="card-body text-center p-5">
             <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
@@ -215,12 +385,16 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
       `;
+      }
       return;
     }
 
     // Mostrar la següent carta
     const nextCardElement = cards[currentIndex];
     nextCardElement.classList.remove('d-none');
+    if (isMobile) {
+      nextCardElement.style.display = 'flex';
+    }
     nextCardElement.style.zIndex = currentIndex + 10;
     nextCardElement.style.transform = '';
     nextCardElement.style.opacity = '1';
@@ -363,8 +537,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        votesCount.textContent = data.votes_left;
-        creditsCount.textContent = data.credits;
+        // Actualitzar comptadors (mòbil i desktop)
+        if (votesCount) votesCount.textContent = isMobile ? (data.votes_left + ' Votes') : data.votes_left;
+        if (creditsCount) creditsCount.textContent = data.credits;
+        const votesCountDesktop = document.getElementById('votes-count-desktop');
+        const creditsCountDesktop = document.getElementById('credits-count-desktop');
+        if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
+        if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
+
         showMessage('Match! ❤️ (-1 Vot)', true);
         animateCardOut('right', songId, 'like');
         // Reactivar botons després de l'animació
@@ -389,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let touchCurrentX = 0;
   let isDragging = false;
 
-  const cardStack = document.getElementById('card-stack');
+  const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
 
   cardStack.addEventListener('touchstart', function(e) {
     if (currentIndex >= cards.length) return;

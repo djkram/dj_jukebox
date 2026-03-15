@@ -3,6 +3,9 @@
 {% block page_title %}DJ Dashboard{% endblock %}
 
 {% block content %}
+
+<!-- Vista Desktop (ORIGINAL) -->
+<div class="d-none d-md-block">
 <style>
   .dj-song-cell {
     display: flex;
@@ -284,4 +287,176 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+</div>
+
+<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<div class="d-md-none px-4 pt-4 pb-32" style="background: #f8f9fe; min-height: 100vh;">
+  <main class="d-flex flex-column gap-4">
+    <!-- Now Playing (Floating Pulse Card) -->
+    {% if recommended_songs %}
+      {% with recommended_songs.0 as now_playing %}
+        <section>
+          <span class="d-block font-bold text-uppercase mb-3" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">NOW SPINNING</span>
+          <div class="bg-white rounded-xl overflow-hidden d-flex flex-column" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
+            <div class="d-flex p-3 gap-3">
+              <div class="rounded-lg overflow-hidden flex-shrink-0" style="width: 6rem; height: 6rem; background: #eceef3;">
+                {% if now_playing.album_image_url %}
+                  <img src="{{ now_playing.album_image_url }}" alt="{{ now_playing.title }}" class="w-100 h-100" style="object-fit: cover;">
+                {% else %}
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <i class="fas fa-music" style="color: #0040e0; font-size: 2rem;"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="d-flex flex-column justify-content-center overflow-hidden">
+                <h2 class="fw-bold mb-0" style="font-size: 1.25rem; font-family: 'Epilogue', sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ now_playing.title }}</h2>
+                <p class="mb-2" style="color: #434656; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ now_playing.artist }}</p>
+                <div class="d-flex gap-2">
+                  {% if now_playing.bpm %}
+                    <span class="px-2 py-0 rounded" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700;">{{ now_playing.bpm|floatformat:0 }} BPM</span>
+                  {% endif %}
+                  {% if now_playing.key %}
+                    <span class="px-2 py-0 rounded" style="background: #e7e8ed; color: #434656; font-size: 0.625rem; font-weight: 700;">{{ now_playing.key }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="p-3 border-top d-flex align-items-center justify-content-between" style="background: rgba(0, 64, 224, 0.05); border-color: rgba(196, 197, 217, 0.1) !important;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-heart" style="color: #0040e0; font-size: 0.875rem;"></i>
+                <span class="fw-bold" style="color: #0040e0;">{{ now_playing.num_votes }} Votes</span>
+              </div>
+              <form method="post" action="{% url 'mark_song_played' now_playing.id %}" class="mb-0">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 border-0" style="background: linear-gradient(to right, #0040e0, #2e5bff); color: white; font-size: 0.875rem;">
+                  PLAY NEXT <i class="fas fa-step-forward" style="font-size: 0.875rem;"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      {% endwith %}
+    {% endif %}
+
+    <!-- Live Queue Section -->
+    <section>
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">UP NEXT</span>
+          <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Live Queue</h2>
+        </div>
+      </div>
+      <div class="d-flex flex-column gap-3">
+        {% for song in pending_songs|slice:":5" %}
+          <!-- Queue Item -->
+          <div class="d-flex align-items-center gap-3 p-3 rounded-lg" style="background: #f2f3f8;">
+            <div class="rounded-md overflow-hidden flex-shrink-0" style="width: 3.5rem; height: 3.5rem;">
+              {% if song.album_image_url %}
+                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+              {% else %}
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                  <i class="fas fa-music" style="color: #747688;"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <h3 class="fw-bold mb-0" style="font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ song.title }}</h3>
+              <p class="mb-0" style="color: #434656; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ song.artist }}{% if song.bpm %} • {{ song.bpm|floatformat:0 }} BPM{% endif %}
+              </p>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-0">
+              <span class="fw-bold" style="color: #0040e0;">{{ song.num_votes }}</span>
+              <span class="text-uppercase fw-bold" style="font-size: 0.625rem; color: #747688;">VOTES</span>
+            </div>
+          </div>
+        {% empty %}
+          <div class="text-center py-4" style="color: #747688;">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0">No songs in queue</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Songs</div>
+        <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ total_songs }}</div>
+      </div>
+      <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Votes</div>
+        <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ total_votes }}</div>
+      </div>
+      <div class="bg-white p-3 rounded-lg text-center" style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+        <div class="fw-bold text-uppercase mb-1" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Played</div>
+        <div class="fw-bold" style="font-size: 1.5rem; color: #0040e0;">{{ played_songs }}</div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    {% if recommended_songs|length > 1 %}
+    <section>
+      <div class="mb-4">
+        <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">SMART PICKS</span>
+        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Recommendations</h2>
+      </div>
+      <div class="d-flex gap-3 overflow-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+        {% for song in recommended_songs|slice:"1:6" %}
+          <div class="flex-shrink-0" style="width: 9rem;">
+            <div class="rounded-lg overflow-hidden mb-2" style="width: 9rem; height: 9rem; background: #eceef3;">
+              {% if song.album_image_url %}
+                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+              {% else %}
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                  <i class="fas fa-music fa-2x" style="color: #747688;"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="fw-bold small mb-0" style="font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ song.title }}">{{ song.title }}</div>
+            <div class="text-muted small mb-2" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ song.artist }}">{{ song.artist }}</div>
+            <form method="post" action="{% url 'mark_song_played' song.id %}">
+              {% csrf_token %}
+              <button type="submit" class="w-100 py-2 rounded-pill fw-bold border-0" style="background: #e7e8ed; color: #191c1f; font-size: 0.75rem;">
+                <i class="fas fa-play me-1"></i>Play
+              </button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- Played Songs -->
+    {% if played_songs_list %}
+    <section>
+      <div class="mb-4">
+        <span class="d-block font-bold text-uppercase mb-1" style="color: #1cc88a; font-size: 0.75rem; letter-spacing: 0.15em;">HISTORY</span>
+        <h2 class="font-extrabold mb-0" style="font-size: 1.875rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">Recently Played</h2>
+      </div>
+      <div class="d-flex flex-column gap-2">
+        {% for song in played_songs_list|slice:":5" %}
+          <div class="d-flex align-items-center gap-3 p-2 rounded-lg" style="background: rgba(28, 200, 138, 0.05);">
+            <div class="rounded-md overflow-hidden flex-shrink-0" style="width: 3rem; height: 3rem;">
+              {% if song.album_image_url %}
+                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+              {% else %}
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                  <i class="fas fa-music" style="color: #1cc88a; font-size: 0.875rem;"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <div class="fw-bold" style="font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ song.title }}</div>
+              <div style="color: #434656; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ song.artist }}</div>
+            </div>
+            <i class="fas fa-check-circle" style="color: #1cc88a;"></i>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </main>
+</div>
 {% endblock %}

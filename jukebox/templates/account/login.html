@@ -22,6 +22,9 @@
         <a href="{% provider_login_url 'spotify' process='login' next=redirect_url %}" class="btn btn-success mt-2">
             <i class="fab fa-spotify"></i> Connecta't amb Spotify
         </a>
+        <a href="{% provider_login_url 'google' process='login' next=redirect_url %}" class="btn btn-danger mt-2">
+            <i class="fab fa-google"></i> Connecta't amb Google
+        </a>
     </div>
 </div>
 {% endblock %}

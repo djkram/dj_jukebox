@@ -248,11 +248,14 @@ ACCOUNT_LOGIN_METHODS = {"email", "username"}   # Pots posar només "email" si v
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Registres amb email han de verificar obligatòriament
 SOCIALACCOUNT_EMAIL_VERIFICATION = "none"  # Logins socials (Spotify) no necessiten verificació
 SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True  # Permet connectar comptes amb el mateix email
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True  # Auto-connecta si l'email ja existeix
 
 
 # Default primary key field type

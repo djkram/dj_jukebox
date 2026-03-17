@@ -130,74 +130,145 @@
   </div>
 
   {% if songs %}
-    <!-- Vista de taula per desktop -->
-    <div class="table-responsive d-none d-md-block">
-      <table class="table table-striped align-middle w-100">
-        <thead>
-          <tr>
-            <th style="width: 80px;"></th>
-            <th>Títol</th>
-            <th>Artista</th>
-            <th class="text-center">Vots</th>
-            <th class="text-center">Acció</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for song in songs %}
-            <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
-              <td>
-                <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
-                  {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                         class="rounded w-100 h-100" style="object-fit: cover;">
-                  {% else %}
-                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
-                      <i class="fas fa-music text-white"></i>
-                    </div>
-                  {% endif %}
+    <!-- Vista de taules per desktop -->
+    <div class="row g-4 d-none d-md-flex">
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-warning text-dark">
+            <strong><i class="fas fa-briefcase me-2"></i>Maleta del DJ</strong>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-striped align-middle w-100 mb-0">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;"></th>
+                    <th>Títol</th>
+                    <th>Artista</th>
+                    <th class="text-center">Vots</th>
+                    <th class="text-center">Acció</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for song in pending_songs %}
+                    <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
+                      <td>
+                        <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
+                          {% if song.album_image_url %}
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                                 class="rounded w-100 h-100" style="object-fit: cover;">
+                          {% else %}
+                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
+                              <i class="fas fa-music text-white"></i>
+                            </div>
+                          {% endif %}
 
-                  {% if has_spotify %}
-                  <!-- Play/Pause Overlay -->
-                  <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
-                       style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
-                    <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
-                            data-song-id="{{ song.id }}"
-                            data-spotify-id="{{ song.spotify_id }}"
-                            style="color: white; font-size: 2rem; line-height: 1;">
-                      <i class="fas fa-play"></i>
-                    </button>
-                  </div>
-                  {% endif %}
-                </div>
-              </td>
-              <td>{{ song.title }}</td>
-              <td>{{ song.artist }}</td>
-              <td class="text-center">{{ song.num_votes }}</td>
-              <td class="text-center">
-                {% if user_votes_dict|get_item:song.id %}
-                  <!-- L'usuari ja ha votat aquesta cançó -->
-                  <i class="fas fa-heart" style="color: #e74c3c; font-size: 1.25rem;"></i>
-                {% else %}
-                  <!-- L'usuari no ha votat aquesta cançó -->
-                  {% if votes_left > 0 or credits > 0 %}
-                    <form method="post" style="display: inline;">{% csrf_token %}
-                      <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                      <input type="hidden" name="vote_type" value="like">
-                      <button type="submit" class="btn btn-link p-0" style="font-size: 1.25rem; color: #e74c3c;">
-                        <i class="far fa-heart"></i>
-                      </button>
-                    </form>
-                  {% else %}
-                    <span class="text-muted" data-bs-toggle="tooltip" title="Necessites Coins per votar">
-                      <i class="fas fa-lock"></i>
-                    </span>
-                  {% endif %}
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                          {% if has_spotify %}
+                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
+                               style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
+                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                                    data-song-id="{{ song.id }}"
+                                    data-spotify-id="{{ song.spotify_id }}"
+                                    style="color: white; font-size: 2rem; line-height: 1;">
+                              <i class="fas fa-play"></i>
+                            </button>
+                          </div>
+                          {% endif %}
+                        </div>
+                      </td>
+                      <td>{{ song.title }}</td>
+                      <td>{{ song.artist }}</td>
+                      <td class="text-center">{{ song.num_votes }}</td>
+                      <td class="text-center">
+                        {% if user_votes_dict|get_item:song.id %}
+                          <i class="fas fa-heart" style="color: #e74c3c; font-size: 1.25rem;"></i>
+                        {% else %}
+                          {% if votes_left > 0 or credits > 0 %}
+                            <form method="post" style="display: inline;">{% csrf_token %}
+                              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                              <input type="hidden" name="vote_type" value="like">
+                              <button type="submit" class="btn btn-link p-0" style="font-size: 1.25rem; color: #e74c3c;">
+                                <i class="far fa-heart"></i>
+                              </button>
+                            </form>
+                          {% else %}
+                            <span class="text-muted" data-bs-toggle="tooltip" title="Necessites Coins per votar">
+                              <i class="fas fa-lock"></i>
+                            </span>
+                          {% endif %}
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center py-4 text-muted">No queden temes pendents.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-success text-white">
+            <strong><i class="fas fa-check-circle me-2"></i>Ja posades</strong>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-striped align-middle w-100 mb-0">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;"></th>
+                    <th>Títol</th>
+                    <th>Artista</th>
+                    <th class="text-center">Vots</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for song in played_songs %}
+                    <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
+                      <td>
+                        <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
+                          {% if song.album_image_url %}
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                                 class="rounded w-100 h-100" style="object-fit: cover;">
+                          {% else %}
+                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
+                              <i class="fas fa-music text-white"></i>
+                            </div>
+                          {% endif %}
+
+                          {% if has_spotify %}
+                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
+                               style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
+                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                                    data-song-id="{{ song.id }}"
+                                    data-spotify-id="{{ song.spotify_id }}"
+                                    style="color: white; font-size: 2rem; line-height: 1;">
+                              <i class="fas fa-play"></i>
+                            </button>
+                          </div>
+                          {% endif %}
+                        </div>
+                      </td>
+                      <td>{{ song.title }}</td>
+                      <td>{{ song.artist }}</td>
+                      <td class="text-center">{{ song.num_votes }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">Encara no ha començat la festa.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
@@ -254,7 +325,7 @@
         </section>
 
         <!-- Song Tabs Header -->
-        <section>
+        <section style="margin-bottom: -0.55rem;">
           <div class="mb-0">
             <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
               <button type="button" class="mobile-song-tab is-active flex-grow-1" data-mobile-tab="bag">Maleta del DJ</button>
@@ -386,7 +457,7 @@
               </div>
             </div>
           {% empty %}
-            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">Encara no ha sonat cap tema.</div>
+            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">Encara no ha començat la festa.</div>
           {% endfor %}
         </section>
 

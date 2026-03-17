@@ -5,7 +5,46 @@
 {% block page_title %}Settings festa{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+  @media (max-width: 767.98px) {
+    .party-settings-mobile {
+      background: #f8f9fe;
+      min-height: 100vh;
+      padding: 0 1rem 8rem;
+    }
+    .party-settings-mobile .mobile-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 12px 24px rgba(0, 64, 224, 0.06);
+    }
+    .party-settings-mobile .mobile-label {
+      display: block;
+      color: #5e24e1;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .party-settings-mobile input,
+    .party-settings-mobile select {
+      border-radius: 10px !important;
+      min-height: 44px;
+    }
+    .party-settings-mobile .help-text {
+      color: #747688;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      margin-top: 0.4rem;
+    }
+    .party-song-row {
+      background: #f2f3f8;
+      border-radius: 10px;
+    }
+  }
+</style>
+
+<div class="container mt-4 d-none d-md-block">
   <div class="row gx-4">
     {# ── COL. ESQUERRA: FORMULARI ──────────────────────────────────────── #}
     <div class="col-lg-4">
@@ -27,7 +66,23 @@
             {{ form.max_votes_per_user.label_tag }}
             {{ form.max_votes_per_user }}
             <small class="form-text text-muted">
-              Número de vots gratuïts que cada usuari podrà fer servir en aquesta festa.
+              Vots gratuïts per festa. Si puges el valor, els usuaris reben més vots automàticament. Si el bajes, només redueix els disponibles però NO toca els vots ja fets.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            {{ form.free_coins_per_user.label_tag }}
+            {{ form.free_coins_per_user }}
+            <small class="form-text text-muted">
+              Coins gratuïts de festa. Funciona igual que els vots: si puges el valor, els usuaris reben la diferència. Si el bajes, només redueix els disponibles.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            {{ form.song_request_cost.label_tag }}
+            {{ form.song_request_cost }}
+            <small class="form-text text-muted">
+              Cost en Coins que un usuari ha de pagar per demanar una cançó nova.
             </small>
           </div>
 
@@ -151,6 +206,8 @@
               <tr>
                 <th>Títol</th>
                 <th>Artista</th>
+                <th>BPM</th>
+                <th>Key</th>
                 <th>Vots</th>
               </tr>
             </thead>
@@ -159,6 +216,20 @@
                 <tr>
                   <td>{{ song.title }}</td>
                   <td>{{ song.artist }}</td>
+                  <td>
+                    {% if song.bpm %}
+                      {{ song.bpm|floatformat:0 }}
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if song.key %}
+                      <span class="badge bg-secondary">{{ song.key }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
                   <td>{{ song.num_votes }}</td>
                 </tr>
               {% endfor %}
@@ -172,10 +243,162 @@
   </div>
 </div>
 
+<div class="party-settings-mobile d-md-none">
+  <main class="d-flex flex-column gap-3">
+    <section style="margin-top: 0; margin-bottom: -0.35rem;">
+      <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
+        <a href="{% url 'dj_dashboard' %}" class="flex-grow-1 text-decoration-none text-center" style="background: transparent; color: #747688; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Dashboard</a>
+        <a href="{% url 'party_settings' party.id %}" class="flex-grow-1 text-decoration-none text-center" style="background: #eef2ff; color: #0040e0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Settings</a>
+      </div>
+    </section>
+
+    <section class="mobile-card p-3">
+      <span class="mobile-label">Settings festa</span>
+      <h2 class="mb-1" style="font-size: 1.6rem; line-height: 1.05; letter-spacing: -0.03em; color: #191c1f;">Configura la festa</h2>
+      <p class="mb-0" style="color: #434656; font-size: 0.92rem;">Edita les dades, la playlist i els paràmetres de votació.</p>
+    </section>
+
+    <div id="loadingProgressMobile" class="mobile-card p-3" style="display: none;">
+      <div class="d-flex align-items-center gap-2 mb-2" style="color: #0040e0;">
+        <i class="fas fa-spinner fa-spin"></i>
+        <strong style="font-size: 0.95rem;">Carregant playlist...</strong>
+      </div>
+      <p id="progressTextMobile" class="mb-2" style="font-size: 0.82rem; color: #434656;">Processant cançons amb BPM i clau musical...</p>
+      <div class="progress" style="height: 0.55rem;">
+        <div id="progressBarMobile" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <section class="mobile-card p-3">
+      <form method="post" id="partySettingsFormMobile">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+          {{ form.name }}
+        </div>
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+          {{ form.date }}
+        </div>
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.max_votes_per_user.id_for_label }}">{{ form.max_votes_per_user.label }}</label>
+          {{ form.max_votes_per_user }}
+          <p class="help-text">Vots gratuïts per festa. Si puges el valor, els usuaris reben més vots automàticament.</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.free_coins_per_user.id_for_label }}">{{ form.free_coins_per_user.label }}</label>
+          {{ form.free_coins_per_user }}
+          <p class="help-text">Coins gratuïts de festa. Si puges el valor, els usuaris reben la diferència.</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.song_request_cost.id_for_label }}">{{ form.song_request_cost.label }}</label>
+          {{ form.song_request_cost }}
+          <p class="help-text">Cost en Coins que un usuari ha de pagar per demanar una cançó nova.</p>
+        </div>
+
+        {% if party.playlist %}
+          <div class="mb-3">
+            <span class="mobile-label">Playlist assignada</span>
+            <div class="p-3" style="background: #f2f3f8; border-radius: 10px;">
+              <div class="fw-semibold" style="color: #191c1f;">{{ party.playlist.name }}</div>
+              <div style="color: #747688; font-size: 0.82rem;">{{ party.playlist.owner }}</div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <button type="button" id="reloadSongsBtnMobile" class="btn btn-success flex-fill">
+                <i class="fas fa-sync-alt me-1"></i>Recarrega
+              </button>
+              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
+            </div>
+          </div>
+        {% elif playlists %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label for="id_spotify_playlist_mobile" class="mobile-label mb-0">Playlist de Spotify</label>
+              <button type="button" id="reloadPlaylistsBtnMobile" class="btn btn-outline-primary btn-sm">Recarrega</button>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoadedMobile" {% if only_owned %}checked{% endif %}>
+              <label class="form-check-label" for="onlyOwnedCheckboxLoadedMobile">Només les meves playlists</label>
+            </div>
+            <select name="spotify_playlist" id="id_spotify_playlist_mobile" class="form-control">
+              <option value="">-- Selecciona una playlist --</option>
+              {% for pl in playlists %}
+                <option value="{{ pl.id }}" {% if pl.id == party.playlist %}selected{% endif %}>{{ pl.name }} ({{ pl.owner }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% else %}
+          <div class="mb-3">
+            {% if has_spotify %}
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxMobile" {% if only_owned %}checked{% endif %}>
+                <label class="form-check-label" for="onlyOwnedCheckboxMobile">Només les meves playlists</label>
+              </div>
+              <div class="d-grid gap-2">
+                <a href="?load_spotify=1" class="btn btn-success" id="loadPlaylistsBtnMobile">
+                  <i class="fas fa-sync-alt me-1"></i>Carrega playlists de Spotify
+                </a>
+                <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-outline-success">
+                  <i class="fas fa-redo me-1"></i>Reconnecta Spotify
+                </a>
+              </div>
+            {% else %}
+              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-success w-100">
+                <i class="fab fa-spotify me-1"></i>Connecta Spotify
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary" id="saveButtonMobile">Desa canvis</button>
+          <a href="{% url 'dj_dashboard' %}" class="btn btn-outline-secondary">Torna</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="mobile-card p-3">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+          <span class="mobile-label mb-1">Playlist</span>
+          <h3 class="mb-0" style="font-size: 1.2rem; color: #191c1f;">Cançons</h3>
+        </div>
+      </div>
+      {% if songs %}
+        <div class="mb-2">
+          <input id="song-search-mobile" class="form-control" placeholder="Filtra per títol, artista, BPM o key…" />
+        </div>
+        <div class="d-flex flex-column gap-2">
+          {% for song in songs %}
+            <div class="party-song-row p-2" data-song-row>
+              <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">{{ song.title }}</div>
+              <div style="font-size: 0.82rem; color: #434656;" data-song-artist>{{ song.artist }}</div>
+              <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem; color: #747688;">
+                <span>BPM: {% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span>
+                <span>Key: {% if song.key %}{{ song.key }}{% else %}-{% endif %}</span>
+                <span>Vots: {{ song.num_votes }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="mb-0 text-muted">No hi ha cançons per mostrar.</p>
+      {% endif %}
+    </section>
+  </main>
+</div>
+
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var settingsForm = document.getElementById('partySettingsForm');
+  var settingsFormMobile = document.getElementById('partySettingsFormMobile');
+  var activeForm = settingsFormMobile || settingsForm;
 
   function parseJsonResponse(response) {
     return response.json().then(function(data) {
@@ -199,7 +422,21 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('table tbody tr').forEach(function(row) {
         var title = row.cells[0].textContent.toLowerCase();
         var artist = row.cells[1].textContent.toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+        var bpm = row.cells[2].textContent.toLowerCase();
+        var key = row.cells[3].textContent.toLowerCase();
+        row.style.display = (title.includes(q) || artist.includes(q) || bpm.includes(q) || key.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  var mobileInput = document.getElementById('song-search-mobile');
+  if (mobileInput) {
+    mobileInput.addEventListener('input', function() {
+      var q = mobileInput.value.trim().toLowerCase();
+      document.querySelectorAll('[data-song-row]').forEach(function(row) {
+        var title = row.querySelector('[data-song-title]').textContent.toLowerCase();
+        var artist = row.querySelector('[data-song-artist]').textContent.toLowerCase();
+        row.style.display = (title.includes(q) || artist.includes(q) || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
       });
     });
   }
@@ -209,11 +446,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var loadingDiv = document.getElementById('loadingProgress');
     var progressBar = document.getElementById('progressBar');
     var progressText = document.getElementById('progressText');
+    var loadingDivMobile = document.getElementById('loadingProgressMobile');
+    var progressBarMobile = document.getElementById('progressBarMobile');
+    var progressTextMobile = document.getElementById('progressTextMobile');
 
     var formData = new FormData();
     formData.append('offset', offset);
     formData.append('chunk_size', 10);
-    formData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
+    formData.append('csrfmiddlewaretoken', activeForm.querySelector('[name=csrfmiddlewaretoken]').value);
 
     return fetch('{% url "process_song_features" party.id %}', {
       method: 'POST',
@@ -234,14 +474,24 @@ document.addEventListener('DOMContentLoaded', function() {
       var percentage = Math.round((processed / total) * 100);
       var displayPercentage = Math.max(20, Math.min(percentage, 95)); // Entre 20% i 95%
 
-      progressBar.style.width = displayPercentage + '%';
-      progressText.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
+      if (progressBar) progressBar.style.width = displayPercentage + '%';
+      if (progressText) progressText.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
+      if (progressBarMobile) progressBarMobile.style.width = displayPercentage + '%';
+      if (progressTextMobile) progressTextMobile.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
 
       if (data.completed) {
-        progressBar.style.width = '100%';
-        progressText.textContent = 'Totes les cançons processades correctament!';
-        progressBar.classList.remove('progress-bar-animated');
-        progressBar.classList.add('bg-success');
+        if (progressBar) {
+          progressBar.style.width = '100%';
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-success');
+        }
+        if (progressText) progressText.textContent = 'Totes les cançons processades correctament!';
+        if (progressBarMobile) {
+          progressBarMobile.style.width = '100%';
+          progressBarMobile.classList.remove('progress-bar-animated');
+          progressBarMobile.classList.add('bg-success');
+        }
+        if (progressTextMobile) progressTextMobile.textContent = 'Totes les cançons processades correctament!';
 
         setTimeout(function() {
           window.location.reload();
@@ -256,20 +506,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Gestió del botó "Recarregar cançons"
   var reloadBtn = document.getElementById('reloadSongsBtn');
-  if (reloadBtn) {
-    reloadBtn.addEventListener('click', function() {
+  var reloadBtnMobile = document.getElementById('reloadSongsBtnMobile');
+  function handleReloadSongs(triggerBtn) {
       var loadingDiv = document.getElementById('loadingProgress');
       var progressBar = document.getElementById('progressBar');
       var progressText = document.getElementById('progressText');
+      var loadingDivMobile = document.getElementById('loadingProgressMobile');
+      var progressBarMobile = document.getElementById('progressBarMobile');
+      var progressTextMobile = document.getElementById('progressTextMobile');
 
-      reloadBtn.disabled = true;
-      loadingDiv.style.display = 'block';
-      progressBar.style.width = '10%';
-      progressText.textContent = 'Carregant llista de cançons de Spotify...';
+      triggerBtn.disabled = true;
+      if (loadingDiv) loadingDiv.style.display = 'block';
+      if (loadingDivMobile) loadingDivMobile.style.display = 'block';
+      if (progressBar) progressBar.style.width = '10%';
+      if (progressText) progressText.textContent = 'Carregant llista de cançons de Spotify...';
+      if (progressBarMobile) progressBarMobile.style.width = '10%';
+      if (progressTextMobile) progressTextMobile.textContent = 'Carregant llista de cançons de Spotify...';
 
       var formData = new FormData();
       formData.append('spotify_playlist_id', '{{ party.playlist.spotify_id }}');
-      formData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
+      formData.append('csrfmiddlewaretoken', activeForm.querySelector('[name=csrfmiddlewaretoken]').value);
 
       fetch('{% url "process_playlist_songs" party.id %}', {
         method: 'POST',
@@ -284,8 +540,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         var data = result.data;
         if (data.success) {
-          progressBar.style.width = '20%';
-          progressText.textContent = data.message;
+          if (progressBar) progressBar.style.width = '20%';
+          if (progressText) progressText.textContent = data.message;
+          if (progressBarMobile) progressBarMobile.style.width = '20%';
+          if (progressTextMobile) progressTextMobile.textContent = data.message;
 
           // Ara processar features en chunks
           return processFeatures(0);
@@ -294,38 +552,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .catch(error => {
-        progressBar.classList.remove('progress-bar-animated');
-        progressBar.classList.add('bg-danger');
-        progressBar.style.width = '100%';
-        progressText.textContent = 'Error: ' + error.message;
-        reloadBtn.disabled = false;
+        if (progressBar) {
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-danger');
+          progressBar.style.width = '100%';
+        }
+        if (progressText) progressText.textContent = 'Error: ' + error.message;
+        if (progressBarMobile) {
+          progressBarMobile.classList.remove('progress-bar-animated');
+          progressBarMobile.classList.add('bg-danger');
+          progressBarMobile.style.width = '100%';
+        }
+        if (progressTextMobile) progressTextMobile.textContent = 'Error: ' + error.message;
+        triggerBtn.disabled = false;
       });
-    });
+  }
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', function() { handleReloadSongs(reloadBtn); });
+  }
+  if (reloadBtnMobile) {
+    reloadBtnMobile.addEventListener('click', function() { handleReloadSongs(reloadBtnMobile); });
   }
 
   // Gestió del submit amb indicador de càrrega
   var playlistSelect = document.getElementById('id_spotify_playlist');
 
-  if (settingsForm && playlistSelect) {
-    settingsForm.addEventListener('submit', function(e) {
-      var selectedPlaylist = playlistSelect.value;
+  var playlistSelectMobile = document.getElementById('id_spotify_playlist_mobile');
+  function handlePlaylistSubmit(formEl, selectEl, saveButton) {
+      if (!formEl || !selectEl) return;
+      formEl.addEventListener('submit', function(e) {
+      var selectedPlaylist = selectEl.value;
 
       // Si s'ha seleccionat una playlist, fer la càrrega via AJAX
       if (selectedPlaylist) {
         e.preventDefault(); // Evitar submit normal
 
-        var saveButton = document.getElementById('saveButton');
+        var loadingDivMobile = document.getElementById('loadingProgressMobile');
+        var progressBarMobile = document.getElementById('progressBarMobile');
+        var progressTextMobile = document.getElementById('progressTextMobile');
         var loadingDiv = document.getElementById('loadingProgress');
         var progressBar = document.getElementById('progressBar');
         var progressText = document.getElementById('progressText');
 
         saveButton.disabled = true;
-        loadingDiv.style.display = 'block';
-        progressBar.style.width = '30%';
-        progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+        if (loadingDiv) loadingDiv.style.display = 'block';
+        if (progressBar) progressBar.style.width = '30%';
+        if (progressText) progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+        if (loadingDivMobile) loadingDivMobile.style.display = 'block';
+        if (progressBarMobile) progressBarMobile.style.width = '30%';
+        if (progressTextMobile) progressTextMobile.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
 
-        // Primer desar els canvis bàsics del formulari
-        var formData = new FormData(settingsForm);
+        var formData = new FormData(formEl);
         formData.append('ajax_request', '1');
 
         fetch(window.location.href, {
@@ -342,13 +619,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
           if (!data.success) throw new Error('Error al desar el formulari');
 
-          progressBar.style.width = '10%';
-          progressText.textContent = 'Carregant llista de cançons de Spotify...';
+          if (progressBar) progressBar.style.width = '10%';
+          if (progressText) progressText.textContent = 'Carregant llista de cançons de Spotify...';
+          if (progressBarMobile) progressBarMobile.style.width = '10%';
+          if (progressTextMobile) progressTextMobile.textContent = 'Carregant llista de cançons de Spotify...';
 
           // Ara carregar les cançons (només metadata)
           var playlistFormData = new FormData();
           playlistFormData.append('spotify_playlist_id', selectedPlaylist);
-          playlistFormData.append('csrfmiddlewaretoken', settingsForm.querySelector('[name=csrfmiddlewaretoken]').value);
+          playlistFormData.append('csrfmiddlewaretoken', formEl.querySelector('[name=csrfmiddlewaretoken]').value);
 
           return fetch('{% url "process_playlist_songs" party.id %}', {
             method: 'POST',
@@ -364,8 +643,10 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           var data = result.data;
           if (data.success) {
-            progressBar.style.width = '20%';
-            progressText.textContent = data.message;
+            if (progressBar) progressBar.style.width = '20%';
+            if (progressText) progressText.textContent = data.message;
+            if (progressBarMobile) progressBarMobile.style.width = '20%';
+            if (progressTextMobile) progressTextMobile.textContent = data.message;
 
             // Ara processar features en chunks
             return processFeatures(0);
@@ -374,20 +655,36 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         })
         .catch(error => {
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-danger');
-          progressBar.style.width = '100%';
-          progressText.textContent = 'Error: ' + error.message;
+          if (progressBar) {
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-danger');
+            progressBar.style.width = '100%';
+          }
+          if (progressText) progressText.textContent = 'Error: ' + error.message;
+          if (progressBarMobile) {
+            progressBarMobile.classList.remove('progress-bar-animated');
+            progressBarMobile.classList.add('bg-danger');
+            progressBarMobile.style.width = '100%';
+          }
+          if (progressTextMobile) progressTextMobile.textContent = 'Error: ' + error.message;
           saveButton.disabled = false;
         });
       }
       // Si no hi ha playlist seleccionada, deixar que el submit sigui normal
     });
   }
+  if (settingsForm && playlistSelect) {
+    handlePlaylistSubmit(settingsForm, playlistSelect, document.getElementById('saveButton'));
+  }
+  if (settingsFormMobile && playlistSelectMobile) {
+    handlePlaylistSubmit(settingsFormMobile, playlistSelectMobile, document.getElementById('saveButtonMobile'));
+  }
 
   // Gestió del checkbox "Només les meves playlists" (quan no hi ha playlists carregades)
   var loadPlaylistsBtn = document.getElementById('loadPlaylistsBtn');
   var onlyOwnedCheckbox = document.getElementById('onlyOwnedCheckbox');
+  var loadPlaylistsBtnMobile = document.getElementById('loadPlaylistsBtnMobile');
+  var onlyOwnedCheckboxMobile = document.getElementById('onlyOwnedCheckboxMobile');
 
   if (loadPlaylistsBtn && onlyOwnedCheckbox) {
     loadPlaylistsBtn.addEventListener('click', function(e) {
@@ -396,15 +693,31 @@ document.addEventListener('DOMContentLoaded', function() {
       window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
     });
   }
+  if (loadPlaylistsBtnMobile && onlyOwnedCheckboxMobile) {
+    loadPlaylistsBtnMobile.addEventListener('click', function(e) {
+      e.preventDefault();
+      var onlyOwned = onlyOwnedCheckboxMobile.checked ? '1' : '0';
+      window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
+    });
+  }
 
   // Gestió del botó "Recarrega" (quan les playlists ja estan carregades)
   var reloadPlaylistsBtn = document.getElementById('reloadPlaylistsBtn');
   var onlyOwnedCheckboxLoaded = document.getElementById('onlyOwnedCheckboxLoaded');
+  var reloadPlaylistsBtnMobile = document.getElementById('reloadPlaylistsBtnMobile');
+  var onlyOwnedCheckboxLoadedMobile = document.getElementById('onlyOwnedCheckboxLoadedMobile');
 
   if (reloadPlaylistsBtn && onlyOwnedCheckboxLoaded) {
     reloadPlaylistsBtn.addEventListener('click', function(e) {
       e.preventDefault();
       var onlyOwned = onlyOwnedCheckboxLoaded.checked ? '1' : '0';
+      window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
+    });
+  }
+  if (reloadPlaylistsBtnMobile && onlyOwnedCheckboxLoadedMobile) {
+    reloadPlaylistsBtnMobile.addEventListener('click', function(e) {
+      e.preventDefault();
+      var onlyOwned = onlyOwnedCheckboxLoadedMobile.checked ? '1' : '0';
       window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
     });
   }

@@ -28,7 +28,7 @@ from .spotify_api import (
     get_audio_features_for_songs,
     search_spotify_tracks,
 )
-from .votes import get_user_votes_left
+from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
 
 from django.contrib.auth import get_user_model
@@ -300,9 +300,13 @@ def song_list(request):
     party = get_object_or_404(Party, pk=party_id)
     user = request.user
 
+    # Assegurar que l'usuari tingui els coins gratuïts de festa (si han canviat)
+    ensure_user_has_free_coins(user, party)
+
     # Comprovar vots restants segons límit de la festa
     votes_left = get_user_votes_left(user, party)
     credits = user.credits  # Coins globals de l'usuari
+    party_coins = get_user_party_coins(user, party)  # Coins gratuïts de festa
 
     annotated_songs = party.songs.annotate(
         num_votes=Count('vote', filter=Q(vote__vote_type='like'))
@@ -364,6 +368,7 @@ def song_list(request):
                     "played_songs": annotated_songs.filter(has_played=True).order_by('id'),
                     "votes_left": votes_left,
                     "credits": credits,
+                    "party_coins": party_coins,
                     "error": error,
                 })
 
@@ -405,6 +410,7 @@ def song_list(request):
         "played_songs": played_songs,
         "votes_left": votes_left,
         "credits": credits,
+        "party_coins": party_coins,
         "songs_played": songs_played,
         "user_votes_count": user_votes_count,
         "total_songs": total_songs,
@@ -805,8 +811,12 @@ def song_swipe(request):
     party = get_object_or_404(Party, pk=party_id)
     user = request.user
 
+    # Assegurar que l'usuari tingui els coins gratuïts de festa
+    ensure_user_has_free_coins(user, party)
+
     votes_left = get_user_votes_left(user, party)
     credits = user.credits
+    party_coins = get_user_party_coins(user, party)
     total_likes = Vote.objects.filter(party=party).count()
     total_songs = party.songs.count()
 
@@ -898,6 +908,7 @@ def song_swipe(request):
         'total_songs': total_songs,
         'swiped_count': swiped_count,
         'credits': credits,
+        'party_coins': party_coins,
         'has_spotify': has_spotify,
         'spotify_token': spotify_token,
     })

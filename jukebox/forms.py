@@ -32,7 +32,7 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'max_votes_per_user']
+        fields = ['name', 'date', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
@@ -40,8 +40,21 @@ class PartySettingsForm(forms.ModelForm):
                 attrs={'type': 'datetime-local', 'class': 'form-control'},
             ),
             'max_votes_per_user': forms.NumberInput(
-                attrs={'class': 'form-control', 'min': 1}
+                attrs={'class': 'form-control', 'min': 0}
             ),
+            'free_coins_per_user': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 0}
+            ),
+            'song_request_cost': forms.NumberInput(
+                attrs={'class': 'form-control', 'min': 0}
+            ),
+        }
+        labels = {
+            'name': 'Nom de la festa',
+            'date': 'Data i hora',
+            'max_votes_per_user': 'Vots gratuïts per usuari',
+            'free_coins_per_user': 'Coins gratuïts per usuari',
+            'song_request_cost': 'Cost per demanar cançó (Coins)',
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):

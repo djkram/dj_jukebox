@@ -22,7 +22,8 @@ class Party(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=False, default='')
-    max_votes_per_user = models.PositiveIntegerField(default=5)  # NOVETAT
+    max_votes_per_user = models.PositiveIntegerField(default=5)  # Vots gratuïts per usuari
+    free_coins_per_user = models.PositiveIntegerField(default=0)  # Coins gratuïts per usuari (per festa)
     song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó
 
     def save(self, *args, **kwargs):
@@ -71,6 +72,21 @@ class VotePackage(models.Model):
     votes_purchased = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     payment_id = models.CharField(max_length=128, blank=True, null=True)  # per Stripe/Paypal
+
+
+class PartyCoinsGrant(models.Model):
+    """
+    Registra coins gratuïts donats per festa.
+    Permet ajustar dinàmicament els coins gratuïts sense afectar els ja utilitzats.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE)
+    coins_granted = models.IntegerField()  # Pot ser positiu (donar) o negatiu (retirar disponibles)
+    created_at = models.DateTimeField(auto_now_add=True)
+    reason = models.CharField(max_length=100, default='free_coins')  # 'free_coins', 'adjustment', etc.
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class SongRequest(models.Model):

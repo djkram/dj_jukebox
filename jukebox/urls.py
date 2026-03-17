@@ -26,6 +26,7 @@ urlpatterns = [
     path('party/<int:party_id>/settings/', views.party_settings, name='party_settings'),
     path('party/<int:party_id>/process-playlist/', views.process_playlist_songs, name='process_playlist_songs'),
     path('party/<int:party_id>/process-features/', views.process_song_features, name='process_song_features'),
+    path('party/<int:party_id>/analyze-song/<int:song_id>/', views.analyze_song_audio, name='analyze_song_audio'),
     path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
     path('buy-coins/', views.buy_votes, name='buy_votes'),
     path('buy-coins/success/', views.buy_votes_success, name='buy_votes_success'),

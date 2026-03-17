@@ -48,6 +48,52 @@
     font-size: .92rem;
     line-height: 1.2;
   }
+  .desktop-reco-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: .75rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+    height: 100%;
+  }
+  .desktop-reco-cover {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: .8rem;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+  }
+  .desktop-request-row {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid rgba(78, 115, 223, .08);
+  }
+  .desktop-request-row:last-child {
+    border-bottom: 0;
+  }
+  .desktop-request-cover {
+    width: 52px;
+    height: 52px;
+    border-radius: .85rem;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .desktop-request-meta {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .desktop-request-title {
+    color: #374151;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: .15rem;
+  }
+  .desktop-request-subtitle {
+    color: #8a93a6;
+    font-size: .88rem;
+    line-height: 1.2;
+  }
 </style>
 <div class="row mb-4">
     <div class="col-md-3">
@@ -89,57 +135,93 @@
 </div>
 
 <!-- Recomanacions intel·ligents -->
-{% if recommended_songs %}
-<div class="card shadow mb-4">
-    <div class="card-header py-3 bg-gradient-primary">
-        <h6 class="m-0 font-weight-bold text-white">
-            <i class="fas fa-lightbulb me-2"></i>Recomanacions intel·ligents per a la propera cançó
-        </h6>
-    </div>
-    <div class="card-body">
-        <div class="row g-3">
-            {% for song in recommended_songs %}
-            <div class="col-md-2 col-sm-4 col-6">
-                <div class="text-center">
-                    {% if song.album_image_url %}
-                        <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="img-fluid rounded shadow-sm mb-2" style="width: 100%; aspect-ratio: 1; object-fit: cover;">
-                    {% else %}
-                        <div class="bg-secondary rounded shadow-sm mb-2 d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 1;">
-                            <i class="fas fa-music text-white fa-2x"></i>
-                        </div>
-                    {% endif %}
-                    <div class="fw-bold small text-truncate" title="{{ song.title }}">{{ song.title }}</div>
-                    <div class="text-muted small text-truncate" title="{{ song.artist }}">{{ song.artist }}</div>
-                    <div class="mt-1">
-                        {% if song.bpm %}
-                            <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
-                        {% endif %}
-                        {% if song.key %}
-                            <span class="badge bg-success text-white small">{{ song.key }}</span>
-                        {% endif %}
-                    </div>
-                    {% if song.recommendation_reasons %}
-                    <div class="mt-2">
-                        {% for reason in song.recommendation_reasons %}
-                            <div class="badge bg-light text-dark border small d-block mb-1">
-                                <i class="fas fa-check-circle text-success me-1"></i>{{ reason }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <form method="post" action="{% url 'mark_song_played' song.id %}" class="mt-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-success w-100">
-                            <i class="fas fa-play me-1"></i>Ja l'he posat
-                        </button>
-                    </form>
-                </div>
+<div class="row g-4 mb-4">
+    <div class="col-xl-6">
+        <div class="card shadow h-100">
+            <div class="card-header py-3 bg-gradient-primary">
+                <h6 class="m-0 font-weight-bold text-white">
+                    <i class="fas fa-lightbulb me-2"></i>Recomanacions intel·ligents
+                </h6>
             </div>
-            {% endfor %}
+            <div class="card-body">
+                {% if recommended_songs %}
+                <div class="row g-3">
+                    {% for song in recommended_songs|slice:":6" %}
+                    <div class="col-4">
+                        <div class="desktop-reco-card">
+                            {% if song.album_image_url %}
+                                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="desktop-reco-cover mb-2">
+                            {% else %}
+                                <div class="bg-secondary d-flex align-items-center justify-content-center desktop-reco-cover mb-2">
+                                    <i class="fas fa-music text-white fa-lg"></i>
+                                </div>
+                            {% endif %}
+                            <div class="fw-bold small" style="line-height: 1.15; min-height: 2.1rem;" title="{{ song.title }}">{{ song.title }}</div>
+                            <div class="text-muted small mb-2 text-truncate" title="{{ song.artist }}">{{ song.artist }}</div>
+                            <div class="d-flex align-items-center gap-1 flex-wrap mb-2">
+                                {% if song.bpm %}
+                                    <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
+                                {% endif %}
+                                {% if song.key %}
+                                    <span class="badge bg-success text-white small">{{ song.key }}</span>
+                                {% endif %}
+                            </div>
+                            <form method="post" action="{% url 'mark_song_played' song.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                    <i class="fas fa-play me-1"></i>Ja l'he posat
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-lightbulb fa-2x mb-2"></i>
+                    <div>No hi ha recomanacions disponibles.</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card shadow h-100">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-dark">
+                    <i class="fas fa-microphone-alt me-2 text-primary"></i>Temes demanats
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                {% if pending_requests %}
+                    {% for req in pending_requests %}
+                    <div class="desktop-request-row">
+                        {% if req.album_image_url %}
+                            <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
+                        {% else %}
+                            <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 52px; height: 52px;">
+                                <i class="fas fa-music"></i>
+                            </div>
+                        {% endif %}
+                        <div class="desktop-request-meta">
+                            <div class="desktop-request-title">{{ req.title }}</div>
+                            <div class="desktop-request-subtitle">{{ req.artist }}</div>
+                            <div class="desktop-request-subtitle mt-1">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
+                        </div>
+                        <span class="badge bg-warning text-dark">Pendent</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                        <div>No hi ha temes demanats pendents.</div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
-{% endif %}
 
 <div class="row g-4 mb-4">
     <div class="col-lg-6">

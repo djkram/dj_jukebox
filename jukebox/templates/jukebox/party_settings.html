@@ -209,21 +209,22 @@
                 <th>BPM</th>
                 <th>Key</th>
                 <th>Vots</th>
+                <th>Accions</th>
               </tr>
             </thead>
             <tbody>
               {% for song in songs %}
-                <tr>
+                <tr data-song-id="{{ song.id }}">
                   <td>{{ song.title }}</td>
                   <td>{{ song.artist }}</td>
-                  <td>
+                  <td class="bpm-cell">
                     {% if song.bpm %}
                       {{ song.bpm|floatformat:0 }}
                     {% else %}
                       <span class="text-muted">-</span>
                     {% endif %}
                   </td>
-                  <td>
+                  <td class="key-cell">
                     {% if song.key %}
                       <span class="badge bg-secondary">{{ song.key }}</span>
                     {% else %}
@@ -231,6 +232,19 @@
                     {% endif %}
                   </td>
                   <td>{{ song.num_votes }}</td>
+                  <td>
+                    {% if not song.bpm or not song.key %}
+                      {% if song.preview_url %}
+                        <button class="btn btn-sm btn-outline-primary analyze-audio-btn"
+                                data-song-id="{{ song.id }}"
+                                title="Analitzar àudio amb IA">
+                          <i class="fas fa-waveform-lines"></i> Analitza
+                        </button>
+                      {% else %}
+                        <span class="text-muted small">No preview</span>
+                      {% endif %}
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -375,13 +389,26 @@
         </div>
         <div class="d-flex flex-column gap-2">
           {% for song in songs %}
-            <div class="party-song-row p-2" data-song-row>
-              <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">{{ song.title }}</div>
-              <div style="font-size: 0.82rem; color: #434656;" data-song-artist>{{ song.artist }}</div>
-              <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem; color: #747688;">
-                <span>BPM: {% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span>
-                <span>Key: {% if song.key %}{{ song.key }}{% else %}-{% endif %}</span>
-                <span>Vots: {{ song.num_votes }}</span>
+            <div class="party-song-row p-2" data-song-row data-song-id="{{ song.id }}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">{{ song.title }}</div>
+                  <div style="font-size: 0.82rem; color: #434656;" data-song-artist>{{ song.artist }}</div>
+                  <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem; color: #747688;">
+                    <span class="bpm-cell-mobile">BPM: {% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span>
+                    <span class="key-cell-mobile">Key: {% if song.key %}{{ song.key }}{% else %}-{% endif %}</span>
+                    <span>Vots: {{ song.num_votes }}</span>
+                  </div>
+                </div>
+                {% if not song.bpm or not song.key %}
+                  {% if song.preview_url %}
+                    <button class="btn btn-sm btn-outline-primary analyze-audio-btn flex-shrink-0"
+                            data-song-id="{{ song.id }}"
+                            style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                      <i class="fas fa-waveform-lines"></i>
+                    </button>
+                  {% endif %}
+                {% endif %}
               </div>
             </div>
           {% endfor %}
@@ -721,6 +748,75 @@ document.addEventListener('DOMContentLoaded', function() {
       window.location.href = '?load_spotify=1&only_owned=' + onlyOwned;
     });
   }
+
+  // Gestió del botó "Analitza àudio" per cada cançó
+  document.querySelectorAll('.analyze-audio-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var songId = this.dataset.songId;
+      var originalHtml = this.innerHTML;
+
+      // Desactivar botó i mostrar spinner
+      this.disabled = true;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analitzant...';
+
+      // Trobar la fila de la cançó
+      var row = document.querySelector('[data-song-id="' + songId + '"]');
+      var bpmCell = row.querySelector('.bpm-cell, .bpm-cell-mobile');
+      var keyCell = row.querySelector('.key-cell, .key-cell-mobile');
+
+      fetch('{% url "analyze_song_audio" party.id 0 %}'.replace('0', songId), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': activeForm.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualitzar cel·les amb els nous valors
+          if (bpmCell) {
+            if (data.bpm) {
+              bpmCell.innerHTML = bpmCell.textContent.includes('BPM:')
+                ? 'BPM: ' + Math.round(data.bpm)
+                : Math.round(data.bpm);
+            }
+          }
+          if (keyCell) {
+            if (data.key) {
+              keyCell.innerHTML = keyCell.textContent.includes('Key:')
+                ? 'Key: <span class="badge bg-secondary">' + data.key + '</span>'
+                : '<span class="badge bg-secondary">' + data.key + '</span>';
+            }
+          }
+
+          // Eliminar botó (ja no cal)
+          this.remove();
+
+          // Mostrar missatge èxit
+          var successMsg = document.createElement('small');
+          successMsg.className = 'text-success';
+          successMsg.innerHTML = '<i class="fas fa-check"></i> Analitzat';
+          if (row.querySelector('td:last-child')) {
+            row.querySelector('td:last-child').appendChild(successMsg);
+          } else {
+            row.appendChild(successMsg);
+          }
+        } else {
+          // Error: restaurar botó
+          this.disabled = false;
+          this.innerHTML = originalHtml;
+          alert('Error: ' + (data.error || 'No s\'ha pogut analitzar'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        this.disabled = false;
+        this.innerHTML = originalHtml;
+        alert('Error de xarxa. Torna a provar.');
+      });
+    });
+  });
 });
 </script>
 {% endblock %}

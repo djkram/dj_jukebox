@@ -30,6 +30,7 @@ from .spotify_api import (
 )
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
+from .audio_analysis import analyze_spotify_preview
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -293,6 +294,61 @@ def process_song_features(request, party_id):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def analyze_song_audio(request, party_id, song_id):
+    """
+    Analitza l'àudio d'una cançó utilitzant librosa per detectar BPM i Key.
+    Utilitzat com a fallback quan les APIs no tenen dades.
+    """
+    party = get_object_or_404(Party, pk=party_id)
+    song = get_object_or_404(Song, pk=song_id, party=party)
+
+    # Verificar que té preview URL
+    if not song.preview_url:
+        return JsonResponse({
+            'success': False,
+            'error': 'Aquesta cançó no té preview disponible per analitzar'
+        }, status=400)
+
+    try:
+        # Analitzar àudio amb librosa
+        logger.info(f"[ANALYZE_AUDIO] Analitzant cançó: {song.title} - {song.artist}")
+        result = analyze_spotify_preview(song.preview_url)
+
+        if not result:
+            return JsonResponse({
+                'success': False,
+                'error': 'No s\'ha pogut analitzar l\'àudio. Prova més tard.'
+            }, status=500)
+
+        # Actualitzar cançó amb resultats
+        song.bpm = result['bpm']
+        song.key = result['key']
+        song.save()
+
+        logger.info(f"[ANALYZE_AUDIO] Cançó analitzada: BPM={result['bpm']}, Key={result['key']}")
+
+        return JsonResponse({
+            'success': True,
+            'bpm': result['bpm'],
+            'key': result['key'],
+            'key_note': result.get('key_note'),
+            'key_mode': result.get('key_mode'),
+        })
+
+    except Exception as e:
+        logger.error(f"[ANALYZE_AUDIO] Error analitzant cançó {song_id}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+
+        return JsonResponse({
+            'success': False,
+            'error': f'Error analitzant àudio: {str(e)}'
+        }, status=500)
+
+
+@login_required
 def song_list(request):
     party_id = request.session.get('selected_party_id')
     if not party_id:
@@ -459,6 +515,7 @@ def dj_dashboard(request):
 
     # Obtenir recomanacions intel·ligents
     recommended_songs = get_recommended_songs(party, limit=6)
+    pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')
 
     context = {
         'party': party,
@@ -468,6 +525,7 @@ def dj_dashboard(request):
         'total_votes': total_votes,
         'played_songs': played_songs_count,
         'recommended_songs': recommended_songs,
+        'pending_requests': pending_requests,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
 

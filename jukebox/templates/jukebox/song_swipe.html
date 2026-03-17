@@ -40,7 +40,7 @@
         <div class="card-body p-2 d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
             <i class="fas fa-layer-group text-primary"></i>
-            <span class="fw-bold" id="progress-text-desktop">0 de {{ songs|length }}</span>
+            <span class="fw-bold" id="progress-text-desktop">{{ swiped_count }} de {{ total_songs }}</span>
           </div>
           <div class="flex-grow-1 mx-3">
             <div class="progress" style="height: 8px;">
@@ -62,6 +62,8 @@
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
+                 data-spotify-id="{{ song.spotify_id }}"
+                 data-preview-url="{{ song.preview_url|default:'' }}"
                  style="position: absolute; width: 100%; transition: all 0.3s; top: 0;">
               <div class="card shadow-lg" style="border-radius: 1.5rem; overflow: hidden;">
                 <div class="card-body text-center p-4 position-relative">
@@ -82,6 +84,10 @@
                       <button class="btn-skip-card btn btn-lg shadow-lg"
                               style="width: 70px; height: 70px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 3px solid #dc3545; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-times fa-2x text-danger"></i>
+                      </button>
+                      <button id="play-preview-btn-desktop" class="btn btn-lg shadow-lg"
+                              style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 3px solid #0040e0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-play fa-lg" style="color: #0040e0;"></i>
                       </button>
                       <button class="btn-like-card btn btn-lg shadow-lg"
                               style="width: 70px; height: 70px; border-radius: 50%; background: rgba(40, 167, 69, 0.95); border: 3px solid #28a745; display: flex; align-items: center; justify-content: center;">
@@ -142,22 +148,55 @@
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
 <div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; display: flex; flex-direction: column;">
-  <main class="flex-1 flex flex-col items-center justify-center px-4 py-4" style="max-width: 28rem; margin: 0 auto; width: 100%;">
-    <!-- Stats Row: Votes & Coins -->
-    <div class="w-full flex justify-between items-center mb-6">
-      <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
-        <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.875rem;"></i>
-        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="votes-count">{{ votes_left }} Vots</span>
+  <main class="flex-1 flex flex-col items-center justify-start px-3 pt-1 pb-2" style="max-width: 28rem; margin: 0 auto; width: 100%;">
+    <!-- Stats Row -->
+    <div class="w-full mb-2" style="margin-top: -0.5rem;">
+      <div class="row g-2 mx-0">
+      <div class="col-3 px-1">
+      <a href="{% url 'buy_votes' %}" class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100 text-decoration-none" style="background: white;">
+        <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.8rem;"></i>
+        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="votes-count">{{ votes_left }}</span>
+      </a>
       </div>
-      <div class="bg-surface-container-lowest px-4 py-2 rounded-full shadow-sm flex items-center gap-2" style="background: white;">
-        <i class="fas fa-coins" style="color: #006875; font-size: 0.875rem;"></i>
-        <span class="font-bold" style="font-size: 0.875rem; color: #191c1f;" id="credits-count">{{ credits }}</span>
+      <div class="col-3 px-1">
+      <div class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100" style="background: white;">
+        <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.8rem;"></i>
+        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_likes }}</span>
+      </div>
+      </div>
+      <div class="col-3 px-1">
+      <div class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100" style="background: white;">
+        <i class="fas fa-music" style="color: #0040e0; font-size: 0.8rem;"></i>
+        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_songs }}</span>
+      </div>
+      </div>
+      <div class="col-3 px-1">
+      <a href="{% url 'buy_votes' %}" class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100 text-decoration-none" style="background: white;">
+        <i class="fas fa-coins" style="color: #006875; font-size: 0.8rem;"></i>
+        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="credits-count">{{ credits }}</span>
+      </a>
+      </div>
       </div>
     </div>
 
     {% if songs %}
+      <div class="w-full mb-2">
+        <div class="bg-white rounded-xl shadow-sm px-3 py-2 d-flex align-items-center justify-content-between" style="border: 1px solid rgba(196, 197, 217, 0.18);">
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <i class="fas fa-layer-group" style="color: #4e73df; font-size: 0.9rem;"></i>
+            <span class="fw-bold" id="progress-text" style="font-size: 0.95rem; color: #191c1f;">{{ swiped_count }} de {{ total_songs }}</span>
+          </div>
+          <div class="flex-grow-1 mx-2">
+            <div class="progress" style="height: 0.45rem; background: #eef0f7;">
+              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: #4e73df;"></div>
+            </div>
+          </div>
+          <span class="badge rounded-pill" id="remaining-count" style="background: #4e73df; color: white; font-size: 0.75rem;">{{ songs|length }}</span>
+        </div>
+      </div>
+
       <!-- Match Card Container (Tinder-like) -->
-      <div class="relative w-full mb-6" style="aspect-ratio: 3/4;">
+      <div class="relative w-full mb-3" style="aspect-ratio: 3 / 3.75;">
         <!-- Background Stack Effect -->
         <div class="absolute inset-0 rounded-xl" style="background: #e7e8ed; transform: rotate(3deg) scale(0.95) translateY(0.5rem); opacity: 0.4;"></div>
         <div class="absolute inset-0 rounded-xl" style="background: #f2f3f8; transform: rotate(-2deg) scale(0.98) translateY(0.25rem); opacity: 0.7;"></div>
@@ -167,6 +206,8 @@
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
+                 data-spotify-id="{{ song.spotify_id }}"
+                 data-preview-url="{{ song.preview_url|default:'' }}"
                  style="position: absolute; width: 100%; height: 100%; top: 0; display: flex; flex-direction: column;">
               <!-- Album Art -->
               <div class="relative" style="flex: 1; overflow: hidden;">
@@ -179,43 +220,39 @@
                   </div>
                 {% endif %}
 
-                <!-- Live Badge -->
-                {% if forloop.first %}
-                  <div class="position-absolute d-flex align-items-center gap-1 px-3 py-1 rounded-pill text-xs font-bold uppercase" style="top: 1rem; left: 1rem; background: #00e3fd; color: #00616d; letter-spacing: 0.05em; font-size: 0.75rem;">
-                    <span class="rounded-circle animate-pulse" style="width: 0.375rem; height: 0.375rem; background: #00616d;"></span>
-                    Tendència
-                  </div>
-                {% endif %}
+                <div class="position-absolute d-flex align-items-center gap-1 px-3 py-1 rounded-pill text-xs font-bold uppercase" style="top: 1rem; left: 1rem; background: {{ song.badge_bg }}; color: {{ song.badge_text }}; letter-spacing: 0.05em; font-size: 0.75rem;">
+                  <span class="rounded-circle" style="width: 0.375rem; height: 0.375rem; background: {{ song.badge_text }};"></span>
+                  {{ song.badge_label }}
+                </div>
               </div>
 
               <!-- Song Info -->
-              <div class="p-4 d-flex flex-column gap-3" style="background: white;">
+              <div class="p-3 d-flex flex-column gap-2" style="background: white;">
                 <div>
-                  <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.1em;">{% if song.genre %}{{ song.genre }}{% else %}Música{% endif %}</span>
-                  <h2 class="font-headline font-extrabold mb-1" style="font-size: 1.5rem; line-height: 1.2; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
-                  <p class="font-medium" style="color: #434656;">{{ song.artist }}</p>
+                  <h2 class="font-headline font-extrabold mb-1" style="font-size: 1.3rem; line-height: 1.15; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
+                  <p class="font-medium mb-0" style="color: #434656; font-size: 0.95rem;">{{ song.artist }}</p>
                 </div>
 
                 <!-- Audio Metadata -->
                 {% if song.bpm or song.key %}
-                  <div class="d-flex align-items-center gap-4 py-2" style="border-top: 1px solid rgba(196, 197, 217, 0.1);">
+                  <div class="d-flex align-items-center gap-3 pt-2" style="border-top: 1px solid rgba(196, 197, 217, 0.1);">
                     {% if song.bpm %}
                       <div class="d-flex flex-column">
                         <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Tempo</span>
                         <div class="d-flex align-items-center gap-1">
-                          <i class="fas fa-drum" style="color: #0040e0; font-size: 1.125rem;"></i>
-                          <span class="font-headline font-bold" style="font-size: 1.125rem;">{{ song.bpm|floatformat:0 }}</span>
+                          <i class="fas fa-drum" style="color: #0040e0; font-size: 1rem;"></i>
+                          <span class="font-headline font-bold" style="font-size: 1rem;">{{ song.bpm|floatformat:0 }}</span>
                           <span class="text-xs font-medium" style="color: #747688;">BPM</span>
                         </div>
                       </div>
                     {% endif %}
                     {% if song.key %}
-                      <div style="width: 1px; height: 2rem; background: rgba(196, 197, 217, 0.2);"></div>
+                      <div style="width: 1px; height: 1.75rem; background: rgba(196, 197, 217, 0.2);"></div>
                       <div class="d-flex flex-column">
                         <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Tonalitat</span>
                         <div class="d-flex align-items-center gap-1">
-                          <i class="fas fa-music" style="color: #0040e0; font-size: 1.125rem;"></i>
-                          <span class="font-headline font-bold" style="font-size: 1.125rem;">{{ song.key }}</span>
+                          <i class="fas fa-music" style="color: #0040e0; font-size: 1rem;"></i>
+                          <span class="font-headline font-bold" style="font-size: 1rem;">{{ song.key }}</span>
                         </div>
                       </div>
                     {% endif %}
@@ -228,24 +265,32 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-6 flex items-center justify-center gap-6 w-full">
+      <div class="mt-3 flex items-center justify-center gap-4 w-full">
         <!-- Skip Button -->
-        <button class="btn-skip-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 4rem; height: 4rem; background: #e7e8ed; color: #191c1f; border: none;">
-          <i class="fas fa-times" style="font-size: 1.875rem;"></i>
+        <button id="mobile-skip-btn" class="btn-skip-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 3.4rem; height: 3.4rem; background: #e7e8ed; color: #191c1f; border: none;">
+          <i class="fas fa-times" style="font-size: 1.45rem;"></i>
         </button>
 
         <!-- Play/Preview Toggle (Small) -->
-        <button class="flex items-center justify-center rounded-circle transition-colors" style="width: 3rem; height: 3rem; border: 2px solid rgba(0, 64, 224, 0.2); background: transparent; color: #0040e0;">
-          <i class="fas fa-play" style="font-size: 1rem;"></i>
+        <button id="play-preview-btn" class="flex items-center justify-center rounded-circle transition-colors" style="width: 2.6rem; height: 2.6rem; border: 2px solid rgba(0, 64, 224, 0.2); background: transparent; color: #0040e0;">
+          <i class="fas fa-play" style="font-size: 0.9rem;"></i>
         </button>
 
         <!-- Like Button -->
-        <button class="btn-like-card flex items-center justify-center rounded-circle transition-transform" style="width: 5rem; height: 5rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(0,64,224,0.3);">
-          <i class="fas fa-heart" style="font-size: 2.5rem;"></i>
+        <button id="mobile-like-btn" class="btn-like-card flex items-center justify-center rounded-circle transition-transform" style="width: 4.2rem; height: 4.2rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(0,64,224,0.3);">
+          <i class="fas fa-heart" style="font-size: 2rem;"></i>
         </button>
       </div>
 
       <div id="message-area" class="text-center mt-3"></div>
+
+      {% if not has_spotify %}
+        <div class="alert alert-info mt-3 text-center" style="font-size: 0.875rem;">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Consell:</strong> Connecta el teu compte de Spotify per reproduir cançons completes!
+          <a href="{% url 'profile' %}" class="alert-link">Connectar Spotify</a>
+        </div>
+      {% endif %}
 
       {% if votes_left == 0 %}
         <div class="alert alert-warning mt-3 text-center">
@@ -275,12 +320,117 @@
   </main>
 </div>
 
+<!-- Audio Element for preview (shared between desktop and mobile) -->
+<audio id="preview-audio" preload="none"></audio>
+
+{% if has_spotify and spotify_token %}
+<!-- Spotify Web Playback SDK -->
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+{% endif %}
+
 <script>
+{% if has_spotify and spotify_token %}
+// Spotify Web Playback SDK Variables
+let spotifyPlayer = null;
+let spotifyDeviceId = null;
+const SPOTIFY_TOKEN = '{{ spotify_token }}';
+const HAS_SPOTIFY_PLAYER = true;
+
+// Initialize Spotify Player
+window.onSpotifyWebPlaybackSDKReady = () => {
+  spotifyPlayer = new Spotify.Player({
+    name: 'DJ Jukebox Web Player',
+    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+    volume: 0.7
+  });
+
+  // Ready
+  spotifyPlayer.addListener('ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Player ready with Device ID:', device_id);
+    spotifyDeviceId = device_id;
+
+    // Test if we can control playback (check permissions)
+    fetch('https://api.spotify.com/v1/me/player', {
+      headers: { 'Authorization': `Bearer ${SPOTIFY_TOKEN}` }
+    }).then(response => {
+      if (response.status === 401) {
+        console.warn('[SPOTIFY] Token invalid - user needs to reconnect');
+        showMessage('⚠️ Reconnecta el teu compte de Spotify des del perfil per activar la reproducció completa', false);
+      }
+    });
+  });
+
+  // Not Ready
+  spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Device ID has gone offline:', device_id);
+  });
+
+  // Player state changed
+  spotifyPlayer.addListener('player_state_changed', state => {
+    if (!state) return;
+
+    isPlaying = !state.paused;
+    updatePlayButton();
+  });
+
+  // Connect to the player
+  spotifyPlayer.connect().then(success => {
+    if (success) {
+      console.log('[SPOTIFY] Connected successfully');
+    }
+  });
+};
+
+// Function to play a track using Spotify SDK
+function playSpotifyTrack(spotifyId) {
+  if (!spotifyPlayer || !spotifyDeviceId) {
+    console.error('[SPOTIFY] Player not ready');
+    showMessage('El reproductor de Spotify no està llest. Espera uns segons...', false);
+    return Promise.reject('Player not ready');
+  }
+
+  return fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SPOTIFY_TOKEN}`
+    },
+  }).then(response => {
+    if (response.ok) {
+      console.log('[SPOTIFY] Playing track:', spotifyId);
+      return response;
+    } else if (response.status === 403) {
+      console.error('[SPOTIFY] Premium required:', response.status);
+      showMessage('Necessites Spotify Premium per reproduir cançons completes', false);
+      throw new Error('Premium required');
+    } else if (response.status === 401) {
+      console.error('[SPOTIFY] Unauthorized:', response.status);
+      showMessage('Sessió de Spotify caducada. Torna a connectar el teu compte.', false);
+      throw new Error('Unauthorized');
+    } else {
+      console.error('[SPOTIFY] Error playing track:', response.status);
+      showMessage('Error reproduint la cançó. Torna-ho a provar.', false);
+      throw new Error('Playback error');
+    }
+  }).catch(error => {
+    console.error('[SPOTIFY] Fetch error:', error);
+    throw error;
+  });
+}
+
+{% else %}
+const HAS_SPOTIFY_PLAYER = false;
+{% endif %}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Detectar si és mòbil o desktop
   const isMobile = window.innerWidth < 768;
+  const totalSongs = {{ total_songs|default:0 }};
+  const initialCompleted = {{ swiped_count|default:0 }};
 
-  const cards = document.querySelectorAll('.swipe-card');
+  const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
+  const cards = cardStack ? cardStack.querySelectorAll('.swipe-card') : [];
   const messageArea = document.getElementById(isMobile ? 'message-area' : 'message-area-desktop');
   const votesCount = document.getElementById('votes-count');
   const creditsCount = document.getElementById('credits-count');
@@ -293,16 +443,160 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastAction = null; // { type: 'like'|'skip', songId: X, index: Y }
   const totalCards = cards.length;
 
-  if (cards.length === 0) return;
+  if (!cardStack || cards.length === 0) return;
 
   // Actualitzar progrés
   function updateProgress() {
-    const progress = (currentIndex / totalCards) * 100;
+    const completedCount = initialCompleted + currentIndex;
+    const progress = totalSongs > 0 ? (completedCount / totalSongs) * 100 : 0;
     const remaining = totalCards - currentIndex;
 
     if (progressBar) progressBar.style.width = progress + '%';
-    if (progressText) progressText.textContent = `${currentIndex} de ${totalCards}`;
+    if (progressText) progressText.textContent = `${completedCount} de ${totalSongs}`;
     if (remainingCount) remainingCount.textContent = remaining;
+  }
+
+  // Audio Management (Spotify SDK or Preview)
+  const audioElement = document.getElementById('preview-audio');
+  const playBtn = document.getElementById(isMobile ? 'play-preview-btn' : 'play-preview-btn-desktop');
+  let isPlaying = false;
+  let currentSpotifyId = null;
+
+  function updatePlayButton() {
+    if (!playBtn) return;
+    const icon = playBtn.querySelector('i');
+    if (isPlaying) {
+      icon.classList.remove('fa-play');
+      icon.classList.add('fa-pause');
+    } else {
+      icon.classList.remove('fa-pause');
+      icon.classList.add('fa-play');
+    }
+  }
+
+  function loadCurrentPreview() {
+    if (currentIndex >= cards.length) return;
+
+    const currentCard = cards[currentIndex];
+    const previewUrl = currentCard.dataset.previewUrl;
+    currentSpotifyId = currentCard.dataset.spotifyId || null;
+
+    // If user has Spotify SDK, always show play button
+    if (HAS_SPOTIFY_PLAYER) {
+      if (playBtn) {
+        playBtn.style.display = '';
+        playBtn.style.opacity = '1';
+        playBtn.disabled = false;
+      }
+    } else {
+      // Fallback to preview URLs
+      if (audioElement && previewUrl) {
+        audioElement.src = previewUrl;
+        audioElement.load();
+        if (playBtn) {
+          playBtn.style.display = '';
+          playBtn.style.opacity = '1';
+          playBtn.disabled = false;
+        }
+      } else {
+        // No preview available
+        if (playBtn) {
+          playBtn.style.display = 'none';
+        }
+      }
+    }
+  }
+
+  function stopAudio() {
+    if (HAS_SPOTIFY_PLAYER && spotifyPlayer) {
+      spotifyPlayer.pause().then(() => {
+        isPlaying = false;
+        updatePlayButton();
+      });
+    } else if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      isPlaying = false;
+      updatePlayButton();
+    }
+  }
+
+  function getCurrentSongSpotifyId() {
+    if (currentIndex >= cards.length) return null;
+    const currentCard = cards[currentIndex];
+    // Get spotify_id from data attribute
+    return currentCard.dataset.spotifyId || null;
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+
+      if (currentIndex >= cards.length) return;
+
+      if (HAS_SPOTIFY_PLAYER) {
+        // Use Spotify Web Playback SDK
+        const spotifyId = getCurrentSongSpotifyId();
+        if (!spotifyId) {
+          showMessage('Error: No s\'ha pogut obtenir l\'ID de Spotify', false);
+          return;
+        }
+
+        if (isPlaying) {
+          spotifyPlayer.pause().then(() => {
+            isPlaying = false;
+            updatePlayButton();
+          });
+        } else {
+          playSpotifyTrack(spotifyId).then(() => {
+            isPlaying = true;
+            updatePlayButton();
+          }).catch(() => {
+            isPlaying = false;
+            updatePlayButton();
+          });
+        }
+      } else {
+        // Fallback: Use preview URLs
+        const currentCard = cards[currentIndex];
+        const previewUrl = currentCard.dataset.previewUrl;
+
+        if (!previewUrl) {
+          showMessage('Preview no disponible per aquesta cançó', false);
+          return;
+        }
+
+        if (isPlaying) {
+          audioElement.pause();
+          isPlaying = false;
+        } else {
+          audioElement.play().catch(err => {
+            console.error('Error playing audio:', err);
+            showMessage('Error reproduint preview', false);
+          });
+          isPlaying = true;
+        }
+        updatePlayButton();
+      }
+    });
+
+    // Preview audio events (only for non-Spotify users)
+    if (!HAS_SPOTIFY_PLAYER && audioElement) {
+      audioElement.addEventListener('ended', function() {
+        isPlaying = false;
+        updatePlayButton();
+      });
+
+      audioElement.addEventListener('pause', function() {
+        isPlaying = false;
+        updatePlayButton();
+      });
+
+      audioElement.addEventListener('play', function() {
+        isPlaying = true;
+        updatePlayButton();
+      });
+    }
   }
 
   // Inicialitzar cartes: primera visible, resta ocultes
@@ -321,10 +615,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Load preview for first card
+  loadCurrentPreview();
+  updateProgress();
+
   // Afegir event listeners als botons (fora de cada carta en mòbil, dins en desktop)
   if (isMobile) {
-    const btnSkip = document.querySelector('.btn-skip-card');
-    const btnLike = document.querySelector('.btn-like-card');
+    const btnSkip = document.getElementById('mobile-skip-btn');
+    const btnLike = document.getElementById('mobile-like-btn');
 
     if (btnSkip) {
       btnSkip.addEventListener('click', function(e) {
@@ -371,6 +669,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function nextCard() {
     if (currentIndex >= cards.length) {
       // No més cançons
+      stopAudio();
       const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
       if (cardStack) {
         cardStack.innerHTML = `
@@ -398,11 +697,17 @@ document.addEventListener('DOMContentLoaded', function() {
     nextCardElement.style.zIndex = currentIndex + 10;
     nextCardElement.style.transform = '';
     nextCardElement.style.opacity = '1';
+
+    // Load preview for next card
+    loadCurrentPreview();
   }
 
   function animateCardOut(direction, songId, actionType) {
     const card = cards[currentIndex];
     const transform = direction === 'left' ? 'translateX(-150%) rotate(-30deg)' : 'translateX(150%) rotate(30deg)';
+
+    // Stop audio when card goes out
+    stopAudio();
 
     // Guardar acció per undo
     lastAction = {
@@ -538,14 +843,14 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       if (data.success) {
         // Actualitzar comptadors (mòbil i desktop)
-        if (votesCount) votesCount.textContent = isMobile ? (data.votes_left + ' Vots') : data.votes_left;
+        if (votesCount) votesCount.textContent = data.votes_left;
         if (creditsCount) creditsCount.textContent = data.credits;
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
         if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
 
-        showMessage('Match! ❤️ (-1 Vot)', true);
+        showMessage('Match! ❤️ (1 Vot)', true);
         animateCardOut('right', songId, 'like');
         // Reactivar botons després de l'animació
         setTimeout(() => {
@@ -568,8 +873,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let touchStartY = 0;
   let touchCurrentX = 0;
   let isDragging = false;
-
-  const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
 
   cardStack.addEventListener('touchstart', function(e) {
     if (currentIndex >= cards.length) return;

@@ -111,70 +111,68 @@
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none px-4 pt-6 pb-24" style="background: #f8f9fe; min-height: 100vh;">
+<div class="d-md-none px-3 pt-3 pb-5" style="background: #f8f9fe; min-height: 100vh;">
   <main class="mx-auto" style="max-width: 48rem;">
     <!-- Header Section -->
-    <header class="mb-8">
-      <span class="d-block font-semibold text-uppercase mb-2" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">Actualitzacions</span>
-      <h2 class="font-headline font-extrabold mb-2" style="font-size: 2.5rem; line-height: 1; letter-spacing: -0.025em; color: #191c1f;">Activitat</h2>
-      <p style="color: #434656; font-size: 0.875rem;">Mantén-te al dia del pols de la festa.</p>
+    <header class="mb-3">
+      <span class="d-block fw-semibold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.65rem; letter-spacing: 0.15em;">Actualitzacions</span>
+      <h2 class="fw-bold mb-1" style="font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.025em; color: #191c1f;">Activitat</h2>
+      <p style="color: #434656; font-size: 0.75rem;">Mantén-te al dia del pols de la festa.</p>
     </header>
 
     {% if notifications %}
       <!-- Notifications Bento-ish List -->
-      <div class="d-flex flex-column gap-4">
+      <div class="d-flex flex-column" style="gap: 0.75rem;">
         {% for notification in notifications %}
           {% if notification.type == 'song_accepted' %}
             <!-- Song Accepted -->
-            <div class="group position-relative bg-white p-4 rounded-xl d-flex align-items-start gap-3 border {% if not notification.is_read %}border-primary{% else %}border-transparent{% endif %} transition-all" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
-              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 3.5rem; height: 3.5rem; background: #dde1ff; color: #efefff;">
-                <i class="fas fa-check-circle" style="font-size: 1.5rem; color: #0040e0;"></i>
+            <div class="position-relative bg-white p-2 d-flex align-items-start border {% if not notification.is_read %}border-primary{% else %}border-transparent{% endif %}" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #dde1ff;">
+                <i class="fas fa-check-circle" style="font-size: 1.125rem; color: #0040e0;"></i>
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <p class="fw-bold mb-0" style="font-size: 0.875rem; color: #191c1f; letter-spacing: -0.01em;">{{ notification.title }}</p>
-                  <span style="font-size: 0.625rem; font-weight: 500; color: #747688;">{{ notification.created_at|timesince }}</span>
+                  <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
+                  <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
                 </div>
-                <p class="mb-3" style="font-size: 0.875rem; color: #434656; line-height: 1.5;">{{ notification.message }}</p>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="px-3 py-1 rounded-pill d-flex align-items-center gap-2" style="background: #eceef3; height: 2rem;">
-                    <i class="fas fa-play-circle" style="font-size: 0.875rem; color: #0040e0;"></i>
-                    <span class="fw-semibold" style="font-size: 0.75rem; color: #0040e0;">Up Next</span>
-                  </div>
+                <p class="mb-2" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
+                <div class="px-2 py-1 rounded-pill d-inline-flex align-items-center" style="background: #eceef3; gap: 0.25rem;">
+                  <i class="fas fa-play-circle" style="font-size: 0.7rem; color: #0040e0;"></i>
+                  <span class="fw-semibold" style="font-size: 0.65rem; color: #0040e0;">Up Next</span>
                 </div>
               </div>
             </div>
 
           {% elif notification.type == 'song_played' %}
             <!-- Song Played -->
-            <div class="group position-relative p-4 rounded-xl d-flex align-items-start gap-3 border border-transparent transition-all" style="background: #f2f3f8;">
-              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 3.5rem; height: 3.5rem; background: #00e3fd; color: #00616d;">
-                <i class="fas fa-thumbs-up" style="font-size: 1.5rem;"></i>
+            <div class="position-relative p-2 d-flex align-items-start border border-transparent" style="background: #f2f3f8; border-radius: 12px; gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #ffe5e5;">
+                <i class="fas fa-heart" style="font-size: 1.125rem; color: #e74c3c;"></i>
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <p class="fw-bold mb-0" style="font-size: 0.875rem; color: #191c1f; letter-spacing: -0.01em;">{{ notification.title }}</p>
-                  <span style="font-size: 0.625rem; font-weight: 500; color: #747688;">{{ notification.created_at|timesince }}</span>
+                  <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
+                  <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
                 </div>
-                <p class="mb-0" style="font-size: 0.875rem; color: #434656; line-height: 1.5;">{{ notification.message }}</p>
+                <p class="mb-0" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
               </div>
             </div>
 
           {% elif notification.type == 'coins_purchased' or notification.type == 'coins_received' %}
             <!-- Coins -->
-            <div class="group position-relative bg-white p-4 rounded-xl d-flex align-items-start gap-3 border border-transparent transition-all" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
-              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 3.5rem; height: 3.5rem; background: #7747fa; color: #f5edff;">
-                <i class="fas fa-{% if notification.type == 'coins_purchased' %}shopping-cart{% else %}gift{% endif %}" style="font-size: 1.5rem;"></i>
+            <div class="position-relative bg-white p-2 d-flex align-items-start border border-transparent" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #7747fa;">
+                <i class="fas fa-{% if notification.type == 'coins_purchased' %}shopping-cart{% else %}gift{% endif %}" style="font-size: 1.125rem; color: #f5edff;"></i>
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <p class="fw-bold mb-0" style="font-size: 0.875rem; color: #191c1f; letter-spacing: -0.01em;">{{ notification.title }}</p>
-                  <span style="font-size: 0.625rem; font-weight: 500; color: #747688;">{{ notification.created_at|timesince }}</span>
+                  <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
+                  <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
                 </div>
-                <p class="mb-0" style="font-size: 0.875rem; color: #434656; line-height: 1.5;">{{ notification.message }}</p>
+                <p class="mb-0" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
               </div>
-              <div class="px-3 py-1 rounded-lg" style="background: rgba(94, 36, 225, 0.05);">
-                <span class="fw-bold" style="font-size: 0.875rem; color: #5e24e1;">+{{ notification.amount }}</span>
+              <div class="px-2 py-1" style="background: rgba(94, 36, 225, 0.05); border-radius: 8px;">
+                <span class="fw-bold" style="font-size: 0.75rem; color: #5e24e1;">+{{ notification.amount }}</span>
               </div>
             </div>
           {% endif %}
@@ -182,27 +180,24 @@
       </div>
 
       <!-- Call to Action / Featured Card -->
-      <div class="mt-8 p-4 rounded-xl position-relative overflow-hidden" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
-        <div class="position-relative" style="z-index: 10;">
-          <h3 class="font-headline font-bold mb-2" style="font-size: 1.5rem;">Demana una Cançó</h3>
-          <p class="mb-4" style="color: rgba(239, 239, 255, 0.8); font-size: 0.875rem; max-width: 200px;">Tens alguna cançó al cap? Sigues l'ànima de la festa.</p>
-          <a href="{% url 'request_song' %}" class="btn fw-bold d-inline-flex align-items-center gap-2 transition-transform" style="background: white; color: #0040e0; padding: 0.75rem 1.5rem; border-radius: 9999px; font-size: 0.875rem; text-decoration: none;">
+      <div class="mt-3 p-3 position-relative overflow-hidden" style="border-radius: 12px; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
+        <div class="position-relative d-flex align-items-center justify-content-between" style="z-index: 10;">
+          <div>
+            <h3 class="fw-bold mb-1" style="font-size: 1rem;">Demana una Cançó</h3>
+            <p class="mb-0" style="color: rgba(239, 239, 255, 0.8); font-size: 0.7rem;">Sigues l'ànima de la festa.</p>
+          </div>
+          <a href="{% url 'request_song' %}" class="btn fw-bold d-inline-flex align-items-center" style="background: white; color: #0040e0; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; text-decoration: none; gap: 0.25rem;">
             <i class="fas fa-plus-circle"></i>
-            Crear Petició
+            Crear
           </a>
-        </div>
-        <!-- Decorative elements -->
-        <div class="position-absolute" style="right: -2.5rem; bottom: -2.5rem; width: 12rem; height: 12rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
-        <div class="position-absolute opacity-20" style="right: 1.5rem; top: 1.5rem;">
-          <i class="fas fa-music" style="font-size: 7.5rem;"></i>
         </div>
       </div>
 
     {% else %}
-      <div class="text-center py-5">
-        <i class="fas fa-bell-slash mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>
-        <h4 class="fw-bold mb-2" style="color: #191c1f;">No tens notificacions</h4>
-        <p class="mb-0" style="color: #434656;">Quan succeixin esdeveniments importants, apareixeran aquí!</p>
+      <div class="text-center py-4">
+        <i class="fas fa-bell-slash mb-2" style="font-size: 2rem; color: #747688; opacity: 0.5;"></i>
+        <h4 class="fw-bold mb-1" style="color: #191c1f; font-size: 1rem;">No tens notificacions</h4>
+        <p class="mb-0" style="color: #434656; font-size: 0.75rem;">Quan succeixin esdeveniments importants, apareixeran aquí!</p>
       </div>
     {% endif %}
   </main>

@@ -13,7 +13,7 @@ from django.urls import reverse
 from urllib.parse import urlencode
 
 from .models import Song, Party, Vote, VotePackage, SongRequest, Notification
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from .forms import PartyForm, PartySettingsForm
 from .notifications import (
     create_song_accepted_notification,
@@ -35,6 +35,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 import stripe
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -198,6 +201,7 @@ def process_playlist_songs(request, party_id):
                 artist=tr['artist'],
                 spotify_id=tr['id'],
                 album_image_url=tr.get('album_image_url'),
+                preview_url=tr.get('preview_url'),
                 bpm=None,
                 key=None,
             )
@@ -300,6 +304,10 @@ def song_list(request):
     votes_left = get_user_votes_left(user, party)
     credits = user.credits  # Coins globals de l'usuari
 
+    annotated_songs = party.songs.annotate(
+        num_votes=Count('vote', filter=Q(vote__vote_type='like'))
+    )
+
     if request.method == 'POST':
         # Conversió de Coins a Vots amb bonificació per volum
         if 'action' in request.POST and request.POST['action'] == 'convert_coins':
@@ -331,9 +339,17 @@ def song_list(request):
         # Votar una cançó
         elif 'vote_song_id' in request.POST:
             song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
+
+            # Comprovar si l'usuari ja ha votat aquesta cançó
+            existing_vote = Vote.objects.filter(user=user, song=song, party=party).first()
+            if existing_vote:
+                # L'usuari ja ha votat aquesta cançó, no fer res
+                return redirect('song_list')
+
+            # Comprovar si té vots disponibles
             if votes_left > 0:
                 # Crear el vot (consumeix 1 Vot)
-                Vote.objects.create(user=user, song=song, party=party)
+                Vote.objects.create(user=user, song=song, party=party, vote_type='like')
                 return redirect('song_list')
             else:
                 # Mostra error segons el cas
@@ -343,26 +359,50 @@ def song_list(request):
                     error = "No tens Coins! Compra Coins i converteix-los a Vots."
                 return render(request, "jukebox/song_list.html", {
                     "party": party,
-                    "songs": party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title'),
+                    "songs": annotated_songs.order_by('-num_votes', 'title'),
+                    "pending_songs": annotated_songs.filter(has_played=False).order_by('-num_votes', 'title'),
+                    "played_songs": annotated_songs.filter(has_played=True).order_by('id'),
                     "votes_left": votes_left,
                     "credits": credits,
                     "error": error,
                 })
 
-    songs = party.songs.annotate(num_votes=Count('vote')).order_by('-num_votes', 'title')
+    # Comptar només els likes per ordenar
+    songs = annotated_songs.order_by('-num_votes', 'title')
+    pending_songs = annotated_songs.filter(has_played=False).order_by('-num_votes', 'title')
+    played_songs = annotated_songs.filter(has_played=True).order_by('id')
+
+    # Obtenir els vots de l'usuari per mostrar els cors/creus marcats
+    user_votes = Vote.objects.filter(user=user, party=party).select_related('song')
+    user_votes_dict = {v.song_id: v.vote_type for v in user_votes}
 
     # Estadístiques per a la vista
     songs_played = party.songs.filter(has_played=True).count()
-    user_votes_count = Vote.objects.filter(user=user, party=party).count()
+    user_votes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
     total_songs = party.songs.count()
-    total_votes = Vote.objects.filter(party=party).count()
+    total_votes = Vote.objects.filter(party=party, vote_type='like').count()
 
     # Cançó que està sonant (la propera en la cua)
-    now_playing = party.songs.filter(has_played=False).annotate(num_votes=Count('vote')).order_by('-num_votes').first()
+    now_playing = party.songs.filter(has_played=False).annotate(
+        num_votes=Count('vote', filter=Q(vote__vote_type='like'))
+    ).order_by('-num_votes').first()
+
+    # Comprovar si l'usuari té Spotify connectat
+    has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
+    spotify_token = None
+    if has_spotify:
+        from .spotify_api import _ensure_valid_user_token
+        try:
+            spotify_token = _ensure_valid_user_token(user)
+        except Exception as e:
+            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
+            has_spotify = False
 
     return render(request, "jukebox/song_list.html", {
         "party": party,
         "songs": songs,
+        "pending_songs": pending_songs,
+        "played_songs": played_songs,
         "votes_left": votes_left,
         "credits": credits,
         "songs_played": songs_played,
@@ -370,6 +410,9 @@ def song_list(request):
         "total_songs": total_songs,
         "total_votes": total_votes,
         "now_playing": now_playing,
+        "user_votes_dict": user_votes_dict,
+        "has_spotify": has_spotify,
+        "spotify_token": spotify_token,
     })
 
 
@@ -409,7 +452,7 @@ def dj_dashboard(request):
     played_songs_count = played_songs_list.count()
 
     # Obtenir recomanacions intel·ligents
-    recommended_songs = get_recommended_songs(party, limit=5)
+    recommended_songs = get_recommended_songs(party, limit=6)
 
     context = {
         'party': party,
@@ -478,16 +521,21 @@ def buy_votes(request):
 
         # Compra de Coins amb Stripe
         else:
-            coins_to_buy = int(request.POST.get('votes', 5))  # 'votes' param name per compatibilitat
-            # Calcula el preu (1€ cada 5 coins, 2€ per 10, 4€ per 20)
-            if coins_to_buy == 5:
-                price_eur = 1
-            elif coins_to_buy == 10:
-                price_eur = 2
-            elif coins_to_buy == 20:
-                price_eur = 4
-            else:
-                price_eur = 1 * (coins_to_buy // 5)
+            coins_to_buy = int(request.POST.get('votes', 10))  # 'votes' param name per compatibilitat
+            package_prices = {
+                10: 2,
+                30: 5,
+                70: 10,
+            }
+            price_eur = package_prices.get(coins_to_buy)
+
+            if price_eur is None:
+                return render(request, "jukebox/buy_votes.html", {
+                    "party": party,
+                    "credits": user.credits,
+                    "votes_left": votes_left,
+                    "error": "Paquet de Coins no disponible."
+                })
 
             try:
                 session = stripe.checkout.Session.create(
@@ -759,6 +807,8 @@ def song_swipe(request):
 
     votes_left = get_user_votes_left(user, party)
     credits = user.credits
+    total_likes = Vote.objects.filter(party=party).count()
+    total_songs = party.songs.count()
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -789,13 +839,67 @@ def song_swipe(request):
 
     # Obtenir cançons que l'usuari encara no ha votat
     voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)
-    songs = party.songs.exclude(id__in=voted_song_ids).order_by('?')  # Ordre aleatori
+    songs = list(
+        party.songs
+        .annotate(num_votes=Count('vote'))
+        .exclude(id__in=voted_song_ids)
+        .order_by('?')
+    )
+    swiped_count = total_songs - len(songs)
+
+    # Etiquetes tipus DJ segons percentil de vots dins la festa
+    all_vote_counts = list(
+        party.songs
+        .annotate(num_votes=Count('vote'))
+        .values_list('num_votes', flat=True)
+    )
+    sorted_vote_counts = sorted(all_vote_counts)
+    total_ranked_songs = len(sorted_vote_counts)
+
+    def get_badge_for_song(vote_count):
+        if total_ranked_songs == 0:
+            percentile = 0
+        else:
+            songs_below_or_equal = sum(1 for count in sorted_vote_counts if count <= vote_count)
+            percentile = (songs_below_or_equal / total_ranked_songs) * 100
+
+        if percentile >= 90:
+            return ("HIMNE", "#18c37e", "#065f46")
+        if percentile >= 75:
+            return ("PETANT-HO", "#ffb020", "#7a3e00")
+        if percentile >= 55:
+            return ("CALENTA", "#ff6b6b", "#7f1d1d")
+        if percentile >= 35:
+            return ("ESCALFANT", "#5e24e1", "#ffffff")
+        return ("FRESCA", "#00e3fd", "#00616d")
+
+    for song in songs:
+        badge_label, badge_bg, badge_text = get_badge_for_song(song.num_votes)
+        song.badge_label = badge_label
+        song.badge_bg = badge_bg
+        song.badge_text = badge_text
+
+    # Comprovar si l'usuari té Spotify connectat
+    has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
+    spotify_token = None
+    if has_spotify:
+        from .spotify_api import _ensure_valid_user_token
+        try:
+            spotify_token = _ensure_valid_user_token(user)
+        except Exception as e:
+            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
+            has_spotify = False
 
     return render(request, 'jukebox/song_swipe.html', {
         'party': party,
         'songs': songs,
         'votes_left': votes_left,
+        'total_likes': total_likes,
+        'total_songs': total_songs,
+        'swiped_count': swiped_count,
         'credits': credits,
+        'has_spotify': has_spotify,
+        'spotify_token': spotify_token,
     })
 
 

@@ -1,9 +1,49 @@
 {% extends "jukebox/admin_base.html" %}
+{% load dict_filters %}
 {% block page_title %}
   {% if party %}{{ party.name }}{% else %}Festa activa{% endif %}
 {% endblock %}
 {% block content %}
 <style>
+  /* Album cover play overlay */
+  .album-cover-container:hover .play-overlay {
+    opacity: 1 !important;
+  }
+
+  .play-overlay.is-playing {
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .spotify-play-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .spotify-play-btn {
+    transition: transform 0.2s;
+  }
+
+  /* Mobile: mostrar play overlay sempre visible */
+  @media (max-width: 767.98px) {
+    .play-overlay {
+      opacity: 0.6 !important;
+    }
+
+    .play-overlay.is-playing {
+      opacity: 1 !important;
+      background: rgba(0, 0, 0, 0.8) !important;
+    }
+
+    .album-cover-container:active .play-overlay {
+      opacity: 1 !important;
+    }
+
+    /* Icona més gran per mòbil */
+    .play-overlay .spotify-play-btn {
+      font-size: 1.5rem !important;
+    }
+  }
+
   /* Animació d'entrada per cards */
   @keyframes fadeInUp {
     from {
@@ -54,11 +94,31 @@
     .song-card h6 {
       font-size: 0.9rem !important;
     }
+    .mobile-songs-grid {
+      padding-top: 0 !important;
+      margin-top: 0;
+    }
+    .mobile-song-tab {
+      border: none;
+      background: transparent;
+      color: #747688;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.8rem;
+      border-radius: 12px;
+    }
+    .mobile-song-tab.is-active {
+      background: #eef2ff;
+      color: #0040e0;
+      box-shadow: inset 0 0 0 1px rgba(0, 64, 224, 0.08);
+    }
   }
 </style>
 <div class="container-fluid">
-  <!-- INFO DE LA FESTA -->
-  <div class="card shadow mb-4">
+  <!-- INFO DE LA FESTA (només desktop) -->
+  <div class="card shadow mb-4 d-none d-md-block">
     <div class="card-body">
       <div class="d-flex align-items-center justify-content-between">
         <h2 class="mb-0">🎉 {{ party.name }}</h2>
@@ -84,35 +144,54 @@
         </thead>
         <tbody>
           {% for song in songs %}
-            <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
+            <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
               <td>
-                {% if song.album_image_url %}
-                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                       class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                {% else %}
-                  <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                       style="width: 60px; height: 60px;">
-                    <i class="fas fa-music text-white"></i>
+                <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
+                  {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                         class="rounded w-100 h-100" style="object-fit: cover;">
+                  {% else %}
+                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
+                      <i class="fas fa-music text-white"></i>
+                    </div>
+                  {% endif %}
+
+                  {% if has_spotify %}
+                  <!-- Play/Pause Overlay -->
+                  <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
+                       style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
+                    <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                            data-song-id="{{ song.id }}"
+                            data-spotify-id="{{ song.spotify_id }}"
+                            style="color: white; font-size: 2rem; line-height: 1;">
+                      <i class="fas fa-play"></i>
+                    </button>
                   </div>
-                {% endif %}
+                  {% endif %}
+                </div>
               </td>
               <td>{{ song.title }}</td>
               <td>{{ song.artist }}</td>
               <td class="text-center">{{ song.num_votes }}</td>
               <td class="text-center">
-                {% if votes_left > 0 %}
-                  <form method="post" style="display: inline;">{% csrf_token %}
-                    <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Vota</button>
-                  </form>
-                {% elif credits == 0 %}
-                  <span class="text-muted" data-bs-toggle="tooltip" title="Necessites Coins i convertir-los a Vots">
-                    <i class="fas fa-lock"></i>
-                  </span>
+                {% if user_votes_dict|get_item:song.id %}
+                  <!-- L'usuari ja ha votat aquesta cançó -->
+                  <i class="fas fa-heart" style="color: #e74c3c; font-size: 1.25rem;"></i>
                 {% else %}
-                  <span class="text-muted" data-bs-toggle="tooltip" title="Converteix Coins a Vots per votar">
-                    <i class="fas fa-ban"></i>
-                  </span>
+                  <!-- L'usuari no ha votat aquesta cançó -->
+                  {% if votes_left > 0 or credits > 0 %}
+                    <form method="post" style="display: inline;">{% csrf_token %}
+                      <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                      <input type="hidden" name="vote_type" value="like">
+                      <button type="submit" class="btn btn-link p-0" style="font-size: 1.25rem; color: #e74c3c;">
+                        <i class="far fa-heart"></i>
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="text-muted" data-bs-toggle="tooltip" title="Necessites Coins per votar">
+                      <i class="fas fa-lock"></i>
+                    </span>
+                  {% endif %}
                 {% endif %}
               </td>
             </tr>
@@ -122,97 +201,387 @@
     </div>
 
     <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
-    <div class="mobile-songs-grid d-md-none px-3">
-      <!-- Stats Grid - 3 columnes -->
-      <section class="grid grid-cols-3 gap-2 mb-6">
-        <div class="bg-white p-3 rounded-lg shadow-sm text-center">
-          <i class="fas fa-play-circle mb-2" style="color: #1cc88a; font-size: 1.5rem;"></i>
-          <p class="font-headline text-2xl font-bold mb-1" style="color: #191c1f;">{{ songs_played }}</p>
-          <span class="text-xs font-semibold" style="color: #747688;">Sonades</span>
-        </div>
-        <div class="bg-white p-3 rounded-lg shadow-sm text-center">
-          <i class="fas fa-heart mb-2" style="color: #e74c3c; font-size: 1.5rem;"></i>
-          <p class="font-headline text-2xl font-bold mb-1" style="color: #191c1f;">{{ total_votes }}</p>
-          <span class="text-xs font-semibold" style="color: #747688;">Vots totals</span>
-        </div>
-        <div class="bg-white p-3 rounded-lg shadow-sm text-center">
-          <i class="fas fa-vote-yea mb-2" style="color: #0040e0; font-size: 1.5rem;"></i>
-          <p class="font-headline text-2xl font-bold mb-1" style="color: #191c1f;">{{ votes_left }}</p>
-          <span class="text-xs font-semibold" style="color: #747688;">Disponibles</span>
-        </div>
-      </section>
-
-      <!-- Song Bag Header -->
-      <section class="mb-4">
-        <h3 class="font-headline text-xl font-bold" style="color: #191c1f;">Maleta de temes:</h3>
-      </section>
-
-      <!-- Song List -->
-      <section class="space-y-3 mb-4">
-        {% for song in songs %}
-          <div class="song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
-            <!-- Song Card (Top voted destacat) -->
-            <div class="group bg-surface-container-lowest p-3 rounded-lg flex items-center gap-3 shadow-sm {% if forloop.first %}border-l-4{% endif %} transition-all" {% if forloop.first %}style="border-color: #0040e0;"{% endif %}>
-              <div class="relative h-16 w-16 flex-shrink-0">
-                {% if song.album_image_url %}
-                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                       class="h-full w-full object-cover rounded-md">
-                {% else %}
-                  <div class="bg-secondary rounded-md d-flex align-items-center justify-content-center"
-                       style="width: 64px; height: 64px;">
-                    <i class="fas fa-music text-white"></i>
-                  </div>
-                {% endif %}
-                {% if forloop.first %}
-                  <div class="absolute inset-0 rounded-md flex items-center justify-center" style="background: rgba(0, 64, 224, 0.2);">
-                    <i class="fas fa-fire text-white text-sm"></i>
-                  </div>
+    <div class="mobile-songs-grid d-md-none px-4 pt-0 pb-32" style="background: #f8f9fe; min-height: 100vh;">
+      <main class="d-flex flex-column gap-3">
+        <!-- Party Info Card -->
+        <section>
+          <span class="d-block font-bold text-uppercase mb-2" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">LA TEVA FESTA</span>
+          <div class="bg-white overflow-hidden d-flex flex-column" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); border-radius: 12px;">
+            <div class="d-flex p-3 gap-3 align-items-center">
+              <span style="font-size: 2rem;">🎉</span>
+              <div class="flex-grow-1">
+                <h2 class="font-extrabold mb-0" style="font-size: 1.25rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">{{ party.name }}</h2>
+                {% if party.date %}
+                  <p class="mb-0 mt-1" style="color: #747688; font-size: 0.75rem;">{{ party.date|date:"d/m/Y H:i" }}</p>
                 {% endif %}
               </div>
-              <div class="flex-grow min-w-0">
-                <h4 class="font-bold truncate mb-0" style="font-size: 0.95rem; color: #191c1f;">{{ song.title }}</h4>
-                <p class="text-sm truncate mb-1" style="color: #747688;">{{ song.artist }}</p>
-                <div class="flex items-center gap-2">
-                  {% if forloop.first %}
-                    <i class="fas fa-trending-up text-xs" style="color: #0040e0;"></i>
+              <a href="{% url 'select_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="Canvia de festa" title="Canvia de festa" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #eef2ff; color: #0040e0;">
+                <i class="fas fa-exchange-alt"></i>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Grid - 3 columnes -->
+        <section class="grid grid-cols-3 gap-2">
+          <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(28, 200, 138, 0.1);">
+                <i class="fas fa-play-circle" style="color: #1cc88a; font-size: 1rem;"></i>
+              </div>
+              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ songs_played }}</p>
+            </div>
+            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Sonades</span>
+          </div>
+          <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(231, 76, 60, 0.1);">
+                <i class="fas fa-heart" style="color: #e74c3c; font-size: 1rem;"></i>
+              </div>
+              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ total_votes }}</p>
+            </div>
+            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Vots totals</span>
+          </div>
+          <a href="{% url 'buy_votes' %}" class="bg-white px-2 py-2 shadow-sm text-center text-decoration-none d-block" style="border-radius: 12px;">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(0, 64, 224, 0.1);">
+                <i class="fas fa-vote-yea" style="color: #0040e0; font-size: 1rem;"></i>
+              </div>
+              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ votes_left }}</p>
+            </div>
+            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Disponibles</span>
+          </a>
+        </section>
+
+        <!-- Song Tabs Header -->
+        <section>
+          <div class="mb-0">
+            <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
+              <button type="button" class="mobile-song-tab is-active flex-grow-1" data-mobile-tab="bag">Maleta del DJ</button>
+              <button type="button" class="mobile-song-tab flex-grow-1" data-mobile-tab="played">El que ha sonat</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Song List -->
+        <section id="mobile-tab-bag" class="d-flex flex-column gap-1">
+          <div class="mb-0">
+            <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white" style="border-radius: 10px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.05);">
+              <i class="fas fa-filter" style="color: #747688; font-size: 0.9rem;"></i>
+              <input id="mobile-song-search" type="search" placeholder="Busca una cançó o artista" class="border-0 bg-transparent w-100" style="outline: none; color: #191c1f; font-size: 0.92rem;">
+            </div>
+          </div>
+
+          {% for song in pending_songs %}
+            <div class="song-card mobile-bag-song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
+              <div class="d-flex align-items-center gap-2 p-2" style="background: #f2f3f8; border-radius: 10px;">
+                <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
+                  {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                  {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                      <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
+                    </div>
                   {% endif %}
-                  <span class="text-xs font-bold" style="color: {% if forloop.first %}#0040e0{% else %}#747688{% endif %};">{{ song.num_votes }} Vots</span>
-                  {% if song.bpm %}
-                    <span class="text-xs" style="color: #747688;">• {{ song.bpm|floatformat:0 }} BPM</span>
+
+                  {% if has_spotify %}
+                  <!-- Play/Pause Overlay Mobile -->
+                  <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                       style="background: rgba(0, 0, 0, 0.7); opacity: 0; transition: opacity 0.2s; cursor: pointer; border-radius: 8px;">
+                    <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                            data-song-id="{{ song.id }}"
+                            data-spotify-id="{{ song.spotify_id }}"
+                            style="color: white; font-size: 1.25rem; line-height: 1;">
+                      <i class="fas fa-play"></i>
+                    </button>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1 pe-1" style="min-width: 0;">
+                  <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
+                  <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
+                    <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
+                    {% if song.bpm %}
+                      <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
+                  <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
+                    <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
+                    <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
+                  </div>
+                  {% if user_votes_dict|get_item:song.id %}
+                    <!-- L'usuari ja ha votat aquesta cançó -->
+                    <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #e74c3c; opacity: 1;">
+                      <i class="fas fa-heart"></i>
+                    </button>
+                  {% else %}
+                    <!-- L'usuari no ha votat aquesta cançó -->
+                    {% if votes_left > 0 or credits > 0 %}
+                      <form method="post" class="m-0">{% csrf_token %}
+                        <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                        <input type="hidden" name="vote_type" value="like">
+                        <button type="submit" class="border-0 bg-transparent p-1 pe-0" style="font-size: 1.5rem; color: #e74c3c;">
+                          <i class="far fa-heart"></i>
+                        </button>
+                      </form>
+                    {% else %}
+                      <a href="{% url 'buy_votes' %}" class="text-decoration-none pe-0" style="font-size: 1.2rem; color: #747688; opacity: 0.5;">
+                        <i class="fas fa-lock"></i>
+                      </a>
+                    {% endif %}
                   {% endif %}
                 </div>
               </div>
-              <div class="flex-shrink-0">
-                {% if votes_left > 0 %}
-                  <form method="post">{% csrf_token %}
-                    <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                    <button type="submit" class="px-5 py-2 rounded-full font-bold text-sm shadow-lg transition-transform active:scale-95" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2);">
-                      Vota
+            </div>
+          {% empty %}
+            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">No queden temes pendents.</div>
+          {% endfor %}
+        </section>
+
+        <section id="mobile-tab-played" class="d-none flex-column gap-2">
+          {% for song in played_songs %}
+            <div class="song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
+              <div class="d-flex align-items-center gap-2 p-2" style="background: #f2f3f8; border-radius: 10px;">
+                <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
+                  {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                  {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                      <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
+                    </div>
+                  {% endif %}
+
+                  {% if has_spotify %}
+                  <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                       style="background: rgba(0, 0, 0, 0.7); opacity: 0; transition: opacity 0.2s; cursor: pointer; border-radius: 8px;">
+                    <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                            data-song-id="{{ song.id }}"
+                            data-spotify-id="{{ song.spotify_id }}"
+                            style="color: white; font-size: 1.25rem; line-height: 1;">
+                      <i class="fas fa-play"></i>
                     </button>
-                  </form>
-                {% elif credits == 0 %}
-                  <button class="border-2 px-5 py-2 rounded-full font-bold text-sm" style="border-color: #c4c5d9; color: #747688;" disabled>
-                    <i class="fas fa-lock me-1"></i>Bloquejat
-                  </button>
-                {% else %}
-                  <a href="{% url 'buy_votes' %}" class="border-2 px-5 py-2 rounded-full font-bold text-sm hover:border-primary transition-colors" style="border-color: #c4c5d9; color: #0040e0; text-decoration: none;">
-                    Obtenir Vots
-                  </a>
-                {% endif %}
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1 pe-1" style="min-width: 0;">
+                  <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
+                  <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
+                    <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
+                    {% if song.bpm %}
+                      <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
+                  <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
+                    <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
+                    <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
+                  </div>
+                  <span class="d-inline-flex align-items-center justify-content-center" style="width: 2rem; height: 2rem; color: #1cc88a; font-size: 1.2rem;">
+                    <i class="fas fa-check-circle"></i>
+                  </span>
+                </div>
               </div>
             </div>
+          {% empty %}
+            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">Encara no ha sonat cap tema.</div>
+          {% endfor %}
+        </section>
+
+        <!-- Error Message -->
+        {% if error %}
+        <section>
+          <div class="bg-danger bg-opacity-10 border border-danger p-2" style="color: #dc3545; border-radius: 10px;">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
           </div>
-        {% endfor %}
-      </section>
+        </section>
+        {% endif %}
+      </main>
     </div>
 
-    {% if error %}
-      <div class="alert alert-danger mt-3">{{ error }}</div>
-    {% endif %}
   {% else %}
-    <div class="alert alert-info">No hi ha cançons per aquesta festa!</div>
+    <!-- Vista desktop - No songs -->
+    <div class="alert alert-info d-none d-md-block">No hi ha cançons per aquesta festa!</div>
+
+    <!-- Vista mòbil - No songs -->
+    <div class="d-md-none px-4 pt-3 pb-32" style="background: #f8f9fe; min-height: 100vh;">
+      <div class="text-center py-4">
+        <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
+        <h4 class="fw-bold mb-1" style="color: #191c1f;">No hi ha cançons</h4>
+        <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Aquesta festa encara no té cançons disponibles</p>
+      </div>
+    </div>
   {% endif %}
 </div>
+
+{% if has_spotify and spotify_token %}
+<!-- Spotify Web Playback SDK -->
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+// Spotify Web Playback SDK Variables
+let spotifyPlayer = null;
+let spotifyDeviceId = null;
+let currentPlayingSpotifyId = null;
+let isCurrentlyPlaying = false;
+const SPOTIFY_TOKEN = '{{ spotify_token }}';
+
+// Initialize Spotify Player
+window.onSpotifyWebPlaybackSDKReady = () => {
+  spotifyPlayer = new Spotify.Player({
+    name: 'DJ Jukebox Web Player',
+    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+    volume: 0.7
+  });
+
+  // Ready
+  spotifyPlayer.addListener('ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Player ready with Device ID:', device_id);
+    spotifyDeviceId = device_id;
+  });
+
+  // Not Ready
+  spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Device ID has gone offline:', device_id);
+  });
+
+  // Player state changed
+  spotifyPlayer.addListener('player_state_changed', state => {
+    if (!state) {
+      currentPlayingSpotifyId = null;
+      isCurrentlyPlaying = false;
+      return;
+    }
+
+    const isPlaying = !state.paused;
+    const track_id = state.track_window.current_track.id;
+
+    console.log('[SPOTIFY] State changed:', { track_id, isPlaying });
+
+    // Update global state
+    currentPlayingSpotifyId = track_id;
+    isCurrentlyPlaying = isPlaying;
+
+    // Update ALL button icons and overlays
+    document.querySelectorAll('.spotify-play-btn').forEach(btn => {
+      const btnSpotifyId = btn.dataset.spotifyId;
+      const icon = btn.querySelector('i');
+      const overlay = btn.closest('.play-overlay');
+
+      if (btnSpotifyId === track_id) {
+        // This is the current track
+        if (isPlaying) {
+          // Currently playing
+          icon.classList.remove('fa-play');
+          icon.classList.add('fa-pause');
+          if (overlay) overlay.classList.add('is-playing');
+        } else {
+          // Current track but paused
+          icon.classList.remove('fa-pause');
+          icon.classList.add('fa-play');
+          if (overlay) overlay.classList.add('is-playing');
+        }
+      } else {
+        // Different track - reset to play
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+        if (overlay) overlay.classList.remove('is-playing');
+      }
+    });
+  });
+
+  // Connect to the player
+  spotifyPlayer.connect().then(success => {
+    if (success) {
+      console.log('[SPOTIFY] Connected successfully');
+    }
+  });
+};
+
+// Function to play a track using Spotify SDK
+function playSpotifyTrack(spotifyId) {
+  if (!spotifyPlayer || !spotifyDeviceId) {
+    console.error('[SPOTIFY] Player not ready');
+    alert('El reproductor de Spotify no està llest. Espera uns segons...');
+    return;
+  }
+
+  fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SPOTIFY_TOKEN}`
+    },
+  }).then(response => {
+    if (response.ok) {
+      console.log('[SPOTIFY] Playing track:', spotifyId);
+    } else if (response.status === 403) {
+      console.error('[SPOTIFY] Premium required');
+      alert('Necessites Spotify Premium per reproduir cançons completes');
+    } else if (response.status === 401) {
+      console.error('[SPOTIFY] Unauthorized');
+      alert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.');
+    } else {
+      console.error('[SPOTIFY] Error playing track:', response.status);
+      alert('Error reproduint la cançó. Torna-ho a provar.');
+    }
+  });
+}
+
+// Setup play button and overlay listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Play button clicks
+  document.querySelectorAll('.spotify-play-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const spotifyId = this.dataset.spotifyId;
+
+      if (currentPlayingSpotifyId === spotifyId) {
+        // Same track - toggle play/pause
+        if (isCurrentlyPlaying) {
+          // Currently playing, so pause
+          console.log('[SPOTIFY] Pausing track');
+          spotifyPlayer.pause().then(() => {
+            console.log('[SPOTIFY] Paused successfully');
+          }).catch(err => {
+            console.error('[SPOTIFY] Error pausing:', err);
+          });
+        } else {
+          // Currently paused, so resume
+          console.log('[SPOTIFY] Resuming track');
+          spotifyPlayer.resume().then(() => {
+            console.log('[SPOTIFY] Resumed successfully');
+          }).catch(err => {
+            console.error('[SPOTIFY] Error resuming:', err);
+          });
+        }
+      } else {
+        // Different track - play it
+        console.log('[SPOTIFY] Playing new track:', spotifyId);
+        playSpotifyTrack(spotifyId);
+      }
+    });
+  });
+
+  // Overlay clicks
+  document.querySelectorAll('.play-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const btn = this.querySelector('.spotify-play-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
+  });
+});
+</script>
+{% endif %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -222,37 +591,64 @@ document.addEventListener('DOMContentLoaded', function() {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
-  // Filtrat de cançons (funciona per taula i cards)
-  var input = document.getElementById('song-search');
-  if (!input) return;
+  // Tabs mòbil per Maleta del DJ / El que ha sonat
+  var mobileTabButtons = document.querySelectorAll('[data-mobile-tab]');
+  var mobileTabBag = document.getElementById('mobile-tab-bag');
+  var mobileTabPlayed = document.getElementById('mobile-tab-played');
 
-  input.addEventListener('input', function() {
-    var q = input.value.trim().toLowerCase();
+  mobileTabButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+      var target = button.getAttribute('data-mobile-tab');
 
-    // Filtrar taula (desktop)
-    var rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(function(row) {
-      var title = row.getAttribute('data-song-title').toLowerCase();
-      var artist = row.getAttribute('data-song-artist').toLowerCase();
-      if (title.includes(q) || artist.includes(q)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    });
+      mobileTabButtons.forEach(function(btn) {
+        btn.classList.remove('is-active');
+      });
+      button.classList.add('is-active');
 
-    // Filtrar cards (mòbil)
-    var cards = document.querySelectorAll('.song-card');
-    cards.forEach(function(card) {
-      var title = card.getAttribute('data-song-title').toLowerCase();
-      var artist = card.getAttribute('data-song-artist').toLowerCase();
-      if (title.includes(q) || artist.includes(q)) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
+      if (mobileTabBag && mobileTabPlayed) {
+        if (target === 'played') {
+          mobileTabBag.classList.add('d-none');
+          mobileTabBag.classList.remove('d-flex');
+          mobileTabPlayed.classList.remove('d-none');
+          mobileTabPlayed.classList.add('d-flex');
+        } else {
+          mobileTabPlayed.classList.add('d-none');
+          mobileTabPlayed.classList.remove('d-flex');
+          mobileTabBag.classList.remove('d-none');
+          mobileTabBag.classList.add('d-flex');
+        }
       }
     });
   });
+
+  // Filtrat de cançons
+  var desktopInput = document.getElementById('song-search');
+  if (desktopInput) {
+    desktopInput.addEventListener('input', function() {
+      var q = desktopInput.value.trim().toLowerCase();
+      var rows = document.querySelectorAll('table tbody tr');
+
+      rows.forEach(function(row) {
+        var title = row.getAttribute('data-song-title').toLowerCase();
+        var artist = row.getAttribute('data-song-artist').toLowerCase();
+        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  var mobileInput = document.getElementById('mobile-song-search');
+  if (mobileInput) {
+    mobileInput.addEventListener('input', function() {
+      var q = mobileInput.value.trim().toLowerCase();
+      var cards = document.querySelectorAll('.mobile-bag-song-card');
+
+      cards.forEach(function(card) {
+        var title = card.getAttribute('data-song-title').toLowerCase();
+        var artist = card.getAttribute('data-song-artist').toLowerCase();
+        card.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+      });
+    });
+  }
 });
 </script>
 {% endblock %}

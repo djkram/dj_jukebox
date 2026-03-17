@@ -599,7 +599,7 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
             all_items = []
             results = sp_user.playlist_items(
                 playlist_id,
-                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
+                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,items.track.preview_url,next",
                 additional_types=["track"]
             )
             all_items.extend(results["items"])
@@ -637,6 +637,7 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
             "title": tr["name"],
             "artist": ", ".join(a["name"] for a in tr["artists"]),
             "album_image_url": album_image_url,
+            "preview_url": tr.get("preview_url"),
             "bpm": None,
             "key": None,
         })

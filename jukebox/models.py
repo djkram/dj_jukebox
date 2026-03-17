@@ -39,6 +39,7 @@ class Song(models.Model):
     artist = models.CharField(max_length=200)
     spotify_id = models.CharField(max_length=100)
     album_image_url = models.URLField(max_length=500, null=True, blank=True)  # URL de la caràtula
+    preview_url = models.URLField(max_length=500, null=True, blank=True)  # URL del preview de 30s
     bpm = models.FloatField(null=True, blank=True)           # ← Nou camp
     key = models.CharField(max_length=4, null=True, blank=True)  # ← Nou camp (ex. “8B”)
     has_played = models.BooleanField(default=False)
@@ -49,10 +50,19 @@ class Song(models.Model):
         return f"{self.title} - {self.artist}"
 
 class Vote(models.Model):
+    VOTE_TYPES = [
+        ('like', 'M\'agrada'),
+        ('dislike', 'No m\'agrada'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, related_name='vote', on_delete=models.CASCADE)
     party = models.ForeignKey(Party, on_delete=models.CASCADE)
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES, default='like')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'song', 'party']  # Un usuari només pot votar una cançó un cop per festa
 
 
 class VotePackage(models.Model):

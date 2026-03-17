@@ -1,11 +1,9 @@
 {% extends "jukebox/admin_base.html" %}
 {% block page_title %}Demanar cançó{% endblock %}
 {% block content %}
-<div class="container-fluid">
-  <!-- Missatges -->
+<div class="container-fluid d-none d-md-block">
   <div id="message-area" class="mb-3"></div>
 
-  <!-- Info i Coins -->
   <div class="row g-2 mb-3">
     <div class="col-6 col-md-4">
       <div class="card shadow-sm" style="border-left: 4px solid #f6c23e; border-top: none; border-right: none; border-bottom: none;">
@@ -37,8 +35,7 @@
     </div>
   </div>
 
-  <!-- Cercador de cançons (sticky en mòbil) -->
-  <div class="card shadow-sm mb-3 search-sticky">
+  <div class="card shadow-sm mb-3">
     <div class="card-body p-2">
       <div class="input-group">
         <input type="text" id="search-input" class="form-control"
@@ -50,21 +47,8 @@
     </div>
   </div>
 
-  <!-- Resultats de cerca -->
   <div id="search-results" class="mb-4"></div>
 
-  <style>
-    @media (max-width: 767.98px) {
-      .search-sticky {
-        position: sticky;
-        top: 56px;
-        z-index: 100;
-        margin-bottom: 1rem !important;
-      }
-    }
-  </style>
-
-  <!-- Les meves peticions -->
   <div class="card shadow-sm">
     <div class="card-header py-2">
       <h5 class="mb-0">
@@ -73,8 +57,7 @@
     </div>
     <div class="card-body p-2">
       {% if user_requests %}
-        <!-- Vista desktop -->
-        <div class="table-responsive d-none d-md-block">
+        <div class="table-responsive">
           <table class="table table-striped">
             <thead>
               <tr>
@@ -126,54 +109,6 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Vista mòbil (cards) -->
-        <div class="d-md-none">
-          {% for req in user_requests %}
-            <div class="card mb-2 shadow-sm">
-              <div class="row g-0">
-                <div class="col-3">
-                  {% if req.album_image_url %}
-                    <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                         class="w-100" style="height: 100px; object-fit: cover;">
-                  {% else %}
-                    <div class="bg-secondary d-flex align-items-center justify-content-center"
-                         style="height: 100px;">
-                      <i class="fas fa-music text-white fa-2x"></i>
-                    </div>
-                  {% endif %}
-                </div>
-                <div class="col-9">
-                  <div class="card-body p-2">
-                    <h6 class="mb-1 fw-bold" style="font-size: 0.9rem;">{{ req.title }}</h6>
-                    <p class="mb-1 text-muted" style="font-size: 0.8rem;">{{ req.artist }}</p>
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                      {% if req.status == 'pending' %}
-                        <span class="badge bg-warning">Pendent</span>
-                      {% elif req.status == 'accepted' %}
-                        <span class="badge bg-success">Acceptada</span>
-                      {% else %}
-                        <span class="badge bg-danger">Rebutjada</span>
-                      {% endif %}
-                      <small class="text-muted">
-                        {% if req.status == 'accepted' %}
-                          {{ req.coins_cost }} Coins
-                        {% elif req.status == 'rejected' %}
-                          0 Coins
-                        {% else %}
-                          {{ req.coins_cost }} Coins
-                        {% endif %}
-                      </small>
-                    </div>
-                    <small class="text-muted" style="font-size: 0.7rem;">
-                      <i class="fas fa-clock me-1"></i>{{ req.created_at|date:"d/m H:i" }}
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
       {% else %}
         <p class="text-muted">Encara no has demanat cap cançó per aquesta festa.</p>
       {% endif %}
@@ -181,12 +116,146 @@
   </div>
 </div>
 
+<style>
+  @media (max-width: 767.98px) {
+    .request-search-sticky {
+      position: sticky;
+      top: 56px;
+      z-index: 100;
+    }
+    .request-mobile-page {
+      padding-top: 0 !important;
+      margin-top: -0.75rem;
+    }
+  }
+</style>
+
+<div class="request-mobile-page d-md-none px-4 pt-0 pb-5" style="background: #f8f9fe; min-height: 100vh;">
+  <main>
+    <div id="message-area-mobile" class="mb-3"></div>
+
+    <section class="row g-2 mb-3">
+      <div class="col-6">
+        <a href="{% url 'buy_votes' %}" class="bg-white px-2 py-2 shadow-sm text-center d-block text-decoration-none" style="border-radius: 12px;">
+          <div class="d-flex align-items-center justify-content-center mb-1" style="gap: 0.5rem;">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(246, 194, 62, 0.16);">
+              <i class="fas fa-coins" style="color: #d39e00; font-size: 1rem;"></i>
+            </div>
+            <p class="fw-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ user_credits }}</p>
+          </div>
+          <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Coins</span>
+        </a>
+      </div>
+      <div class="col-6">
+        <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
+          <div class="d-flex align-items-center justify-content-center mb-1" style="gap: 0.5rem;">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(54, 185, 204, 0.12);">
+              <i class="fas fa-microphone" style="color: #36b9cc; font-size: 1rem;"></i>
+            </div>
+            <p class="fw-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ request_cost }}</p>
+          </div>
+          <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Cost petició</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-3">
+      <div class="bg-white p-3" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
+        <div class="d-flex align-items-start" style="gap: 1rem;">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: rgba(0, 64, 224, 0.08);">
+            <i class="fas fa-info-circle" style="color: #0040e0;"></i>
+          </div>
+          <div>
+            <span class="d-block fw-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">PETICIONS</span>
+            <p class="mb-0" style="color: #434656; font-size: 0.85rem; line-height: 1.35;">Només es cobra si el DJ accepta la cançó.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="request-search-sticky mb-3">
+      <span class="d-block fw-bold text-uppercase mb-2" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">BUSCA CANÇONS</span>
+      <div class="bg-white p-2" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
+        <div class="d-flex align-items-center" style="gap: 0.5rem;">
+          <input type="text" id="search-input-mobile" class="form-control border-0 shadow-none flex-grow-1"
+                 placeholder="Cerca cançó o artista..."
+                 style="background: #f2f3f8; border-radius: 10px; min-height: 2.75rem; color: #191c1f;">
+          <button class="border-0 d-inline-flex align-items-center justify-content-center flex-shrink-0" type="button" id="search-btn-mobile"
+                  style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #0040e0; color: white;">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="search-results-mobile" class="mb-3"></section>
+
+    <section class="mb-3">
+      <div class="mb-3">
+        <span class="d-block fw-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">LES MEVES PETICIONS</span>
+        <h2 class="fw-bold mb-0" style="font-size: 1.5rem; letter-spacing: -0.025em; color: #191c1f;">Historial</h2>
+      </div>
+    </section>
+
+    <section>
+      {% if user_requests %}
+        {% for req in user_requests %}
+          <div class="d-flex align-items-center p-2 mb-2" style="background: #f2f3f8; border-radius: 10px; gap: 0.5rem;">
+            <div class="overflow-hidden flex-shrink-0" style="width: 3rem; height: 3rem; border-radius: 8px;">
+              {% if req.album_image_url %}
+                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="w-100 h-100" style="object-fit: cover;">
+              {% else %}
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                  <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-grow-1" style="min-width: 0;">
+              <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ req.title }}</div>
+              <div class="mt-1" style="color: #434656; font-size: 12px !important; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ req.artist }}</div>
+              <div class="d-flex align-items-center mt-1 flex-wrap" style="gap: 0.5rem;">
+                {% if req.status == 'pending' %}
+                  <span class="px-2 py-1 fw-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.08em; border-radius: 999px; background: rgba(246, 194, 62, 0.18); color: #9a6b00;">Pendent</span>
+                {% elif req.status == 'accepted' %}
+                  <span class="px-2 py-1 fw-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.08em; border-radius: 999px; background: rgba(28, 200, 138, 0.16); color: #0f7c4d;">Acceptada</span>
+                {% else %}
+                  <span class="px-2 py-1 fw-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.08em; border-radius: 999px; background: rgba(231, 76, 60, 0.14); color: #b7342a;">Rebutjada</span>
+                {% endif %}
+                <span style="color: #747688; font-size: 0.7rem;">
+                  {% if req.status == 'accepted' %}
+                    {{ req.coins_cost }} Coins
+                  {% elif req.status == 'rejected' %}
+                    0 Coins
+                  {% else %}
+                    {{ req.coins_cost }} Coins
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+            <div class="text-end flex-shrink-0" style="min-width: 3rem;">
+              <span class="d-block" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">{{ req.created_at|date:"d/m" }}</span>
+              <span class="d-block mt-1" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">{{ req.created_at|date:"H:i" }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="text-center py-4">
+          <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
+          <h4 class="fw-bold mb-1" style="color: #191c1f;">Sense peticions</h4>
+          <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Encara no has demanat cap cançó per aquesta festa.</p>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('search-input');
-  const searchBtn = document.getElementById('search-btn');
-  const resultsDiv = document.getElementById('search-results');
-  const messageArea = document.getElementById('message-area');
+  const isMobile = window.innerWidth < 768;
+  const searchInput = document.getElementById(isMobile ? 'search-input-mobile' : 'search-input');
+  const searchBtn = document.getElementById(isMobile ? 'search-btn-mobile' : 'search-btn');
+  const resultsDiv = document.getElementById(isMobile ? 'search-results-mobile' : 'search-results');
+  const messageArea = document.getElementById(isMobile ? 'message-area-mobile' : 'message-area');
 
   function showMessage(message, type = 'success') {
     messageArea.innerHTML = `
@@ -212,7 +281,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const query = searchInput.value.trim();
     if (!query) return;
 
-    resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+    resultsDiv.innerHTML = isMobile
+      ? '<div class="text-center py-3"><i class="fas fa-spinner fa-spin fa-2x" style="color: #0040e0;"></i></div>'
+      : '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
 
     fetch(`{% url "request_song" %}?search=${encodeURIComponent(query)}`)
       .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
@@ -226,35 +297,65 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (data.data.tracks && data.data.tracks.length > 0) {
-          let html = '<div class="row g-2">';
+          let html = isMobile ? '' : '<div class="row g-2">';
           data.data.tracks.forEach(track => {
-            html += `
-              <div class="col-6 col-md-4 col-lg-3">
-                <div class="card h-100 shadow-sm" style="border-radius: 1rem;">
-                  <div class="card-body p-2 text-center">
+            const safeTitle = track.title.replace(/"/g, '&quot;');
+            const safeArtist = track.artist.replace(/"/g, '&quot;');
+            if (isMobile) {
+              html += `
+                <div class="d-flex align-items-center p-2 mb-2" style="background: #f2f3f8; border-radius: 10px; gap: 0.5rem;">
+                  <div class="overflow-hidden flex-shrink-0" style="width: 3rem; height: 3rem; border-radius: 8px;">
                     ${track.album_image_url ?
-                      `<img src="${track.album_image_url}" class="rounded w-100 mb-2" style="aspect-ratio: 1; object-fit: cover;">` :
-                      `<div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-2" style="width: 100%; aspect-ratio: 1;">
-                        <i class="fas fa-music text-white fa-2x"></i>
+                      `<img src="${track.album_image_url}" class="w-100 h-100" style="object-fit: cover;" alt="${safeTitle}">` :
+                      `<div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                        <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
                       </div>`
                     }
-                    <h6 class="mb-1" style="font-size: 0.85rem; line-height: 1.2;">${track.title}</h6>
-                    <p class="text-muted mb-2" style="font-size: 0.75rem;">${track.artist}</p>
-                    <button class="btn btn-success btn-sm w-100 request-song-btn"
-                            data-id="${track.id}"
-                            data-title="${track.title.replace(/"/g, '&quot;')}"
-                                data-artist="${track.artist.replace(/"/g, '&quot;')}"
-                                data-image="${track.album_image_url || ''}">
-                          <i class="fas fa-plus me-1"></i>Demanar ({{ request_cost }} Coins)
-                        </button>
-                      </div>
+                  </div>
+                  <div class="flex-grow-1 pe-2" style="min-width: 0;">
+                    <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${track.title}</div>
+                    <div class="mt-1" style="color: #434656; font-size: 12px !important; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${track.artist}</div>
+                  </div>
+                  <button class="request-song-btn border-0 flex-shrink-0 d-inline-flex align-items-center justify-content-center"
+                          style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #1cc88a; color: white;"
+                          data-id="${track.id}"
+                          data-title="${safeTitle}"
+                          data-artist="${safeArtist}"
+                          data-image="${track.album_image_url || ''}"
+                          aria-label="Demanar cançó">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              `;
+            } else {
+              html += `
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="card h-100 shadow-sm" style="border-radius: 1rem;">
+                    <div class="card-body p-2 text-center">
+                      ${track.album_image_url ?
+                        `<img src="${track.album_image_url}" class="rounded w-100 mb-2" style="aspect-ratio: 1; object-fit: cover;">` :
+                        `<div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-2" style="width: 100%; aspect-ratio: 1;">
+                          <i class="fas fa-music text-white fa-2x"></i>
+                        </div>`
+                      }
+                      <h6 class="mb-1" style="font-size: 0.85rem; line-height: 1.2;">${track.title}</h6>
+                      <p class="text-muted mb-2" style="font-size: 0.75rem;">${track.artist}</p>
+                      <button class="btn btn-success btn-sm w-100 request-song-btn"
+                              data-id="${track.id}"
+                              data-title="${safeTitle}"
+                              data-artist="${safeArtist}"
+                              data-image="${track.album_image_url || ''}">
+                        <i class="fas fa-plus me-1"></i>Demanar ({{ request_cost }} Coins)
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            `;
+              `;
+            }
           });
-          html += '</div>';
+          if (!isMobile) {
+            html += '</div>';
+          }
           resultsDiv.innerHTML = html;
 
           // Afegir event listeners als botons

@@ -389,6 +389,7 @@
             }
             .glass-nav {
                 padding: 0.75rem 1rem !important;
+                margin-bottom: 0.25rem !important;
             }
             .glass-nav h1 {
                 font-size: 1.25rem;
@@ -656,7 +657,7 @@
                 </nav>
 
                 <!-- Topbar Mòbil (nou disseny glass) -->
-                <nav class="glass-nav d-md-none sticky top-0 z-40 px-4 py-3 mb-4">
+                <nav class="glass-nav d-md-none sticky top-0 z-40 px-4 py-3 mb-1">
                     <div class="flex items-center justify-between">
                         <!-- Logo + Title -->
                         <div class="flex items-center gap-3">
@@ -715,7 +716,7 @@
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                     <a href="{% url 'song_swipe' %}">
                         <i class="fas fa-random"></i>
-                        <span>Cercar</span>
+                        <span>Match</span>
                     </a>
                 </div>
                 <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">

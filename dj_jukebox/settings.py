@@ -228,6 +228,9 @@ SOCIALACCOUNT_PROVIDERS = {
             'user-read-private',           # dades bàsiques del perfil
             'playlist-read-private',       # playlists privades
             'playlist-read-collaborative', # playlists col·laboratives
+            'streaming',                   # reproduir música amb Web Playback SDK
+            'user-read-playback-state',    # llegir estat de reproducció
+            'user-modify-playback-state',  # controlar reproducció
         ],
         'AUTH_PARAMS': {
             'show_dialog': True,           # força diàleg per regenerar tokens

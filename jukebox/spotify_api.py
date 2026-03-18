@@ -857,3 +857,89 @@ def search_spotify_tracks(request_or_user, query, limit=10):
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al cercar '{query}': {e}")
         return []
+
+
+def add_track_to_playlist(request_or_user, playlist_id, track_id):
+    """
+    Afegeix una cançó a una playlist de Spotify.
+
+    Args:
+        request_or_user: Request object o User
+        playlist_id: Spotify playlist ID
+        track_id: Spotify track ID
+
+    Returns:
+        dict: resposta de Spotify amb snapshot_id
+    """
+    track_uri = track_id if str(track_id).startswith("spotify:track:") else f"spotify:track:{track_id}"
+
+    try:
+        result = _run_spotify_call(
+            request_or_user,
+            "playlist_add_items",
+            lambda sp: sp.playlist_add_items(playlist_id, [track_uri]),
+        )
+        logger.info(f"[SPOTIFY] Cançó {track_id} afegida a la playlist {playlist_id}")
+        return result
+    except SpotifyAuthError:
+        raise
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error afegint {track_id} a la playlist {playlist_id}: {e}")
+        raise
+
+
+def remove_track_from_playlist(request_or_user, playlist_id, track_id):
+    """
+    Elimina una única ocurrència d'una cançó d'una playlist de Spotify.
+
+    Si hi ha duplicats a la playlist, només n'elimina la primera.
+    """
+    track_uri = track_id if str(track_id).startswith("spotify:track:") else f"spotify:track:{track_id}"
+
+    try:
+        def find_first_occurrence(sp):
+            position = 0
+            results = sp.playlist_items(
+                playlist_id,
+                fields="items.track.id,next",
+                additional_types=["track"],
+            )
+
+            while True:
+                for item in results.get("items", []):
+                    track = item.get("track") or {}
+                    if track.get("id") == track_id:
+                        return position
+                    position += 1
+
+                if not results.get("next"):
+                    break
+                results = sp.next(results)
+
+            return None
+
+        position = _run_spotify_call(
+            request_or_user,
+            "playlist_find_track_for_removal",
+            find_first_occurrence,
+        )
+
+        if position is None:
+            logger.warning(f"[SPOTIFY] No s'ha trobat {track_id} a la playlist {playlist_id} per eliminar")
+            return None
+
+        result = _run_spotify_call(
+            request_or_user,
+            "playlist_remove_specific_occurrence",
+            lambda sp: sp.playlist_remove_specific_occurrences_of_items(
+                playlist_id,
+                [{"uri": track_uri, "positions": [position]}],
+            ),
+        )
+        logger.info(f"[SPOTIFY] Cançó {track_id} eliminada de la playlist {playlist_id} a la posició {position}")
+        return result
+    except SpotifyAuthError:
+        raise
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error eliminant {track_id} de la playlist {playlist_id}: {e}")
+        raise

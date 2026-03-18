@@ -6,6 +6,82 @@
 
 {% block content %}
 <style>
+  /* Album cover play overlay */
+  .album-cover-container:hover .play-overlay {
+    opacity: 1 !important;
+  }
+
+  .play-overlay.is-playing {
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .spotify-search-result {
+    background: #f8f9fe;
+    border: 1px solid #e9ecf7;
+    border-radius: 14px;
+    padding: 0.75rem;
+  }
+
+  .spotify-search-result img {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .spotify-play-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .spotify-play-btn {
+    transition: transform 0.2s;
+  }
+
+  /* Camelot Key Colors */
+  .camelot-key {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .camelot-1A, .camelot-1B { background-color: #FF6B35; } /* Orange */
+  .camelot-2A, .camelot-2B { background-color: #FFA500; } /* Dark Orange */
+  .camelot-3A, .camelot-3B { background-color: #FFD700; color: #333; } /* Yellow */
+  .camelot-4A, .camelot-4B { background-color: #90EE90; color: #333; } /* Light Green */
+  .camelot-5A, .camelot-5B { background-color: #32CD32; } /* Green */
+  .camelot-6A, .camelot-6B { background-color: #00CED1; } /* Cyan */
+  .camelot-7A, .camelot-7B { background-color: #4682B4; } /* Steel Blue */
+  .camelot-8A, .camelot-8B { background-color: #4169E1; } /* Royal Blue */
+  .camelot-9A, .camelot-9B { background-color: #9370DB; } /* Purple */
+  .camelot-10A, .camelot-10B { background-color: #FF69B4; } /* Pink */
+  .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
+  .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
+
+  /* Mobile: mostrar play overlay sempre visible */
+  @media (max-width: 767.98px) {
+    .play-overlay {
+      opacity: 0.6 !important;
+    }
+
+    .play-overlay.is-playing {
+      opacity: 1 !important;
+      background: rgba(0, 0, 0, 0.8) !important;
+    }
+
+    .album-cover-container:active .play-overlay {
+      opacity: 1 !important;
+    }
+
+    /* Icona més gran per mòbil */
+    .play-overlay .spotify-play-btn {
+      font-size: 1.5rem !important;
+    }
+  }
+
   @media (max-width: 767.98px) {
     .party-settings-mobile {
       background: #f8f9fe;
@@ -86,89 +162,6 @@
             </small>
           </div>
 
-          {# ── Gestió de la playlist ───────────────────────────────────── #}
-          {% if party.playlist %}
-            {# 1) Ja està assignada: mostrar en mode readonly + botons #}
-            <div class="mb-3">
-              <label class="form-label">Playlist assignada</label>
-              <p class="form-control-plaintext mb-1">
-                {{ party.playlist.name }} ({{ party.playlist.owner }})
-              </p>
-              <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm me-2">
-                <i class="fas fa-sync-alt"></i>
-                Recarregar cançons
-              </button>
-              <a href="{% url 'remove_playlist' party.id %}"
-                 class="btn btn-danger btn-sm">
-                Neteja playlist
-              </a>
-            </div>
-
-          {% elif playlists %}
-            {# 2) Acabem de carregar playlists: mostrar select amb opcions #}
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <label for="id_spotify_playlist" class="form-label mb-0">
-                  Selecciona una playlist de Spotify
-                </label>
-                <button type="button" id="reloadPlaylistsBtn" class="btn btn-outline-primary btn-sm">
-                  <i class="fas fa-sync-alt"></i> Recarrega
-                </button>
-              </div>
-              <div class="mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded"
-                         {% if only_owned %}checked{% endif %}>
-                  <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
-                    Només les meves playlists
-                  </label>
-                </div>
-              </div>
-              <select name="spotify_playlist"
-                      id="id_spotify_playlist"
-                      class="form-control">
-                <option value="">-- Selecciona una playlist --</option>
-                {% for pl in playlists %}
-                  <option value="{{ pl.id }}"
-                    {% if pl.id == party.playlist %}selected{% endif %}>
-                    {{ pl.name }} ({{ pl.owner }})
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-
-          {% else %}
-            {# 3) Encara no tenim playlist i no hem carregat: boto verd #}
-            <div class="mb-3">
-              {% if has_spotify %}
-                <div class="mb-2">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox"
-                           {% if only_owned %}checked{% endif %}>
-                    <label class="form-check-label" for="onlyOwnedCheckbox">
-                      Només les meves playlists
-                    </label>
-                  </div>
-                </div>
-                <a href="?load_spotify=1" class="btn btn-success me-2" id="loadPlaylistsBtn">
-                  <i class="fas fa-sync-alt"></i>
-                  Carrega playlists de Spotify
-                </a>
-                <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
-                   class="btn btn-outline-success btn-sm">
-                  <i class="fas fa-redo"></i>
-                  Reconnecta Spotify
-                </a>
-              {% else %}
-                <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
-                   class="btn btn-success">
-                  <i class="fab fa-spotify"></i>
-                  Connecta Spotify
-                </a>
-              {% endif %}
-            </div>
-          {% endif %}
-
           <button type="submit" class="btn btn-primary me-2" id="saveButton">
             Desa canvis
           </button>
@@ -176,6 +169,97 @@
             Torna
           </a>
         </form>
+      </div>
+
+      <div class="card shadow-sm p-4 rounded-4 mb-4">
+        <h3 class="h5 mb-3">Playlist de Spotify</h3>
+        {% if party.playlist %}
+          <div class="mb-3">
+            <label class="form-label">Playlist assignada</label>
+            <p class="form-control-plaintext mb-2" id="playlistAssignedName">
+              {{ party.playlist.name }} ({{ party.playlist.owner }})
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm">
+                <i class="fas fa-sync-alt me-1"></i>Recarregar cançons
+              </button>
+              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm">
+                Neteja playlist
+              </a>
+            </div>
+          </div>
+
+          {% if has_spotify %}
+            <div class="border-top pt-3">
+              <label for="spotify-track-search" class="form-label">Afegeix una cançó</label>
+              <div class="input-group mb-2">
+                <input id="spotify-track-search" class="form-control" placeholder="Cerca tema o artista a Spotify..." />
+                <button type="button" id="spotify-track-search-btn" class="btn btn-outline-primary">
+                  <i class="fas fa-search me-1"></i>Cerca
+                </button>
+              </div>
+              <small class="text-muted">La cançó s'afegirà a la playlist de Spotify i també a la llista de la festa.</small>
+              <div id="spotify-track-search-results" class="d-flex flex-column gap-2 mt-3"></div>
+            </div>
+          {% endif %}
+
+        {% elif playlists %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label for="id_spotify_playlist" class="form-label mb-0">Selecciona una playlist de Spotify</label>
+              <button type="button" id="reloadPlaylistsBtn" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-sync-alt"></i> Recarrega
+              </button>
+            </div>
+            <div class="mb-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded"
+                       {% if only_owned %}checked{% endif %}>
+                <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
+                  Només les meves playlists
+                </label>
+              </div>
+            </div>
+            <select id="id_spotify_playlist" class="form-control">
+              <option value="">-- Selecciona una playlist --</option>
+              {% for pl in playlists %}
+                <option value="{{ pl.id }}">
+                  {{ pl.name }} ({{ pl.owner }})
+                </option>
+              {% endfor %}
+            </select>
+            <button type="button" id="assignPlaylistBtn" class="btn btn-primary mt-3 w-100">
+              <i class="fab fa-spotify me-1"></i>Assigna playlist a la festa
+            </button>
+          </div>
+
+        {% else %}
+          <div class="mb-3">
+            {% if has_spotify %}
+              <div class="mb-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox"
+                         {% if only_owned %}checked{% endif %}>
+                  <label class="form-check-label" for="onlyOwnedCheckbox">
+                    Només les meves playlists
+                  </label>
+                </div>
+              </div>
+              <a href="?load_spotify=1" class="btn btn-success me-2" id="loadPlaylistsBtn">
+                <i class="fas fa-sync-alt me-1"></i>Carrega playlists de Spotify
+              </a>
+              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
+                 class="btn btn-outline-success btn-sm">
+                <i class="fas fa-redo me-1"></i>Reconnecta Spotify
+              </a>
+            {% else %}
+              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
+                 class="btn btn-success">
+                <i class="fab fa-spotify me-1"></i>Connecta Spotify
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
       </div>
     </div>
 
@@ -185,7 +269,7 @@
       <div id="loadingProgress" class="mb-3" style="display: none;">
         <div class="alert alert-info">
           <h5><i class="fas fa-spinner fa-spin"></i> Carregant playlist...</h5>
-          <p id="progressText">Processant cançons amb BPM i clau musical...</p>
+          <p id="progressText">Sincronitzant cançons amb Spotify...</p>
           <div class="progress">
             <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
                  role="progressbar" style="width: 0%"></div>
@@ -196,14 +280,24 @@
       <div class="card shadow-sm p-4 rounded-4 mb-4">
         <h3 class="h5 mb-3">Cançons de la playlist</h3>
         {% if songs %}
-          <input
-            id="song-search"
-            class="form-control mb-3"
-            placeholder="Filtra per títol o artista…"
-          />
+          <div class="d-flex gap-2 mb-3">
+            <input
+              id="song-search"
+              class="form-control"
+              placeholder="Filtra per títol o artista…"
+            />
+            <button
+              id="bulk-analyze-btn"
+              class="btn btn-outline-primary"
+              title="Analitza totes les cançons pendents"
+              style="white-space: nowrap;">
+              <i class="fas fa-chart-line me-1"></i>Analitza pendents ({{ pending_analysis_count }})
+            </button>
+          </div>
           <table class="table table-striped w-100">
             <thead>
               <tr>
+                <th style="width: 55px;"></th>
                 <th>Títol</th>
                 <th>Artista</th>
                 <th>BPM</th>
@@ -212,9 +306,33 @@
                 <th>Accions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="songs-table-body">
               {% for song in songs %}
-                <tr data-song-id="{{ song.id }}">
+                <tr data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id }}">
+                  <td>
+                    <div class="position-relative album-cover-container" style="width: 45px; height: 45px;">
+                      {% if song.album_image_url %}
+                        <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
+                             class="rounded w-100 h-100" style="object-fit: cover;">
+                      {% else %}
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
+                          <i class="fas fa-music text-white"></i>
+                        </div>
+                      {% endif %}
+
+                      {% if has_spotify %}
+                      <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
+                           style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
+                        <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                                data-song-id="{{ song.id }}"
+                                data-spotify-id="{{ song.spotify_id }}"
+                                style="color: white; font-size: 1.5rem; line-height: 1;">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </td>
                   <td>{{ song.title }}</td>
                   <td>{{ song.artist }}</td>
                   <td class="bpm-cell">
@@ -226,24 +344,31 @@
                   </td>
                   <td class="key-cell">
                     {% if song.key %}
-                      <span class="badge bg-secondary">{{ song.key }}</span>
+                      <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
                     {% else %}
                       <span class="text-muted">-</span>
                     {% endif %}
                   </td>
                   <td>{{ song.num_votes }}</td>
-                  <td>
-                    {% if not song.bpm or not song.key %}
-                      {% if song.preview_url %}
-                        <button class="btn btn-sm btn-outline-primary analyze-audio-btn"
+                  <td class="analyze-cell">
+                    <div class="d-flex align-items-center gap-2">
+                      {% if not song.bpm or not song.key %}
+                        <button class="btn btn-sm btn-primary analyze-audio-btn"
                                 data-song-id="{{ song.id }}"
-                                title="Analitzar àudio amb IA">
-                          <i class="fas fa-waveform-lines"></i> Analitza
+                                title="Analitza BPM i Key"
+                                style="padding: 0.25rem 0.4rem;">
+                          <i class="fas fa-chart-line"></i>
                         </button>
                       {% else %}
-                        <span class="text-muted small">No preview</span>
+                        <span class="text-success small"><i class="fas fa-check"></i></span>
                       {% endif %}
-                    {% endif %}
+                      <button class="btn btn-sm btn-outline-danger delete-song-btn"
+                              data-song-id="{{ song.id }}"
+                              title="Elimina de la playlist i de la festa"
+                              style="padding: 0.25rem 0.45rem;">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
@@ -277,7 +402,7 @@
         <i class="fas fa-spinner fa-spin"></i>
         <strong style="font-size: 0.95rem;">Carregant playlist...</strong>
       </div>
-      <p id="progressTextMobile" class="mb-2" style="font-size: 0.82rem; color: #434656;">Processant cançons amb BPM i clau musical...</p>
+      <p id="progressTextMobile" class="mb-2" style="font-size: 0.82rem; color: #434656;">Sincronitzant cançons amb Spotify...</p>
       <div class="progress" style="height: 0.55rem;">
         <div id="progressBarMobile" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
       </div>
@@ -315,65 +440,77 @@
           <p class="help-text">Cost en Coins que un usuari ha de pagar per demanar una cançó nova.</p>
         </div>
 
-        {% if party.playlist %}
-          <div class="mb-3">
-            <span class="mobile-label">Playlist assignada</span>
-            <div class="p-3" style="background: #f2f3f8; border-radius: 10px;">
-              <div class="fw-semibold" style="color: #191c1f;">{{ party.playlist.name }}</div>
-              <div style="color: #747688; font-size: 0.82rem;">{{ party.playlist.owner }}</div>
-            </div>
-            <div class="d-flex gap-2 mt-2">
-              <button type="button" id="reloadSongsBtnMobile" class="btn btn-success flex-fill">
-                <i class="fas fa-sync-alt me-1"></i>Recarrega
-              </button>
-              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
-            </div>
-          </div>
-        {% elif playlists %}
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <label for="id_spotify_playlist_mobile" class="mobile-label mb-0">Playlist de Spotify</label>
-              <button type="button" id="reloadPlaylistsBtnMobile" class="btn btn-outline-primary btn-sm">Recarrega</button>
-            </div>
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoadedMobile" {% if only_owned %}checked{% endif %}>
-              <label class="form-check-label" for="onlyOwnedCheckboxLoadedMobile">Només les meves playlists</label>
-            </div>
-            <select name="spotify_playlist" id="id_spotify_playlist_mobile" class="form-control">
-              <option value="">-- Selecciona una playlist --</option>
-              {% for pl in playlists %}
-                <option value="{{ pl.id }}" {% if pl.id == party.playlist %}selected{% endif %}>{{ pl.name }} ({{ pl.owner }})</option>
-              {% endfor %}
-            </select>
-          </div>
-        {% else %}
-          <div class="mb-3">
-            {% if has_spotify %}
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxMobile" {% if only_owned %}checked{% endif %}>
-                <label class="form-check-label" for="onlyOwnedCheckboxMobile">Només les meves playlists</label>
-              </div>
-              <div class="d-grid gap-2">
-                <a href="?load_spotify=1" class="btn btn-success" id="loadPlaylistsBtnMobile">
-                  <i class="fas fa-sync-alt me-1"></i>Carrega playlists de Spotify
-                </a>
-                <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-outline-success">
-                  <i class="fas fa-redo me-1"></i>Reconnecta Spotify
-                </a>
-              </div>
-            {% else %}
-              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-success w-100">
-                <i class="fab fa-spotify me-1"></i>Connecta Spotify
-              </a>
-            {% endif %}
-          </div>
-        {% endif %}
-
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-primary" id="saveButtonMobile">Desa canvis</button>
           <a href="{% url 'dj_dashboard' %}" class="btn btn-outline-secondary">Torna</a>
         </div>
       </form>
+    </section>
+
+    <section class="mobile-card p-3">
+      <span class="mobile-label">Playlist de Spotify</span>
+      {% if party.playlist %}
+        <div class="p-3 mb-3" style="background: #f2f3f8; border-radius: 10px;">
+          <div class="fw-semibold" style="color: #191c1f;" id="playlistAssignedNameMobile">{{ party.playlist.name }}</div>
+          <div style="color: #747688; font-size: 0.82rem;">{{ party.playlist.owner }}</div>
+        </div>
+        <div class="d-flex gap-2 mb-3">
+          <button type="button" id="reloadSongsBtnMobile" class="btn btn-success flex-fill">
+            <i class="fas fa-sync-alt me-1"></i>Recarrega
+          </button>
+          <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
+        </div>
+
+        {% if has_spotify %}
+          <label class="mobile-label" for="spotify-track-search-mobile">Afegeix una cançó</label>
+          <div class="input-group mb-2">
+            <input id="spotify-track-search-mobile" class="form-control" placeholder="Cerca tema o artista..." />
+            <button type="button" id="spotify-track-search-btn-mobile" class="btn btn-outline-primary">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <div id="spotify-track-search-results-mobile" class="d-flex flex-column gap-2"></div>
+        {% endif %}
+
+      {% elif playlists %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label for="id_spotify_playlist_mobile" class="mobile-label mb-0">Selecciona playlist</label>
+          <button type="button" id="reloadPlaylistsBtnMobile" class="btn btn-outline-primary btn-sm">Recarrega</button>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoadedMobile" {% if only_owned %}checked{% endif %}>
+          <label class="form-check-label" for="onlyOwnedCheckboxLoadedMobile">Només les meves playlists</label>
+        </div>
+        <select id="id_spotify_playlist_mobile" class="form-control mb-3">
+          <option value="">-- Selecciona una playlist --</option>
+          {% for pl in playlists %}
+            <option value="{{ pl.id }}">{{ pl.name }} ({{ pl.owner }})</option>
+          {% endfor %}
+        </select>
+        <button type="button" id="assignPlaylistBtnMobile" class="btn btn-primary w-100">
+          <i class="fab fa-spotify me-1"></i>Assigna playlist
+        </button>
+
+      {% else %}
+        {% if has_spotify %}
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxMobile" {% if only_owned %}checked{% endif %}>
+            <label class="form-check-label" for="onlyOwnedCheckboxMobile">Només les meves playlists</label>
+          </div>
+          <div class="d-grid gap-2">
+            <a href="?load_spotify=1" class="btn btn-success" id="loadPlaylistsBtnMobile">
+              <i class="fas fa-sync-alt me-1"></i>Carrega playlists de Spotify
+            </a>
+            <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-outline-success">
+              <i class="fas fa-redo me-1"></i>Reconnecta Spotify
+            </a>
+          </div>
+        {% else %}
+          <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-success w-100">
+            <i class="fab fa-spotify me-1"></i>Connecta Spotify
+          </a>
+        {% endif %}
+      {% endif %}
     </section>
 
     <section class="mobile-card p-3">
@@ -385,30 +522,43 @@
       </div>
       {% if songs %}
         <div class="mb-2">
-          <input id="song-search-mobile" class="form-control" placeholder="Filtra per títol, artista, BPM o key…" />
+          <input id="song-search-mobile" class="form-control mb-2" placeholder="Filtra per títol, artista, BPM o key…" />
+          <button
+            id="bulk-analyze-btn-mobile"
+            class="btn btn-outline-primary btn-sm w-100"
+            title="Analitza totes les cançons pendents">
+            <i class="fas fa-chart-line me-1"></i>Analitza pendents ({{ pending_analysis_count }})
+          </button>
         </div>
-        <div class="d-flex flex-column gap-2">
+        <div class="d-flex flex-column gap-2" id="songs-mobile-list">
           {% for song in songs %}
             <div class="party-song-row p-2" data-song-row data-song-id="{{ song.id }}">
               <div class="d-flex justify-content-between align-items-start">
                 <div class="flex-grow-1">
                   <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">{{ song.title }}</div>
                   <div style="font-size: 0.82rem; color: #434656;" data-song-artist>{{ song.artist }}</div>
-                  <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem; color: #747688;">
-                    <span class="bpm-cell-mobile">BPM: {% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span>
-                    <span class="key-cell-mobile">Key: {% if song.key %}{{ song.key }}{% else %}-{% endif %}</span>
-                    <span>Vots: {{ song.num_votes }}</span>
+                  <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem;">
+                    <span style="color: #747688;">BPM: <span class="bpm-cell-mobile">{% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span></span>
+                    <span style="color: #747688;">Key: <span class="key-cell-mobile">{% if song.key %}<span class="camelot-key camelot-{{ song.key }}" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>{% else %}-{% endif %}</span></span>
+                    <span style="color: #747688;">Vots: {{ song.num_votes }}</span>
                   </div>
                 </div>
-                {% if not song.bpm or not song.key %}
-                  {% if song.preview_url %}
-                    <button class="btn btn-sm btn-outline-primary analyze-audio-btn flex-shrink-0"
+                <div class="d-flex flex-column gap-2 align-items-end">
+                  {% if not song.bpm or not song.key %}
+                    <button class="btn btn-sm btn-primary analyze-audio-btn flex-shrink-0"
                             data-song-id="{{ song.id }}"
-                            style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
-                      <i class="fas fa-waveform-lines"></i>
+                            style="font-size: 0.7rem; padding: 0.25rem 0.5rem;"
+                            title="Analitza BPM i Key">
+                      <i class="fas fa-chart-line"></i>
                     </button>
                   {% endif %}
-                {% endif %}
+                  <button class="btn btn-sm btn-outline-danger delete-song-btn flex-shrink-0"
+                          data-song-id="{{ song.id }}"
+                          style="font-size: 0.7rem; padding: 0.25rem 0.5rem;"
+                          title="Elimina de la playlist i de la festa">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
               </div>
             </div>
           {% endfor %}
@@ -426,6 +576,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var settingsForm = document.getElementById('partySettingsForm');
   var settingsFormMobile = document.getElementById('partySettingsFormMobile');
   var activeForm = settingsFormMobile || settingsForm;
+  var loadingDiv = document.getElementById('loadingProgress');
+  var progressBar = document.getElementById('progressBar');
+  var progressText = document.getElementById('progressText');
+  var loadingDivMobile = document.getElementById('loadingProgressMobile');
+  var progressBarMobile = document.getElementById('progressBarMobile');
+  var progressTextMobile = document.getElementById('progressTextMobile');
 
   function parseJsonResponse(response) {
     return response.json().then(function(data) {
@@ -447,10 +603,10 @@ document.addEventListener('DOMContentLoaded', function() {
     input.addEventListener('input', function() {
       var q = input.value.trim().toLowerCase();
       document.querySelectorAll('table tbody tr').forEach(function(row) {
-        var title = row.cells[0].textContent.toLowerCase();
-        var artist = row.cells[1].textContent.toLowerCase();
-        var bpm = row.cells[2].textContent.toLowerCase();
-        var key = row.cells[3].textContent.toLowerCase();
+        var title = row.cells[1].textContent.toLowerCase();
+        var artist = row.cells[2].textContent.toLowerCase();
+        var bpm = row.cells[3].textContent.toLowerCase();
+        var key = row.cells[4].textContent.toLowerCase();
         row.style.display = (title.includes(q) || artist.includes(q) || bpm.includes(q) || key.includes(q)) ? '' : 'none';
       });
     });
@@ -468,87 +624,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Funció per processar features en chunks
-  function processFeatures(offset) {
-    var loadingDiv = document.getElementById('loadingProgress');
-    var progressBar = document.getElementById('progressBar');
-    var progressText = document.getElementById('progressText');
-    var loadingDivMobile = document.getElementById('loadingProgressMobile');
-    var progressBarMobile = document.getElementById('progressBarMobile');
-    var progressTextMobile = document.getElementById('progressTextMobile');
-
-    var formData = new FormData();
-    formData.append('offset', offset);
-    formData.append('chunk_size', 10);
-    formData.append('csrfmiddlewaretoken', activeForm.querySelector('[name=csrfmiddlewaretoken]').value);
-
-    return fetch('{% url "process_song_features" party.id %}', {
-      method: 'POST',
-      body: formData
-    })
-    .then(parseJsonResponse)
-    .then(result => {
-      if (!result.ok) {
-        if (maybeReconnectSpotify(result, 'Error processant features')) {
-          return null;
-        }
-      }
-      var data = result.data;
-
-      // Actualitzar progrés
-      var total = data.total_songs || 1;
-      var processed = total - data.total_pending;
-      var percentage = Math.round((processed / total) * 100);
-      var displayPercentage = Math.max(20, Math.min(percentage, 95)); // Entre 20% i 95%
-
-      if (progressBar) progressBar.style.width = displayPercentage + '%';
-      if (progressText) progressText.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
-      if (progressBarMobile) progressBarMobile.style.width = displayPercentage + '%';
-      if (progressTextMobile) progressTextMobile.textContent = `Processant BPM i clau musical: ${processed}/${total} cançons (${percentage}%)`;
-
-      if (data.completed) {
-        if (progressBar) {
-          progressBar.style.width = '100%';
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-success');
-        }
-        if (progressText) progressText.textContent = 'Totes les cançons processades correctament!';
-        if (progressBarMobile) {
-          progressBarMobile.style.width = '100%';
-          progressBarMobile.classList.remove('progress-bar-animated');
-          progressBarMobile.classList.add('bg-success');
-        }
-        if (progressTextMobile) progressTextMobile.textContent = 'Totes les cançons processades correctament!';
-
-        setTimeout(function() {
-          window.location.reload();
-        }, 2000);
-        return null;
-      } else {
-        // Processar següent chunk
-        return processFeatures(offset + 10);
-      }
-    });
-  }
-
   // Gestió del botó "Recarregar cançons"
   var reloadBtn = document.getElementById('reloadSongsBtn');
   var reloadBtnMobile = document.getElementById('reloadSongsBtnMobile');
   function handleReloadSongs(triggerBtn) {
-      var loadingDiv = document.getElementById('loadingProgress');
-      var progressBar = document.getElementById('progressBar');
-      var progressText = document.getElementById('progressText');
-      var loadingDivMobile = document.getElementById('loadingProgressMobile');
-      var progressBarMobile = document.getElementById('progressBarMobile');
-      var progressTextMobile = document.getElementById('progressTextMobile');
-
       triggerBtn.disabled = true;
       if (loadingDiv) loadingDiv.style.display = 'block';
       if (loadingDivMobile) loadingDivMobile.style.display = 'block';
-      if (progressBar) progressBar.style.width = '10%';
-      if (progressText) progressText.textContent = 'Carregant llista de cançons de Spotify...';
-      if (progressBarMobile) progressBarMobile.style.width = '10%';
-      if (progressTextMobile) progressTextMobile.textContent = 'Carregant llista de cançons de Spotify...';
+      if (progressBar) progressBar.style.width = '50%';
+      if (progressText) progressText.textContent = 'Sincronitzant cançons amb Spotify...';
+      if (progressBarMobile) progressBarMobile.style.width = '50%';
+      if (progressTextMobile) progressTextMobile.textContent = 'Sincronitzant cançons amb Spotify...';
 
       var formData = new FormData();
       formData.append('spotify_playlist_id', '{{ party.playlist.spotify_id }}');
@@ -567,13 +653,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         var data = result.data;
         if (data.success) {
-          if (progressBar) progressBar.style.width = '20%';
-          if (progressText) progressText.textContent = data.message;
-          if (progressBarMobile) progressBarMobile.style.width = '20%';
-          if (progressTextMobile) progressTextMobile.textContent = data.message;
+          if (progressBar) {
+            progressBar.style.width = '100%';
+            progressBar.classList.remove('progress-bar-animated');
+            progressBar.classList.add('bg-success');
+          }
+          if (progressText) progressText.textContent = data.message + ' Recarregant pàgina...';
+          if (progressBarMobile) {
+            progressBarMobile.style.width = '100%';
+            progressBarMobile.classList.remove('progress-bar-animated');
+            progressBarMobile.classList.add('bg-success');
+          }
+          if (progressTextMobile) progressTextMobile.textContent = data.message + ' Recarregant pàgina...';
 
-          // Ara processar features en chunks
-          return processFeatures(0);
+          // Recarregar pàgina després d'1 segon
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000);
         } else {
           throw new Error(data.error || 'Error desconegut');
         }
@@ -601,110 +697,413 @@ document.addEventListener('DOMContentLoaded', function() {
     reloadBtnMobile.addEventListener('click', function() { handleReloadSongs(reloadBtnMobile); });
   }
 
-  // Gestió del submit amb indicador de càrrega
   var playlistSelect = document.getElementById('id_spotify_playlist');
-
   var playlistSelectMobile = document.getElementById('id_spotify_playlist_mobile');
-  function handlePlaylistSubmit(formEl, selectEl, saveButton) {
-      if (!formEl || !selectEl) return;
-      formEl.addEventListener('submit', function(e) {
-      var selectedPlaylist = selectEl.value;
+  var assignPlaylistBtn = document.getElementById('assignPlaylistBtn');
+  var assignPlaylistBtnMobile = document.getElementById('assignPlaylistBtnMobile');
+  var spotifyTrackSearchInput = document.getElementById('spotify-track-search');
+  var spotifyTrackSearchBtn = document.getElementById('spotify-track-search-btn');
+  var spotifyTrackSearchResults = document.getElementById('spotify-track-search-results');
+  var spotifyTrackSearchInputMobile = document.getElementById('spotify-track-search-mobile');
+  var spotifyTrackSearchBtnMobile = document.getElementById('spotify-track-search-btn-mobile');
+  var spotifyTrackSearchResultsMobile = document.getElementById('spotify-track-search-results-mobile');
+  var songsTableBody = document.getElementById('songs-table-body');
+  var songsMobileList = document.getElementById('songs-mobile-list');
+  var assignPlaylistUrl = '{% url "assign_party_playlist" party.id %}';
+  var searchTracksUrl = '{% url "party_settings_search_tracks" party.id %}';
+  var addTrackUrl = '{% url "add_track_to_party_playlist" party.id %}';
+  var deleteSongUrlTemplate = '{% url "delete_song_from_party_playlist" party.id 0 %}';
 
-      // Si s'ha seleccionat una playlist, fer la càrrega via AJAX
-      if (selectedPlaylist) {
-        e.preventDefault(); // Evitar submit normal
+  function getCsrfToken() {
+    return activeForm.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
 
-        var loadingDivMobile = document.getElementById('loadingProgressMobile');
-        var progressBarMobile = document.getElementById('progressBarMobile');
-        var progressTextMobile = document.getElementById('progressTextMobile');
-        var loadingDiv = document.getElementById('loadingProgress');
-        var progressBar = document.getElementById('progressBar');
-        var progressText = document.getElementById('progressText');
+  function showLoadingState(message, progressValue) {
+    if (loadingDiv) loadingDiv.style.display = 'block';
+    if (progressBar) {
+      progressBar.classList.remove('bg-danger', 'bg-success');
+      progressBar.classList.add('progress-bar-animated');
+      progressBar.style.width = progressValue + '%';
+    }
+    if (progressText) progressText.textContent = message;
+    if (loadingDivMobile) loadingDivMobile.style.display = 'block';
+    if (progressBarMobile) {
+      progressBarMobile.classList.remove('bg-danger', 'bg-success');
+      progressBarMobile.classList.add('progress-bar-animated');
+      progressBarMobile.style.width = progressValue + '%';
+    }
+    if (progressTextMobile) progressTextMobile.textContent = message;
+  }
 
-        saveButton.disabled = true;
-        if (loadingDiv) loadingDiv.style.display = 'block';
-        if (progressBar) progressBar.style.width = '30%';
-        if (progressText) progressText.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
-        if (loadingDivMobile) loadingDivMobile.style.display = 'block';
-        if (progressBarMobile) progressBarMobile.style.width = '30%';
-        if (progressTextMobile) progressTextMobile.textContent = 'Carregant cançons de Spotify amb BPM i clau musical...';
+  function showLoadingError(message) {
+    if (progressBar) {
+      progressBar.classList.remove('progress-bar-animated');
+      progressBar.classList.add('bg-danger');
+      progressBar.style.width = '100%';
+    }
+    if (progressText) progressText.textContent = 'Error: ' + message;
+    if (progressBarMobile) {
+      progressBarMobile.classList.remove('progress-bar-animated');
+      progressBarMobile.classList.add('bg-danger');
+      progressBarMobile.style.width = '100%';
+    }
+    if (progressTextMobile) progressTextMobile.textContent = 'Error: ' + message;
+  }
 
-        var formData = new FormData(formEl);
-        formData.append('ajax_request', '1');
+  function getDeleteButtonHtml(songId, isMobile) {
+    var classes = isMobile
+      ? 'btn btn-sm btn-outline-danger delete-song-btn flex-shrink-0'
+      : 'btn btn-sm btn-outline-danger delete-song-btn';
+    var style = isMobile
+      ? 'font-size: 0.7rem; padding: 0.25rem 0.5rem;'
+      : 'padding: 0.25rem 0.45rem;';
 
-        fetch(window.location.href, {
-          method: 'POST',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: formData
-        })
-        .then(response => {
-          if (!response.ok) throw new Error('Error al desar el formulari');
-          return response.json();
-        })
-        .then(data => {
-          if (!data.success) throw new Error('Error al desar el formulari');
+    return '<button class="' + classes + '" data-song-id="' + songId + '" title="Elimina de la playlist i de la festa" style="' + style + '"><i class="fas fa-trash"></i></button>';
+  }
 
-          if (progressBar) progressBar.style.width = '10%';
-          if (progressText) progressText.textContent = 'Carregant llista de cançons de Spotify...';
-          if (progressBarMobile) progressBarMobile.style.width = '10%';
-          if (progressTextMobile) progressTextMobile.textContent = 'Carregant llista de cançons de Spotify...';
+  function getDesktopActionCellHtml(song) {
+    var analyzeHtml = song.needs_analysis
+      ? '<button class="btn btn-sm btn-primary analyze-audio-btn" data-song-id="' + song.id + '" title="Analitza BPM i Key" style="padding: 0.25rem 0.4rem;"><i class="fas fa-chart-line"></i></button>'
+      : '<span class="text-success small"><i class="fas fa-check"></i></span>';
 
-          // Ara carregar les cançons (només metadata)
-          var playlistFormData = new FormData();
-          playlistFormData.append('spotify_playlist_id', selectedPlaylist);
-          playlistFormData.append('csrfmiddlewaretoken', formEl.querySelector('[name=csrfmiddlewaretoken]').value);
+    return '<div class="d-flex align-items-center gap-2">' + analyzeHtml + getDeleteButtonHtml(song.id, false) + '</div>';
+  }
 
-          return fetch('{% url "process_playlist_songs" party.id %}', {
-            method: 'POST',
-            body: playlistFormData
-          });
-        })
-        .then(parseJsonResponse)
-        .then(result => {
-          if (!result.ok) {
-            if (maybeReconnectSpotify(result, 'Error desconegut')) {
-              return;
-            }
-          }
-          var data = result.data;
-          if (data.success) {
-            if (progressBar) progressBar.style.width = '20%';
-            if (progressText) progressText.textContent = data.message;
-            if (progressBarMobile) progressBarMobile.style.width = '20%';
-            if (progressTextMobile) progressTextMobile.textContent = data.message;
+  function getMobileActionCellHtml(song) {
+    var analyzeHtml = song.needs_analysis
+      ? '<button class="btn btn-sm btn-primary analyze-audio-btn flex-shrink-0" data-song-id="' + song.id + '" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;" title="Analitza BPM i Key"><i class="fas fa-chart-line"></i></button>'
+      : '';
 
-            // Ara processar features en chunks
-            return processFeatures(0);
-          } else {
-            throw new Error(data.error || 'Error desconegut');
-          }
-        })
-        .catch(error => {
-          if (progressBar) {
-            progressBar.classList.remove('progress-bar-animated');
-            progressBar.classList.add('bg-danger');
-            progressBar.style.width = '100%';
-          }
-          if (progressText) progressText.textContent = 'Error: ' + error.message;
-          if (progressBarMobile) {
-            progressBarMobile.classList.remove('progress-bar-animated');
-            progressBarMobile.classList.add('bg-danger');
-            progressBarMobile.style.width = '100%';
-          }
-          if (progressTextMobile) progressTextMobile.textContent = 'Error: ' + error.message;
-          saveButton.disabled = false;
-        });
+    return '<div class="d-flex flex-column gap-2 align-items-end">' + analyzeHtml + getDeleteButtonHtml(song.id, true) + '</div>';
+  }
+
+  function assignPlaylist(selectEl, triggerBtn) {
+    if (!selectEl || !triggerBtn) return;
+    var selectedPlaylist = selectEl.value;
+    if (!selectedPlaylist) {
+      alert('Selecciona una playlist de Spotify.');
+      return;
+    }
+
+    triggerBtn.disabled = true;
+    showLoadingState('Assignant playlist a la festa...', 25);
+
+    var payload = new URLSearchParams();
+    payload.append('spotify_playlist_id', selectedPlaylist);
+    payload.append('csrfmiddlewaretoken', getCsrfToken());
+
+    fetch(assignPlaylistUrl, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: payload.toString()
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      if (!result.ok) {
+        if (maybeReconnectSpotify(result, 'No s\'ha pogut assignar la playlist')) {
+          return null;
+        }
       }
-      // Si no hi ha playlist seleccionada, deixar que el submit sigui normal
+      showLoadingState('Sincronitzant cançons amb Spotify...', 55);
+      var playlistFormData = new FormData();
+      playlistFormData.append('spotify_playlist_id', selectedPlaylist);
+      playlistFormData.append('csrfmiddlewaretoken', getCsrfToken());
+      return fetch('{% url "process_playlist_songs" party.id %}', {
+        method: 'POST',
+        body: playlistFormData
+      });
+    })
+    .then(function(response) {
+      if (!response) return null;
+      return parseJsonResponse(response);
+    })
+    .then(function(result) {
+      if (!result) return;
+      if (!result.ok) {
+        if (maybeReconnectSpotify(result, 'No s\'ha pogut sincronitzar la playlist')) {
+          return;
+        }
+      }
+      var data = result.data;
+      if (!data.success) {
+        throw new Error(data.error || 'Error sincronitzant la playlist');
+      }
+
+      if (progressBar) {
+        progressBar.style.width = '100%';
+        progressBar.classList.remove('progress-bar-animated');
+        progressBar.classList.add('bg-success');
+      }
+      if (progressText) progressText.textContent = data.message + ' Recarregant pàgina...';
+      if (progressBarMobile) {
+        progressBarMobile.style.width = '100%';
+        progressBarMobile.classList.remove('progress-bar-animated');
+        progressBarMobile.classList.add('bg-success');
+      }
+      if (progressTextMobile) progressTextMobile.textContent = data.message + ' Recarregant pàgina...';
+
+      setTimeout(function() {
+        window.location.reload();
+      }, 900);
+    })
+    .catch(function(error) {
+      showLoadingError(error.message);
+      triggerBtn.disabled = false;
     });
   }
-  if (settingsForm && playlistSelect) {
-    handlePlaylistSubmit(settingsForm, playlistSelect, document.getElementById('saveButton'));
+
+  function renderSearchResults(container, tracks, isMobile) {
+    if (!container) return;
+
+    if (!tracks.length) {
+      container.innerHTML = '<div class="text-muted small">No s\'han trobat resultats.</div>';
+      return;
+    }
+
+    container.innerHTML = tracks.map(function(track) {
+      var buttonHtml = track.already_in_party
+        ? '<button type="button" class="btn btn-sm btn-outline-secondary" disabled>Ja hi és</button>'
+        : '<button type="button" class="btn btn-sm btn-primary add-track-btn" data-spotify-id="' + track.id + '" data-title="' + track.title.replace(/"/g, '&quot;') + '" data-artist="' + track.artist.replace(/"/g, '&quot;') + '" data-album-image-url="' + (track.album_image_url || '') + '"><i class="fas fa-plus me-1"></i>Afegir</button>';
+
+      return '<div class="spotify-search-result d-flex align-items-center gap-3">' +
+        (track.album_image_url
+          ? '<img src="' + track.album_image_url + '" alt="' + track.title.replace(/"/g, '&quot;') + '">'
+          : '<div class="d-flex align-items-center justify-content-center bg-secondary text-white" style="width:52px;height:52px;border-radius:10px;"><i class="fas fa-music"></i></div>') +
+        '<div class="flex-grow-1" style="min-width:0;">' +
+          '<div class="fw-semibold" style="line-height:1.1;color:#191c1f;">' + track.title + '</div>' +
+          '<div class="text-muted small">' + track.artist + '</div>' +
+        '</div>' +
+        '<div class="' + (isMobile ? 'align-self-stretch d-flex align-items-center' : '') + '">' + buttonHtml + '</div>' +
+      '</div>';
+    }).join('');
   }
-  if (settingsFormMobile && playlistSelectMobile) {
-    handlePlaylistSubmit(settingsFormMobile, playlistSelectMobile, document.getElementById('saveButtonMobile'));
+
+  function searchSpotifyTracks(inputEl, buttonEl, resultsEl, isMobile) {
+    if (!inputEl || !buttonEl || !resultsEl) return;
+    var query = inputEl.value.trim();
+    if (!query) {
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    buttonEl.disabled = true;
+    var originalHtml = buttonEl.innerHTML;
+    buttonEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch(searchTracksUrl + '?search=' + encodeURIComponent(query))
+      .then(parseJsonResponse)
+      .then(function(result) {
+        if (!result.ok) {
+          if (maybeReconnectSpotify(result, 'No s\'ha pogut cercar a Spotify')) {
+            return;
+          }
+        }
+        renderSearchResults(resultsEl, result.data.tracks || [], isMobile);
+      })
+      .catch(function(error) {
+        console.error('Error cercant tracks:', error);
+        resultsEl.innerHTML = '<div class="text-danger small">No s\'ha pogut fer la cerca.</div>';
+      })
+      .finally(function() {
+        buttonEl.disabled = false;
+        buttonEl.innerHTML = originalHtml;
+      });
+  }
+
+  function buildDesktopSongRow(song) {
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-song-id', song.id);
+    tr.setAttribute('data-spotify-id', song.spotify_id);
+    tr.innerHTML = `
+      <td>
+        <div class="position-relative album-cover-container" style="width: 45px; height: 45px;">
+          ${song.album_image_url
+            ? `<img src="${song.album_image_url}" alt="${song.title}" class="rounded w-100 h-100" style="object-fit: cover;">`
+            : `<div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100"><i class="fas fa-music text-white"></i></div>`}
+        </div>
+      </td>
+      <td>${song.title}</td>
+      <td>${song.artist}</td>
+      <td class="bpm-cell">${song.bpm || '<span class="text-muted">-</span>'}</td>
+      <td class="key-cell">${song.key ? `<span class="camelot-key camelot-${song.key}">${song.key}</span>` : '<span class="text-muted">-</span>'}</td>
+      <td>0</td>
+      <td class="analyze-cell">${getDesktopActionCellHtml(song)}</td>
+    `;
+    return tr;
+  }
+
+  function buildMobileSongCard(song) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'party-song-row p-2';
+    wrapper.setAttribute('data-song-row', '');
+    wrapper.setAttribute('data-song-id', song.id);
+    wrapper.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+          <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">${song.title}</div>
+          <div style="font-size: 0.82rem; color: #434656;" data-song-artist>${song.artist}</div>
+          <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem;">
+            <span style="color: #747688;">BPM: <span class="bpm-cell-mobile">${song.bpm || '-'}</span></span>
+            <span style="color: #747688;">Key: <span class="key-cell-mobile">${song.key ? `<span class="camelot-key camelot-${song.key}" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">${song.key}</span>` : '-'}</span></span>
+            <span style="color: #747688;">Vots: 0</span>
+          </div>
+        </div>
+        ${getMobileActionCellHtml(song)}
+      </div>
+    `;
+    return wrapper;
+  }
+
+  function appendSongToLists(song) {
+    var appended = false;
+
+    if (songsTableBody) {
+      var desktopRow = buildDesktopSongRow(song);
+      songsTableBody.prepend(desktopRow);
+      var desktopAnalyzeBtn = desktopRow.querySelector('.analyze-audio-btn');
+      if (desktopAnalyzeBtn) bindAnalyzeButton(desktopAnalyzeBtn);
+      var desktopDeleteBtn = desktopRow.querySelector('.delete-song-btn');
+      if (desktopDeleteBtn) bindDeleteButton(desktopDeleteBtn);
+      appended = true;
+    }
+
+    if (songsMobileList) {
+      var mobileCard = buildMobileSongCard(song);
+      songsMobileList.prepend(mobileCard);
+      var mobileAnalyzeBtn = mobileCard.querySelector('.analyze-audio-btn');
+      if (mobileAnalyzeBtn) bindAnalyzeButton(mobileAnalyzeBtn);
+      var mobileDeleteBtn = mobileCard.querySelector('.delete-song-btn');
+      if (mobileDeleteBtn) bindDeleteButton(mobileDeleteBtn);
+      appended = true;
+    }
+
+    if (!appended) {
+      window.location.reload();
+    }
+  }
+
+  function handleAddTrackClick(event) {
+    var button = event.target.closest('.add-track-btn');
+    if (!button) return;
+
+    var payload = new URLSearchParams();
+    payload.append('spotify_id', button.dataset.spotifyId);
+    payload.append('title', button.dataset.title);
+    payload.append('artist', button.dataset.artist);
+    payload.append('album_image_url', button.dataset.albumImageUrl || '');
+    payload.append('csrfmiddlewaretoken', getCsrfToken());
+
+    button.disabled = true;
+    var originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch(addTrackUrl, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: payload.toString()
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      if (!result.ok) {
+        if (maybeReconnectSpotify(result, 'No s\'ha pogut afegir la cançó')) {
+          return;
+        }
+      }
+      var data = result.data;
+      if (!data.success) {
+        throw new Error(data.error || 'No s\'ha pogut afegir la cançó');
+      }
+      button.classList.remove('btn-primary');
+      button.classList.add('btn-outline-secondary');
+      button.innerHTML = 'Afegida';
+      appendSongToLists(data.song);
+      renderBulkAnalyzeButtons('idle');
+    })
+    .catch(function(error) {
+      console.error('Error afegint track:', error);
+      button.disabled = false;
+      button.innerHTML = originalHtml;
+    });
+  }
+
+  function removeSongFromLists(songId) {
+    document.querySelectorAll('tr[data-song-id="' + songId + '"], [data-song-row][data-song-id="' + songId + '"]').forEach(function(row) {
+      row.remove();
+    });
+    renderBulkAnalyzeButtons('idle');
+  }
+
+  function deleteSong(songId) {
+    var payload = new URLSearchParams();
+    payload.append('csrfmiddlewaretoken', getCsrfToken());
+
+    return fetch(deleteSongUrlTemplate.replace('0', songId), {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: payload.toString()
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      if (!result.ok) {
+        if (maybeReconnectSpotify(result, 'No s\'ha pogut eliminar la cançó')) {
+          return null;
+        }
+      }
+      var data = result.data || {};
+      if (!data.success) {
+        throw new Error(data.error || 'No s\'ha pogut eliminar la cançó');
+      }
+      removeSongFromLists(songId);
+      return data;
+    });
+  }
+
+  [spotifyTrackSearchResults, spotifyTrackSearchResultsMobile].filter(Boolean).forEach(function(container) {
+    container.addEventListener('click', handleAddTrackClick);
+  });
+
+  if (assignPlaylistBtn && playlistSelect) {
+    assignPlaylistBtn.addEventListener('click', function() {
+      assignPlaylist(playlistSelect, assignPlaylistBtn);
+    });
+  }
+  if (assignPlaylistBtnMobile && playlistSelectMobile) {
+    assignPlaylistBtnMobile.addEventListener('click', function() {
+      assignPlaylist(playlistSelectMobile, assignPlaylistBtnMobile);
+    });
+  }
+
+  if (spotifyTrackSearchBtn && spotifyTrackSearchInput && spotifyTrackSearchResults) {
+    spotifyTrackSearchBtn.addEventListener('click', function() {
+      searchSpotifyTracks(spotifyTrackSearchInput, spotifyTrackSearchBtn, spotifyTrackSearchResults, false);
+    });
+    spotifyTrackSearchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchSpotifyTracks(spotifyTrackSearchInput, spotifyTrackSearchBtn, spotifyTrackSearchResults, false);
+      }
+    });
+  }
+
+  if (spotifyTrackSearchBtnMobile && spotifyTrackSearchInputMobile && spotifyTrackSearchResultsMobile) {
+    spotifyTrackSearchBtnMobile.addEventListener('click', function() {
+      searchSpotifyTracks(spotifyTrackSearchInputMobile, spotifyTrackSearchBtnMobile, spotifyTrackSearchResultsMobile, true);
+    });
+    spotifyTrackSearchInputMobile.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchSpotifyTracks(spotifyTrackSearchInputMobile, spotifyTrackSearchBtnMobile, spotifyTrackSearchResultsMobile, true);
+      }
+    });
   }
 
   // Gestió del checkbox "Només les meves playlists" (quan no hi ha playlists carregades)
@@ -749,74 +1148,553 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Gestió del botó "Analitza àudio" per cada cançó
-  document.querySelectorAll('.analyze-audio-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var songId = this.dataset.songId;
-      var originalHtml = this.innerHTML;
+  var analyzeSongUrlTemplate = '{% url "analyze_song_audio" party.id 0 %}';
+  var bulkAnalyzeBtn = document.getElementById('bulk-analyze-btn');
+  var bulkAnalyzeBtnMobile = document.getElementById('bulk-analyze-btn-mobile');
+  var bulkAnalyzeButtons = [bulkAnalyzeBtn, bulkAnalyzeBtnMobile].filter(Boolean);
+  var bulkAnalyzeStorageKey = 'party-settings-bulk-analyze-{{ party.id }}';
+  var songAnalysisPromises = {};
+  var bulkAnalyzeRunning = false;
+  var bulkAnalyzePaused = false;
+  var bulkAnalyzeInFlight = false;
+  var bulkAnalyzeQueue = [];
+  var bulkAnalyzeIndex = 0;
+  var bulkAnalyzeErrors = 0;
 
-      // Desactivar botó i mostrar spinner
-      this.disabled = true;
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analitzant...';
+  function getAnalyzeButtonsForSong(songId) {
+    return Array.from(document.querySelectorAll('.analyze-audio-btn[data-song-id="' + songId + '"]'));
+  }
 
-      // Trobar la fila de la cançó
-      var row = document.querySelector('[data-song-id="' + songId + '"]');
-      var bpmCell = row.querySelector('.bpm-cell, .bpm-cell-mobile');
-      var keyCell = row.querySelector('.key-cell, .key-cell-mobile');
+  function collectPendingAnalyzeSongIds() {
+    var seen = new Set();
+    return Array.from(document.querySelectorAll('.analyze-audio-btn')).map(function(btn) {
+      return btn.dataset.songId;
+    }).filter(function(songId) {
+      if (!songId || seen.has(songId)) {
+        return false;
+      }
+      seen.add(songId);
+      return true;
+    });
+  }
 
-      fetch('{% url "analyze_song_audio" party.id 0 %}'.replace('0', songId), {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': activeForm.querySelector('[name=csrfmiddlewaretoken]').value,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualitzar cel·les amb els nous valors
-          if (bpmCell) {
-            if (data.bpm) {
-              bpmCell.innerHTML = bpmCell.textContent.includes('BPM:')
-                ? 'BPM: ' + Math.round(data.bpm)
-                : Math.round(data.bpm);
-            }
-          }
-          if (keyCell) {
-            if (data.key) {
-              keyCell.innerHTML = keyCell.textContent.includes('Key:')
-                ? 'Key: <span class="badge bg-secondary">' + data.key + '</span>'
-                : '<span class="badge bg-secondary">' + data.key + '</span>';
-            }
-          }
+  function getPendingAnalyzeCount() {
+    return collectPendingAnalyzeSongIds().length;
+  }
 
-          // Eliminar botó (ja no cal)
-          this.remove();
+  function persistBulkAnalyzeState() {
+    if (!bulkAnalyzeRunning && !bulkAnalyzePaused) {
+      localStorage.removeItem(bulkAnalyzeStorageKey);
+      return;
+    }
 
-          // Mostrar missatge èxit
-          var successMsg = document.createElement('small');
-          successMsg.className = 'text-success';
-          successMsg.innerHTML = '<i class="fas fa-check"></i> Analitzat';
-          if (row.querySelector('td:last-child')) {
-            row.querySelector('td:last-child').appendChild(successMsg);
-          } else {
-            row.appendChild(successMsg);
-          }
-        } else {
-          // Error: restaurar botó
-          this.disabled = false;
-          this.innerHTML = originalHtml;
-          alert('Error: ' + (data.error || 'No s\'ha pogut analitzar'));
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        this.disabled = false;
-        this.innerHTML = originalHtml;
-        alert('Error de xarxa. Torna a provar.');
+    localStorage.setItem(bulkAnalyzeStorageKey, JSON.stringify({
+      running: bulkAnalyzeRunning,
+      paused: bulkAnalyzePaused,
+      queue: bulkAnalyzeQueue,
+      index: bulkAnalyzeIndex,
+      errors: bulkAnalyzeErrors
+    }));
+  }
+
+  function resetBulkAnalyzeState() {
+    bulkAnalyzeRunning = false;
+    bulkAnalyzePaused = false;
+    bulkAnalyzeInFlight = false;
+    bulkAnalyzeQueue = [];
+    bulkAnalyzeIndex = 0;
+    bulkAnalyzeErrors = 0;
+    localStorage.removeItem(bulkAnalyzeStorageKey);
+  }
+
+  function renderBulkAnalyzeButtons(state) {
+    bulkAnalyzeButtons.forEach(function(btn) {
+      btn.disabled = false;
+      btn.classList.remove('btn-danger', 'btn-warning', 'btn-success', 'btn-outline-primary');
+
+      if (state === 'running') {
+        var current = Math.min(bulkAnalyzeIndex + (bulkAnalyzeInFlight ? 1 : 0), bulkAnalyzeQueue.length);
+        btn.classList.add('btn-danger');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + current + '/' + bulkAnalyzeQueue.length;
+        return;
+      }
+
+      if (state === 'paused') {
+        btn.classList.add('btn-warning');
+        btn.innerHTML = '<i class="fas fa-chart-line me-1"></i>Analitza ' + Math.max(0, bulkAnalyzeQueue.length - bulkAnalyzeIndex);
+        return;
+      }
+
+      if (state === 'done') {
+        btn.classList.add('btn-success');
+        btn.innerHTML = bulkAnalyzeErrors
+          ? '<i class="fas fa-exclamation-triangle me-1"></i>Completat amb errors'
+          : '<i class="fas fa-check me-1"></i>Completat';
+        return;
+      }
+
+      btn.classList.add('btn-outline-primary');
+      btn.innerHTML = '<i class="fas fa-chart-line me-1"></i>Analitza ' + getPendingAnalyzeCount();
+    });
+  }
+
+  function setAnalyzeButtonsLoading(songId) {
+    getAnalyzeButtonsForSong(songId).forEach(function(button) {
+      if (!button.dataset.originalHtml) {
+        button.dataset.originalHtml = button.innerHTML;
+      }
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    });
+  }
+
+  function restoreAnalyzeButtons(songId) {
+    getAnalyzeButtonsForSong(songId).forEach(function(button) {
+      button.disabled = false;
+      button.innerHTML = button.dataset.originalHtml || '<i class="fas fa-chart-line"></i>';
+    });
+  }
+
+  function showAnalyzeFailureState(songId, message) {
+    getAnalyzeButtonsForSong(songId).forEach(function(button) {
+      button.title = message || 'No s\'ha pogut analitzar aquesta cançó';
+    });
+  }
+
+  function markSongAnalyzed(songId, data) {
+    document.querySelectorAll('tr[data-song-id="' + songId + '"], [data-song-row][data-song-id="' + songId + '"]').forEach(function(row) {
+      var bpmCell = row.querySelector('.bpm-cell');
+      var keyCell = row.querySelector('.key-cell');
+      var bpmCellMobile = row.querySelector('.bpm-cell-mobile');
+      var keyCellMobile = row.querySelector('.key-cell-mobile');
+      var analyzeCell = row.querySelector('.analyze-cell');
+
+      if (bpmCell && data.bpm) {
+        bpmCell.textContent = Math.round(data.bpm);
+      }
+
+      if (bpmCellMobile && data.bpm) {
+        bpmCellMobile.textContent = Math.round(data.bpm);
+      }
+
+      if (keyCell && data.key) {
+        keyCell.innerHTML = '<span class="camelot-key camelot-' + data.key + '">' + data.key + '</span>';
+      }
+
+      if (keyCellMobile && data.key) {
+        keyCellMobile.innerHTML = '<span class="camelot-key camelot-' + data.key + '" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">' + data.key + '</span>';
+      }
+
+      row.querySelectorAll('.analyze-audio-btn').forEach(function(button) {
+        button.remove();
       });
+
+      if (analyzeCell) {
+        analyzeCell.innerHTML = getDesktopActionCellHtml({
+          id: songId,
+          needs_analysis: false,
+        });
+        var deleteBtn = analyzeCell.querySelector('.delete-song-btn');
+        if (deleteBtn) bindDeleteButton(deleteBtn);
+      }
+
+      if (row.hasAttribute('data-song-row')) {
+        var actionWrapper = row.querySelector('.d-flex.flex-column.gap-2.align-items-end');
+        if (actionWrapper) {
+          actionWrapper.innerHTML = getDeleteButtonHtml(songId, true);
+          var mobileDeleteBtn = actionWrapper.querySelector('.delete-song-btn');
+          if (mobileDeleteBtn) bindDeleteButton(mobileDeleteBtn);
+        }
+      }
+    });
+
+    if (!bulkAnalyzeRunning && !bulkAnalyzePaused) {
+      renderBulkAnalyzeButtons('idle');
+    }
+  }
+
+  function analyzeSong(songId) {
+    if (songAnalysisPromises[songId]) {
+      return songAnalysisPromises[songId];
+    }
+
+    setAnalyzeButtonsLoading(songId);
+
+    songAnalysisPromises[songId] = fetch(analyzeSongUrlTemplate.replace('0', songId), {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': activeForm.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      }
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      var data = result.data || {};
+      if (!result.ok || !data.success) {
+        throw new Error(data.error || 'No s\'ha pogut analitzar');
+      }
+
+      markSongAnalyzed(songId, data);
+      return data;
+    })
+    .catch(function(error) {
+      restoreAnalyzeButtons(songId);
+      showAnalyzeFailureState(songId, error.message);
+      throw error;
+    })
+    .finally(function() {
+      delete songAnalysisPromises[songId];
+    });
+
+    return songAnalysisPromises[songId];
+  }
+
+  function finishBulkAnalysis() {
+    renderBulkAnalyzeButtons('done');
+    resetBulkAnalyzeState();
+
+    setTimeout(function() {
+      renderBulkAnalyzeButtons('idle');
+    }, 2000);
+  }
+
+  function processNextBulkSong() {
+    if (!bulkAnalyzeRunning || bulkAnalyzePaused || bulkAnalyzeInFlight) {
+      renderBulkAnalyzeButtons(bulkAnalyzePaused ? 'paused' : 'running');
+      persistBulkAnalyzeState();
+      return;
+    }
+
+    var pendingSet = new Set(collectPendingAnalyzeSongIds());
+    while (bulkAnalyzeIndex < bulkAnalyzeQueue.length && !pendingSet.has(String(bulkAnalyzeQueue[bulkAnalyzeIndex]))) {
+      bulkAnalyzeIndex++;
+    }
+
+    if (bulkAnalyzeIndex >= bulkAnalyzeQueue.length) {
+      finishBulkAnalysis();
+      return;
+    }
+
+    var songId = bulkAnalyzeQueue[bulkAnalyzeIndex];
+    bulkAnalyzeInFlight = true;
+    renderBulkAnalyzeButtons('running');
+    persistBulkAnalyzeState();
+
+    analyzeSong(songId)
+      .catch(function(error) {
+        bulkAnalyzeErrors += 1;
+        console.error('Error bulk analitzant cançó ' + songId + ':', error);
+      })
+      .finally(function() {
+        bulkAnalyzeInFlight = false;
+        bulkAnalyzeIndex += 1;
+        persistBulkAnalyzeState();
+
+        if (bulkAnalyzeRunning && !bulkAnalyzePaused) {
+          processNextBulkSong();
+        } else {
+          renderBulkAnalyzeButtons(bulkAnalyzePaused ? 'paused' : 'idle');
+        }
+      });
+  }
+
+  function startOrToggleBulkAnalysis() {
+    if (bulkAnalyzeRunning && !bulkAnalyzePaused) {
+      bulkAnalyzePaused = true;
+      renderBulkAnalyzeButtons('paused');
+      persistBulkAnalyzeState();
+      return;
+    }
+
+    if (bulkAnalyzePaused) {
+      bulkAnalyzePaused = false;
+      bulkAnalyzeRunning = true;
+      renderBulkAnalyzeButtons('running');
+      persistBulkAnalyzeState();
+      processNextBulkSong();
+      return;
+    }
+
+    bulkAnalyzeQueue = collectPendingAnalyzeSongIds();
+    if (bulkAnalyzeQueue.length === 0) {
+      alert('No hi ha cançons pendents d\'analitzar!');
+      return;
+    }
+
+    bulkAnalyzeRunning = true;
+    bulkAnalyzePaused = false;
+    bulkAnalyzeInFlight = false;
+    bulkAnalyzeIndex = 0;
+    bulkAnalyzeErrors = 0;
+    renderBulkAnalyzeButtons('running');
+    persistBulkAnalyzeState();
+    processNextBulkSong();
+  }
+
+  function restoreBulkAnalyzeState() {
+    var savedStateRaw = localStorage.getItem(bulkAnalyzeStorageKey);
+    if (!savedStateRaw) {
+      renderBulkAnalyzeButtons('idle');
+      return;
+    }
+
+    try {
+      var savedState = JSON.parse(savedStateRaw);
+      var pendingSet = new Set(collectPendingAnalyzeSongIds());
+      var remainingQueue = (savedState.queue || []).slice(savedState.index || 0).filter(function(songId) {
+        return pendingSet.has(String(songId));
+      });
+
+      if (!remainingQueue.length) {
+        resetBulkAnalyzeState();
+        renderBulkAnalyzeButtons('idle');
+        return;
+      }
+
+      bulkAnalyzeQueue = remainingQueue;
+      bulkAnalyzeIndex = 0;
+      bulkAnalyzeErrors = savedState.errors || 0;
+      bulkAnalyzeRunning = !!savedState.running;
+      bulkAnalyzePaused = !!savedState.paused;
+      bulkAnalyzeInFlight = false;
+
+      renderBulkAnalyzeButtons(bulkAnalyzePaused ? 'paused' : 'running');
+      persistBulkAnalyzeState();
+
+      if (bulkAnalyzeRunning && !bulkAnalyzePaused) {
+        processNextBulkSong();
+      }
+    } catch (error) {
+      console.error('No s\'ha pogut restaurar l\'estat del bulk analysis:', error);
+      resetBulkAnalyzeState();
+      renderBulkAnalyzeButtons('idle');
+    }
+  }
+
+  function bindAnalyzeButton(btn) {
+    if (!btn || btn.dataset.bound === '1') {
+      return;
+    }
+
+    if (!btn.dataset.originalHtml) {
+      btn.dataset.originalHtml = btn.innerHTML;
+    }
+    btn.dataset.bound = '1';
+
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var songId = this.dataset.songId;
+
+      analyzeSong(songId)
+        .catch(function(error) {
+          console.error('Error:', error);
+        });
+    });
+  }
+
+  document.querySelectorAll('.analyze-audio-btn').forEach(bindAnalyzeButton);
+
+  function bindDeleteButton(btn) {
+    if (!btn || btn.dataset.bound === '1') {
+      return;
+    }
+
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var button = this;
+      var songId = button.dataset.songId;
+      var originalHtml = button.innerHTML;
+
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      deleteSong(songId)
+        .catch(function(error) {
+          console.error('Error eliminant cançó:', error);
+          button.disabled = false;
+          button.innerHTML = originalHtml;
+        });
+    });
+  }
+
+  document.querySelectorAll('.delete-song-btn').forEach(bindDeleteButton);
+
+  bulkAnalyzeButtons.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      startOrToggleBulkAnalysis();
+    });
+  });
+
+  restoreBulkAnalyzeState();
+});
+</script>
+
+{% if has_spotify and spotify_token %}
+<!-- Spotify Web Playback SDK -->
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+// Spotify Web Playback SDK Variables
+let spotifyPlayer = null;
+let spotifyDeviceId = null;
+let currentPlayingSpotifyId = null;
+let isCurrentlyPlaying = false;
+const SPOTIFY_TOKEN = '{{ spotify_token }}';
+
+// Initialize Spotify Player
+window.onSpotifyWebPlaybackSDKReady = () => {
+  spotifyPlayer = new Spotify.Player({
+    name: 'DJ Jukebox Web Player',
+    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+    volume: 0.7
+  });
+
+  // Ready
+  spotifyPlayer.addListener('ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Player ready with Device ID:', device_id);
+    spotifyDeviceId = device_id;
+  });
+
+  // Not Ready
+  spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+    console.log('[SPOTIFY] Device ID has gone offline:', device_id);
+  });
+
+  // Player state changed
+  spotifyPlayer.addListener('player_state_changed', state => {
+    if (!state) {
+      currentPlayingSpotifyId = null;
+      isCurrentlyPlaying = false;
+      return;
+    }
+
+    const isPlaying = !state.paused;
+    const track_id = state.track_window.current_track.id;
+
+    console.log('[SPOTIFY] State changed:', { track_id, isPlaying });
+
+    // Update global state
+    currentPlayingSpotifyId = track_id;
+    isCurrentlyPlaying = isPlaying;
+
+    // Update ALL button icons and overlays
+    document.querySelectorAll('.spotify-play-btn').forEach(btn => {
+      const btnSpotifyId = btn.dataset.spotifyId;
+      const icon = btn.querySelector('i');
+      const overlay = btn.closest('.play-overlay');
+
+      if (btnSpotifyId === track_id) {
+        // This is the current track
+        if (isPlaying) {
+          // Currently playing
+          icon.classList.remove('fa-play');
+          icon.classList.add('fa-pause');
+          if (overlay) overlay.classList.add('is-playing');
+        } else {
+          // Current track but paused
+          icon.classList.remove('fa-pause');
+          icon.classList.add('fa-play');
+          if (overlay) overlay.classList.add('is-playing');
+        }
+      } else {
+        // Different track - reset to play
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+        if (overlay) overlay.classList.remove('is-playing');
+      }
+    });
+  });
+
+  // Connect to the player
+  spotifyPlayer.connect().then(success => {
+    if (success) {
+      console.log('[SPOTIFY] Connected successfully');
+    }
+  });
+};
+
+// Function to play a track using Spotify SDK
+function playSpotifyTrack(spotifyId) {
+  if (!spotifyPlayer || !spotifyDeviceId) {
+    console.error('[SPOTIFY] Player not ready');
+    alert('El reproductor de Spotify no està llest. Espera uns segons...');
+    return;
+  }
+
+  fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SPOTIFY_TOKEN}`
+    },
+  }).then(response => {
+    if (response.ok) {
+      console.log('[SPOTIFY] Playing track:', spotifyId);
+    } else if (response.status === 403) {
+      console.error('[SPOTIFY] Premium required');
+      alert('Necessites Spotify Premium per reproduir cançons completes');
+    } else if (response.status === 401) {
+      console.error('[SPOTIFY] Unauthorized');
+      alert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.');
+    } else {
+      console.error('[SPOTIFY] Error playing track:', response.status);
+      alert('Error reproduint la cançó. Torna-ho a provar.');
+    }
+  });
+}
+
+// Setup play button and overlay listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Play button clicks
+  document.querySelectorAll('.spotify-play-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const spotifyId = this.dataset.spotifyId;
+
+      if (currentPlayingSpotifyId === spotifyId) {
+        // Same track - toggle play/pause
+        if (isCurrentlyPlaying) {
+          // Currently playing, so pause
+          console.log('[SPOTIFY] Pausing track');
+          spotifyPlayer.pause().then(() => {
+            console.log('[SPOTIFY] Paused successfully');
+          }).catch(err => {
+            console.error('[SPOTIFY] Error pausing:', err);
+          });
+        } else {
+          // Currently paused, so resume
+          console.log('[SPOTIFY] Resuming track');
+          spotifyPlayer.resume().then(() => {
+            console.log('[SPOTIFY] Resumed successfully');
+          }).catch(err => {
+            console.error('[SPOTIFY] Error resuming:', err);
+          });
+        }
+      } else {
+        // Different track - play it
+        console.log('[SPOTIFY] Playing new track:', spotifyId);
+        playSpotifyTrack(spotifyId);
+      }
+    });
+  });
+
+  // Overlay clicks
+  document.querySelectorAll('.play-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const btn = this.querySelector('.spotify-play-btn');
+      if (btn) {
+        btn.click();
+      }
     });
   });
 });
 </script>
+{% endif %}
 {% endblock %}

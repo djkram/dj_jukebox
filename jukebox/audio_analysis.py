@@ -3,11 +3,12 @@ Anàlisi d'àudio local per detectar BPM i Key utilitzant librosa.
 Utilitzat com a fallback quan les APIs de Spotify/GetSongBPM no tenen dades.
 """
 import os
+import shutil
 import tempfile
 import logging
-import requests
 import librosa
 import numpy as np
+from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
 
@@ -47,34 +48,47 @@ CAMELOT_MAP = {
 }
 
 
-def download_audio_preview(preview_url, timeout=30):
+def download_temporary_song_audio(title, artist, timeout=60):
     """
-    Descarrega el preview d'àudio de Spotify a un fitxer temporal.
+    Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
-    Args:
-        preview_url: URL del preview MP3 (30 segons)
-        timeout: Temps màxim d'espera en segons
-
-    Returns:
-        Path al fitxer temporal descarregat
+    Es fa servir com a últim recurs per obtenir un MP3 temporal analitzable
+    amb librosa quan no tenim BPM/Key per via metadata.
     """
+    search_query = f"ytsearch1:{title} {artist} audio"
+    temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
+    output_template = os.path.join(temp_dir, "audio.%(ext)s")
+
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "noplaylist": True,
+        "quiet": True,
+        "no_warnings": True,
+        "outtmpl": output_template,
+        "default_search": "ytsearch1",
+        "socket_timeout": timeout,
+        "nopart": True,
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
+    }
+
     try:
-        response = requests.get(preview_url, timeout=timeout, stream=True)
-        response.raise_for_status()
+        logger.info(f"[AUDIO_ANALYSIS] Buscant àudio temporal per '{title}' - '{artist}'")
+        with YoutubeDL(ydl_opts) as ydl:
+            ydl.extract_info(search_query, download=True)
 
-        # Crear fitxer temporal
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+        for filename in os.listdir(temp_dir):
+            if filename.endswith(".mp3"):
+                temp_path = os.path.join(temp_dir, filename)
+                logger.info(f"[AUDIO_ANALYSIS] MP3 temporal descarregat: {temp_path}")
+                return temp_path, temp_dir
 
-        # Descarregar en chunks
-        for chunk in response.iter_content(chunk_size=8192):
-            temp_file.write(chunk)
-
-        temp_file.close()
-        logger.info(f"[AUDIO_ANALYSIS] Preview descarregat: {temp_file.name}")
-        return temp_file.name
-
-    except Exception as e:
-        logger.error(f"[AUDIO_ANALYSIS] Error descarregant preview: {e}")
+        raise RuntimeError("No s'ha generat cap MP3 temporal")
+    except Exception:
+        shutil.rmtree(temp_dir, ignore_errors=True)
         raise
 
 
@@ -89,8 +103,8 @@ def detect_bpm(audio_path):
         BPM detectat (float)
     """
     try:
-        # Carregar àudio (només els primers 30s per estalviar memòria)
-        y, sr = librosa.load(audio_path, duration=30, sr=22050)
+        # Carregar àudio (només els primers 45s per estalviar memòria)
+        y, sr = librosa.load(audio_path, duration=45, sr=22050)
 
         # Detectar tempo amb onset strength
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
@@ -122,7 +136,7 @@ def detect_key(audio_path):
     """
     try:
         # Carregar àudio
-        y, sr = librosa.load(audio_path, duration=30, sr=22050)
+        y, sr = librosa.load(audio_path, duration=45, sr=22050)
 
         # Extreure chroma features (12 pitch classes)
         chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
@@ -217,36 +231,27 @@ def analyze_audio_file(audio_path):
         raise
 
 
-def analyze_spotify_preview(preview_url):
+def analyze_song_from_temporary_mp3(title, artist):
     """
-    Analitza un preview de Spotify: descarrega, analitza i neteja.
-
-    Args:
-        preview_url: URL del preview MP3 de Spotify
-
-    Returns:
-        Dict amb 'bpm' i 'key' o None si falla
+    Cerca, descarrega, analitza i esborra un MP3 temporal d'una cançó.
     """
     temp_file = None
+    temp_dir = None
     try:
-        # Descarregar preview
-        temp_file = download_audio_preview(preview_url)
-
-        # Analitzar
+        temp_file, temp_dir = download_temporary_song_audio(title, artist)
         result = analyze_audio_file(temp_file)
-
-        logger.info(f"[AUDIO_ANALYSIS] Anàlisi completat: BPM={result['bpm']}, Key={result['key']}")
+        logger.info(
+            f"[AUDIO_ANALYSIS] Anàlisi completat per '{title}' - '{artist}': "
+            f"BPM={result['bpm']}, Key={result['key']}"
+        )
         return result
-
     except Exception as e:
-        logger.error(f"[AUDIO_ANALYSIS] Error analitzant preview: {e}")
+        logger.error(f"[AUDIO_ANALYSIS] Error analitzant àudio temporal: {e}")
         return None
-
     finally:
-        # Netejar fitxer temporal
-        if temp_file and os.path.exists(temp_file):
+        if temp_dir and os.path.exists(temp_dir):
             try:
-                os.unlink(temp_file)
-                logger.debug(f"[AUDIO_ANALYSIS] Fitxer temporal eliminat: {temp_file}")
+                shutil.rmtree(temp_dir, ignore_errors=True)
+                logger.debug(f"[AUDIO_ANALYSIS] Directori temporal eliminat: {temp_dir}")
             except Exception as e:
-                logger.warning(f"[AUDIO_ANALYSIS] No s'ha pogut eliminar temporal: {e}")
+                logger.warning(f"[AUDIO_ANALYSIS] No s'ha pogut eliminar el temporal: {e}")

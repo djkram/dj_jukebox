@@ -7,6 +7,29 @@
 <!-- Vista Desktop (ORIGINAL) -->
 <div class="d-none d-md-block">
 <style>
+  /* Camelot Key Colors */
+  .camelot-key {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .camelot-1A, .camelot-1B { background-color: #FF6B35; } /* Orange */
+  .camelot-2A, .camelot-2B { background-color: #FFA500; } /* Dark Orange */
+  .camelot-3A, .camelot-3B { background-color: #FFD700; color: #333; } /* Yellow */
+  .camelot-4A, .camelot-4B { background-color: #90EE90; color: #333; } /* Light Green */
+  .camelot-5A, .camelot-5B { background-color: #32CD32; } /* Green */
+  .camelot-6A, .camelot-6B { background-color: #00CED1; } /* Cyan */
+  .camelot-7A, .camelot-7B { background-color: #4682B4; } /* Steel Blue */
+  .camelot-8A, .camelot-8B { background-color: #4169E1; } /* Royal Blue */
+  .camelot-9A, .camelot-9B { background-color: #9370DB; } /* Purple */
+  .camelot-10A, .camelot-10B { background-color: #FF69B4; } /* Pink */
+  .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
+  .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
+
   .dj-song-cell {
     display: flex;
     align-items: center;
@@ -51,33 +74,42 @@
   .desktop-reco-card {
     background: #fff;
     border-radius: 1rem;
-    padding: .75rem;
+    padding: .55rem;
     box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
     height: 100%;
-  }
-  .desktop-reco-cover {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: .8rem;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
-  }
-  .desktop-request-row {
     display: flex;
     align-items: center;
-    gap: .85rem;
-    padding: .85rem 1rem;
-    border-bottom: 1px solid rgba(78, 115, 223, .08);
+    gap: .7rem;
   }
-  .desktop-request-row:last-child {
-    border-bottom: 0;
+  .desktop-reco-cover {
+    width: 74px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: .65rem;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
+    flex-shrink: 0;
+  }
+  .desktop-reco-body {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .desktop-request-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: .55rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
   }
   .desktop-request-cover {
-    width: 52px;
-    height: 52px;
-    border-radius: .85rem;
+    width: 74px;
+    height: 74px;
+    border-radius: .65rem;
     object-fit: cover;
     flex-shrink: 0;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
   }
   .desktop-request-meta {
     min-width: 0;
@@ -86,13 +118,13 @@
   .desktop-request-title {
     color: #374151;
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: .15rem;
+    line-height: 1.05;
+    margin-bottom: 0;
   }
   .desktop-request-subtitle {
     color: #8a93a6;
-    font-size: .88rem;
-    line-height: 1.2;
+    font-size: .78rem;
+    line-height: 1.05;
   }
 </style>
 <div class="row mb-4">
@@ -150,28 +182,30 @@
                     <div class="col-4">
                         <div class="desktop-reco-card">
                             {% if song.album_image_url %}
-                                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="desktop-reco-cover mb-2">
+                                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="desktop-reco-cover">
                             {% else %}
-                                <div class="bg-secondary d-flex align-items-center justify-content-center desktop-reco-cover mb-2">
+                                <div class="bg-secondary d-flex align-items-center justify-content-center desktop-reco-cover">
                                     <i class="fas fa-music text-white fa-lg"></i>
                                 </div>
                             {% endif %}
-                            <div class="fw-bold small" style="line-height: 1.15; min-height: 2.1rem;" title="{{ song.title }}">{{ song.title }}</div>
-                            <div class="text-muted small mb-2 text-truncate" title="{{ song.artist }}">{{ song.artist }}</div>
-                            <div class="d-flex align-items-center gap-1 flex-wrap mb-2">
-                                {% if song.bpm %}
-                                    <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
-                                {% endif %}
-                                {% if song.key %}
-                                    <span class="badge bg-success text-white small">{{ song.key }}</span>
-                                {% endif %}
+                            <div class="desktop-reco-body">
+                                <div class="fw-bold small mb-0 text-truncate" style="line-height: 1.05;" title="{{ song.title }}">{{ song.title }}</div>
+                                <div class="text-muted small mb-1 text-truncate" style="font-size: .78rem; line-height: 1.05;" title="{{ song.artist }}">{{ song.artist }}</div>
+                                <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
+                                    {% if song.bpm %}
+                                        <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
+                                    {% endif %}
+                                    {% if song.key %}
+                                        <span class="camelot-key camelot-{{ song.key }} small">{{ song.key }}</span>
+                                    {% endif %}
+                                </div>
+                                <form method="post" action="{% url 'mark_song_played' song.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success w-100 py-1" style="font-size: .88rem; line-height: 1.1;">
+                                        <i class="fas fa-compact-disc me-1"></i>Posada
+                                    </button>
+                                </form>
                             </div>
-                            <form method="post" action="{% url 'mark_song_played' song.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                    <i class="fas fa-play me-1"></i>Ja l'he posat
-                                </button>
-                            </form>
                         </div>
                     </div>
                     {% endfor %}
@@ -193,25 +227,81 @@
                     <i class="fas fa-microphone-alt me-2 text-primary"></i>Temes demanats
                 </h6>
             </div>
-            <div class="card-body p-0">
-                {% if pending_requests %}
+            <div class="card-body">
+                {% if pending_requests or accepted_unplayed_requests %}
+                    <div class="row g-3">
+                    {% if pending_requests %}
                     {% for req in pending_requests %}
-                    <div class="desktop-request-row">
-                        {% if req.album_image_url %}
-                            <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
-                        {% else %}
-                            <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 52px; height: 52px;">
-                                <i class="fas fa-music"></i>
+                    <div class="col-4">
+                        <div class="desktop-request-card">
+                            {% if req.album_image_url %}
+                                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
+                            {% else %}
+                                <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 74px; height: 74px; border-radius: .65rem;">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            {% endif %}
+                            <div class="desktop-request-meta">
+                                <div class="desktop-request-title small text-truncate">{{ req.title }}</div>
+                                <div class="desktop-request-subtitle text-truncate">{{ req.artist }}</div>
+                                <div class="desktop-request-subtitle mb-1 text-truncate">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                                        <input type="hidden" name="action" value="accept">
+                                        <button type="submit" class="btn btn-sm btn-warning w-100 py-1" title="Acceptar">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 py-1" title="Rebutjar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        {% endif %}
-                        <div class="desktop-request-meta">
-                            <div class="desktop-request-title">{{ req.title }}</div>
-                            <div class="desktop-request-subtitle">{{ req.artist }}</div>
-                            <div class="desktop-request-subtitle mt-1">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
                         </div>
-                        <span class="badge bg-warning text-dark">Pendent</span>
                     </div>
                     {% endfor %}
+                    {% endif %}
+
+                    {% if accepted_unplayed_requests %}
+                    {% for req in accepted_unplayed_requests %}
+                    <div class="col-4">
+                        <div class="desktop-request-card">
+                            {% if req.album_image_url %}
+                                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
+                            {% else %}
+                                <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 74px; height: 74px; border-radius: .65rem;">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            {% endif %}
+                            <div class="desktop-request-meta">
+                                <div class="desktop-request-title small text-truncate">{{ req.title }}</div>
+                                <div class="desktop-request-subtitle text-truncate">{{ req.artist }}</div>
+                                <div class="desktop-request-subtitle mb-1 text-truncate">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
+                                {% if req.linked_song_id %}
+                                <form method="post" action="{% url 'mark_song_played' req.linked_song_id %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success w-100 py-1" title="Posada">
+                                        <i class="fas fa-compact-disc"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-success w-100 py-1 mt-2" disabled title="Acceptada">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    </div>
                 {% else %}
                     <div class="text-center py-5 text-muted">
                         <i class="fas fa-inbox fa-2x mb-2"></i>
@@ -268,7 +358,13 @@
                                     &mdash;
                                   {% endif %}
                                 </td>
-                                <td>{{ song.key|default:"—" }}</td>
+                                <td>
+                                  {% if song.key %}
+                                    <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                                  {% else %}
+                                    —
+                                  {% endif %}
+                                </td>
                                 <td>
                                     <span class="badge badge-primary">{{ song.num_votes }}</span>
                                 </td>
@@ -276,7 +372,7 @@
                                     <form method="post" action="{% url 'mark_song_played' song.id %}">
                                         {% csrf_token %}
                                         <button class="btn btn-sm btn-success">
-                                          <i class="fas fa-play me-1"></i>Ja l'he posat
+                                          <i class="fas fa-compact-disc me-1"></i>Posada
                                         </button>
                                     </form>
                                 </td>
@@ -339,7 +435,13 @@
                                     &mdash;
                                   {% endif %}
                                 </td>
-                                <td>{{ song.key|default:"—" }}</td>
+                                <td>
+                                  {% if song.key %}
+                                    <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                                  {% else %}
+                                    —
+                                  {% endif %}
+                                </td>
                                 <td>
                                     <span class="badge badge-success">{{ song.num_votes }}</span>
                                 </td>
@@ -477,6 +579,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% if song.bpm %}
                   <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
                 {% endif %}
+                {% if song.key %}
+                  <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
+                {% endif %}
               </div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
@@ -486,8 +591,8 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
               <form method="post" action="{% url 'mark_song_played' song.id %}" class="m-0">
                 {% csrf_token %}
-                <button type="submit" class="border-0 d-inline-flex align-items-center justify-content-center" aria-label="Ja l'he posat" style="width: 2.25rem; height: 2.25rem; border-radius: 10px; background: white; color: #1cc88a; box-shadow: inset 0 0 0 1.5px rgba(28, 200, 138, 0.45);">
-                  <i class="far fa-check-circle" style="font-size: 1rem;"></i>
+                <button type="submit" class="border-0 d-inline-flex align-items-center justify-content-center" aria-label="Posada" style="width: 2.25rem; height: 2.25rem; border-radius: 10px; background: white; color: #1cc88a; box-shadow: inset 0 0 0 1.5px rgba(28, 200, 138, 0.45);">
+                  <i class="fas fa-compact-disc" style="font-size: 0.95rem;"></i>
                 </button>
               </form>
             </div>
@@ -518,6 +623,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
                 {% if song.bpm %}
                   <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
+                {% endif %}
+                {% if song.key %}
+                  <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
                 {% endif %}
               </div>
             </div>

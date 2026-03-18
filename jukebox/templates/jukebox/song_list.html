@@ -23,6 +23,29 @@
     transition: transform 0.2s;
   }
 
+  /* Camelot Key Colors */
+  .camelot-key {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .camelot-1A, .camelot-1B { background-color: #FF6B35; } /* Orange */
+  .camelot-2A, .camelot-2B { background-color: #FFA500; } /* Dark Orange */
+  .camelot-3A, .camelot-3B { background-color: #FFD700; color: #333; } /* Yellow */
+  .camelot-4A, .camelot-4B { background-color: #90EE90; color: #333; } /* Light Green */
+  .camelot-5A, .camelot-5B { background-color: #32CD32; } /* Green */
+  .camelot-6A, .camelot-6B { background-color: #00CED1; } /* Cyan */
+  .camelot-7A, .camelot-7B { background-color: #4682B4; } /* Steel Blue */
+  .camelot-8A, .camelot-8B { background-color: #4169E1; } /* Royal Blue */
+  .camelot-9A, .camelot-9B { background-color: #9370DB; } /* Purple */
+  .camelot-10A, .camelot-10B { background-color: #FF69B4; } /* Pink */
+  .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
+  .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
+
   /* Mobile: mostrar play overlay sempre visible */
   @media (max-width: 767.98px) {
     .play-overlay {
@@ -145,6 +168,8 @@
                     <th style="width: 80px;"></th>
                     <th>Títol</th>
                     <th>Artista</th>
+                    <th>BPM</th>
+                    <th>Key</th>
                     <th class="text-center">Vots</th>
                     <th class="text-center">Acció</th>
                   </tr>
@@ -178,6 +203,20 @@
                       </td>
                       <td>{{ song.title }}</td>
                       <td>{{ song.artist }}</td>
+                      <td>
+                        {% if song.bpm %}
+                          {{ song.bpm|floatformat:0 }}
+                        {% else %}
+                          <span class="text-muted">-</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if song.key %}
+                          <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                        {% else %}
+                          <span class="text-muted">-</span>
+                        {% endif %}
+                      </td>
                       <td class="text-center">{{ song.num_votes }}</td>
                       <td class="text-center">
                         {% if user_votes_dict|get_item:song.id %}
@@ -201,7 +240,7 @@
                     </tr>
                   {% empty %}
                     <tr>
-                      <td colspan="5" class="text-center py-4 text-muted">No queden temes pendents.</td>
+                      <td colspan="7" class="text-center py-4 text-muted">No queden temes pendents.</td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -224,6 +263,8 @@
                     <th style="width: 80px;"></th>
                     <th>Títol</th>
                     <th>Artista</th>
+                    <th>BPM</th>
+                    <th>Key</th>
                     <th class="text-center">Vots</th>
                   </tr>
                 </thead>
@@ -256,11 +297,25 @@
                       </td>
                       <td>{{ song.title }}</td>
                       <td>{{ song.artist }}</td>
+                      <td>
+                        {% if song.bpm %}
+                          {{ song.bpm|floatformat:0 }}
+                        {% else %}
+                          <span class="text-muted">-</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if song.key %}
+                          <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                        {% else %}
+                          <span class="text-muted">-</span>
+                        {% endif %}
+                      </td>
                       <td class="text-center">{{ song.num_votes }}</td>
                     </tr>
                   {% empty %}
                     <tr>
-                      <td colspan="4" class="text-center py-4 text-muted">Encara no ha començat la festa.</td>
+                      <td colspan="6" class="text-center py-4 text-muted">Encara no ha començat la festa.</td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -375,6 +430,9 @@
                     {% if song.bpm %}
                       <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
                     {% endif %}
+                    {% if song.key %}
+                      <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
+                    {% endif %}
                   </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
@@ -442,6 +500,9 @@
                     <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
                     {% if song.bpm %}
                       <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
+                    {% endif %}
+                    {% if song.key %}
+                      <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
                     {% endif %}
                   </div>
                 </div>

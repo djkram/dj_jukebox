@@ -12,7 +12,7 @@ from django.conf import settings
 from django.urls import reverse
 from urllib.parse import urlencode
 
-from .models import Song, Party, Vote, VotePackage, SongRequest, Notification
+from .models import Song, Party, Playlist, Vote, VotePackage, SongRequest, Notification
 from django.db.models import Sum, Count, Q
 from .forms import PartyForm, PartySettingsForm
 from .notifications import (
@@ -22,6 +22,9 @@ from .notifications import (
 )
 from .spotify_api import (
     SpotifyAuthError,
+    _get_getsongbpm_features,
+    add_track_to_playlist,
+    remove_track_from_playlist,
     get_user_playlists,
     get_playlist_tracks,
     get_playlist_tracks_basic,
@@ -30,7 +33,7 @@ from .spotify_api import (
 )
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
-from .audio_analysis import analyze_spotify_preview
+from .audio_analysis import analyze_song_from_temporary_mp3
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -140,6 +143,9 @@ def party_settings(request, party_id):
     songs = party.songs.annotate(
         num_votes=Count('vote')
     ).order_by('-num_votes', 'title')
+    pending_analysis_count = songs.filter(
+        Q(bpm__isnull=True) | Q(key__isnull=True)
+    ).count()
 
     # Només carreguem playlists de Spotify si NO n'hi ha i hem pitjat el botó
     playlists = None
@@ -150,12 +156,24 @@ def party_settings(request, party_id):
         except SpotifyAuthError:
             return redirect(_spotify_reconnect_url(request))
 
+    # Obtenir token de Spotify per Web Playback SDK
+    spotify_token = None
+    if has_spotify:
+        from .spotify_api import _ensure_valid_user_token
+        try:
+            spotify_token = _ensure_valid_user_token(request.user)
+        except Exception as e:
+            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
+            has_spotify = False
+
     return render(request, 'jukebox/party_settings.html', {
         'party':     party,
         'form':      form,
         'songs':     songs,
+        'pending_analysis_count': pending_analysis_count,
         'playlists': playlists,
         'has_spotify': has_spotify,
+        'spotify_token': spotify_token,
         'only_owned': only_owned,
     })
 
@@ -173,10 +191,56 @@ def remove_playlist(request, party_id):
 
 @login_required
 @require_POST
+def assign_party_playlist(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+    spotify_playlist_id = request.POST.get('spotify_playlist_id', '').strip()
+
+    if not spotify_playlist_id:
+        return JsonResponse({'error': 'No s\'ha seleccionat cap playlist.'}, status=400)
+
+    try:
+        playlists = get_user_playlists(request)
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
+
+    playlist_data = next((pl for pl in playlists if pl['id'] == spotify_playlist_id), None)
+    if not playlist_data:
+        return JsonResponse({'error': 'No s\'ha trobat aquesta playlist a Spotify.'}, status=404)
+
+    playlist_obj, _ = Playlist.objects.get_or_create(
+        spotify_id=spotify_playlist_id,
+        defaults={
+            'name': playlist_data['name'],
+            'owner': playlist_data['owner'],
+        }
+    )
+    playlist_obj.name = playlist_data['name']
+    playlist_obj.owner = playlist_data['owner']
+    playlist_obj.save(update_fields=['name', 'owner'])
+
+    party.playlist = playlist_obj
+    party.save(update_fields=['playlist'])
+
+    return JsonResponse({
+        'success': True,
+        'playlist': {
+            'id': playlist_obj.spotify_id,
+            'name': playlist_obj.name,
+            'owner': playlist_obj.owner,
+        }
+    })
+
+
+@login_required
+@require_POST
 def process_playlist_songs(request, party_id):
     """
-    Processa les cançons d'una playlist de manera ràpida (només metadata bàsica).
-    El BPM i clau musical es processaran després amb process_song_features.
+    Sincronitza les cançons d'una playlist de Spotify amb la DB.
+    Afegeix noves cançons i elimina les que ja no estan a la playlist.
+    NO processa BPM ni clau musical automàticament.
     """
     from .models import Playlist
 
@@ -189,28 +253,57 @@ def process_playlist_songs(request, party_id):
     try:
         # Obtenir les cançons de Spotify (ràpid, només metadata)
         tracks = get_playlist_tracks_basic(request, spotify_playlist_id)
-        total = len(tracks)
 
-        # Esborrar cançons antigues
-        party.songs.all().delete()
+        # Crear un set amb els spotify_ids de la playlist actual
+        spotify_ids_in_playlist = {tr['id'] for tr in tracks}
 
-        # Crear les cançons (sense BPM/clau de moment)
+        # Obtenir les cançons existents a la DB
+        existing_songs = party.songs.all()
+        existing_spotify_ids = {song.spotify_id for song in existing_songs}
+
+        # Identificar cançons a afegir (noves a la playlist)
+        new_spotify_ids = spotify_ids_in_playlist - existing_spotify_ids
+
+        # Identificar cançons a eliminar (ja no estan a la playlist)
+        removed_spotify_ids = existing_spotify_ids - spotify_ids_in_playlist
+
+        # Eliminar cançons que ja no estan a la playlist
+        if removed_spotify_ids:
+            party.songs.filter(spotify_id__in=removed_spotify_ids).delete()
+
+        # Afegir noves cançons
+        new_songs_count = 0
         for tr in tracks:
-            Song.objects.create(
-                party=party,
-                title=tr['title'],
-                artist=tr['artist'],
-                spotify_id=tr['id'],
-                album_image_url=tr.get('album_image_url'),
-                preview_url=tr.get('preview_url'),
-                bpm=None,
-                key=None,
-            )
+            if tr['id'] in new_spotify_ids:
+                Song.objects.create(
+                    party=party,
+                    title=tr['title'],
+                    artist=tr['artist'],
+                    spotify_id=tr['id'],
+                    album_image_url=tr.get('album_image_url'),
+                    preview_url=tr.get('preview_url'),
+                    bpm=None,
+                    key=None,
+                )
+                new_songs_count += 1
+
+        # Preparar missatge informatiu
+        message_parts = []
+        if new_songs_count > 0:
+            message_parts.append(f'{new_songs_count} cançons noves afegides')
+        if removed_spotify_ids:
+            message_parts.append(f'{len(removed_spotify_ids)} cançons eliminades')
+        if not message_parts:
+            message_parts.append('Playlist sincronitzada (sense canvis)')
+
+        message = '. '.join(message_parts) + '.'
 
         return JsonResponse({
             'success': True,
-            'total': total,
-            'message': f'{total} cançons carregades. Processant BPM i clau musical...'
+            'total': len(tracks),
+            'new_songs': new_songs_count,
+            'removed_songs': len(removed_spotify_ids),
+            'message': message
         })
     except SpotifyAuthError:
         return JsonResponse({
@@ -222,6 +315,132 @@ def process_playlist_songs(request, party_id):
         return JsonResponse({
             'error': str(e)
         }, status=500)
+
+
+@login_required
+def party_settings_search_tracks(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+    query = request.GET.get('search', '').strip()
+
+    if not query:
+        return JsonResponse({'tracks': []})
+
+    try:
+        tracks = search_spotify_tracks(request, query, limit=12)
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per buscar cançons.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
+
+    existing_ids = set(party.songs.values_list('spotify_id', flat=True))
+    serialized_tracks = []
+    for track in tracks:
+        serialized_tracks.append({
+            **track,
+            'already_in_party': track['id'] in existing_ids,
+        })
+
+    return JsonResponse({'tracks': serialized_tracks})
+
+
+@login_required
+@require_POST
+def add_track_to_party_playlist(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+
+    if not party.playlist:
+        return JsonResponse({'error': 'La festa encara no té una playlist assignada.'}, status=400)
+
+    spotify_id = request.POST.get('spotify_id', '').strip()
+    title = request.POST.get('title', '').strip()
+    artist = request.POST.get('artist', '').strip()
+    album_image_url = request.POST.get('album_image_url', '').strip()
+
+    if not spotify_id or not title or not artist:
+        return JsonResponse({'error': 'Falten dades de la cançó.'}, status=400)
+
+    if party.songs.filter(spotify_id=spotify_id).exists():
+        return JsonResponse({'error': 'Aquesta cançó ja és a la playlist de la festa.'}, status=400)
+
+    try:
+        add_track_to_playlist(request, party.playlist.spotify_id, spotify_id)
+
+        features = get_audio_features_for_songs(request, [{
+            'id': spotify_id,
+            'title': title,
+            'artist': artist,
+        }]).get(spotify_id, {})
+
+        song = Song.objects.create(
+            party=party,
+            title=title,
+            artist=artist,
+            spotify_id=spotify_id,
+            album_image_url=album_image_url or None,
+            bpm=features.get('bpm'),
+            key=features.get('key'),
+        )
+
+        pending_analysis_count = party.songs.filter(
+            Q(bpm__isnull=True) | Q(key__isnull=True)
+        ).count()
+
+        return JsonResponse({
+            'success': True,
+            'song': {
+                'id': song.id,
+                'title': song.title,
+                'artist': song.artist,
+                'spotify_id': song.spotify_id,
+                'album_image_url': song.album_image_url,
+                'bpm': round(song.bpm) if song.bpm else None,
+                'key': song.key,
+                'num_votes': 0,
+                'needs_analysis': not song.bpm or not song.key,
+            },
+            'pending_analysis_count': pending_analysis_count,
+            'message': 'Cançó afegida a la playlist de Spotify i a la llista de la festa.',
+        })
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
+    except Exception as e:
+        logger.error(f"[PLAYLIST_ADD] Error afegint cançó a la festa {party_id}: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def delete_song_from_party_playlist(request, party_id, song_id):
+    party = get_object_or_404(Party, pk=party_id)
+    song = get_object_or_404(Song, pk=song_id, party=party)
+
+    try:
+        if party.playlist and song.spotify_id:
+            remove_track_from_playlist(request, party.playlist.spotify_id, song.spotify_id)
+
+        song.delete()
+
+        pending_analysis_count = party.songs.filter(
+            Q(bpm__isnull=True) | Q(key__isnull=True)
+        ).count()
+
+        return JsonResponse({
+            'success': True,
+            'pending_analysis_count': pending_analysis_count,
+            'message': 'Cançó eliminada de la playlist i de la festa.',
+        })
+    except SpotifyAuthError:
+        return JsonResponse({
+            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'reconnect_url': _spotify_reconnect_url(request),
+        }, status=401)
+    except Exception as e:
+        logger.error(f"[PLAYLIST_DELETE] Error eliminant cançó {song_id} de la festa {party_id}: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required
@@ -298,28 +517,37 @@ def process_song_features(request, party_id):
 @require_POST
 def analyze_song_audio(request, party_id, song_id):
     """
-    Analitza l'àudio d'una cançó utilitzant librosa per detectar BPM i Key.
-    Utilitzat com a fallback quan les APIs no tenen dades.
+    Intenta obtenir BPM i Key via GetSongBPM i, si no n'hi ha prou,
+    fa fallback a un MP3 temporal analitzat amb librosa.
     """
     party = get_object_or_404(Party, pk=party_id)
     song = get_object_or_404(Song, pk=song_id, party=party)
 
-    # Verificar que té preview URL
-    if not song.preview_url:
-        return JsonResponse({
-            'success': False,
-            'error': 'Aquesta cançó no té preview disponible per analitzar'
-        }, status=400)
-
     try:
-        # Analitzar àudio amb librosa
         logger.info(f"[ANALYZE_AUDIO] Analitzant cançó: {song.title} - {song.artist}")
-        result = analyze_spotify_preview(song.preview_url)
+        source = "getsongbpm"
+        result = _get_getsongbpm_features(song.title, song.artist)
 
-        if not result:
+        if not result or not result.get('bpm') or not result.get('key'):
+            logger.info(
+                f"[ANALYZE_AUDIO] GetSongBPM incomplet per '{song.title}' - '{song.artist}', "
+                "provant MP3 temporal"
+            )
+            temp_result = analyze_song_from_temporary_mp3(song.title, song.artist)
+            if temp_result:
+                merged_result = {
+                    'bpm': result.get('bpm') if result and result.get('bpm') else temp_result.get('bpm'),
+                    'key': result.get('key') if result and result.get('key') else temp_result.get('key'),
+                    'key_note': temp_result.get('key_note'),
+                    'key_mode': temp_result.get('key_mode'),
+                }
+                result = merged_result
+                source = "temporary_mp3"
+
+        if not result or not result.get('bpm') or not result.get('key'):
             return JsonResponse({
                 'success': False,
-                'error': 'No s\'ha pogut analitzar l\'àudio. Prova més tard.'
+                'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.'
             }, status=500)
 
         # Actualitzar cançó amb resultats
@@ -327,7 +555,10 @@ def analyze_song_audio(request, party_id, song_id):
         song.key = result['key']
         song.save()
 
-        logger.info(f"[ANALYZE_AUDIO] Cançó analitzada: BPM={result['bpm']}, Key={result['key']}")
+        logger.info(
+            f"[ANALYZE_AUDIO] Cançó analitzada via {source}: "
+            f"BPM={result['bpm']}, Key={result['key']}"
+        )
 
         return JsonResponse({
             'success': True,
@@ -335,6 +566,7 @@ def analyze_song_audio(request, party_id, song_id):
             'key': result['key'],
             'key_note': result.get('key_note'),
             'key_mode': result.get('key_mode'),
+            'source': source,
         })
 
     except Exception as e:
@@ -516,6 +748,21 @@ def dj_dashboard(request):
     # Obtenir recomanacions intel·ligents
     recommended_songs = get_recommended_songs(party, limit=6)
     pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')
+    unplayed_requested_spotify_ids = list(
+        party.songs.filter(has_played=False).values_list('spotify_id', flat=True)
+    )
+    accepted_unplayed_requests = SongRequest.objects.filter(
+        party=party,
+        status='accepted',
+        spotify_id__in=unplayed_requested_spotify_ids,
+    ).order_by('-processed_at')
+
+    unplayed_songs_by_spotify = {
+        song.spotify_id: song.id
+        for song in party.songs.filter(has_played=False)
+    }
+    for req in accepted_unplayed_requests:
+        req.linked_song_id = unplayed_songs_by_spotify.get(req.spotify_id)
 
     context = {
         'party': party,
@@ -526,6 +773,7 @@ def dj_dashboard(request):
         'played_songs': played_songs_count,
         'recommended_songs': recommended_songs,
         'pending_requests': pending_requests,
+        'accepted_unplayed_requests': accepted_unplayed_requests,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
 

@@ -228,6 +228,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'user-read-private',           # dades bàsiques del perfil
             'playlist-read-private',       # playlists privades
             'playlist-read-collaborative', # playlists col·laboratives
+            'playlist-modify-public',      # afegir cançons a playlists públiques
+            'playlist-modify-private',     # afegir cançons a playlists privades
             'streaming',                   # reproduir música amb Web Playback SDK
             'user-read-playback-state',    # llegir estat de reproducció
             'user-modify-playback-state',  # controlar reproducció

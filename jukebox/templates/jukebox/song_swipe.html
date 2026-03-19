@@ -2,6 +2,98 @@
 {% block page_title %}Busca Match{% endblock %}
 {% block content %}
 
+<style>
+  @media (max-width: 767.98px) {
+    .mobile-page-content.mobile-page-content--swipe {
+      padding-bottom: calc(5.4rem + env(safe-area-inset-bottom));
+    }
+
+    .mobile-swipe-stage {
+      height: clamp(18rem, calc(100dvh - 25rem), 30rem);
+    }
+
+    .mobile-swipe-stage-card {
+      height: 100%;
+    }
+
+    .mobile-swipe-media {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .mobile-swipe-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 24%;
+    }
+
+    .mobile-swipe-body {
+      flex: 0 0 auto;
+      padding: 0.95rem 1rem;
+      gap: 0.55rem !important;
+    }
+
+    .mobile-swipe-title {
+      font-size: 1.18rem !important;
+      line-height: 1.08 !important;
+    }
+
+    .mobile-swipe-artist {
+      font-size: 0.88rem !important;
+    }
+
+    .mobile-swipe-meta {
+      gap: 0.85rem !important;
+      padding-top: 0.55rem !important;
+    }
+
+    .mobile-swipe-actions {
+      margin-top: 0.5rem !important;
+      gap: 0.9rem !important;
+      padding-bottom: 0.15rem;
+    }
+  }
+
+  @media (max-width: 767.98px) and (max-height: 740px) {
+    .mobile-swipe-stage {
+      height: clamp(16.75rem, calc(100dvh - 26.2rem), 24rem);
+    }
+
+    .mobile-swipe-media img {
+      object-position: center 20%;
+    }
+
+    .mobile-swipe-body {
+      padding: 0.85rem 0.95rem;
+      gap: 0.45rem !important;
+    }
+
+    .mobile-swipe-title {
+      font-size: 1.06rem !important;
+    }
+
+    .mobile-swipe-artist {
+      font-size: 0.82rem !important;
+    }
+  }
+
+  @media (max-width: 767.98px) and (max-height: 680px) {
+    .mobile-swipe-stage {
+      height: clamp(15.5rem, calc(100dvh - 26.8rem), 21.5rem);
+    }
+
+    .mobile-swipe-media img {
+      object-position: center 18%;
+    }
+
+    .mobile-swipe-actions {
+      gap: 0.75rem !important;
+    }
+  }
+</style>
+
 <!-- Vista Desktop (ORIGINAL) -->
 <div class="container-fluid d-none d-md-block">
   <!-- Indicadors de Coins i Vots -->
@@ -147,62 +239,56 @@
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; display: flex; flex-direction: column;">
-  <main class="flex-1 flex flex-col items-center justify-start px-3 pt-1 pb-2" style="max-width: 28rem; margin: 0 auto; width: 100%;">
-    <!-- Stats Row -->
-    <div class="w-full mb-2" style="margin-top: -0.5rem;">
-      <div class="row g-2 mx-0">
-      <div class="col-3 px-1">
-      <a href="{% url 'buy_votes' %}" class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100 text-decoration-none" style="background: white;">
-        <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.8rem;"></i>
-        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="votes-count">{{ votes_left }}</span>
-      </a>
-      </div>
-      <div class="col-3 px-1">
-      <div class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100" style="background: white;">
-        <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.8rem;"></i>
-        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_likes }}</span>
-      </div>
-      </div>
-      <div class="col-3 px-1">
-      <div class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100" style="background: white;">
-        <i class="fas fa-music" style="color: #0040e0; font-size: 0.8rem;"></i>
-        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_songs }}</span>
-      </div>
-      </div>
-      <div class="col-3 px-1">
-      <a href="{% url 'buy_votes' %}" class="bg-surface-container-lowest px-2 py-2 rounded-xl shadow-sm d-flex align-items-center justify-content-center gap-1 w-100 text-decoration-none" style="background: white;">
-        <i class="fas fa-coins" style="color: #006875; font-size: 0.8rem;"></i>
-        <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="credits-count">{{ credits }}</span>
-      </a>
-      </div>
-      </div>
+<div class="mobile-page-shell d-md-none">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-content--swipe mobile-page-stack">
+    <div class="mobile-group-stack" style="gap: 0.5rem;">
+      <!-- Stats Row -->
+      <section class="mobile-stat-grid mobile-stat-grid--4">
+        <a href="{% url 'buy_votes' %}" class="mobile-stat-card d-flex align-items-center justify-content-center gap-1 text-decoration-none" style="padding: 0.7rem 0.35rem;">
+          <i class="fas fa-vote-yea" style="color: #5e24e1; font-size: 0.85rem;"></i>
+          <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="votes-count">{{ votes_left }}</span>
+        </a>
+        <div class="mobile-stat-card d-flex align-items-center justify-content-center gap-1" style="padding: 0.7rem 0.35rem;">
+          <i class="fas fa-heart" style="color: #e74c3c; font-size: 0.85rem;"></i>
+          <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_likes }}</span>
+        </div>
+        <div class="mobile-stat-card d-flex align-items-center justify-content-center gap-1" style="padding: 0.7rem 0.35rem;">
+          <i class="fas fa-music" style="color: #0040e0; font-size: 0.85rem;"></i>
+          <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;">{{ total_songs }}</span>
+        </div>
+        <a href="{% url 'buy_votes' %}" class="mobile-stat-card d-flex align-items-center justify-content-center gap-1 text-decoration-none" style="padding: 0.7rem 0.35rem;">
+          <i class="fas fa-coins" style="color: #006875; font-size: 0.85rem;"></i>
+          <span class="font-bold" style="font-size: 0.8rem; color: #191c1f;" id="credits-count">{{ credits }}</span>
+        </a>
+      </section>
+
+      {% if songs %}
+        <section>
+          <div class="bg-white rounded-xl shadow-sm px-3 py-2 d-flex align-items-center justify-content-between" style="border: 1px solid rgba(196, 197, 217, 0.18);">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+              <i class="fas fa-layer-group" style="color: #4e73df; font-size: 0.9rem;"></i>
+              <span class="fw-bold" id="progress-text" style="font-size: 0.95rem; color: #191c1f;">{{ swiped_count }} de {{ total_songs }}</span>
+            </div>
+            <div class="flex-grow-1 mx-2">
+              <div class="progress" style="height: 0.45rem; background: #eef0f7;">
+                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: #4e73df;"></div>
+              </div>
+            </div>
+            <span class="badge rounded-pill" id="remaining-count" style="background: #4e73df; color: white; font-size: 0.75rem;">{{ songs|length }}</span>
+          </div>
+        </section>
+      {% endif %}
     </div>
 
     {% if songs %}
-      <div class="w-full mb-2">
-        <div class="bg-white rounded-xl shadow-sm px-3 py-2 d-flex align-items-center justify-content-between" style="border: 1px solid rgba(196, 197, 217, 0.18);">
-          <div class="d-flex align-items-center gap-2 flex-shrink-0">
-            <i class="fas fa-layer-group" style="color: #4e73df; font-size: 0.9rem;"></i>
-            <span class="fw-bold" id="progress-text" style="font-size: 0.95rem; color: #191c1f;">{{ swiped_count }} de {{ total_songs }}</span>
-          </div>
-          <div class="flex-grow-1 mx-2">
-            <div class="progress" style="height: 0.45rem; background: #eef0f7;">
-              <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: #4e73df;"></div>
-            </div>
-          </div>
-          <span class="badge rounded-pill" id="remaining-count" style="background: #4e73df; color: white; font-size: 0.75rem;">{{ songs|length }}</span>
-        </div>
-      </div>
-
       <!-- Match Card Container (Tinder-like) -->
-      <div class="relative w-full mb-3" style="aspect-ratio: 3 / 3.75;">
+      <section class="relative w-full mobile-swipe-stage">
         <!-- Background Stack Effect -->
         <div class="absolute inset-0 rounded-xl" style="background: #e7e8ed; transform: rotate(3deg) scale(0.95) translateY(0.5rem); opacity: 0.4;"></div>
         <div class="absolute inset-0 rounded-xl" style="background: #f2f3f8; transform: rotate(-2deg) scale(0.98) translateY(0.25rem); opacity: 0.7;"></div>
 
         <!-- Main Card -->
-        <div id="card-stack" class="relative h-full w-full bg-white rounded-xl overflow-hidden flex flex-col" style="box-shadow: 0 20px 40px rgba(0,64,224,0.06);">
+        <div id="card-stack" class="relative h-full w-full bg-white rounded-xl overflow-hidden flex flex-col mobile-swipe-stage-card" style="box-shadow: 0 20px 40px rgba(0,64,224,0.06);">
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
@@ -210,10 +296,10 @@
                  data-preview-url="{{ song.preview_url|default:'' }}"
                  style="position: absolute; width: 100%; height: 100%; top: 0; display: flex; flex-direction: column;">
               <!-- Album Art -->
-              <div class="relative" style="flex: 1; overflow: hidden;">
+              <div class="relative mobile-swipe-media" style="flex: 1; overflow: hidden;">
                 {% if song.album_image_url %}
                   <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                       class="w-100 h-100" style="object-fit: cover;">
+                       class="w-100 h-100">
                 {% else %}
                   <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
                     <i class="fas fa-music fa-5x text-white"></i>
@@ -227,15 +313,15 @@
               </div>
 
               <!-- Song Info -->
-              <div class="p-3 d-flex flex-column gap-2" style="background: white;">
+              <div class="p-3 d-flex flex-column gap-2 mobile-swipe-body" style="background: white;">
                 <div>
-                  <h2 class="font-headline font-extrabold mb-1" style="font-size: 1.3rem; line-height: 1.15; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
-                  <p class="font-medium mb-0" style="color: #434656; font-size: 0.95rem;">{{ song.artist }}</p>
+                  <h2 class="font-headline font-extrabold mb-1 mobile-swipe-title" style="font-size: 1.3rem; line-height: 1.15; color: #191c1f; letter-spacing: -0.025em;">{{ song.title }}</h2>
+                  <p class="font-medium mb-0 mobile-swipe-artist" style="color: #434656; font-size: 0.95rem;">{{ song.artist }}</p>
                 </div>
 
                 <!-- Audio Metadata -->
                 {% if song.bpm or song.key %}
-                  <div class="d-flex align-items-center gap-3 pt-2" style="border-top: 1px solid rgba(196, 197, 217, 0.1);">
+                  <div class="d-flex align-items-center gap-3 pt-2 mobile-swipe-meta" style="border-top: 1px solid rgba(196, 197, 217, 0.1);">
                     {% if song.bpm %}
                       <div class="d-flex flex-column">
                         <span class="font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.05em;">Tempo</span>
@@ -262,10 +348,10 @@
             </div>
           {% endfor %}
         </div>
-      </div>
+      </section>
 
       <!-- Action Buttons -->
-      <div class="mt-3 flex items-center justify-center gap-4 w-full">
+      <div class="mt-3 flex items-center justify-center gap-4 w-full mobile-swipe-actions">
         <!-- Skip Button -->
         <button id="mobile-skip-btn" class="btn-skip-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 3.4rem; height: 3.4rem; background: #e7e8ed; color: #191c1f; border: none;">
           <i class="fas fa-times" style="font-size: 1.45rem;"></i>
@@ -807,11 +893,24 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      animateCardOut('left', songId, 'skip');
-      // Reactivar botons després de l'animació
-      setTimeout(() => {
+      if (data.success) {
+        // Actualitzar comptadors (mòbil i desktop)
+        if (votesCount) votesCount.textContent = data.votes_left;
+        if (creditsCount) creditsCount.textContent = data.credits;
+        const votesCountDesktop = document.getElementById('votes-count-desktop');
+        const creditsCountDesktop = document.getElementById('credits-count-desktop');
+        if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
+        if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
+
+        animateCardOut('left', songId, 'skip');
+        // Reactivar botons després de l'animació
+        setTimeout(() => {
+          disableCurrentButtons(false);
+        }, 350);
+      } else {
+        showMessage(data.error || 'Error al saltar la cançó', false);
         disableCurrentButtons(false);
-      }, 350);
+      }
     })
     .catch(error => {
       console.error('Error:', error);

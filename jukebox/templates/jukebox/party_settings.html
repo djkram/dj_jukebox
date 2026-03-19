@@ -38,6 +38,91 @@
     transition: transform 0.2s;
   }
 
+  .settings-toggle-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .settings-toggle-copy {
+    margin: 0;
+    color: #191c1f;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .settings-toggle {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .settings-toggle-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .settings-toggle-switch {
+    position: relative;
+    width: 4.6rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    background: #d9e2f2;
+    box-shadow: inset 0 0 0 1px rgba(116, 118, 136, 0.18);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .settings-toggle-switch::before {
+    content: 'OFF';
+    position: absolute;
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #6f7a90;
+    transition: color 0.2s ease, left 0.2s ease, right 0.2s ease;
+  }
+
+  .settings-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 0.25rem;
+    left: 0.25rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    transition: transform 0.2s ease;
+  }
+
+  .settings-toggle-input:checked + .settings-toggle-switch {
+    background: linear-gradient(135deg, #2e9ae6 0%, #4ba5ee 100%);
+    box-shadow: inset 0 0 0 1px rgba(0, 64, 224, 0.08), 0 8px 18px rgba(46, 154, 230, 0.2);
+  }
+
+  .settings-toggle-input:checked + .settings-toggle-switch::before {
+    content: 'ON';
+    left: 0.8rem;
+    right: auto;
+    color: #fff;
+  }
+
+  .settings-toggle-input:checked + .settings-toggle-switch::after {
+    transform: translateX(2.35rem);
+  }
+
+  .settings-toggle-input:focus-visible + .settings-toggle-switch {
+    outline: 2px solid rgba(0, 64, 224, 0.3);
+    outline-offset: 2px;
+  }
+
   /* Camelot Key Colors */
   .camelot-key {
     display: inline-block;
@@ -86,7 +171,6 @@
     .party-settings-mobile {
       background: #f8f9fe;
       min-height: 100vh;
-      padding: 0 1rem 8rem;
     }
     .party-settings-mobile .mobile-card {
       background: #fff;
@@ -116,6 +200,24 @@
     .party-song-row {
       background: #f2f3f8;
       border-radius: 10px;
+    }
+    .settings-toggle-control {
+      gap: 0.6rem;
+    }
+    .settings-toggle-copy {
+      font-size: 0.84rem;
+      white-space: normal;
+    }
+    .settings-toggle-switch {
+      width: 4.25rem;
+      height: 2.1rem;
+    }
+    .settings-toggle-switch::after {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+    .settings-toggle-input:checked + .settings-toggle-switch::after {
+      transform: translateX(2.15rem);
     }
   }
 </style>
@@ -179,14 +281,40 @@
             <p class="form-control-plaintext mb-2" id="playlistAssignedName">
               {{ party.playlist.name }} ({{ party.playlist.owner }})
             </p>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
               <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm">
                 <i class="fas fa-sync-alt me-1"></i>Recarregar cançons
               </button>
               <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm">
                 Neteja playlist
               </a>
+
+              <!-- Auto-Sync Toggle -->
+              <label class="settings-toggle-control ms-2" for="autoSyncToggle">
+                <span class="settings-toggle">
+                  <input class="settings-toggle-input"
+                         type="checkbox"
+                         id="autoSyncToggle"
+                         {% if party.auto_sync_playlist %}checked{% endif %}>
+                  <span class="settings-toggle-switch" aria-hidden="true"></span>
+                </span>
+                <span class="settings-toggle-copy">Auto-sync cada 5 min</span>
+              </label>
+
+              <!-- Badge indicador -->
+              <span class="badge bg-success" id="autoSyncBadge"
+                    style="{% if not party.auto_sync_playlist %}display: none;{% endif %}">
+                <i class="fas fa-check-circle me-1"></i>Actiu
+              </span>
             </div>
+
+            <!-- Timestamp última sync -->
+            {% if party.last_sync_at %}
+            <small class="text-muted d-block">
+              <i class="fas fa-clock me-1"></i>
+              Última sync: {{ party.last_sync_at|timesince }} enrere
+            </small>
+            {% endif %}
           </div>
 
           {% if has_spotify %}
@@ -280,11 +408,12 @@
       <div class="card shadow-sm p-4 rounded-4 mb-4">
         <h3 class="h5 mb-3">Cançons de la playlist</h3>
         {% if songs %}
-          <div class="d-flex gap-2 mb-3">
+          <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
             <input
               id="song-search"
               class="form-control"
               placeholder="Filtra per títol o artista…"
+              style="flex: 1; min-width: 200px;"
             />
             <button
               id="bulk-analyze-btn"
@@ -293,7 +422,38 @@
               style="white-space: nowrap;">
               <i class="fas fa-chart-line me-1"></i>Analitza pendents ({{ pending_analysis_count }})
             </button>
+
+            <!-- Auto-Analyze Toggle -->
+            <label class="settings-toggle-control ms-2" for="autoAnalyzeToggle">
+              <span class="settings-toggle">
+                <input class="settings-toggle-input"
+                       type="checkbox"
+                       id="autoAnalyzeToggle"
+                       {% if party.auto_analyze_audio %}checked{% endif %}>
+                <span class="settings-toggle-switch" aria-hidden="true"></span>
+              </span>
+              <span class="settings-toggle-copy">Auto-anàlisi cada 5 min</span>
+            </label>
+
+            <!-- Badge indicador -->
+            <span class="badge bg-info" id="autoAnalyzeBadge"
+                  style="{% if not party.auto_analyze_audio %}display: none;{% endif %}">
+              <i class="fas fa-robot me-1"></i>Actiu
+            </span>
           </div>
+
+          <!-- Progress info (opcional) -->
+          {% if party.auto_analyze_audio %}
+          <div class="mb-3">
+            <small class="text-muted">
+              <i class="fas fa-chart-line me-1"></i>
+              Auto-anàlisi actiu: processant cançons pendents automàticament
+              {% if party.last_analyze_at %}
+              <br><i class="fas fa-clock me-1"></i>Última anàlisi: {{ party.last_analyze_at|timesince }} enrere
+              {% endif %}
+            </small>
+          </div>
+          {% endif %}
           <table class="table table-striped w-100">
             <thead>
               <tr>
@@ -302,7 +462,8 @@
                 <th>Artista</th>
                 <th>BPM</th>
                 <th>Key</th>
-                <th>Vots</th>
+                <th><i class="fas fa-heart text-danger"></i></th>
+                <th><i class="fas fa-heart-broken text-secondary"></i></th>
                 <th>Accions</th>
               </tr>
             </thead>
@@ -349,7 +510,8 @@
                       <span class="text-muted">-</span>
                     {% endif %}
                   </td>
-                  <td>{{ song.num_votes }}</td>
+                  <td>{{ song.num_likes }}</td>
+                  <td>{{ song.num_dislikes }}</td>
                   <td class="analyze-cell">
                     <div class="d-flex align-items-center gap-2">
                       {% if not song.bpm or not song.key %}
@@ -382,12 +544,12 @@
   </div>
 </div>
 
-<div class="party-settings-mobile d-md-none">
-  <main class="d-flex flex-column gap-3">
-    <section style="margin-top: 0; margin-bottom: -0.35rem;">
-      <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
-        <a href="{% url 'dj_dashboard' %}" class="flex-grow-1 text-decoration-none text-center" style="background: transparent; color: #747688; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Dashboard</a>
-        <a href="{% url 'party_settings' party.id %}" class="flex-grow-1 text-decoration-none text-center" style="background: #eef2ff; color: #0040e0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Settings</a>
+<div class="party-settings-mobile mobile-page-shell d-md-none">
+  <main class="mobile-page-content mobile-page-content--tight d-flex flex-column gap-3">
+    <section>
+      <div class="mobile-segmented">
+        <a href="{% url 'dj_dashboard' %}" class="mobile-segmented-item">Dashboard</a>
+        <a href="{% url 'party_settings' party.id %}" class="mobile-segmented-item is-active">Settings</a>
       </div>
     </section>
 
@@ -461,6 +623,38 @@
           <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
         </div>
 
+        <!-- Auto-Sync Toggle Mobile -->
+        <div class="mb-3 p-2" style="background: #fff; border-radius: 10px; border: 1px solid #e7e8ed;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="fw-semibold" style="font-size: 0.9rem; color: #191c1f;">Auto-sync cada 5 min</div>
+              <small style="color: #747688; font-size: 0.75rem;">Sincronitza automàticament</small>
+            </div>
+            <label class="settings-toggle-control" for="autoSyncToggleMobile">
+              <span class="settings-toggle">
+                <input class="settings-toggle-input"
+                       type="checkbox"
+                       id="autoSyncToggleMobile"
+                       {% if party.auto_sync_playlist %}checked{% endif %}>
+                <span class="settings-toggle-switch" aria-hidden="true"></span>
+              </span>
+            </label>
+          </div>
+          <!-- Badge i timestamp -->
+          <div class="mt-2" id="autoSyncInfoMobile">
+            {% if party.auto_sync_playlist %}
+            <span class="badge bg-success" style="font-size: 0.7rem;">
+              <i class="fas fa-check-circle me-1"></i>Actiu
+            </span>
+            {% endif %}
+            {% if party.last_sync_at %}
+            <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+              <i class="fas fa-clock me-1"></i>Última sync: {{ party.last_sync_at|timesince }} enrere
+            </small>
+            {% endif %}
+          </div>
+        </div>
+
         {% if has_spotify %}
           <label class="mobile-label" for="spotify-track-search-mobile">Afegeix una cançó</label>
           <div class="input-group mb-2">
@@ -529,8 +723,40 @@
             title="Analitza totes les cançons pendents">
             <i class="fas fa-chart-line me-1"></i>Analitza pendents ({{ pending_analysis_count }})
           </button>
+
+          <!-- Auto-Analyze Toggle Mobile -->
+          <div class="mt-2 p-2" style="background: #fff; border-radius: 10px; border: 1px solid #e7e8ed;">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold" style="font-size: 0.9rem; color: #191c1f;">Auto-anàlisi cada 5 min</div>
+                <small style="color: #747688; font-size: 0.75rem;">Analitza cançons automàticament</small>
+              </div>
+              <label class="settings-toggle-control" for="autoAnalyzeToggleMobile">
+                <span class="settings-toggle">
+                  <input class="settings-toggle-input"
+                         type="checkbox"
+                         id="autoAnalyzeToggleMobile"
+                         {% if party.auto_analyze_audio %}checked{% endif %}>
+                  <span class="settings-toggle-switch" aria-hidden="true"></span>
+                </span>
+              </label>
+            </div>
+            <!-- Badge i info -->
+            <div class="mt-2" id="autoAnalyzeInfoMobile">
+              {% if party.auto_analyze_audio %}
+              <span class="badge bg-info" style="font-size: 0.7rem;">
+                <i class="fas fa-robot me-1"></i>Actiu
+              </span>
+              {% endif %}
+              {% if party.last_analyze_at %}
+              <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+                <i class="fas fa-clock me-1"></i>Última anàlisi: {{ party.last_analyze_at|timesince }} enrere
+              </small>
+              {% endif %}
+            </div>
+          </div>
         </div>
-        <div class="d-flex flex-column gap-2" id="songs-mobile-list">
+        <div class="mobile-list-stack" id="songs-mobile-list">
           {% for song in songs %}
             <div class="party-song-row p-2" data-song-row data-song-id="{{ song.id }}">
               <div class="d-flex justify-content-between align-items-start">
@@ -540,7 +766,8 @@
                   <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem;">
                     <span style="color: #747688;">BPM: <span class="bpm-cell-mobile">{% if song.bpm %}{{ song.bpm|floatformat:0 }}{% else %}-{% endif %}</span></span>
                     <span style="color: #747688;">Key: <span class="key-cell-mobile">{% if song.key %}<span class="camelot-key camelot-{{ song.key }}" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>{% else %}-{% endif %}</span></span>
-                    <span style="color: #747688;">Vots: {{ song.num_votes }}</span>
+                    <span style="color: #e74c3c;"><i class="fas fa-heart"></i> {{ song.num_likes }}</span>
+                    <span style="color: #858796;"><i class="fas fa-heart-broken"></i> {{ song.num_dislikes }}</span>
                   </div>
                 </div>
                 <div class="d-flex flex-column gap-2 align-items-end">
@@ -570,9 +797,72 @@
   </main>
 </div>
 
+<!-- Alert area for notifications -->
+<div id="party-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
+
+<!-- Bootstrap Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirmar acció</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody">
+        <!-- Missatge dinàmic -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·lar</button>
+        <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Function to show dismissible alerts
+  function showAlert(message, type = 'info') {
+    const alertArea = document.getElementById('party-alert-area');
+    if (!alertArea) return;
+
+    const alertId = 'alert-' + Date.now();
+    const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+
+    alertArea.innerHTML = `
+      <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
+        <i class="fas ${iconClass} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    setTimeout(() => {
+      const alert = document.getElementById(alertId);
+      if (alert) {
+        alert.classList.remove('show');
+        setTimeout(() => alertArea.innerHTML = '', 150);
+      }
+    }, 5000);
+  }
+
+  // Reusable confirm modal function
+  function showConfirm(title, message, onConfirm) {
+    document.getElementById('confirmModalLabel').textContent = title;
+    document.getElementById('confirmModalBody').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    const confirmBtn = document.getElementById('confirmModalBtn');
+    confirmBtn.onclick = () => {
+      modal.hide();
+      onConfirm();
+    };
+
+    modal.show();
+  }
   var settingsForm = document.getElementById('partySettingsForm');
   var settingsFormMobile = document.getElementById('partySettingsFormMobile');
   var activeForm = settingsFormMobile || settingsForm;
@@ -781,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!selectEl || !triggerBtn) return;
     var selectedPlaylist = selectEl.value;
     if (!selectedPlaylist) {
-      alert('Selecciona una playlist de Spotify.');
+      showAlert('Selecciona una playlist de Spotify.', 'warning');
       return;
     }
 
@@ -1417,7 +1707,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     bulkAnalyzeQueue = collectPendingAnalyzeSongIds();
     if (bulkAnalyzeQueue.length === 0) {
-      alert('No hi ha cançons pendents d\'analitzar!');
+      showAlert('No hi ha cançons pendents d\'analitzar!', 'info');
       return;
     }
 
@@ -1528,6 +1818,173 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   restoreBulkAnalyzeState();
+
+  // ==========================================
+  // Auto-Sync Toggle Handlers
+  // ==========================================
+  var autoSyncToggle = document.getElementById('autoSyncToggle');
+  var autoSyncToggleMobile = document.getElementById('autoSyncToggleMobile');
+  var autoSyncBadge = document.getElementById('autoSyncBadge');
+  var autoSyncInfoMobile = document.getElementById('autoSyncInfoMobile');
+
+  function handleAutoSyncToggle(toggle, isMobile) {
+    if (!toggle) return;
+
+    var enabled = toggle.checked;
+
+    // Deshabilitar toggle mentre processa
+    toggle.disabled = true;
+
+    fetch('{% url "toggle_auto_sync" party.id %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      if (!result.ok || !result.data.success) {
+        throw new Error(result.data.error || 'Error al canviar auto-sync');
+      }
+
+      var data = result.data;
+      var isEnabled = data.auto_sync_enabled;
+
+      // Actualitzar UI Desktop
+      if (autoSyncBadge) {
+        autoSyncBadge.style.display = isEnabled ? 'inline-block' : 'none';
+      }
+
+      // Actualitzar UI Mobile
+      if (autoSyncInfoMobile) {
+        if (isEnabled) {
+          autoSyncInfoMobile.innerHTML = '<span class="badge bg-success" style="font-size: 0.7rem;"><i class="fas fa-check-circle me-1"></i>Actiu</span>';
+        } else {
+          autoSyncInfoMobile.innerHTML = '';
+        }
+      }
+
+      // Sincronitzar ambdós toggles
+      if (autoSyncToggle) autoSyncToggle.checked = isEnabled;
+      if (autoSyncToggleMobile) autoSyncToggleMobile.checked = isEnabled;
+
+      // Mostrar missatge
+      showAlert(
+        isEnabled
+          ? 'Auto-sync activat. La playlist es sincronitzarà cada 5 minuts.'
+          : 'Auto-sync desactivat.',
+        'success'
+      );
+    })
+    .catch(function(error) {
+      console.error('Error toggling auto-sync:', error);
+      // Revertir toggle si error
+      toggle.checked = !enabled;
+      showAlert('Error al canviar auto-sync: ' + error.message, 'danger');
+    })
+    .finally(function() {
+      toggle.disabled = false;
+    });
+  }
+
+  if (autoSyncToggle) {
+    autoSyncToggle.addEventListener('change', function() {
+      handleAutoSyncToggle(this, false);
+    });
+  }
+
+  if (autoSyncToggleMobile) {
+    autoSyncToggleMobile.addEventListener('change', function() {
+      handleAutoSyncToggle(this, true);
+    });
+  }
+
+  // ==========================================
+  // Auto-Analyze Toggle Handlers
+  // ==========================================
+  var autoAnalyzeToggle = document.getElementById('autoAnalyzeToggle');
+  var autoAnalyzeToggleMobile = document.getElementById('autoAnalyzeToggleMobile');
+  var autoAnalyzeBadge = document.getElementById('autoAnalyzeBadge');
+  var autoAnalyzeInfoMobile = document.getElementById('autoAnalyzeInfoMobile');
+
+  function handleAutoAnalyzeToggle(toggle, isMobile) {
+    if (!toggle) return;
+
+    var enabled = toggle.checked;
+
+    // Deshabilitar toggle mentre processa
+    toggle.disabled = true;
+
+    fetch('{% url "toggle_auto_analyze" party.id %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(parseJsonResponse)
+    .then(function(result) {
+      if (!result.ok || !result.data.success) {
+        throw new Error(result.data.error || 'Error al canviar auto-anàlisi');
+      }
+
+      var data = result.data;
+      var isEnabled = data.auto_analyze_enabled;
+
+      // Actualitzar UI Desktop
+      if (autoAnalyzeBadge) {
+        autoAnalyzeBadge.style.display = isEnabled ? 'inline-block' : 'none';
+      }
+
+      // Actualitzar UI Mobile
+      if (autoAnalyzeInfoMobile) {
+        if (isEnabled) {
+          autoAnalyzeInfoMobile.innerHTML = '<span class="badge bg-info" style="font-size: 0.7rem;"><i class="fas fa-robot me-1"></i>Actiu</span>';
+        } else {
+          autoAnalyzeInfoMobile.innerHTML = '';
+        }
+      }
+
+      // Sincronitzar ambdós toggles
+      if (autoAnalyzeToggle) autoAnalyzeToggle.checked = isEnabled;
+      if (autoAnalyzeToggleMobile) autoAnalyzeToggleMobile.checked = isEnabled;
+
+      // Mostrar missatge amb informació de cançons pendents
+      var message = isEnabled
+        ? 'Auto-anàlisi activat. Les cançons pendents s\'analitzaran cada 5 minuts.'
+        : 'Auto-anàlisi desactivat.';
+
+      if (isEnabled && data.pending_songs !== undefined) {
+        message += ' (' + data.pending_songs + ' cançons pendents)';
+      }
+
+      showAlert(message, 'success');
+    })
+    .catch(function(error) {
+      console.error('Error toggling auto-analyze:', error);
+      // Revertir toggle si error
+      toggle.checked = !enabled;
+      showAlert('Error al canviar auto-anàlisi: ' + error.message, 'danger');
+    })
+    .finally(function() {
+      toggle.disabled = false;
+    });
+  }
+
+  if (autoAnalyzeToggle) {
+    autoAnalyzeToggle.addEventListener('change', function() {
+      handleAutoAnalyzeToggle(this, false);
+    });
+  }
+
+  if (autoAnalyzeToggleMobile) {
+    autoAnalyzeToggleMobile.addEventListener('change', function() {
+      handleAutoAnalyzeToggle(this, true);
+    });
+  }
 });
 </script>
 
@@ -1535,6 +1992,33 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
+// Function to show Spotify alerts
+function showSpotifyAlert(message, type = 'warning') {
+  const alertArea = document.getElementById('party-alert-area');
+  if (!alertArea) return;
+
+  const alertId = 'alert-' + Date.now();
+  const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle';
+
+  alertArea.innerHTML = `
+    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
+      <i class="fas ${iconClass} me-2"></i>
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  setTimeout(() => {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+      alert.classList.remove('show');
+      setTimeout(() => alertArea.innerHTML = '', 150);
+    }
+  }, 5000);
+}
+
 // Spotify Web Playback SDK Variables
 let spotifyPlayer = null;
 let spotifyDeviceId = null;
@@ -1618,7 +2102,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 function playSpotifyTrack(spotifyId) {
   if (!spotifyPlayer || !spotifyDeviceId) {
     console.error('[SPOTIFY] Player not ready');
-    alert('El reproductor de Spotify no està llest. Espera uns segons...');
+    showSpotifyAlert('El reproductor de Spotify no està llest. Espera uns segons...', 'info');
     return;
   }
 
@@ -1634,13 +2118,13 @@ function playSpotifyTrack(spotifyId) {
       console.log('[SPOTIFY] Playing track:', spotifyId);
     } else if (response.status === 403) {
       console.error('[SPOTIFY] Premium required');
-      alert('Necessites Spotify Premium per reproduir cançons completes');
+      showSpotifyAlert('Necessites Spotify Premium per reproduir cançons completes', 'warning');
     } else if (response.status === 401) {
       console.error('[SPOTIFY] Unauthorized');
-      alert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.');
+      showSpotifyAlert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.', 'danger');
     } else {
       console.error('[SPOTIFY] Error playing track:', response.status);
-      alert('Error reproduint la cançó. Torna-ho a provar.');
+      showSpotifyAlert('Error reproduint la cançó. Torna-ho a provar.', 'danger');
     }
   });
 }

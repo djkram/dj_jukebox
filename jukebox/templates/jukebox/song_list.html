@@ -23,6 +23,80 @@
     transition: transform 0.2s;
   }
 
+  /* Compact KPI Cards */
+  .kpi-card-compact {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    border-left: 2px solid;
+    height: 100%;
+    min-height: 38px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .kpi-card-compact .kpi-icon {
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .kpi-card-compact .kpi-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #858796;
+    line-height: 1.2;
+    flex: 1;
+  }
+  .kpi-card-compact .kpi-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .kpi-primary { border-left-color: #4e73df; }
+  .kpi-success { border-left-color: #1cc88a; }
+  .kpi-info { border-left-color: #36b9cc; }
+  .kpi-warning { border-left-color: #f6c23e; }
+  .kpi-danger { border-left-color: #e74a3b; }
+  .kpi-secondary { border-left-color: #858796; }
+  .kpi-purple { border-left-color: #6f42c1; }
+  .kpi-orange { border-left-color: #fd7e14; }
+
+  /* Party info card special */
+  .kpi-party-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .kpi-party-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kpi-party-date {
+    font-size: 0.65rem;
+    color: #858796;
+    line-height: 1;
+  }
+  .kpi-change-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
   /* Camelot Key Colors */
   .camelot-key {
     display: inline-block;
@@ -140,14 +214,41 @@
   }
 </style>
 <div class="container-fluid">
-  <!-- INFO DE LA FESTA (només desktop) -->
-  <div class="card shadow mb-4 d-none d-md-block">
-    <div class="card-body">
-      <div class="d-flex align-items-center justify-content-between">
-        <h2 class="mb-0">🎉 {{ party.name }}</h2>
-        {% if party.date %}
-          <span class="badge badge-primary">{{ party.date|date:"d/m/Y H:i" }}</span>
-        {% endif %}
+  <!-- KPI BOXES (només desktop) - 4 columnes en una línia -->
+  <div class="row g-2 mb-3 d-none d-md-flex">
+    <div class="col-md-4">
+      <div class="kpi-card-compact kpi-primary">
+        <div class="kpi-icon">🎉</div>
+        <div class="kpi-party-info">
+          <div class="kpi-party-name">{{ party.name }}</div>
+          {% if party.date %}
+            <div class="kpi-party-date">{{ party.date|date:"d/m/Y H:i" }}</div>
+          {% endif %}
+        </div>
+        <a href="{% url 'select_party' %}" class="btn btn-sm btn-primary kpi-change-btn">
+          <i class="fas fa-exchange-alt"></i>
+        </a>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="kpi-card-compact kpi-success">
+        <div class="kpi-icon"><i class="fas fa-play-circle"></i></div>
+        <div class="kpi-label">Sonades</div>
+        <div class="kpi-value">{{ songs_played }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="kpi-card-compact kpi-danger">
+        <div class="kpi-icon"><i class="fas fa-heart"></i></div>
+        <div class="kpi-label">Vots totals</div>
+        <div class="kpi-value">{{ total_votes }}</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="kpi-card-compact kpi-info">
+        <div class="kpi-icon"><i class="fas fa-vote-yea"></i></div>
+        <div class="kpi-label">Disponibles</div>
+        <div class="kpi-value">{{ votes_left }}</div>
       </div>
     </div>
   </div>
@@ -170,7 +271,7 @@
                     <th>Artista</th>
                     <th>BPM</th>
                     <th>Key</th>
-                    <th class="text-center">Vots</th>
+                    <th class="text-center">Etiqueta</th>
                     <th class="text-center">Acció</th>
                   </tr>
                 </thead>
@@ -217,7 +318,11 @@
                           <span class="text-muted">-</span>
                         {% endif %}
                       </td>
-                      <td class="text-center">{{ song.num_votes }}</td>
+                      <td class="text-center">
+                        <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.7rem; padding: 0.35rem 0.6rem; font-weight: 600;">
+                          {{ song.badge_label }}
+                        </span>
+                      </td>
                       <td class="text-center">
                         {% if user_votes_dict|get_item:song.id %}
                           <i class="fas fa-heart" style="color: #e74c3c; font-size: 1.25rem;"></i>
@@ -265,7 +370,7 @@
                     <th>Artista</th>
                     <th>BPM</th>
                     <th>Key</th>
-                    <th class="text-center">Vots</th>
+                    <th class="text-center">Etiqueta</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -311,7 +416,11 @@
                           <span class="text-muted">-</span>
                         {% endif %}
                       </td>
-                      <td class="text-center">{{ song.num_votes }}</td>
+                      <td class="text-center">
+                        <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.7rem; padding: 0.35rem 0.6rem; font-weight: 600;">
+                          {{ song.badge_label }}
+                        </span>
+                      </td>
                     </tr>
                   {% empty %}
                     <tr>
@@ -327,12 +436,13 @@
     </div>
 
     <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
-    <div class="mobile-songs-grid d-md-none px-4 pt-0 pb-32" style="background: #f8f9fe; min-height: 100vh;">
-      <main class="d-flex flex-column gap-3">
+    <div class="mobile-songs-grid mobile-page-shell d-md-none">
+      <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
+        <div class="mobile-group-stack" style="gap: 0.5rem;">
         <!-- Party Info Card -->
-        <section>
-          <span class="d-block font-bold text-uppercase mb-2" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">LA TEVA FESTA</span>
-          <div class="bg-white overflow-hidden d-flex flex-column" style="box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); border-radius: 12px;">
+        <section class="mobile-section-header">
+          <span class="mobile-kicker">LA TEVA FESTA</span>
+          <div class="mobile-surface-card overflow-hidden d-flex flex-column">
             <div class="d-flex p-3 gap-3 align-items-center">
               <span style="font-size: 2rem;">🎉</span>
               <div class="flex-grow-1">
@@ -349,58 +459,58 @@
         </section>
 
         <!-- Stats Grid - 3 columnes -->
-        <section class="grid grid-cols-3 gap-2">
-          <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
-            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(28, 200, 138, 0.1);">
+        <section class="mobile-stat-grid">
+          <div class="mobile-stat-card">
+            <div class="mobile-stat-top">
+              <div class="mobile-stat-icon" style="background: rgba(28, 200, 138, 0.1);">
                 <i class="fas fa-play-circle" style="color: #1cc88a; font-size: 1rem;"></i>
               </div>
-              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ songs_played }}</p>
+              <p class="mobile-stat-value mb-0">{{ songs_played }}</p>
             </div>
-            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Sonades</span>
+            <span class="mobile-stat-label">Sonades</span>
           </div>
-          <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
-            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(231, 76, 60, 0.1);">
+          <div class="mobile-stat-card">
+            <div class="mobile-stat-top">
+              <div class="mobile-stat-icon" style="background: rgba(231, 76, 60, 0.1);">
                 <i class="fas fa-heart" style="color: #e74c3c; font-size: 1rem;"></i>
               </div>
-              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ total_votes }}</p>
+              <p class="mobile-stat-value mb-0">{{ total_votes }}</p>
             </div>
-            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Vots totals</span>
+            <span class="mobile-stat-label">Vots totals</span>
           </div>
-          <a href="{% url 'buy_votes' %}" class="bg-white px-2 py-2 shadow-sm text-center text-decoration-none d-block" style="border-radius: 12px;">
-            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(0, 64, 224, 0.1);">
+          <a href="{% url 'buy_votes' %}" class="mobile-stat-card d-block text-decoration-none">
+            <div class="mobile-stat-top">
+              <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1);">
                 <i class="fas fa-vote-yea" style="color: #0040e0; font-size: 1rem;"></i>
               </div>
-              <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ votes_left }}</p>
+              <p class="mobile-stat-value mb-0">{{ votes_left }}</p>
             </div>
-            <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Disponibles</span>
+            <span class="mobile-stat-label">Disponibles</span>
           </a>
         </section>
+        </div>
 
         <!-- Song Tabs Header -->
-        <section style="margin-bottom: -0.55rem;">
-          <div class="mb-0">
-            <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
-              <button type="button" class="mobile-song-tab is-active flex-grow-1" data-mobile-tab="bag">Maleta del DJ</button>
-              <button type="button" class="mobile-song-tab flex-grow-1" data-mobile-tab="played">El que ha sonat</button>
-            </div>
+        <section>
+          <div class="mobile-segmented">
+            <button type="button" class="mobile-song-tab mobile-segmented-item is-active" data-mobile-tab="bag">Maleta del DJ</button>
+            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="played">El que ha sonat</button>
           </div>
         </section>
 
         <!-- Song List -->
-        <section id="mobile-tab-bag" class="d-flex flex-column gap-1">
-          <div class="mb-0">
-            <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white" style="border-radius: 10px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.05);">
+        <section id="mobile-tab-bag" class="mobile-group-stack" style="gap: 0.5rem;">
+          <div>
+            <div class="mobile-search-shell mobile-search-shell--aligned">
               <i class="fas fa-filter" style="color: #747688; font-size: 0.9rem;"></i>
-              <input id="mobile-song-search" type="search" placeholder="Busca una cançó o artista" class="border-0 bg-transparent w-100" style="outline: none; color: #191c1f; font-size: 0.92rem;">
+              <input id="mobile-song-search" type="search" placeholder="Busca una cançó o artista" class="w-100">
             </div>
           </div>
 
+          <div class="mobile-list-stack">
           {% for song in pending_songs %}
             <div class="song-card mobile-bag-song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
-              <div class="d-flex align-items-center gap-2 p-2" style="background: #f2f3f8; border-radius: 10px;">
+              <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
                     <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -427,32 +537,42 @@
                   <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
                   <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
                     <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
-                    {% if song.bpm %}
-                      <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
-                    {% endif %}
-                    {% if song.key %}
-                      <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
-                    {% endif %}
+                    <span class="badge flex-shrink-0" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.6rem; padding: 0.25rem 0.4rem; font-weight: 600;">
+                      {{ song.badge_label }}
+                    </span>
                   </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
-                  <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
-                    <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
-                    <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
-                  </div>
                   {% if user_votes_dict|get_item:song.id %}
                     <!-- L'usuari ja ha votat aquesta cançó -->
-                    <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #e74c3c; opacity: 1;">
-                      <i class="fas fa-heart"></i>
-                    </button>
+                    {% if user_votes_dict|get_item:song.id == 'like' %}
+                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #e74c3c; opacity: 1;">
+                        <i class="fas fa-heart"></i>
+                      </button>
+                    {% elif user_votes_dict|get_item:song.id == 'dislike' %}
+                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #858796; opacity: 1;">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    {% elif user_votes_dict|get_item:song.id == 'skip' %}
+                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #858796; opacity: 1;">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    {% endif %}
                   {% else %}
                     <!-- L'usuari no ha votat aquesta cançó -->
                     {% if votes_left > 0 or credits > 0 %}
                       <form method="post" class="m-0">{% csrf_token %}
                         <input type="hidden" name="vote_song_id" value="{{ song.id }}">
                         <input type="hidden" name="vote_type" value="like">
-                        <button type="submit" class="border-0 bg-transparent p-1 pe-0" style="font-size: 1.5rem; color: #e74c3c;">
+                        <button type="submit" class="border-0 bg-transparent p-1" style="font-size: 1.5rem; color: #e74c3c;">
                           <i class="far fa-heart"></i>
+                        </button>
+                      </form>
+                      <form method="post" class="m-0">{% csrf_token %}
+                        <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                        <input type="hidden" name="vote_type" value="dislike">
+                        <button type="submit" class="border-0 bg-transparent p-1 pe-0" style="font-size: 1.3rem; color: #858796;">
+                          <i class="fas fa-times"></i>
                         </button>
                       </form>
                     {% else %}
@@ -465,14 +585,15 @@
               </div>
             </div>
           {% empty %}
-            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">No queden temes pendents.</div>
+            <div class="mobile-empty-state">No queden temes pendents.</div>
           {% endfor %}
+          </div>
         </section>
 
-        <section id="mobile-tab-played" class="d-none flex-column gap-2">
+        <section id="mobile-tab-played" class="d-none mobile-list-stack">
           {% for song in played_songs %}
             <div class="song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
-              <div class="d-flex align-items-center gap-2 p-2" style="background: #f2f3f8; border-radius: 10px;">
+              <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
                     <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -498,19 +619,12 @@
                   <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
                   <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
                     <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
-                    {% if song.bpm %}
-                      <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
-                    {% endif %}
-                    {% if song.key %}
-                      <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
-                    {% endif %}
+                    <span class="badge flex-shrink-0" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.6rem; padding: 0.25rem 0.4rem; font-weight: 600;">
+                      {{ song.badge_label }}
+                    </span>
                   </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
-                  <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
-                    <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
-                    <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
-                  </div>
                   <span class="d-inline-flex align-items-center justify-content-center" style="width: 2rem; height: 2rem; color: #1cc88a; font-size: 1.2rem;">
                     <i class="fas fa-check-circle"></i>
                   </span>
@@ -518,7 +632,7 @@
               </div>
             </div>
           {% empty %}
-            <div class="p-3 text-center" style="background: #f2f3f8; border-radius: 10px; color: #747688; font-size: 0.9rem;">Encara no ha començat la festa.</div>
+            <div class="mobile-empty-state">Encara no ha començat la festa.</div>
           {% endfor %}
         </section>
 
@@ -538,8 +652,8 @@
     <div class="alert alert-info d-none d-md-block">No hi ha cançons per aquesta festa!</div>
 
     <!-- Vista mòbil - No songs -->
-    <div class="d-md-none px-4 pt-3 pb-32" style="background: #f8f9fe; min-height: 100vh;">
-      <div class="text-center py-4">
+    <div class="mobile-page-shell d-md-none">
+      <div class="mobile-page-content text-center py-4">
         <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
         <h4 class="fw-bold mb-1" style="color: #191c1f;">No hi ha cançons</h4>
         <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Aquesta festa encara no té cançons disponibles</p>
@@ -548,10 +662,40 @@
   {% endif %}
 </div>
 
+<!-- Alert area for Spotify errors -->
+<div id="spotify-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
+
 {% if has_spotify and spotify_token %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
+// Function to show dismissible alerts
+function showSpotifyAlert(message, type = 'warning') {
+  const alertArea = document.getElementById('spotify-alert-area');
+  if (!alertArea) return;
+
+  const alertId = 'alert-' + Date.now();
+  const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle';
+
+  alertArea.innerHTML = `
+    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
+      <i class="fas ${iconClass} me-2"></i>
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  setTimeout(() => {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+      alert.classList.remove('show');
+      setTimeout(() => alertArea.innerHTML = '', 150);
+    }
+  }, 5000);
+}
+
 // Spotify Web Playback SDK Variables
 let spotifyPlayer = null;
 let spotifyDeviceId = null;
@@ -635,7 +779,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 function playSpotifyTrack(spotifyId) {
   if (!spotifyPlayer || !spotifyDeviceId) {
     console.error('[SPOTIFY] Player not ready');
-    alert('El reproductor de Spotify no està llest. Espera uns segons...');
+    showSpotifyAlert('El reproductor de Spotify no està llest. Espera uns segons...', 'info');
     return;
   }
 
@@ -651,13 +795,13 @@ function playSpotifyTrack(spotifyId) {
       console.log('[SPOTIFY] Playing track:', spotifyId);
     } else if (response.status === 403) {
       console.error('[SPOTIFY] Premium required');
-      alert('Necessites Spotify Premium per reproduir cançons completes');
+      showSpotifyAlert('Necessites Spotify Premium per reproduir cançons completes', 'warning');
     } else if (response.status === 401) {
       console.error('[SPOTIFY] Unauthorized');
-      alert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.');
+      showSpotifyAlert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.', 'danger');
     } else {
       console.error('[SPOTIFY] Error playing track:', response.status);
-      alert('Error reproduint la cançó. Torna-ho a provar.');
+      showSpotifyAlert('Error reproduint la cançó. Torna-ho a provar.', 'danger');
     }
   });
 }

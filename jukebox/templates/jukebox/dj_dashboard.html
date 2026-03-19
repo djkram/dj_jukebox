@@ -30,6 +30,37 @@
   .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
   .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
 
+  /* Status Badges - Compacte estil mòbil */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .status-badge i {
+    font-size: 0.7rem;
+  }
+  .status-accepted {
+    background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+  }
+  .status-rejected {
+    background: linear-gradient(135deg, #e74a3b 0%, #d32f2f 100%);
+  }
+  .status-pending {
+    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
+    color: #333;
+    text-shadow: none;
+  }
+
   .dj-song-cell {
     display: flex;
     align-items: center;
@@ -127,44 +158,130 @@
     line-height: 1.05;
   }
 </style>
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                    Temes a la festa
-                </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{ total_songs }}
-                </div>
-            </div>
+<!-- Dashboard KPIs - Compacte 4x2 -->
+<style>
+.kpi-card-compact {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    border-left: 2px solid;
+    height: 100%;
+    min-height: 38px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+.kpi-card-compact .kpi-icon {
+    font-size: 1rem;
+    opacity: 0.85;
+    flex-shrink: 0;
+}
+.kpi-card-compact .kpi-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    flex: 1;
+    min-width: 0;
+}
+.kpi-card-compact .kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+}
+.kpi-card-compact .kpi-subvalue {
+    font-size: 0.7rem;
+    color: #6c757d;
+    margin-left: 0.35rem;
+    font-weight: 500;
+}
+.kpi-primary { border-left-color: #4e73df; }
+.kpi-primary .kpi-label { color: #4e73df; }
+.kpi-success { border-left-color: #1cc88a; }
+.kpi-success .kpi-label { color: #1cc88a; }
+.kpi-info { border-left-color: #36b9cc; }
+.kpi-info .kpi-label { color: #36b9cc; }
+.kpi-warning { border-left-color: #f6c23e; }
+.kpi-warning .kpi-label { color: #f6c23e; }
+.kpi-danger { border-left-color: #e74a3b; }
+.kpi-danger .kpi-label { color: #e74a3b; }
+.kpi-purple { border-left-color: #6f42c1; }
+.kpi-purple .kpi-label { color: #6f42c1; }
+</style>
+
+<div class="row g-2 mb-3">
+    <!-- Fila 1: 4 KPIs principals -->
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-primary">
+            <div class="kpi-icon">🎵</div>
+            <div class="kpi-label">Temes festa</div>
+            <div class="kpi-value">{{ total_songs }}</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                    Total de vots
-                </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{ total_votes }}
-                </div>
-            </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-success">
+            <div class="kpi-icon">💜</div>
+            <div class="kpi-label">Total vots</div>
+            <div class="kpi-value">{{ total_votes }}</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                    Temes ja posats
-                </div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{ played_songs }}
-                </div>
-            </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-info">
+            <div class="kpi-icon">👥</div>
+            <div class="kpi-label">Usuaris actius</div>
+            <div class="kpi-value">{{ active_users }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-warning">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-label">Vots 30 min</div>
+            <div class="kpi-value">{{ recent_votes }}</div>
         </div>
     </div>
 </div>
+
+<div class="row g-2 mb-3">
+    <!-- Fila 2: 4 KPIs secundaris -->
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-danger">
+            <div class="kpi-icon">📝</div>
+            <div class="kpi-label">Peticions pend.</div>
+            <div class="kpi-value">{{ pending_requests_count }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-success">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-label">Temes votats</div>
+            <div class="kpi-value">{{ songs_with_votes }}<span class="kpi-subvalue">{{ songs_with_votes_percentage }}%</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-purple">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-label">Coins gastats</div>
+            <div class="kpi-value">{{ total_coins_spent }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-lg-3">
+        <div class="kpi-card-compact kpi-info">
+            <div class="kpi-icon">✓</div>
+            <div class="kpi-label">Temes posats</div>
+            <div class="kpi-value">{{ played_songs }}</div>
+        </div>
+    </div>
+</div>
+
+<div id="dashboard-request-message" class="mb-3"></div>
 
 <!-- Recomanacions intel·ligents -->
 <div class="row g-4 mb-4">
@@ -246,7 +363,7 @@
                                 <div class="desktop-request-subtitle text-truncate">{{ req.artist }}</div>
                                 <div class="desktop-request-subtitle mb-1 text-truncate">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
                                 <div class="d-flex gap-2 mt-2">
-                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill">
+                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
                                         {% csrf_token %}
                                         <input type="hidden" name="request_id" value="{{ req.id }}">
                                         <input type="hidden" name="action" value="accept">
@@ -254,7 +371,7 @@
                                             <i class="fas fa-check"></i>
                                         </button>
                                     </form>
-                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill">
+                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill dashboard-request-action-form">
                                         {% csrf_token %}
                                         <input type="hidden" name="request_id" value="{{ req.id }}">
                                         <input type="hidden" name="action" value="reject">
@@ -329,7 +446,8 @@
                                 <th>Cançó</th>
                                 <th>BPM</th>
                                 <th>Key</th>
-                                <th>Vots</th>
+                                <th><i class="fas fa-heart text-danger"></i></th>
+                                <th><i class="fas fa-heart-broken text-secondary"></i></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -366,7 +484,10 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge badge-primary">{{ song.num_votes }}</span>
+                                    <span class="badge badge-danger">{{ song.num_likes }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-secondary">{{ song.num_dislikes }}</span>
                                 </td>
                                 <td>
                                     <form method="post" action="{% url 'mark_song_played' song.id %}">
@@ -407,7 +528,8 @@
                                 <th>Cançó</th>
                                 <th>BPM</th>
                                 <th>Key</th>
-                                <th>Vots</th>
+                                <th><i class="fas fa-heart text-danger"></i></th>
+                                <th><i class="fas fa-heart-broken text-secondary"></i></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -443,7 +565,10 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                    <span class="badge badge-success">{{ song.num_votes }}</span>
+                                    <span class="badge badge-danger">{{ song.num_likes }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-secondary">{{ song.num_dislikes }}</span>
                                 </td>
                             </tr>
                         {% empty %}
@@ -462,15 +587,138 @@
     </div>
 </div>
 
+<!-- Bootstrap Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirmar acció</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody">
+        <!-- Missatge dinàmic -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·lar</button>
+        <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Reusable confirm modal function
+  function showConfirm(title, message, onConfirm) {
+    document.getElementById('confirmModalLabel').textContent = title;
+    document.getElementById('confirmModalBody').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    const confirmBtn = document.getElementById('confirmModalBtn');
+    confirmBtn.onclick = () => {
+      modal.hide();
+      onConfirm();
+    };
+
+    modal.show();
+  }
+
   var input = document.getElementById('song-search');
-  if (!input) return;
-  input.addEventListener('input', function() {
-    var q = input.value.trim().toLowerCase();
-    document.querySelectorAll('table tbody tr').forEach(function(row) {
-      var title = row.cells[0].textContent.toLowerCase();
-      row.style.display = title.includes(q) ? '' : 'none';
+  if (input) {
+    input.addEventListener('input', function() {
+      var q = input.value.trim().toLowerCase();
+      document.querySelectorAll('table tbody tr').forEach(function(row) {
+        var title = row.cells[0].textContent.toLowerCase();
+        row.style.display = title.includes(q) ? '' : 'none';
+      });
+    });
+  }
+
+  var requestMessageArea = document.getElementById('dashboard-request-message');
+
+  function showDashboardMessage(message, type) {
+    if (!requestMessageArea) return;
+    requestMessageArea.innerHTML = `
+      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.dashboard-request-action-form').forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      var action = form.querySelector('input[name="action"]').value;
+      var userCredits = parseInt(form.dataset.userCredits || '0', 10);
+      var cost = parseInt(form.dataset.cost || '0', 10);
+      var allowWithoutCharge = false;
+
+      if (action === 'accept') {
+        if (userCredits < cost) {
+          showConfirm(
+            'Usuari sense prou coins',
+            `L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment sense cobrar-li?`,
+            function() {
+              allowWithoutCharge = true;
+              submitRequestForm();
+            }
+          );
+          return;
+        } else {
+          showConfirm(
+            'Acceptar petició',
+            `Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`,
+            submitRequestForm
+          );
+          return;
+        }
+      } else {
+        showConfirm(
+          'Rebutjar petició',
+          'Rebutjar aquesta petició? No es cobrarà cap Coin.',
+          submitRequestForm
+        );
+        return;
+      }
+
+      function submitRequestForm() {
+        var formData = new FormData(form);
+        if (allowWithoutCharge) {
+          formData.append('allow_without_charge', '1');
+        }
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          body: formData
+        })
+        .then(function(response) {
+          return response.json().then(function(data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function(result) {
+          if (result.ok && result.data.success) {
+            showDashboardMessage(result.data.message, 'success');
+            setTimeout(function() { window.location.reload(); }, 900);
+            return;
+          }
+
+          showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
+        })
+        .catch(function(error) {
+          console.error('Error processant la petició:', error);
+          showDashboardMessage('No s\'ha pogut processar la petició.', 'danger');
+        });
+      }
     });
   });
 });
@@ -478,57 +726,102 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none px-4 pt-2 pb-32" style="background: #f8f9fe; min-height: 100vh;">
-  <main class="d-flex flex-column gap-4">
-    <section style="margin-top: 0; margin-bottom: -0.35rem;">
-      <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
-        <a href="{% url 'dj_dashboard' %}" class="flex-grow-1 text-decoration-none text-center" style="background: #eef2ff; color: #0040e0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Dashboard</a>
-        <a href="{% url 'party_settings' party.id %}" class="flex-grow-1 text-decoration-none text-center" style="background: transparent; color: #747688; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Settings</a>
+<div class="mobile-page-shell d-md-none">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
+    <div class="mobile-group-stack" style="gap: 0.5rem;">
+    <section>
+      <div class="mobile-segmented">
+        <a href="{% url 'dj_dashboard' %}" class="mobile-segmented-item is-active">Dashboard</a>
+        <a href="{% url 'party_settings' party.id %}" class="mobile-segmented-item">Settings</a>
       </div>
     </section>
 
-    <!-- Stats Grid -->
-    <section class="grid grid-cols-3 gap-2">
-      <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(0, 64, 224, 0.1);">
-            <i class="fas fa-music" style="color: #0040e0; font-size: 1rem;"></i>
+    <!-- Stats Grid - 8 KPIs Compactes -->
+    <section class="mobile-stat-grid mobile-stat-grid--4">
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-music" style="color: #0040e0; font-size: 0.85rem;"></i>
           </div>
-          <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ total_songs }}</p>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ total_songs }}</p>
         </div>
-        <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Cançons</span>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Temes</span>
       </div>
-      <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(231, 76, 60, 0.1);">
-            <i class="fas fa-heart" style="color: #e74c3c; font-size: 1rem;"></i>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-heart" style="color: #0040e0; font-size: 0.85rem;"></i>
           </div>
-          <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ total_votes }}</p>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ total_votes }}</p>
         </div>
-        <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Vots</span>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Vots</span>
       </div>
-      <div class="bg-white px-2 py-2 shadow-sm text-center" style="border-radius: 12px;">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-          <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(28, 200, 138, 0.1);">
-            <i class="fas fa-check-circle" style="color: #1cc88a; font-size: 1rem;"></i>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-users" style="color: #0040e0; font-size: 0.8rem;"></i>
           </div>
-          <p class="font-headline font-bold mb-0" style="color: #191c1f; font-size: 1rem; line-height: 1;">{{ played_songs }}</p>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ active_users }}</p>
         </div>
-        <span class="d-block fw-semibold" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">Posades</span>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Usuaris</span>
+      </div>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-bolt" style="color: #0040e0; font-size: 0.8rem;"></i>
+          </div>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ recent_votes }}</p>
+        </div>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">30 min</span>
+      </div>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-file-alt" style="color: #0040e0; font-size: 0.78rem;"></i>
+          </div>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ pending_requests_count }}</p>
+        </div>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Pend.</span>
+      </div>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-check-circle" style="color: #0040e0; font-size: 0.82rem;"></i>
+          </div>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ songs_with_votes }}</p>
+        </div>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Votats</span>
+      </div>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-coins" style="color: #0040e0; font-size: 0.82rem;"></i>
+          </div>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ total_coins_spent }}</p>
+        </div>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Coins</span>
+      </div>
+      <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
+        <div class="mobile-stat-top" style="gap: 0.35rem; margin-bottom: 0.2rem;">
+          <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1); width: 1.8rem; height: 1.8rem;">
+            <i class="fas fa-check" style="color: #0040e0; font-size: 0.82rem;"></i>
+          </div>
+          <p class="mobile-stat-value mb-0" style="font-size: 0.95rem;">{{ played_songs }}</p>
+        </div>
+        <span class="mobile-stat-label" style="font-size: 0.62rem;">Posats</span>
       </div>
     </section>
+    </div>
 
     <!-- Recommendations -->
     {% if recommended_songs %}
-    <section>
-      <div class="mb-3">
-        <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em;">SELECCIONS INTEL·LIGENTS</span>
-      </div>
-      <div class="row g-1">
+    <section class="mobile-section-header">
+      <span class="mobile-kicker">SELECCIONS INTEL·LIGENTS</span>
+      <div class="mobile-card-grid mobile-card-grid--3">
         {% for song in recommended_songs|slice:":6" %}
-          <div class="col-4">
+          <div>
             <div class="bg-white p-2 h-100 d-flex flex-column" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-              <div class="rounded-lg overflow-hidden mb-2 position-relative" style="aspect-ratio: 1 / 1; background: #eceef3;">
+              <div class="rounded-lg overflow-hidden mb-2 position-relative" style="aspect-ratio: 1 / 0.82; background: #eceef3;">
                 {% if song.album_image_url %}
                   <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
                 {% else %}
@@ -538,13 +831,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% endif %}
                 <form method="post" action="{% url 'mark_song_played' song.id %}" class="position-absolute mb-0" style="right: 0.35rem; bottom: 0.35rem;">
                   {% csrf_token %}
-                  <button type="submit" class="border-0 d-inline-flex align-items-center justify-content-center rounded-circle" aria-label="Posada" style="width: 1.55rem; height: 1.55rem; background: rgba(255, 255, 255, 0.96); color: #1cc88a; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);">
-                    <i class="far fa-check-circle" style="font-size: 0.82rem;"></i>
+                  <button type="submit" class="border-0 d-inline-flex align-items-center justify-content-center" aria-label="Posada" style="width: 2rem; height: 2rem; border-radius: 10px; background: white; color: #1cc88a; box-shadow: inset 0 0 0 1.5px rgba(28, 200, 138, 0.45);">
+                    <i class="fas fa-compact-disc" style="font-size: 0.85rem;"></i>
                   </button>
                 </form>
               </div>
-              <div class="fw-bold mb-1" style="font-size: 0.68rem; line-height: 1.05; color: #191c1f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.45rem;" title="{{ song.title }}">{{ song.title }}</div>
-              <div class="text-muted mb-2" style="font-size: 0.6rem; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.25rem;" title="{{ song.artist }}">{{ song.artist }}</div>
+              <div class="fw-bold mb-1" style="font-size: 0.66rem; line-height: 1.05; color: #191c1f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.35rem;" title="{{ song.title }}">{{ song.title }}</div>
+              <div class="text-muted" style="font-size: 0.58rem; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.15rem;" title="{{ song.artist }}">{{ song.artist }}</div>
             </div>
           </div>
         {% endfor %}
@@ -552,17 +845,15 @@ document.addEventListener('DOMContentLoaded', function() {
     </section>
     {% endif %}
 
-    <section>
-      <div class="mb-3">
-        <div class="d-flex align-items-center gap-1 p-1" style="background: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);">
-          <button type="button" class="dashboard-mobile-tab flex-grow-1 is-active" data-dashboard-tab="bag" style="border: none; background: #eef2ff; color: #0040e0; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Maleta del DJ</button>
-          <button type="button" class="dashboard-mobile-tab flex-grow-1" data-dashboard-tab="played" style="border: none; background: transparent; color: #747688; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 0.8rem; border-radius: 12px;">Temes ja posats</button>
-        </div>
+    <section class="mobile-group-stack">
+      <div class="mobile-segmented">
+        <button type="button" class="dashboard-mobile-tab mobile-segmented-item is-active" data-dashboard-tab="bag">Maleta del DJ</button>
+        <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="played">Temes ja posats</button>
       </div>
 
-      <div id="dashboard-mobile-tab-bag" class="d-flex flex-column gap-2">
+      <div id="dashboard-mobile-tab-bag" class="mobile-list-stack">
         {% for song in pending_songs %}
-          <div class="d-flex align-items-center gap-2 p-2" style="background: #f2f3f8; border-radius: 10px;">
+          <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -585,9 +876,13 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
-              <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
-                <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
-                <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
+              <div class="d-flex flex-column align-items-center" style="min-width: 1.5rem;">
+                <span class="fw-bold" style="color: #e74c3c; font-size: 0.9rem; line-height: 1;">{{ song.num_likes }}</span>
+                <span style="font-size: 0.65rem; line-height: 1;"><i class="fas fa-heart"></i></span>
+              </div>
+              <div class="d-flex flex-column align-items-center" style="min-width: 1.5rem;">
+                <span class="fw-bold" style="color: #858796; font-size: 0.9rem; line-height: 1;">{{ song.num_dislikes }}</span>
+                <span style="font-size: 0.65rem; line-height: 1;"><i class="fas fa-heart-broken"></i></span>
               </div>
               <form method="post" action="{% url 'mark_song_played' song.id %}" class="m-0">
                 {% csrf_token %}
@@ -598,16 +893,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
         {% empty %}
-          <div class="text-center py-4" style="color: #747688;">
+          <div class="mobile-empty-state">
             <i class="fas fa-inbox fa-2x mb-2"></i>
             <p class="mb-0">Sense cançons a la cua</p>
           </div>
         {% endfor %}
       </div>
 
-      <div id="dashboard-mobile-tab-played" class="d-none flex-column gap-2">
+      <div id="dashboard-mobile-tab-played" class="d-none mobile-list-stack">
         {% for song in played_songs_list %}
-          <div class="d-flex align-items-center gap-2 p-2" style="background: rgba(28, 200, 138, 0.05); border-radius: 10px;">
+          <div class="mobile-list-card mobile-list-card--positive d-flex align-items-center gap-2 p-2">
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -630,9 +925,13 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
-              <div class="d-flex flex-column align-items-center" style="min-width: 1.75rem;">
-                <span class="fw-bold" style="color: #191c1f; font-size: 0.9rem; line-height: 1;">{{ song.num_votes }}</span>
-                <span class="text-uppercase fw-bold" style="font-size: 0.5rem; color: #747688; line-height: 1;">VOTS</span>
+              <div class="d-flex flex-column align-items-center" style="min-width: 1.5rem;">
+                <span class="fw-bold" style="color: #e74c3c; font-size: 0.9rem; line-height: 1;">{{ song.num_likes }}</span>
+                <span style="font-size: 0.65rem; line-height: 1;"><i class="fas fa-heart"></i></span>
+              </div>
+              <div class="d-flex flex-column align-items-center" style="min-width: 1.5rem;">
+                <span class="fw-bold" style="color: #858796; font-size: 0.9rem; line-height: 1;">{{ song.num_dislikes }}</span>
+                <span style="font-size: 0.65rem; line-height: 1;"><i class="fas fa-heart-broken"></i></span>
               </div>
               <span class="d-inline-flex align-items-center justify-content-center" style="width: 2rem; height: 2rem; color: #1cc88a; font-size: 1.2rem;">
                 <i class="fas fa-check-circle"></i>
@@ -640,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
         {% empty %}
-          <div class="text-center py-4" style="color: #747688;">
+          <div class="mobile-empty-state">
             <i class="fas fa-hourglass-start fa-2x mb-2"></i>
             <p class="mb-0">Encara no ha començat la festa</p>
           </div>

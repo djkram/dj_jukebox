@@ -1,6 +1,38 @@
 {% extends "jukebox/admin_base.html" %}
 {% block page_title %}Gestionar peticions{% endblock %}
 {% block content %}
+<style>
+  /* Status Badges - Compacte estil mòbil */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .status-badge i {
+    font-size: 0.7rem;
+  }
+  .status-accepted {
+    background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+  }
+  .status-rejected {
+    background: linear-gradient(135deg, #e74a3b 0%, #d32f2f 100%);
+  }
+  .status-pending {
+    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
+    color: #333;
+    text-shadow: none;
+  }
+</style>
 <div class="container-fluid">
   <!-- Missatges -->
   <div id="message-area" class="mb-3"></div>
@@ -50,7 +82,9 @@
                     <small class="text-muted">Coins disponibles: {{ req.user.credits }}</small>
                   </td>
                   <td>
-                    <span class="badge bg-warning text-dark">{{ req.coins_cost }} Coins</span>
+                    <span class="status-badge status-pending">
+                      <i class="fas fa-coins"></i>{{ req.coins_cost }}
+                    </span>
                   </td>
                   <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
                   <td class="text-center">
@@ -121,9 +155,13 @@
                   <td>{{ req.user.username }}</td>
                   <td>
                     {% if req.status == 'accepted' %}
-                      <span class="badge bg-success">Acceptada</span>
+                      <span class="status-badge status-accepted">
+                        <i class="fas fa-check-circle"></i>Acceptada
+                      </span>
                     {% else %}
-                      <span class="badge bg-danger">Rebutjada</span>
+                      <span class="status-badge status-rejected">
+                        <i class="fas fa-times-circle"></i>Rebutjada
+                      </span>
                     {% endif %}
                   </td>
                   <td>{{ req.processed_by.username|default:"-" }}</td>
@@ -140,9 +178,43 @@
   </div>
 </div>
 
+<!-- Bootstrap Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirmar acció</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmModalBody">
+        <!-- Missatge dinàmic -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·lar</button>
+        <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const messageArea = document.getElementById('message-area');
+
+  // Reusable confirm modal function
+  function showConfirm(title, message, onConfirm) {
+    document.getElementById('confirmModalLabel').textContent = title;
+    document.getElementById('confirmModalBody').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    const confirmBtn = document.getElementById('confirmModalBtn');
+    confirmBtn.onclick = () => {
+      modal.hide();
+      onConfirm();
+    };
+
+    modal.show();
+  }
 
   function showMessage(message, type = 'success') {
     messageArea.innerHTML = `
@@ -170,16 +242,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const cost = parseInt(this.dataset.cost);
 
       if (userCredits < cost) {
-        if (!confirm(`L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment? (No es cobrarà)`)) {
-          return;
-        }
+        showConfirm(
+          'Usuari sense prou coins',
+          `L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment sense cobrar-li?`,
+          () => processRequest(requestId, 'accept', true)
+        );
       } else {
-        if (!confirm(`Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`)) {
-          return;
-        }
+        showConfirm(
+          'Acceptar petició',
+          `Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`,
+          () => processRequest(requestId, 'accept', false)
+        );
       }
-
-      processRequest(requestId, 'accept');
     });
   });
 
@@ -188,23 +262,28 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.addEventListener('click', function() {
       const requestId = this.dataset.id;
 
-      if (!confirm('Rebutjar aquesta petició? No es cobrarà cap Coin.')) {
-        return;
-      }
-
-      processRequest(requestId, 'reject');
+      showConfirm(
+        'Rebutjar petició',
+        'Rebutjar aquesta petició? No es cobrarà cap Coin.',
+        () => processRequest(requestId, 'reject')
+      );
     });
   });
 
-  function processRequest(requestId, action) {
+  function processRequest(requestId, action, allowWithoutCharge = false) {
     const formData = new FormData();
     formData.append('request_id', requestId);
     formData.append('action', action);
+    if (allowWithoutCharge) {
+      formData.append('allow_without_charge', '1');
+    }
 
     fetch('{% url "manage_song_requests" %}', {
       method: 'POST',
       headers: {
-        'X-CSRFToken': '{{ csrf_token }}'
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
       },
       body: formData
     })

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-container": "#5e24e1",
+              "on-secondary-fixed": "#001356",
+              "surface-container-high": "#e5e8eb",
+              "surface": "#f7fafd",
+              "secondary-fixed": "#dde1ff",
+              "on-surface": "#181c1e",
+              "outline": "#747687",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#20005f",
+              "tertiary-fixed": "#e7deff",
+              "on-primary-fixed": "#001356",
+              "secondary-fixed-dim": "#b8c3ff",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2d3133",
+              "inverse-primary": "#b8c3ff",
+              "surface-container-highest": "#e0e3e6",
+              "on-primary-fixed-variant": "#0035be",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "primary-fixed": "#dde1ff",
+              "on-secondary-fixed-variant": "#0035be",
+              "on-primary-container": "#bdc7ff",
+              "outline-variant": "#c4c5d8",
+              "on-secondary-container": "#efefff",
+              "tertiary": "#4500b9",
+              "surface-tint": "#1b4ce9",
+              "surface-container-lowest": "#ffffff",
+              "on-surface-variant": "#434655",
+              "on-secondary": "#ffffff",
+              "inverse-on-surface": "#eef1f4",
+              "background": "#f7fafd",
+              "surface-container": "#ebeef1",
+              "on-tertiary-container": "#d0c2ff",
+              "surface-variant": "#e0e3e6",
+              "tertiary-fixed-dim": "#cdbdff",
+              "surface-bright": "#f7fafd",
+              "primary-fixed-dim": "#b8c3ff",
+              "surface-container-low": "#f1f4f7",
+              "primary": "#002ea8",
+              "secondary": "#0040e0",
+              "on-background": "#181c1e",
+              "error-container": "#ffdad6",
+              "secondary-container": "#2e5bff",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d7dadd",
+              "primary-container": "#0040e0",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Epilogue', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-gradient-to-b from-[#0040e0] to-[#2e5bff] flex flex-col py-6 shadow-[24px_0_40px_rgba(0,64,224,0.06)] z-50">
+<div class="px-6 mb-8">
+<h1 class="text-2xl font-bold text-white tracking-tighter">DJ Jukebox</h1>
+<p class="text-blue-100/60 text-xs font-label uppercase tracking-widest mt-1">The Sonic Architect</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-blue-100/70 hover:text-white transition-all duration-200 ease-out hover:bg-white/5 px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs tracking-wide uppercase">Inici</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-all duration-200 ease-out hover:bg-white/5 px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">queue_music</span>
+<span class="text-xs tracking-wide uppercase">Peticions</span>
+</a>
+<a class="bg-white/10 text-white rounded-lg mx-2 px-4 py-3 font-semibold shadow-inner flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-xs tracking-wide uppercase">Configuració</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-all duration-200 ease-out hover:bg-white/5 px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+<span class="text-xs tracking-wide uppercase">Backoffice</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-all duration-200 ease-out hover:bg-white/5 px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-xs tracking-wide uppercase">Biblioteca</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<button class="w-full bg-gradient-to-r from-primary to-secondary-container text-white py-3 rounded-lg font-headline font-semibold flex items-center justify-center gap-2 mb-6 active:scale-95 transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+                Nova Festa
+            </button>
+<a class="text-blue-100/70 hover:text-white transition-all px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-xs tracking-wide uppercase">Perfil</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-all px-4 py-3 mx-2 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-xs tracking-wide uppercase">Sortir</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8">
+<div class="flex items-center gap-6">
+<h2 class="text-xl font-headline font-bold text-primary">Sonic Architect Console</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="bg-surface-container-high border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-2 focus:ring-primary/20" placeholder="Cerca global..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<a class="text-primary border-b-2 border-primary pb-1 font-bold text-sm font-body" href="#">Directe</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-sm font-body" href="#">Arxiu</a>
+<a class="text-slate-500 hover:text-primary transition-colors text-sm font-body" href="#">Analítica</a>
+</div>
+<div class="h-6 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-surface-container-high rounded-full transition-all flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="bg-surface-container-low px-4 py-1.5 rounded-full text-xs font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">wallet</span>
+                    Estat de la Sala
+                </button>
+<div class="flex items-center gap-2 pl-2">
+<div class="text-right">
+<p class="text-[10px] text-slate-400 leading-none">DJ Avatar</p>
+<p class="text-xs font-bold text-on-surface">Marc Planagumà</p>
+</div>
+<img alt="Avatar" class="w-8 h-8 rounded-full object-cover" data-alt="Profile photo of a professional DJ" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH-VmHcompdtUtSu0igG6L5RmEzWMapwUzk53kaO74O02qPVcZnitpl5RJwZMnbzC9s4kUo76JHzqIJ2E2gBUsEmjA_PE61dH3l6v4RWun1mwz54mc9hDLT4sXY-7YxN3-lmJV35lYf6Qwmnbm_DpqrEfwghrG7Az2dats3hTdElLTAztySaJ61ESmgL-lL_TAeZCTaWVRSnpq_NngG7AkR1Xj8G0mU_jifFbRdTVw84HzlDKPZBREH86EhpkUhTOZCh0KkwBmlNSD"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12">
+<div class="max-w-7xl mx-auto space-y-8">
+<header class="flex items-end justify-between">
+<div>
+<h1 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight">Configuració de la Festa</h1>
+<p class="text-on-surface-variant mt-1 text-lg">Ajusta els paràmetres operatius i la selecció musical.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-highest px-6 py-2.5 rounded-lg text-on-surface font-semibold hover:bg-surface-container-high transition-all">Descartar</button>
+<button class="bg-gradient-to-r from-primary to-secondary-container text-white px-8 py-2.5 rounded-lg font-headline font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">Guardar Canvis</button>
+</div>
+</header>
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: Settings Form -->
+<section class="col-span-4 space-y-6">
+<div class="bg-surface-container-low rounded-xl p-6 shadow-sm border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">tune</span>
+<h3 class="font-headline font-bold text-lg">Detalls de la festa</h3>
+</div>
+<form class="space-y-5">
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1">Nom de l'esdeveniment</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 shadow-sm" type="text" value="Summer Closing Party 2024"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1">Data i hora</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">calendar_today</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 shadow-sm" type="text" value="24 Setembre, 22:00"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1">Vots gratuïts</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 shadow-sm" type="number" value="3"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1">Coins gratuïts</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary/20 shadow-sm" type="number" value="50"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-1">Cost per cançó (Coins)</label>
+<div class="flex items-center gap-4 bg-surface-container-lowest p-1 rounded-lg shadow-sm">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<input class="flex-1 text-center bg-transparent border-none font-bold text-lg focus:ring-0" type="text" value="15"/>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</form>
+</div>
+<!-- Spotify Integration Section -->
+<div class="bg-gradient-to-br from-[#1DB954] to-[#191414] rounded-xl p-6 text-white shadow-xl shadow-[#1db954]/10 relative overflow-hidden group">
+<div class="relative z-10 flex flex-col h-full">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-white/20 p-2 rounded-lg backdrop-blur-md">
+<img alt="Spotify Logo" class="w-6 h-6 invert" data-alt="Spotify logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIjeWcnvyxeo_6JZV46XNvHZHEWYhDbwrH6lRWLi8ocQhUvhpJRcGMWl_71KpeghOrzvwT9JsH6H8wcRZCeHj6bmEXizKDBqJyt7lHrZRlKPbgMPNxwE6Ep6l2clylov7I_fINyumDY7McMe0RrcGPp70c2fBhWWLeIynCO6G8Zo6C4ZZtQLCnmVA22KmQ95NOvTrVYsSu08YyrOuZYxB_zvlraevC-1Bo9PqAw9juTgZmySqved3ATD2qY_21hwB2t5gRhQckSCXA"/>
+</div>
+<span class="text-[10px] font-bold bg-white/10 px-2 py-1 rounded tracking-widest uppercase">Connectat</span>
+</div>
+<h3 class="font-headline font-bold text-xl mb-1">Playlist de Spotify</h3>
+<p class="text-white/70 text-sm mb-6">Sincronització automàtica activa amb el teu compte professional.</p>
+<div class="bg-white/10 rounded-lg p-3 flex items-center gap-3 border border-white/5 backdrop-blur-sm mb-4">
+<div class="w-10 h-10 rounded bg-white/5 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white/50">music_note</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate">Techno Bunker 2024</p>
+<p class="text-[10px] text-white/50 uppercase tracking-tighter">428 Cançons • 24 hores</p>
+</div>
+<span class="material-symbols-outlined text-white/50 text-sm">open_in_new</span>
+</div>
+<button class="w-full bg-white text-[#191414] py-2.5 rounded-lg font-bold text-sm hover:scale-[1.02] transition-transform">
+                                Canviar Playlist
+                            </button>
+</div>
+<!-- Decorative glow -->
+<div class="absolute -right-12 -top-12 w-32 h-32 bg-white/10 blur-3xl rounded-full transition-all group-hover:scale-150"></div>
+</div>
+</section>
+<!-- Right Column: Playlist Management -->
+<section class="col-span-8 space-y-6">
+<div class="bg-surface-container-low rounded-xl p-1 shadow-sm border border-outline-variant/10">
+<div class="p-6 flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">playlist_play</span>
+</div>
+<h3 class="font-headline font-bold text-lg uppercase tracking-tight">Cançons de la playlist</h3>
+</div>
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-surface-container-highest border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Filtra per títol, artista o BPM..." type="text"/>
+</div>
+<button class="bg-surface-container-lowest p-2.5 rounded-lg hover:bg-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-on-surface">filter_list</span>
+</button>
+</div>
+<div class="overflow-hidden">
+<table class="w-full text-left border-separate border-spacing-y-2 px-6 pb-6">
+<thead>
+<tr class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+<th class="px-4 pb-2">Títol i Artista</th>
+<th class="px-4 pb-2">BPM</th>
+<th class="px-4 pb-2">Key</th>
+<th class="px-4 pb-2 text-center">Vots</th>
+<th class="px-4 pb-2 text-right">Accions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface-container-lowest hover:bg-surface-container-high transition-all group cursor-pointer">
+<td class="px-4 py-3 rounded-l-lg">
+<div class="flex items-center gap-3">
+<div class="relative w-12 h-12 rounded overflow-hidden shadow-md">
+<img class="w-full h-full object-cover" data-alt="Electronic music album cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBL1lCWiBs2ZB020BCIk28ZE1hqNWlXS3Ir5cMIqROqlC_jElMwSfMlG8l45MH5vddiByWOUj2NHx0FhwQ884yhPO0A3AK90XEanc3ZOT4qO-6IDABWm9mqc0id6dYjaarCwCv5JD0qi4DEDpQSw_PhWbwxf7NHDz1gRr9O1brJi2a1xQcmnZLLwW__CDchj5UEr5XfomfSjyAdcHDj_jlv0vEgNdcTevRrcUKBgsM3R_0OudwP2VIVgdcdMKzbajkh6GSN7BFV2CFr"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-lg">play_arrow</span>
+</div>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Laser Focus</p>
+<p class="text-xs text-slate-500">Cyberpunk Orchestra</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="bg-primary/5 text-primary text-xs font-bold px-2 py-1 rounded">128 BPM</span>
+</td>
+<td class="px-4 py-3">
+<span class="bg-tertiary/5 text-tertiary text-xs font-bold px-2 py-1 rounded uppercase tracking-tighter">4A (F-Minor)</span>
+</td>
+<td class="px-4 py-3 text-center">
+<div class="flex flex-col items-center">
+<span class="text-sm font-bold">1.2k</span>
+<span class="text-[8px] uppercase font-bold text-accent_cyan text-[#00e3fd]">Hot</span>
+</div>
+</td>
+<td class="px-4 py-3 text-right rounded-r-lg">
+<div class="flex justify-end gap-2">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-highest flex items-center justify-center transition-all text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-error/10 flex items-center justify-center transition-all text-slate-400 hover:text-error">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container-high transition-all group cursor-pointer">
+<td class="px-4 py-3 rounded-l-lg">
+<div class="flex items-center gap-3">
+<div class="relative w-12 h-12 rounded overflow-hidden shadow-md">
+<img class="w-full h-full object-cover" data-alt="Vibrant nightlife stage lights album cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiGr7aERblmRmNKgnVWOZ8H72d9m4rrqpOh8uwDEdfQyV6ON2dk_cKmpvCjSiNK68_BCc4zIKMEL90mKuVsG-8v0wPvT5ESRjrqQdy9tjzJwhrDIPJzBly7w55_2anaGwnhnEDAe6EtcQWsCKWe_7lA3ev9dOI2iWo7xI6gyMnnX4h4I9jGv4jXSeRkBE06dR9-4n206RsbB2pQE3uQXbL6jBMfqU2Gi5rZvtQrQn-Hngk8QboSuS-9NIQZymX-53PCwM7swfQgG6d"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-lg">play_arrow</span>
+</div>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Midnight Pulse</p>
+<p class="text-xs text-slate-500">Neon Dreams</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="bg-primary/5 text-primary text-xs font-bold px-2 py-1 rounded">124 BPM</span>
+</td>
+<td class="px-4 py-3">
+<span class="bg-tertiary/5 text-tertiary text-xs font-bold px-2 py-1 rounded uppercase tracking-tighter">8B (C-Major)</span>
+</td>
+<td class="px-4 py-3 text-center text-sm font-bold">842</td>
+<td class="px-4 py-3 text-right rounded-r-lg">
+<div class="flex justify-end gap-2">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-highest flex items-center justify-center transition-all text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-error/10 flex items-center justify-center transition-all text-slate-400 hover:text-error">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container-high transition-all group cursor-pointer">
+<td class="px-4 py-3 rounded-l-lg">
+<div class="flex items-center gap-3">
+<div class="relative w-12 h-12 rounded overflow-hidden shadow-md">
+<img class="w-full h-full object-cover" data-alt="Abstract musical visual album cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMvBvqi2fgxNqVRKrkgqzswUslxU62cC3SLZIjdvXn2s7ta1OfvU6mEi3nVoNkdvclT76ODlZc6oFdB2ScqeCBG58PhrxnEJsAuYe4bQhukg7Oxb5TxaNC1iVXbSGvvz8RoeCwMdAl_gbMYEHVc6fKaxcVGRctmT8jaAnP_8Yv5QiZilT5hKqd4R_YIZC2CzKQTKXI0zkDIhgVSpwA0j0Ob2wWgGWPSNqzsQWxojG4QWrR9GImV1PraG6jPNFaaP3L4CYdM52ao-FR"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-lg">play_arrow</span>
+</div>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Deep Horizon</p>
+<p class="text-xs text-slate-500">The Architect</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="bg-primary/5 text-primary text-xs font-bold px-2 py-1 rounded">132 BPM</span>
+</td>
+<td class="px-4 py-3">
+<span class="bg-tertiary/5 text-tertiary text-xs font-bold px-2 py-1 rounded uppercase tracking-tighter">11A (F#-Minor)</span>
+</td>
+<td class="px-4 py-3 text-center text-sm font-bold">456</td>
+<td class="px-4 py-3 text-right rounded-r-lg">
+<div class="flex justify-end gap-2">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-highest flex items-center justify-center transition-all text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-error/10 flex items-center justify-center transition-all text-slate-400 hover:text-error">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant/10 flex items-center justify-between">
+<p class="text-xs text-slate-500">Mostrant 3 de 128 cançons</p>
+<div class="flex gap-1">
+<button class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary text-white font-bold text-xs">1</button>
+<button class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-surface-container-high">2</button>
+<button class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-surface-container-high">3</button>
+<button class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-on-surface hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</body></html>

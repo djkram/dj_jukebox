@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "tertiary-container": "#5e24e1",
+            "on-secondary-fixed": "#001356",
+            "surface-container-high": "#e5e8eb",
+            "surface": "#f7fafd",
+            "secondary-fixed": "#dde1ff",
+            "on-surface": "#181c1e",
+            "outline": "#747687",
+            "error": "#ba1a1a",
+            "on-tertiary-fixed": "#20005f",
+            "tertiary-fixed": "#e7deff",
+            "on-primary-fixed": "#001356",
+            "secondary-fixed-dim": "#b8c3ff",
+            "on-error": "#ffffff",
+            "inverse-surface": "#2d3133",
+            "inverse-primary": "#b8c3ff",
+            "surface-container-highest": "#e0e3e6",
+            "on-primary-fixed-variant": "#0035be",
+            "on-tertiary-fixed-variant": "#4f00d0",
+            "primary-fixed": "#dde1ff",
+            "on-secondary-fixed-variant": "#0035be",
+            "on-primary-container": "#bdc7ff",
+            "outline-variant": "#c4c5d8",
+            "on-secondary-container": "#efefff",
+            "tertiary": "#4500b9",
+            "surface-tint": "#1b4ce9",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#434655",
+            "on-secondary": "#ffffff",
+            "inverse-on-surface": "#eef1f4",
+            "background": "#f7fafd",
+            "surface-container": "#ebeef1",
+            "on-tertiary-container": "#d0c2ff",
+            "surface-variant": "#e0e3e6",
+            "tertiary-fixed-dim": "#cdbdff",
+            "surface-bright": "#f7fafd",
+            "primary-fixed-dim": "#b8c3ff",
+            "surface-container-low": "#f1f4f7",
+            "primary": "#002ea8",
+            "secondary": "#0040e0",
+            "on-background": "#181c1e",
+            "error-container": "#ffdad6",
+            "secondary-container": "#2e5bff",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "surface-dim": "#d7dadd",
+            "primary-container": "#0040e0",
+            "on-tertiary": "#ffffff"
+          },
+          fontFamily: {
+            "headline": ["Epilogue"],
+            "body": ["Plus Jakarta Sans"],
+            "label": ["Plus Jakarta Sans"]
+          },
+          borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1, h2, h3 { font-family: 'Epilogue', sans-serif; }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- SideNavBar Anchor -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-gradient-to-b from-[#0040e0] to-[#2e5bff] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<div class="text-2xl font-bold text-white tracking-tighter">DJ Jukebox</div>
+<div class="text-blue-100/60 text-[10px] uppercase tracking-widest mt-1">The Sonic Architect</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-blue-100/70 hover:text-white transition-colors px-4 py-3 mx-2 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs tracking-wide uppercase">Inici</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-colors px-4 py-3 mx-2 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out group" href="#">
+<span class="material-symbols-outlined">queue_music</span>
+<span class="text-xs tracking-wide uppercase">Peticions</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-colors px-4 py-3 mx-2 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-xs tracking-wide uppercase">Configuració</span>
+</a>
+<a class="bg-white/10 text-white rounded-lg mx-2 px-4 py-3 font-semibold shadow-inner flex items-center gap-3 group scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[#00e3fd]">admin_panel_settings</span>
+<span class="text-xs tracking-wide uppercase">Backoffice</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-colors px-4 py-3 mx-2 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out group" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-xs tracking-wide uppercase">Biblioteca</span>
+</a>
+</nav>
+<div class="px-4 mb-6">
+<button class="w-full py-3 px-4 bg-gradient-to-r from-primary-container to-secondary-container text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-lg scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+        Nova Festa
+      </button>
+</div>
+<div class="mt-auto border-t border-white/10 pt-4 space-y-1">
+<div class="px-6 py-3 flex items-center gap-3">
+<img class="w-10 h-10 rounded-full bg-white/20 object-cover" data-alt="Marc Planagumà Valls DJ Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHvx3XDhc0dsIspofcd7A7FzQeJWq5drhQHgZ-evB1-_usUPeYTSB0alNeq2IDajVEOa8fk6HZjqerZrcM0-TljxHD3ZshKIYs9Y9kR5Mun0iOQo9Dpcwi8-zvohkSo72eNRlqULGnOnYROtfh-_Fykx5xYEH72ORr34aIAifGt_XCorOLJuVJWbb7Rec-xykldy8l_kNX-sZahKjih2VnnV2AULZCZkLXgfMQwBI9vXehmHMhichqsS5-fkbzJ3ltu1efGmIrCn6a"/>
+<div>
+<p class="text-white text-xs font-bold truncate">Marc Planagumà Valls</p>
+<p class="text-blue-200/50 text-[10px]">DJ Principal</p>
+</div>
+</div>
+<a class="text-blue-100/70 hover:text-white transition-colors px-6 py-3 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-xs tracking-wide uppercase">Perfil</span>
+</a>
+<a class="text-blue-100/70 hover:text-white transition-colors px-6 py-3 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-xs tracking-wide uppercase">Sortir</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="pl-64 min-h-screen">
+<!-- TopNavBar Anchor -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 z-40">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+<input class="bg-surface-container-highest border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-80 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Cerca festes, djs o sales..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#0040e0] border-b-2 border-[#0040e0] pb-1 font-bold text-sm Plus Jakarta Sans tracking-tight" href="#">Directe</a>
+<a class="text-slate-500 hover:text-[#0040e0] transition-colors text-sm font-medium" href="#">Arxiu</a>
+<a class="text-slate-500 hover:text-[#0040e0] transition-colors text-sm font-medium" href="#">Analítica</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-[#f1f4f7] rounded-full transition-all flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center gap-2 bg-primary/5 text-primary px-4 py-1.5 rounded-full font-bold text-sm hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-sm">wallet</span>
+          Estat de la Sala
+        </button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="pt-24 pb-12 px-8">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Backoffice</h1>
+<p class="text-on-surface-variant max-w-lg">Gestió centralitzada d'esdeveniments, sales i control d'accés per a administradors.</p>
+</div>
+<button class="bg-gradient-to-br from-primary to-secondary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 shadow-[0_10px_30px_rgba(0,64,224,0.15)] hover:shadow-[0_15px_40px_rgba(0,64,224,0.25)] transition-all transform hover:-translate-y-1">
+<span class="material-symbols-outlined">add</span>
+          + Nova Festa
+        </button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Stats Row -->
+<div class="col-span-12 md:col-span-4 bg-surface-container-lowest p-6 rounded-xl shadow-[24px_0_40px_rgba(0,64,224,0.04)]">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">event_available</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Festes Actives</span>
+</div>
+<div class="text-4xl font-black text-on-surface">12</div>
+<div class="mt-2 flex items-center gap-1 text-green-600 text-xs font-bold">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>+3 aquesta setmana</span>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 bg-surface-container-lowest p-6 rounded-xl shadow-[24px_0_40px_rgba(0,64,224,0.04)]">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined">group</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Assistents Totals</span>
+</div>
+<div class="text-4xl font-black text-on-surface">2.481</div>
+<div class="mt-2 flex items-center gap-1 text-on-surface-variant text-xs font-bold">
+<span>Mitjana de 206 per festa</span>
+</div>
+</div>
+<div class="col-span-12 md:col-span-4 bg-surface-container-lowest p-6 rounded-xl shadow-[24px_0_40px_rgba(0,64,224,0.04)]">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-accent-cyan/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Recaptació</span>
+</div>
+<div class="text-4xl font-black text-on-surface">14.200€</div>
+<div class="mt-2 flex items-center gap-1 text-blue-600 text-xs font-bold">
+<span>Pagaments confirmats</span>
+</div>
+</div>
+<!-- Main Party List (The "Ginjol" Card Highlighted) -->
+<div class="col-span-12 lg:col-span-8 space-y-4">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xl font-bold tracking-tight">Pròximes Festes</h2>
+<button class="text-primary text-xs font-bold uppercase tracking-wider hover:underline transition-all">Veure totes</button>
+</div>
+<!-- Highlighted Card -->
+<div class="group relative bg-surface-container-lowest p-6 rounded-xl transition-all duration-300 hover:bg-surface-container-high border-l-4 border-secondary overflow-hidden shadow-sm">
+<div class="flex items-start justify-between relative z-10">
+<div class="flex gap-6">
+<div class="w-24 h-24 rounded-lg overflow-hidden bg-surface-container flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Vibrant club atmosphere with neon lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbOvNlgO_BcJ_N_r0Xs8rfzDrQgLePlPxxrkSf10Mxvx-aqKkRvZhR1IeVQcmMysZNerHxl4jAMmv5oRdllogPjm8AKS-v8OIKEhml-QEtdDNDZwDf7p7X2Z2vuqCQE4T7mdQvQ0tItTN88VqyDR_4osSS419s3sDtbg4JDO2uvH5kQBBgW3Fb16JU3OG8RkBdjjh10uxhcBr2KwlxUZZ0vDGZkVVOJv0hmcqKMeP9AofiwY7ZH8pzSaf6T9vTCMt1br97H3s-MHq7"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-secondary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">Destacat</span>
+<span class="text-on-surface-variant text-xs font-semibold">Ref: GJ-2024-03</span>
+</div>
+<h3 class="text-2xl font-bold text-on-surface mb-2">Ginjols 30 Anys</h3>
+<div class="flex flex-wrap gap-4 text-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+<span class="font-medium">24 de Maig, 2024</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-medium">23:00 - 04:30</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="font-medium">Sala Piano</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-2">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">128 BPM Avg</span>
+<div class="flex -space-x-2 mt-2">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Avatar user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9VQW6j2KASRKVL-zJQHGo9cT_E2cDdA-XBp5J8Y8gc8iMZFhuRIMUVI7Hsw6czqqe-DrlWEpCqIjsnzHh-MHahNw1MJGEjyqzFNbujocNCFP3BHDP7xS9Br9AWtCu4JkV-XP3vCUsSvsumZpBJOmZAZLfRiicT2rZ_kETrgMZ--X-jqQe2Ko8TOr38G6070Isto5ngb8km7-9fgw4sqRg_PT0Bx6s1A_ZOIqWeaORofnBIqH7EeV0K70c1BgxIXzMLkzWivpoVvpV"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="Avatar user 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlvBpmOrRvnY6vDRVtI5AFy_Ehp-vtKG4W4kKH6znVC7tSHY9_CfyxbzPaBOxQq4MbItb1Lx8DWQlHLaxrr4IPpmiYzhTkiwp9oTaMZy-oytn2-Tmb89QX2Rz9l7ualPymRJITWHlfPXod4KHFTCJro2K2b4TogcaOIHEy4ZC2StD6Np_jiEqMwNnASkUiBury17pRKCEb1f-vvGZiZ7FCD-ipOy7PbwnIE_3STqLHeACaHwYb6i40Vgp0LbizdGLxD58qFeMe1IY8"/>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border-2 border-white flex items-center justify-center text-[10px] font-bold text-on-surface-variant">+42</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant/20 flex justify-between items-center">
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-highest text-on-surface text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors">Modificar</button>
+<button class="px-4 py-2 bg-surface-container-highest text-on-surface text-xs font-bold rounded-lg hover:bg-surface-container-high transition-colors">Llista Convidats</button>
+</div>
+<button class="text-secondary text-sm font-bold flex items-center gap-1 group">
+                Gestionar Directe
+                <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Secondary Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl transition-all duration-300 hover:bg-surface-container-high shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-highest flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">music_note</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-on-surface">Nit de Versions 80s</h3>
+<p class="text-sm text-on-surface-variant">31 de Maig, 2024 • 22:30h</p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-on-surface">Sala Terrassa</div>
+<div class="text-xs text-on-surface-variant">Aforament: 150/200</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Actions/Secondary Info -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-low p-6 rounded-xl">
+<h2 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4">Accions Ràpides</h2>
+<div class="space-y-3">
+<button class="w-full text-left p-3 bg-white rounded-lg flex items-center gap-3 hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<span class="text-sm font-semibold">Generar Informe Mensual</span>
+</button>
+<button class="w-full text-left p-3 bg-white rounded-lg flex items-center gap-3 hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+<span class="material-symbols-outlined text-primary">playlist_add_check</span>
+<span class="text-sm font-semibold">Auditoria de Tracks</span>
+</button>
+<button class="w-full text-left p-3 bg-white rounded-lg flex items-center gap-3 hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+<span class="material-symbols-outlined text-primary">share_reviews</span>
+<span class="text-sm font-semibold">Review del Públic</span>
+</button>
+</div>
+</div>
+<div class="bg-gradient-to-br from-tertiary-container to-tertiary p-6 rounded-xl text-white shadow-xl">
+<h2 class="text-sm font-bold uppercase tracking-widest text-white/70 mb-4">Estat del Sistema</h2>
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">sensors</span>
+</div>
+<div>
+<div class="text-lg font-bold">Online &amp; Estable</div>
+<div class="text-xs text-white/60">Latència: 24ms</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-semibold">
+<span>Càrrega Servidor</span>
+<span>42%</span>
+</div>
+<div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-accent-cyan w-[42%]"></div>
+</div>
+</div>
+</div>
+<div class="p-4 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center py-10 text-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl mb-2 text-on-surface-variant">upload_file</span>
+<p class="text-sm font-bold">Importar Base de Dades</p>
+<p class="text-xs text-on-surface-variant mt-1">Arrossega .csv o .xlsx</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

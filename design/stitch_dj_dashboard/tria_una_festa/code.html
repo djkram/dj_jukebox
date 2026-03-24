@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DJ Jukebox - Selecciona una festa</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#0040e0",
+                        "surface-dim": "#d7dadd",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary": "#0040e0",
+                        "on-background": "#181c1e",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#2e5bff",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "surface-variant": "#e0e3e6",
+                        "surface-container-low": "#f1f4f7",
+                        "primary": "#002ea8",
+                        "surface-bright": "#f7fafd",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "background": "#f7fafd",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eef1f4",
+                        "on-tertiary-container": "#d0c2ff",
+                        "surface-container": "#ebeef1",
+                        "surface-tint": "#1b4ce9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#efefff",
+                        "tertiary": "#4500b9",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-primary-fixed-variant": "#0035be",
+                        "on-primary-container": "#bdc7ff",
+                        "outline-variant": "#c4c5d8",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#e7deff",
+                        "on-primary-fixed": "#001356",
+                        "surface-container-highest": "#e0e3e6",
+                        "inverse-surface": "#2d3133",
+                        "inverse-primary": "#b8c3ff",
+                        "surface-container-high": "#e5e8eb",
+                        "surface": "#f7fafd",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface": "#181c1e",
+                        "outline": "#747687",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#5e24e1",
+                        "on-secondary-fixed": "#001356",
+                        "on-tertiary-fixed": "#20005f"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7fafd;
+        }
+        h1, h2, h3 {
+            font-family: 'Epilogue', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<aside class="bg-gradient-to-b from-[#0040e0] to-[#2e5bff] text-white h-screen w-64 fixed left-0 top-0 overflow-y-auto shadow-2xl shadow-[#0040e0]/20 flex flex-col py-6 z-50">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+</div>
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-white leading-none">DJ Jukebox</h2>
+<p class="text-[10px] uppercase tracking-widest opacity-70 mt-1">Electric Sonic</p>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs font-semibold">Inici</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-xs font-semibold">Maleta del DJ</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">audiotrack</span>
+<span class="text-xs font-semibold">Pistes</span>
+</a>
+<a class="bg-white/10 backdrop-blur-md text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">event</span>
+<span class="text-xs font-semibold">Esdeveniments</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-xs font-semibold">Configuració</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-xs font-semibold">Ajuda</span>
+</a>
+</nav>
+<div class="px-4 mt-8">
+<button class="w-full bg-white text-primary-container font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-xs uppercase tracking-wider">Nova Sessió</span>
+</button>
+</div>
+<div class="mt-auto pt-6 border-t border-white/10">
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-xs font-semibold">Perfil</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-xs font-semibold">Sortir</span>
+</a>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-64 h-20 z-40 bg-[#f7fafd]/80 backdrop-blur-xl flex justify-between items-center px-8 w-full">
+<div class="flex items-center bg-surface-container-high rounded-full px-4 py-2 w-96">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-outline/60" placeholder="Cerca esdeveniments..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-outline-variant/30">
+<div class="text-right">
+<p class="text-xs font-bold text-on-surface">Marc Planagumà Valls</p>
+<p class="text-[10px] text-primary font-medium">Administrator</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Professional male user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDE4LdaaaN4Tmtnj3zaiW142ZNVbRbmmtUePctcWMMbLHzLItK9pwjUa3O1llLfaZ8msV6nJR4nYB98VWMM7xhZNEAytFsfvUxWwYMdMDGWv7wP0sQNf2KSbOjYdktKLWu6MIldBqm2wqMLB2g1MFbMqsxCpxfPzuKWZ-5TY_gXLNkV_40atTFeWk1Lx2PcT4tnzilv6YeF0jfGEJQFqSJqS3cYR0pOFBjxp7FkEidkvJ2ZEQjparvpzWU2L1H7_9dplIDOKbln5iIN"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-64 pt-28 px-10 pb-12">
+<div class="max-w-7xl mx-auto">
+<header class="mb-10 flex justify-between items-end">
+<div>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Selecciona una festa</h1>
+<p class="text-on-surface-variant font-medium">Tria l'esdeveniment actiu per començar a gestionar la música.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 bg-surface-container-highest text-on-surface font-semibold rounded-xl text-sm transition-all hover:bg-surface-container-high">
+                        Tots els esdeveniments
+                    </button>
+<button class="px-5 py-2.5 bg-primary-container text-white font-bold rounded-xl text-sm shadow-lg shadow-primary-container/20 transition-all hover:scale-[1.02]">
+                        Propers actes
+                    </button>
+</div>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col cursor-pointer">
+<div class="h-48 relative overflow-hidden">
+<img alt="Party Visual" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Crowd at a vibrant indoor music festival with blue lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBapzxQjR9hwZEvInVCg-iyI7lL5fVch5683Q_1Bn1thiP67BAVmEsSQD5Ffff9czAHKzcdHl7nVMjGAT4nZ-qwgARD4m8as9ULB8-dnSrm705H1aeLM1R7NCDDTYPRwA5H2JkT3hYZavQcSsfLmABQz7zqctkZYXlejG9P7WgJobXlsEWnp5W9RFkvlpf6WL0U9Vd2pKwf20Femc7Kt21OiljAwGtcWd-w9Ixhjgl2FKqJY_tCQlWeNhQkLpiqVVBQFJP-6qxB0i5s"/>
+<div class="absolute top-4 left-4">
+<span class="bg-tertiary-container text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                EN DIRECTE
+                            </span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<h3 class="text-xl font-bold text-on-surface mb-4">Ginjols 30 Anys</h3>
+<div class="space-y-3 mb-6">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">calendar_today</span>
+<span class="text-xs font-medium">Avui, 22:00h - 04:00h</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">person</span>
+<span class="text-xs font-medium">DJ Marc Planagumà</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">queue_music</span>
+<span class="text-xs font-medium">Llista: Festa Major 2024</span>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full py-3 bg-primary-container text-white font-bold rounded-xl flex items-center justify-center gap-2 group-hover:bg-primary transition-colors">
+                                Entrar a la sessió
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col cursor-pointer">
+<div class="h-48 relative overflow-hidden">
+<img alt="DJ Decks" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Close up of high-end DJ controller in a dark club setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKMSmvbQd6JDjzOSOZs4ImxLBwk0gyLUkZ2AtrXoxF-GL11KNPPk-X4IW3w_YFpfHoEhkXDc_4q06-44_4srXhKi_Tn9XpiDcknaeWZJAGNovqPIeg67kw4xt5a7RZftqlFElkxMnA5Vy2OaDb0I_Eqx_cz8UZW9PUBpEWatMFDpzBI0D6SM9rtEi-Bh0IZVs6qidESBbpecwdS1JLGSv2KdFx4MNNtn5KwTIJcgrCWwESm3kQNbnZadW8GxJfD6vFVzPrDXJW1qX0"/>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<h3 class="text-xl font-bold text-on-surface mb-4">Casament Laura &amp; Pol</h3>
+<div class="space-y-3 mb-6">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">calendar_today</span>
+<span class="text-xs font-medium">Demà, 18:30h - 02:00h</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">person</span>
+<span class="text-xs font-medium">DJ Alex G.</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">queue_music</span>
+<span class="text-xs font-medium">Llista: Wedding Vibes V3</span>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full py-3 bg-surface-container-high text-on-surface font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors">
+                                Gestionar esdeveniment
+                                <span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col cursor-pointer">
+<div class="h-48 relative overflow-hidden">
+<img alt="Event Setup" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Elegant corporate event lounge with purple ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM30_hIYSQIlLAYT8w9yywMIC62O-q1fpv43s3-61vNoAK9iwCtSdQUoMzCTyDf8LWV3qdBHLRgPx1tDDT5J5izhV5iG8FPqly_8CllHUbxa0scy0QsAa4cVVd5azX0QR5SxXEewHD9PYAeQ9L8waJI2BKukQeMI0ZKgQBxqodfpG83g_73nqUgDrOg7HP6GgSxHxxJZQFBFAX5mG2qDOU0aNfTKShdouQH1WQUS5qgWBDyoCy_DzxxahQBg0Bps9JEKpJJ1gTMXDV"/>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<h3 class="text-xl font-bold text-on-surface mb-4">Sopar Empresa 'Electric'</h3>
+<div class="space-y-3 mb-6">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">calendar_today</span>
+<span class="text-xs font-medium">24 Juny, 20:00h</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">person</span>
+<span class="text-xs font-medium">DJ Marc Planagumà</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-sm">queue_music</span>
+<span class="text-xs font-medium">Llista: Corporate Chill House</span>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full py-3 bg-surface-container-high text-on-surface font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors">
+                                Gestionar esdeveniment
+                                <span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group border-2 border-dashed border-outline-variant/50 rounded-3xl p-8 flex flex-col items-center justify-center text-center hover:border-primary transition-colors cursor-pointer min-h-[400px]">
+<div class="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center text-on-surface-variant mb-4 group-hover:bg-primary-fixed group-hover:text-primary transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface">Afegir nou esdeveniment</h3>
+<p class="text-sm text-on-surface-variant mt-2 max-w-[200px]">Configura una nova festa, llista de reproducció i assigna un DJ.</p>
+</div>
+</div>
+<section class="mt-16">
+<div class="bg-primary-container rounded-[2rem] p-10 flex flex-col md:flex-row items-center gap-10 overflow-hidden relative">
+<div class="relative z-10 flex-1">
+<h2 class="text-3xl font-bold text-white mb-4">Ets l'amo de la pista</h2>
+<p class="text-on-primary-container max-w-lg mb-8">Gestioneu les peticions en temps real, sincronitzeu els llums i manteniu el ritme des d'un sol lloc.</p>
+<div class="flex gap-4">
+<div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
+<p class="text-[10px] text-on-primary-container font-bold uppercase tracking-widest">Sessions Totals</p>
+<p class="text-2xl font-bold text-white">124</p>
+</div>
+<div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
+<p class="text-[10px] text-on-primary-container font-bold uppercase tracking-widest">Temes punxats</p>
+<p class="text-2xl font-bold text-white">4.8k</p>
+</div>
+</div>
+</div>
+<div class="relative z-10 flex flex-col gap-3">
+<div class="bg-surface-container-lowest p-4 rounded-2xl shadow-xl flex items-center gap-4 w-64 transform -rotate-2">
+<div class="w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<div>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">Més demanada</p>
+<p class="text-xs font-bold text-on-surface">Titanium - David Guetta</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl shadow-xl flex items-center gap-4 w-64 transform rotate-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">Estat del Sistema</p>
+<p class="text-xs font-bold text-on-surface">100% Operatiu</p>
+</div>
+</div>
+</div>
+<div class="absolute -right-20 -bottom-20 w-80 h-80 bg-tertiary rounded-full opacity-20 blur-3xl"></div>
+<div class="absolute -left-10 -top-10 w-60 h-60 bg-secondary rounded-full opacity-10 blur-2xl"></div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

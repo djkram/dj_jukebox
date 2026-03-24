@@ -4,7 +4,7 @@ Utilitats per crear notificacions als usuaris
 from .models import Notification, Song, SongRequest, User
 
 
-def create_song_accepted_notification(song_request):
+def create_song_accepted_notification(song_request, charged_amount=None):
     """Notifica quan accepten una cançó demanada"""
     Notification.objects.create(
         user=song_request.user,
@@ -12,7 +12,7 @@ def create_song_accepted_notification(song_request):
         title='Cançó acceptada! 🎉',
         message=f'La teva petició "{song_request.title}" de {song_request.artist} ha estat acceptada pel DJ!',
         song_request=song_request,
-        amount=song_request.coins_cost
+        amount=charged_amount
     )
 
 

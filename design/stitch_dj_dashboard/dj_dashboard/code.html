@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DJ Jukebox - Dashboard DJ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-background": "#181c1e",
+                        "surface-container-high": "#e5e8eb",
+                        "surface-container-low": "#f1f4f7",
+                        "on-tertiary-container": "#d0c2ff",
+                        "outline-variant": "#c4c5d8",
+                        "primary": "#002ea8",
+                        "tertiary": "#4500b9",
+                        "surface-container": "#ebeef1",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface-bright": "#f7fafd",
+                        "on-primary-fixed-variant": "#0035be",
+                        "secondary": "#0040e0",
+                        "background": "#f7fafd",
+                        "on-secondary-fixed": "#001356",
+                        "tertiary-container": "#5e24e1",
+                        "surface": "#f7fafd",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#b8c3ff",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "on-surface": "#181c1e",
+                        "on-primary-fixed": "#001356",
+                        "inverse-on-surface": "#eef1f4",
+                        "on-surface-variant": "#434655",
+                        "secondary-fixed": "#dde1ff",
+                        "surface-dim": "#d7dadd",
+                        "primary-container": "#0040e0",
+                        "inverse-surface": "#2d3133",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "surface-tint": "#1b4ce9",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#dde1ff",
+                        "outline": "#747687",
+                        "secondary-container": "#2e5bff",
+                        "on-tertiary-fixed": "#20005f",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "on-secondary-container": "#efefff",
+                        "on-primary-container": "#bdc7ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e0e3e6",
+                        "tertiary-fixed": "#e7deff",
+                        "on-secondary": "#ffffff",
+                        "accent-cyan": "#00e3fd"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Epilogue', sans-serif; }
+        .glass-effect { backdrop-filter: blur(20px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SideNavBar -->
+<aside class="h-screen w-72 fixed left-0 top-0 bg-gradient-to-b from-[#0040e0] to-[#2e5bff] shadow-[4px_0px_24px_rgba(0,64,224,0.06)] flex flex-col py-6 z-50">
+<div class="px-8 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary-container shadow-lg">
+<span class="material-symbols-outlined text-2xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">music_note</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold text-white tracking-tight">DJ Jukebox</h1>
+<p class="text-xs text-white/60 font-medium uppercase tracking-widest">The Sonic Architect</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-4 overflow-y-auto no-scrollbar">
+<!-- Active Tab: Dashboard DJ -->
+<a class="bg-white/10 text-white rounded-lg px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard DJ</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="queue_music">queue_music</span>
+<span>Gestionar peticions</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings festa</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+<span>Backoffice</span>
+</a>
+<div class="pt-4 pb-2 px-6 text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Sessió actual</div>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="celebration">celebration</span>
+<span>Ginjols 30 Anys</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span>Busca Match</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="add_to_photos">add_to_photos</span>
+<span>Demanar cançó</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Compra Coins</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="event_repeat">event_repeat</span>
+<span>Tria una altra festa</span>
+</a>
+</nav>
+<div class="px-4 mt-auto border-t border-white/10 pt-4">
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Perfil</span>
+</a>
+<a class="text-white/70 hover:text-white px-4 py-3 mx-2 transition-all duration-200 flex items-center gap-3 font-semibold text-sm hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Tancar sessió</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Integrated -->
+<header class="fixed top-0 right-0 w-[calc(100%-18rem)] z-40 h-20 px-10 flex justify-between items-center bg-[#f7fafd]/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<h2 class="text-2xl font-bold text-primary font-headline tracking-tight">DJ Dashboard</h2>
+</div>
+<div class="flex items-center gap-8">
+<div class="relative group">
+<div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="bg-surface-container-highest border-none rounded-full py-2.5 pl-10 pr-4 text-sm w-80 focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Cerca cançons, gèneres..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors relative">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3 ml-2">
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface leading-none">Marc Planagumà Valls</p>
+<p class="text-[10px] text-primary font-bold uppercase tracking-wider mt-1">Headliner DJ</p>
+</div>
+<img alt="Marc Planagumà Valls" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/10" data-alt="Portrait of a professional DJ Marc Planaguma Valls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSKhiIcRKMeL6PXNd9EqWx-ymawfRH1rsLJ3WwTf0MEJQdStiKNuKoXRGqSe8h_mpBqijJQU4vFDm8PpG1lgRq2OVTj-Zpt6Zv2pOnrHo2bjsuIkuaGWaSXdJP5N7M0gGEVP6bNE1DuoTwwd9esSrkRL20N3HXlY_z55wdJdDrcpAYHosyO3QeUwydBFfHKldwDsVtvCRAmNl6UEOWw8MRv3VOVTvqFZPkhp-rcwC7umwvx-IfAwpUp1PjB2WbfLwjDpwBZGLcgKhO"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-72 pt-20 p-8 bg-surface min-h-screen">
+<!-- Stats Overview Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(0,64,224,0.04)] flex items-center gap-5 border border-outline-variant/10">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">library_music</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Temes a la festa</p>
+<p class="text-3xl font-extrabold text-on-surface mt-1">366</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(0,64,224,0.04)] flex items-center gap-5 border border-outline-variant/10">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Total de vots</p>
+<p class="text-3xl font-extrabold text-on-surface mt-1">0</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_24px_rgba(0,64,224,0.04)] flex items-center gap-5 border border-outline-variant/10">
+<div class="w-12 h-12 rounded-xl bg-accent-cyan/10 flex items-center justify-center text-[#00a3b8]">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Temes ja posats</p>
+<p class="text-3xl font-extrabold text-on-surface mt-1">2</p>
+</div>
+</div>
+</div>
+<!-- Dashboard Layout Split -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: Wide -->
+<div class="col-span-8 space-y-8">
+<!-- Recommendations Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">auto_awesome</span>
+                            Recomanacions intel·ligents
+                        </h3>
+<button class="text-xs font-bold text-primary hover:underline">Veure tot</button>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<!-- Recommendation Card 1 -->
+<div class="group bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 hover:shadow-xl transition-all duration-300">
+<div class="relative overflow-hidden rounded-lg aspect-square mb-3">
+<img alt="Album Cover 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Abstract vibrant album cover art with neon lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDytkt_uJx-asZ59idweCdj34hvk_WUjxV4224yVANuj--ZJlkRtths8ekytG8GM1QuMsbJXoe332ehu1pSkm-zbxhLBso0sLCtAkuUUTBAXR2uRodgRWhqE4YM5-DRYH8yEydFNbFhZPJC9BnozHTpTxU4MXvdPy07nxLi_GZTBndtBO52sYLZ7z-FKa5Mocj8yB10LhpNmLVG1YWmcQlnP-7NoJBcDq8MwHWzrf2a0wzSm9xR3JMOjx4VStyPUrMpEBMOaM1Z9qf_"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-primary p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
+<span class="material-symbols-outlined">play_arrow</span>
+</button>
+</div>
+</div>
+<h4 class="font-bold text-sm truncate">Midnight City</h4>
+<p class="text-xs text-on-surface-variant truncate">M83</p>
+<div class="flex gap-2 mt-3">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">126 BPM</span>
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">C# Min</span>
+</div>
+<button class="w-full mt-4 bg-gradient-to-r from-primary to-primary-container text-white py-2 rounded-lg text-xs font-bold font-headline uppercase tracking-tight hover:opacity-90 transition-all">Posada</button>
+</div>
+<!-- Recommendation Card 2 -->
+<div class="group bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 hover:shadow-xl transition-all duration-300">
+<div class="relative overflow-hidden rounded-lg aspect-square mb-3">
+<img alt="Album Cover 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Dark aesthetic electronic music album cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv5pstoknxq6T7JPsuNgxvad-LHBByoQtg7B-HPXPIva3W2MZoHKFUYZ3FkVQlxot_FWN91rA5EmdY1w0AN8QHQJMWz7Xu4bE0SxshPTIMAg5mk2WeNDNyM7YEJZB1zuBg7Fizdt1btLdKTRg1a5TYE-_QHy3Tm5XdBsK9MtvBqDgigRgHSNKl0cYBAUhajhfPttI2UEK1YJ8SBgsKxr8n_E3qr5ppZnVInxyBX48Z5Grhr6v9CtMvSaaUlgxLwnQqLNBYLBByDpkP"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-primary p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
+<span class="material-symbols-outlined">play_arrow</span>
+</button>
+</div>
+</div>
+<h4 class="font-bold text-sm truncate">Levels</h4>
+<p class="text-xs text-on-surface-variant truncate">Avicii</p>
+<div class="flex gap-2 mt-3">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">128 BPM</span>
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">E Maj</span>
+</div>
+<button class="w-full mt-4 bg-gradient-to-r from-primary to-primary-container text-white py-2 rounded-lg text-xs font-bold font-headline uppercase tracking-tight hover:opacity-90 transition-all">Posada</button>
+</div>
+<!-- Recommendation Card 3 -->
+<div class="group bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/10 hover:shadow-xl transition-all duration-300">
+<div class="relative overflow-hidden rounded-lg aspect-square mb-3">
+<img alt="Album Cover 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Dynamic concert photography with colorful smoke effects" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5sFHvK77c8LFEHVBjfN6w8e0MiNagmvnoQGYf_Yfj_405BX9IoxA0BsT6jGYgFqKtEbdd9QQz17lSSOUYjC3gUyyHrBoC2tjJkO4jDrMYM5pzyBlipQR0bJ_MtuL0aPOpSxqaUrZPnaV5P33NldnSMnuJwF8exD2Te4GBRQx3hUInt5NWXqKz1ewP-68n0NpB_WRPw0kGvJW5WFmboiSx43n9q9mLWbaNNdz8LujWp5W7COHGvSfH2D6Jh2ZIky5nt60Zjrnyk0GE"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-primary p-3 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
+<span class="material-symbols-outlined">play_arrow</span>
+</button>
+</div>
+</div>
+<h4 class="font-bold text-sm truncate">Titanium</h4>
+<p class="text-xs text-on-surface-variant truncate">David Guetta</p>
+<div class="flex gap-2 mt-3">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">126 BPM</span>
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">Eb Maj</span>
+</div>
+<button class="w-full mt-4 bg-gradient-to-r from-primary to-primary-container text-white py-2 rounded-lg text-xs font-bold font-headline uppercase tracking-tight hover:opacity-90 transition-all">Posada</button>
+</div>
+</div>
+</section>
+<!-- Maleta del DJ Section (Table) -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface">Maleta del DJ</h3>
+<div class="flex gap-2">
+<button class="bg-surface-container-highest px-4 py-2 rounded-lg text-xs font-bold text-on-surface hover:bg-surface-container-high transition-colors">Tots els gèneres</button>
+<button class="bg-surface-container-highest px-4 py-2 rounded-lg text-xs font-bold text-on-surface hover:bg-surface-container-high transition-colors">Ordre: Més recents</button>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/10">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="py-4 px-6 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Títol i Artista</th>
+<th class="py-4 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">BPM</th>
+<th class="py-4 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">Key</th>
+<th class="py-4 px-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">Vots</th>
+<th class="py-4 px-6 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-right">Accions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Minimalist geometric album art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLoTVpsCH9_ns36JtaxF78EwL9RrZvBufLS9DG13BhUmTtZm5QxC7_nZ01d4IMgga1KvBv2T8iaZ02qwxtZlZhd-OvlIfHKyZCABlfhCk8Xtzr-WAtBKNkkpOwBe3hpSx8ZoB8lnZxB1BByz8gsLJCxHP4CiNpio9mrvD7kLskfD6WDEKUyBVwy3YmBtesK1oz647WaKrXkZ3spPeKSbuTq99khQ7E5r8wPKVOgJ1vGETFNXlNOvMgAuOyijHgnHElvsjONy_eA-Yk"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">One More Time</p>
+<p class="text-xs text-on-surface-variant">Daft Punk</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">123</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">G Maj</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="text-sm font-bold text-on-surface">12</span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="bg-surface-container-highest hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Posada</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Blue and purple lighting on music equipment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmvPBV2tPFVSJYBEFSk0uEAok6OPYqQriEKarh2lzhV6oQifd2C7V43NYsFtA7Lr5XzaaSy0fycuae2r6PJMwuoXx2H-d3yhr3NsjJMRFJqQ6mMZmB3wE1dSZSVSDQSN-YTRrdwdHzLvLNKfN-v5FKigbnEESWGAEThfL2YTxdRLQXbXLUibvQ3yToWeLNTE69qHaW_rQ9TjBjkY8lqkchBAK0BiIg_q7eUJf7p4b6Xye2JpT6DDDueDXJp-sGUbt0TUPPs9YZOp-V"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Starboy</p>
+<p class="text-xs text-on-surface-variant">The Weeknd</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">186</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">A Min</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="text-sm font-bold text-on-surface">8</span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="bg-surface-container-highest hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Posada</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Concert stage lights with silhouetted crowd" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrsweNaU0kVaKdwG3BufBGZ2Uqsnurozbr7-PaQxEzEwq49bt-DgN3EsCb3vvM0fci_LdjuO1FaOJjF2Dk2YEkzzHQJZDrwiHJ0dYkLg13RVWXFkiZIOwCg_KKqOIGJbfE4H5CKktVeyOyinwgpXoYpo1yhtQEMNi5rFrErbz3mgvB3llc5BSuf5b5lqjX363GdDLrVVZn4ZXHIJuqyq_oVg52VtIN0cgFexBOtqeyUt_ZzNYNt2qmeMpZ1s04kIApPuEC_JciyYEx"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Sweet Disposition</p>
+<p class="text-xs text-on-surface-variant">The Temper Trap</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">128</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">D Maj</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="text-sm font-bold text-on-surface">5</span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="bg-surface-container-highest hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Posada</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="py-3 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Abstract record player spinning with colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx_B1KHiabKYRERPDLxChoygfo_l6yFvn8lekL-DiyAuo43lmZJbLj4ns5W50_PAp6INDRzCj0BU-DnbzNV2PmQDqqpn5Tr1ZkIydOAe0b1dLYbNmhhIxDZqenELSFm3R8ydqVyS-BH1SdTMwEPjoYv74odvXb4MvPyZnNJylNencEn-zsGCmxFZ3A7OIyDIEQ_Kv4dUyqP6kVER8qNMa1uGFFINlV10o4csEPLNzFm9jbSy49ExmRFR5aZK6O_hAw8CGh8l-wXvOf"/>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Blue Monday</p>
+<p class="text-xs text-on-surface-variant">New Order</p>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-primary-container/10 text-primary-container px-2 py-1 rounded text-[10px] font-bold">130</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-tertiary-container/10 text-tertiary-container px-2 py-1 rounded text-[10px] font-bold">F Maj</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="text-sm font-bold text-on-surface">4</span>
+</td>
+<td class="py-3 px-6 text-right">
+<button class="bg-surface-container-highest hover:bg-primary hover:text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Posada</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-4 bg-surface-container-low text-center">
+<button class="text-xs font-bold text-primary hover:underline">Carrega més cançons</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Narrower -->
+<div class="col-span-4 space-y-8">
+<!-- Temes Demanats -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface">Temes demanats</h3>
+<span class="bg-tertiary-container text-white px-2 py-0.5 rounded-full text-[10px] font-bold">3 Pendents</span>
+</div>
+<div class="space-y-3">
+<!-- Request Item 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between group hover:border-tertiary/30 transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Vivid light trails in a nightclub" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_ggRQojYEj0iX3diiEGk6BP9EpY8lVkhJ1zBBEVra6cbGl2AnWY2pTZVEZBfXC50iad96vl7uxvz7-Q1ar1DFdkRDzRmx2QEYrFTqL_z8AkZ0SQ8wDtf52S2wuaDetj-7-A6io8dOPKfigeXLFVUlvSXboqNDpC-L0w7aHV9LY71gKf0WhqeYP8JbhL6x29eoYyf-GlJYLi6NVtbPyHD5Kp02D6TeT-gfYjEYCep324Qb_bQzTSIskxsQmzCJaLXs4_0-znfELeXZ"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Despechá</p>
+<p class="text-xs text-on-surface-variant truncate">Rosalía</p>
+<div class="flex items-center gap-1 mt-1 text-[10px] text-tertiary font-bold">
+<span class="material-symbols-outlined text-[12px]">payments</span>
+                                        5 Coins
+                                    </div>
+</div>
+</div>
+<button class="bg-tertiary hover:bg-tertiary-container text-white px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Acceptar</button>
+</div>
+<!-- Request Item 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between group hover:border-tertiary/30 transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Dynamic electronic music producer studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwJLAVZhUwuQyjiHj_EnubYyTWAKhOQgKiv-ju94oLjGQI63uFI6tGmeDnNGVFmpGzegKtjHmNszuUsJ1YFRT8UABKflhikNIQvQC6Rps_2nI0ogl2MCGhjB9Z-j2ZsVn1Ei4NWwD_kxafgIKyPy8pCM0dEd-sfXEDBSRVXfUdUSJo6ldHAMJKKF2pQ6xUhVdAGoaBaCExlZdSQuAkYK6C67JUfz01DS3ait48mGbmH73jmOmFuXOFnGnyJdiAFXXPzeAS6XXiHrj9"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Pepas</p>
+<p class="text-xs text-on-surface-variant truncate">Farruko</p>
+<div class="flex items-center gap-1 mt-1 text-[10px] text-tertiary font-bold">
+<span class="material-symbols-outlined text-[12px]">payments</span>
+                                        3 Coins
+                                    </div>
+</div>
+</div>
+<button class="bg-tertiary hover:bg-tertiary-container text-white px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Acceptar</button>
+</div>
+<!-- Request Item 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between group hover:border-tertiary/30 transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Nightlife party crowd silhouetted" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTyIID3fsql00tVJIRxbMmuW5P_-veWGRczEHKo6PVlYJI-baErnyod_lhk7JVSRulPf7PqzG9vxZ9o76QAOBm_zlPHDZ1q01aGzqO8lkBxtb7NJtryfIDX3IOFQ2_dvwtCRglkXII4t1QtxV9kvwrVWwegg1y-qtvq0pUjVX6UPP1zZcrr8osSP6Xv-C4eSY1AppikNKO5MoJ4BerBbFGrNygkzfN0rFm9mRCphjySOMwMiixJzngRpP9evj5y2p3UwkY4aGGAwih"/>
+</div>
+<div class="overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Stay</p>
+<p class="text-xs text-on-surface-variant truncate">The Kid LAROI, Justin Bieber</p>
+<div class="flex items-center gap-1 mt-1 text-[10px] text-tertiary font-bold">
+<span class="material-symbols-outlined text-[12px]">payments</span>
+                                        10 Coins
+                                    </div>
+</div>
+</div>
+<button class="bg-tertiary hover:bg-tertiary-container text-white px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all">Acceptar</button>
+</div>
+</div>
+</section>
+<!-- Temes Ja Posats (Compact History) -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface">Historial recent</h3>
+<button class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Veure Historial</button>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4 space-y-4">
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Minimalist neon music notes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSn49TSF36A_Qkl8ln7_46xo8pt-Ggn47rXMyUUEtdFTLPVQRquszF1EKDfyDauFM_pxC3ZAKFboWObSP24DBhzSc0HSbaLf3lDHc9kYoIiVvUHGzfVzCBixifyuiPAwSgkk7ZTGAf1DHzpcnhaJNHyYBJg4jhqkOcmtop4rDosnR2L4fSoUAZz5EcdJZeizQhhykxXVwiSMY51EwFPfIIepZN1WtegcGm7uyuJuEpQuHDDqMnJxIaJu4yu2myGTsh8qSTQu7FjWeu"/>
+</div>
+<div class="overflow-hidden flex-1">
+<p class="text-xs font-bold text-on-surface truncate">Blinding Lights</p>
+<p class="text-[10px] text-on-surface-variant truncate">The Weeknd</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant whitespace-nowrap">Fa 8 min</span>
+</div>
+<div class="flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Track Art" class="w-full h-full object-cover" data-alt="Creative blue light on music tech" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg5HppR_qSgbDIvzrgpEgIB9DW7sY0K0rtC252XR6TZoFGIgD7TT8NW-xtniXZkxgj1b_5EOfucmjlbMfcJjA_z-uQvih59BzCIfNSvRAlZb8ApSzkkfdGNxHscwkSYtK7wAHf_TkkFygJTsw3WStvmYGmoEriJHJvWWts760S-WqJ-cxBNjBISXHhM-OFnivTiS94l5RO9bWBla-3hsSN63Ib6t20QSSikCgk9vfeGGJaJ4E7AG3GCMqZnNNfqIShGfC7RIH_XJwD"/>
+</div>
+<div class="overflow-hidden flex-1">
+<p class="text-xs font-bold text-on-surface truncate">Don't Start Now</p>
+<p class="text-[10px] text-on-surface-variant truncate">Dua Lipa</p>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant whitespace-nowrap">Fa 15 min</span>
+</div>
+</div>
+</section>
+<!-- Current Session Info Card -->
+<section class="bg-gradient-to-br from-tertiary to-tertiary-container p-6 rounded-2xl text-white relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 mb-2">Sessió en directe</p>
+<h4 class="text-xl font-bold font-headline leading-tight mb-4">Aniversari Els Ginjols - 30 Anys</h4>
+<div class="flex items-center gap-4 text-xs font-medium">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">group</span>
+                                142 Asistents
+                            </div>
+<div class="flex items-center gap-1 text-accent-cyan">
+<span class="material-symbols-outlined text-sm">timer</span>
+                                02:45:12
+                            </div>
+</div>
+</div>
+<!-- Decorative Background Graphic -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+</section>
+</div>
+</div>
+</main>
+</body></html>

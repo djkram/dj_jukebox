@@ -95,11 +95,11 @@
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none flex-column pb-32" style="background: #f8f9fe; min-height: 100vh; display: flex;">
+<div class="mobile-page-shell d-md-none">
   <!-- Main Content Canvas -->
-  <main class="flex-1 px-4 pb-32">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
     <!-- Hero Profile Section -->
-    <section class="mt-2 d-flex flex-column align-items-center">
+    <section class="d-flex flex-column align-items-center">
       <div class="position-relative">
         <div class="rounded-xl overflow-hidden" style="width: 6.25rem; height: 6.25rem; box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08); border: 3px solid white;">
           {% if user_avatar_url %}
@@ -126,7 +126,7 @@
     </section>
 
     <!-- Connection Status Bento Card -->
-    <section class="mt-4">
+    <section>
       <div class="rounded-xl p-3 d-flex flex-column gap-2 position-relative overflow-hidden" style="background: #f2f3f8;">
         <div class="d-flex align-items-center gap-3">
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 1.9rem; height: 1.9rem; background: #1DB954;">
@@ -158,9 +158,10 @@
     </section>
 
     <!-- Settings List (No-Line Grid) -->
-    <section class="mt-5 d-flex flex-column gap-2">
-      <h3 class="font-headline font-bold px-2 mb-2" style="font-size: 1.05rem;">Preferències</h3>
+    <section class="mobile-group-stack">
+      <h3 class="font-headline font-bold px-2 mb-0" style="font-size: 1.05rem;">Preferències</h3>
 
+      <div class="mobile-list-stack">
       <a href="{% url 'account_email' %}" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
         <div class="d-flex align-items-center gap-3">
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
@@ -195,7 +196,7 @@
         </a>
       {% endif %}
 
-      <form method="post" action="{% url 'account_logout' %}" class="mt-3">
+      <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
         <button type="submit" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg transition-colors" style="border: none;">
           <div class="d-flex align-items-center gap-3">
@@ -207,6 +208,7 @@
           <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
         </button>
       </form>
+      </div>
     </section>
   </main>
 </div>

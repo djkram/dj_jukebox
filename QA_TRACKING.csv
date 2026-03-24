@@ -1,0 +1,195 @@
+Fase,ID,Test,Status,Prioritat,Severitat,Notes,Data
+1.1,AUTH-01,Registre amb email + password,PENDING,Alta,Critical,,
+1.1,AUTH-02,Registre amb Spotify OAuth,PENDING,Alta,Critical,,
+1.1,AUTH-03,Login amb email + password,PENDING,Alta,Critical,,
+1.1,AUTH-04,Login amb Spotify OAuth,PENDING,Alta,Critical,,
+1.1,AUTH-05,Auto-connexió amb mateix email,PENDING,Alta,Medium,,
+1.1,AUTH-06,Verificació obligatòria d'email,PENDING,Alta,High,,
+1.1,AUTH-07,Reset de password,PENDING,Alta,Medium,,
+1.1,AUTH-08,Logout correcte,PENDING,Alta,High,,
+1.1,AUTH-09,Perfil d'usuari edició,PENDING,Alta,Low,,
+1.1,AUTH-10,Reconnexió Spotify caducat,PENDING,Alta,High,,
+1.1,AUTH-11,Email ja existent mostra error,PENDING,Alta,Medium,,
+1.1,AUTH-12,Credencials incorrectes mostra error,PENDING,Alta,Medium,,
+1.1,AUTH-13,Token Spotify expirat gestió,PENDING,Alta,High,,
+1.2,PARTY-01,Crear nova festa com superuser,PENDING,Alta,Critical,,
+1.2,PARTY-02,Editar festa existent,PENDING,Alta,High,,
+1.2,PARTY-03,Eliminar festa,PENDING,Alta,Medium,,
+1.2,PARTY-04,Seleccionar festa activa,PENDING,Alta,Critical,,
+1.2,PARTY-05,Canviar entre festes,PENDING,Alta,High,,
+1.2,PARTY-06,Configurar vots gratuïts,PENDING,Alta,High,,
+1.2,PARTY-07,Configurar coins gratuïts,PENDING,Alta,High,,
+1.2,PARTY-08,Configurar cost song request,PENDING,Alta,Medium,,
+1.2,PARTY-09,Assignar playlist de Spotify,PASS,Alta,Critical,PartySettingsForm amb spotify_playlist field,2026-03-18
+1.2,PARTY-10,Sincronitzar playlist afegir noves,PASS,Alta,High,process_playlist_songs sincronitza: afegeix noves,2026-03-18
+1.2,PARTY-11,Sincronitzar playlist eliminar no existents,PASS,Alta,High,process_playlist_songs: elimina removed_spotify_ids,2026-03-18
+1.2,PARTY-12,Eliminar playlist assignada,PENDING,Alta,Medium,,
+1.2,PARTY-13,Festa sense playlist funciona,PENDING,Alta,Medium,,
+1.2,PARTY-14,Playlist buida gestió,PENDING,Alta,Low,,
+1.3,COINS-01,Usuari rep coins gratuïts,PENDING,Alta,Critical,,
+1.3,COINS-02,Usuari rep vots gratuïts,PENDING,Alta,Critical,,
+1.3,COINS-03,Comprar coins amb Stripe,PENDING,Alta,Critical,,
+1.3,COINS-04,Webhook Stripe crea VotePackage,PENDING,Alta,Critical,,
+1.3,COINS-05,Convertir coins a vots,PENDING,Alta,Critical,,
+1.3,COINS-06,Votar cançó consumeix 1 vot,PENDING,Alta,Critical,,
+1.3,COINS-07,No votar sense vots,PENDING,Alta,High,,
+1.3,COINS-08,Badge vots actualitzat,PENDING,Alta,Medium,,
+1.3,COINS-09,Històric compres coins,PENDING,Alta,Low,,
+1.3,COINS-10,Ajust pujar vots gratuïts,PENDING,Alta,High,,
+1.3,COINS-11,Ajust baixar vots gratuïts,PENDING,Alta,High,,
+1.3,COINS-12,Ajust pujar coins gratuïts,PENDING,Alta,High,,
+1.3,COINS-13,Ajust baixar coins gratuïts,PENDING,Alta,High,,
+1.4,VOTE-01,Veure llista cançons pendents,PENDING,Alta,Critical,,
+1.4,VOTE-02,Veure llista cançons posades,PENDING,Alta,High,,
+1.4,VOTE-03,Votar cançó amb cor,PENDING,Alta,Critical,,
+1.4,VOTE-04,Detectar cançó ja votada,PENDING,Alta,High,,
+1.4,VOTE-05,Ordenació per vots,PENDING,Alta,High,,
+1.4,VOTE-06,Filtrar per títol,PENDING,Alta,Medium,,
+1.4,VOTE-07,Filtrar per artista,PENDING,Alta,Medium,,
+1.4,VOTE-08,Vista desktop dues taules,PENDING,Alta,Medium,,
+1.4,VOTE-09,Vista mòbil amb tabs,PENDING,Alta,Medium,,
+1.4,VOTE-10,Swipe view per votar,PENDING,Alta,Low,,
+1.5,REQUEST-01,Cercar cançons a Spotify,PENDING,Alta,High,,
+1.5,REQUEST-02,Veure cost en coins,PENDING,Alta,Medium,,
+1.5,REQUEST-03,Demanar cançó amb coins,PENDING,Alta,High,,
+1.5,REQUEST-04,No demanar sense coins,PENDING,Alta,High,,
+1.5,REQUEST-05,DJ veu requests pendents,PENDING,Alta,High,,
+1.5,REQUEST-06,DJ accepta request,PENDING,Alta,Critical,,
+1.5,REQUEST-07,DJ rebutja request,PENDING,Alta,High,,
+1.5,REQUEST-08,Notificació request acceptada,PENDING,Alta,Medium,,
+1.5,REQUEST-09,Notificació cançó posada,PENDING,Alta,Medium,,
+1.6,PLAYER-01,Play/pause song_list desktop,PENDING,Alta,High,,
+1.6,PLAYER-02,Play/pause song_list mòbil,PENDING,Alta,High,,
+1.6,PLAYER-03,Play/pause party_settings desktop,PENDING,Alta,Medium,,
+1.6,PLAYER-04,Play/pause party_settings mòbil,PENDING,Alta,Medium,,
+1.6,PLAYER-05,Canviar cançó pausa anterior,PENDING,Alta,High,,
+1.6,PLAYER-06,Icona canvia play/pause,PENDING,Alta,Medium,,
+1.6,PLAYER-07,Overlay visible quan reprodueix,PENDING,Alta,Low,,
+1.6,PLAYER-08,Funciona amb Premium,PENDING,Alta,Critical,,
+1.6,PLAYER-09,Error sense Premium,PENDING,Alta,High,,
+1.6,PLAYER-10,Error token caducat,PENDING,Alta,High,,
+2.1,AUDIO-01,Botó Analitza apareix si null,PASS,Alta,High,Botó apareix si song.bpm is null or song.key is null,2026-03-18
+2.1,AUDIO-02,Spinner amb progrés 15-75%,PENDING,Alta,Low,,
+2.1,AUDIO-03,GetSongBPM actualitza DB,PASS,Alta,Critical,GetSongBPM integrat a views.analyze_song_audio,2026-03-18
+2.1,AUDIO-04,Fallback MP3 temporal,PASS,Alta,High,Fallback a analyze_song_from_temporary_mp3,2026-03-18
+2.1,AUDIO-05,yt-dlp + librosa funciona,PASS,Alta,High,yt-dlp + librosa 0.11.0 instal·lats,2026-03-18
+2.1,AUDIO-06,Detecció BPM librosa,PASS,Alta,High,librosa.beat.beat_track detecta BPM,2026-03-18
+2.1,AUDIO-07,Detecció Key Krumhansl,PASS,Alta,High,librosa.feature.chroma_cqt + Krumhansl-Schmuckler,2026-03-18
+2.1,AUDIO-08,Conversió Camelot 1A-12B,PASS,Alta,High,"CAMELOT_MAP converteix (note, mode) a 1A-12B",2026-03-18
+2.1,AUDIO-09,Neteja fitxer temporal,PASS,Alta,Medium,os.unlink(temp_file) al finally block,2026-03-18
+2.1,AUDIO-10,Botó desapareix després anàlisi,PENDING,Alta,Medium,,
+2.1,AUDIO-11,Checkmark apareix,PENDING,Alta,Low,,
+2.2,BULK-01,Botó mostra Analitza (X),PASS,Alta,Medium,Botó mostra {{ pending_analysis_count }},2026-03-18
+2.2,BULK-02,Primer clic inicia anàlisi,PENDING,Alta,High,,
+2.2,BULK-03,Progrés mostra X/Y,PENDING,Alta,Medium,,
+2.2,BULK-04,Segon clic pausa,PENDING,Alta,High,,
+2.2,BULK-05,Botó pausat groc Reprèn,PENDING,Alta,Medium,,
+2.2,BULK-06,Tercer clic reprèn,PENDING,Alta,High,,
+2.2,BULK-07,Completat mostra verd,PENDING,Alta,Low,,
+2.2,BULK-08,Estat guarda localStorage,PASS,Alta,Medium,"localStorage.setItem(bulkAnalyzeStorageKey, JSON.stringify())",2026-03-18
+2.2,BULK-09,Estat restaura al reload,PASS,Alta,High,restoreBulkAnalyzeState() al DOMContentLoaded,2026-03-18
+2.2,BULK-10,Continua després reload,PENDING,Alta,High,,
+2.2,BULK-11,Només analitza pendents,PASS,Alta,Medium,collectPendingAnalyzeSongIds() filtra només pendents,2026-03-18
+2.3,CAMELOT-01,Colors correctes 1A-12B,PASS,Alta,Medium,.camelot-1A fins .camelot-12B amb colors CSS,2026-03-18
+2.3,CAMELOT-02,Keys dashboard recomanacions,PASS,Alta,Medium,dj_dashboard.html recomanacions amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-03,Keys dashboard taules desktop,PASS,Alta,Medium,dj_dashboard.html taules desktop amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-04,Keys dashboard cards mòbil,PASS,Alta,Medium,dj_dashboard.html cards mòbil amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-05,Keys song_list taules desktop,PASS,Alta,Medium,song_list.html taules desktop amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-06,Keys song_list cards mòbil,PASS,Alta,Medium,song_list.html cards mòbil amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-07,Keys party_settings desktop,PASS,Alta,Medium,party_settings.html desktop amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-08,Keys party_settings mòbil,PASS,Alta,Medium,party_settings.html mòbil amb camelot-{{ song.key }},2026-03-18
+2.3,CAMELOT-09,Colors llegibles contrast,PENDING,Alta,High,,
+2.3,CAMELOT-10,Badge petit visible mòbil,PENDING,Alta,Low,,
+3.1,DASH-01,Recomanacions per BPM/Key,PENDING,Mitjana,Medium,,
+3.1,DASH-02,Cards amb caràtula,PENDING,Mitjana,Low,,
+3.1,DASH-03,BPM/Key visibles colors,PENDING,Mitjana,Medium,,
+3.1,DASH-04,Botó Posada marca played,PENDING,Mitjana,High,,
+3.1,DASH-05,Només superusers accés,PASS,Mitjana,Critical,@user_passes_test(lambda u: u.is_superuser) en dj_backoffice,2026-03-18
+3.2,MANAGE-01,Llista requests pendents,PASS,Mitjana,High,manage_song_requests view amb SongRequest.objects.filter,2026-03-18
+3.2,MANAGE-02,Botó Acceptar funciona,PENDING,Mitjana,Critical,,
+3.2,MANAGE-03,Botó Rebutjar funciona,PENDING,Mitjana,High,,
+3.2,MANAGE-04,Notificació enviada usuari,PENDING,Mitjana,Medium,,
+3.2,MANAGE-05,Request desapareix llista,PENDING,Mitjana,Medium,,
+3.3,PLAYED-01,Botó Posada dashboard,PENDING,Mitjana,High,,
+3.3,PLAYED-02,Botó Posada taula,PENDING,Mitjana,High,,
+3.3,PLAYED-03,Cançó es mou Maleta→Posades,PENDING,Mitjana,High,,
+3.3,PLAYED-04,Notificació tots votants,PENDING,Mitjana,Medium,,
+3.3,PLAYED-05,Badge notificacions actualitza,PENDING,Mitjana,Medium,,
+4.1,NOTIF-01,Badge vermell número,PENDING,Mitjana,Medium,,
+4.1,NOTIF-02,Clicar bell va /notifications/,PENDING,Mitjana,Medium,,
+4.1,NOTIF-03,Marca totes llegides,PENDING,Mitjana,Medium,,
+4.1,NOTIF-04,Badge desapareix,PENDING,Mitjana,Low,,
+4.1,NOTIF-05,Notificació request acceptada,PENDING,Mitjana,Medium,,
+4.1,NOTIF-06,Notificació cançó posada,PENDING,Mitjana,Medium,,
+4.1,NOTIF-07,Notificació coins comprats,PENDING,Mitjana,Medium,,
+4.1,NOTIF-08,Notificació coins rebuts,PENDING,Mitjana,Low,,
+5.1,UI-01,Desktop >1024px layout,PENDING,Mitjana,Medium,,
+5.1,UI-02,Tablet 768-1024px adaptat,PENDING,Mitjana,Medium,,
+5.1,UI-03,Mòbil 320-767px cards/tabs,PENDING,Mitjana,High,,
+5.1,UI-04,Mòbil 320px sense scroll H,PENDING,Mitjana,High,,
+5.1,UI-05,Landscape mòbil funciona,PENDING,Mitjana,Low,,
+5.2,A11Y-01,Botons 44x44px mínim,PENDING,Mitjana,Medium,,
+5.2,A11Y-02,Contrast colors WCAG AA,PENDING,Mitjana,High,,
+5.2,A11Y-03,Tooltips explicatius,PENDING,Mitjana,Low,,
+5.2,A11Y-04,Focus teclat visible,PENDING,Mitjana,Medium,,
+5.2,A11Y-05,Errors formulari clars,PENDING,Mitjana,High,,
+5.3,FEEDBACK-01,Loading spinners,PENDING,Mitjana,Medium,,
+5.3,FEEDBACK-02,Barres progrés percentatge,PENDING,Mitjana,Medium,,
+5.3,FEEDBACK-03,Missatges confirmació,PENDING,Mitjana,Medium,,
+5.3,FEEDBACK-04,Errors visibles alerts,PENDING,Mitjana,High,,
+5.3,FEEDBACK-05,Animacions suaus,PENDING,Mitjana,Low,,
+5.3,FEEDBACK-06,Hover states botons,PENDING,Mitjana,Low,,
+5.4,VISUAL-01,Colors marca consistents,PENDING,Mitjana,Low,,
+5.4,VISUAL-02,Tipografia consistent,PENDING,Mitjana,Low,,
+5.4,VISUAL-03,Espaiat consistent,PENDING,Mitjana,Low,,
+5.4,VISUAL-04,Botons mateix estil,PENDING,Mitjana,Low,,
+5.4,VISUAL-05,Icons FontAwesome carreguen,PENDING,Mitjana,Medium,,
+6.1,PERF-01,Pàgina inicial <2s,PENDING,Mitjana,Medium,,
+6.1,PERF-02,Song list 100 cançons <3s,PENDING,Mitjana,Medium,,
+6.1,PERF-03,Party settings 200 <5s,PENDING,Mitjana,Medium,,
+6.1,PERF-04,Dashboard <2s,PENDING,Mitjana,Medium,,
+6.1,PERF-05,Imatges optimitzades,PENDING,Mitjana,Low,,
+6.2,DB-01,N+1 queries resoltes,PENDING,Mitjana,High,,
+6.2,DB-02,Índexs camps freqüents,PENDING,Mitjana,Medium,,
+6.2,DB-03,Paginació llistes llargues,PENDING,Baixa,Low,,
+6.3,CDN-01,Spotify SDK carrega,PENDING,Mitjana,High,,
+6.3,CDN-02,FontAwesome carrega ràpid,PENDING,Mitjana,Medium,,
+6.3,CDN-03,Bootstrap des CDN,PENDING,Mitjana,Medium,,
+7.1,SEC-01,Pàgines protegides login,REVIEW,Alta,Critical,"Decoradors @login_required presents, cal test manual",2026-03-18
+7.1,SEC-02,DJ dashboard superusers,PASS,Alta,Critical,@user_passes_test(lambda u: u.is_superuser) en dj_dashboard,2026-03-18
+7.1,SEC-03,Party settings superusers,PASS,Alta,Critical,@user_passes_test(lambda u: u.is_superuser) en party_settings,2026-03-18
+7.1,SEC-04,Webhook Stripe verificat,PASS,Alta,Critical,stripe.Webhook.construct_event verifica signatura amb STRIPE_WEBHOOK_SECRET,2026-03-18
+7.1,SEC-05,CSRF tokens formularis,PASS,Alta,Critical,"@require_POST en formularis, @csrf_exempt només webhook",2026-03-18
+7.2,VAL-01,SQL Injection previngut,PASS,Alta,Critical,"Django ORM utilitzat, cap query .raw() o execute()",2026-03-18
+7.2,VAL-02,XSS output escapats,REVIEW,Alta,Critical,"2 casos |safe: oauth_response (risc potencial), help_text (segur)",2026-03-18
+7.2,VAL-03,CSRF tokens verificats,PASS,Alta,Critical,CSRF verificat via @require_POST i tokens automàtics Django,2026-03-18
+7.2,VAL-04,File uploads restringits,PENDING,Alta,High,,
+7.2,VAL-05,Max length inputs,PASS,Alta,Medium,Tots els CharField tenen max_length definit,2026-03-18
+7.3,SECRET-01,SECRET_KEY no en codi,PASS,Alta,Critical,SECRET_KEY usa os.environ.get(),2026-03-18
+7.3,SECRET-02,STRIPE_SECRET en .env,PASS,Alta,Critical,STRIPE_SECRET_KEY usa os.environ.get(),2026-03-18
+7.3,SECRET-03,SPOTIFY_SECRET en .env,PASS,Alta,Critical,SPOTIFY_CLIENT_SECRET usa os.environ.get(),2026-03-18
+7.3,SECRET-04,.env en .gitignore,PASS,Alta,Critical,.env està a .gitignore,2026-03-18
+7.4,HTTPS-01,HTTPS en producció,SKIP,Alta,Critical,"Només dev, configurar en producció",2026-03-18
+7.4,HTTPS-02,SESSION_COOKIE_SECURE,FAIL,Alta,Critical,SESSION_COOKIE_SECURE no configurat - CRÍTIC per producció,2026-03-18
+7.4,HTTPS-03,CSRF_COOKIE_SECURE,FAIL,Alta,Critical,CSRF_COOKIE_SECURE no configurat - CRÍTIC per producció,2026-03-18
+7.4,HTTPS-04,SECURE_SSL_REDIRECT,FAIL,Alta,Critical,SECURE_SSL_REDIRECT no configurat - CRÍTIC per producció,2026-03-18
+8.1,EDGE-01,Títol 200+ caràcters,PENDING,Baixa,Low,,
+8.1,EDGE-02,Artista emojis especials,PENDING,Baixa,Low,,
+8.1,EDGE-03,Playlist 1000+ cançons,PENDING,Baixa,Medium,,
+8.1,EDGE-04,Festa 0 cançons,PENDING,Baixa,Medium,,
+8.1,EDGE-05,Usuari 0 coins 0 vots,PENDING,Baixa,Medium,,
+8.2,RACE-01,Dos usuaris voten simultani,PENDING,Baixa,Medium,,
+8.2,RACE-02,DJ marca mentre voten,PENDING,Baixa,Medium,,
+8.2,RACE-03,Dos admins recarreguen,PENDING,Baixa,Low,,
+8.2,RACE-04,Bulk analysis dues tabs,PENDING,Baixa,Low,,
+8.3,NET-01,Spotify API 500 gestió,PENDING,Baixa,High,,
+8.3,NET-02,GetSongBPM fora servei,PENDING,Baixa,High,,
+8.3,NET-03,YouTube sense resultats,PENDING,Baixa,Medium,,
+8.3,NET-04,Stripe webhook falla,PENDING,Baixa,High,,
+8.3,NET-05,Internet perduda,PENDING,Baixa,Medium,,
+8.4,BROWSER-01,Chrome últimes 2 versions,PENDING,Baixa,High,,
+8.4,BROWSER-02,Firefox últimes 2,PENDING,Baixa,High,,
+8.4,BROWSER-03,Safari macOS + iOS,PENDING,Baixa,High,,
+8.4,BROWSER-04,Edge Windows,PENDING,Baixa,Medium,,
+8.4,BROWSER-05,iOS Safari iPhone/iPad,PENDING,Baixa,High,,
+8.4,BROWSER-06,Android Chrome,PENDING,Baixa,High,,

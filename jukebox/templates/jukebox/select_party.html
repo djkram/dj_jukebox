@@ -35,11 +35,11 @@
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #191c1f;">
-  <main class="pt-6 pb-32 px-4 mx-auto" style="max-width: 32rem;">
+<div class="mobile-page-shell d-md-none" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #191c1f;">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-stack" style="max-width: 32rem;">
     <!-- Brand Logo Area -->
-    <section class="mb-10 text-center">
-      <div class="d-inline-block mb-3 p-3 shadow-lg" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
+    <section class="text-center mobile-section-header">
+      <div class="d-inline-block p-3 shadow-lg" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
         <img src="{% static 'jukebox/img/DJJukebox_logo.png' %}" alt="DJ Jukebox" style="height: 48px; width: auto; display: block;">
       </div>
       <p class="font-medium" style="color: #434656; opacity: 0.8;">Escull la teva festa i fes sentir les teves preferències.</p>
@@ -48,8 +48,8 @@
     {% if parties %}
       <!-- Featured Section (First Party - Bento Style) -->
       {% with parties.0 as featured %}
-        <div class="mb-8">
-          <span class="d-block font-headline font-bold text-uppercase mb-3 ms-1" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">En Directe Ara</span>
+        <div class="mobile-section-header">
+          <span class="d-block font-headline font-bold text-uppercase mb-0" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">En Directe Ara</span>
           <a href="{% url 'set_party' featured.id %}" class="text-decoration-none">
             <div class="position-relative overflow-hidden rounded-xl p-4 text-white shadow-xl cursor-pointer" style="background: #2e5bff; box-shadow: 0 10px 40px rgba(0, 64, 224, 0.1);">
               <div class="position-absolute" style="top: 0; right: 0; margin-top: -4rem; margin-right: -4rem; width: 16rem; height: 16rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
@@ -74,9 +74,10 @@
 
       <!-- Party Selection List (Rest of parties) -->
       {% if parties|length > 1 %}
-        <section class="d-flex flex-column gap-4">
-          <h3 class="font-headline font-bold mb-3 ms-1" style="font-size: 1.25rem;">Properes Festes</h3>
+        <section class="mobile-group-stack">
+          <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem;">Properes Festes</h3>
 
+          <div class="mobile-group-stack">
           {% for party in parties %}
             {% if not forloop.first %}
               <!-- Party Card -->
@@ -111,6 +112,7 @@
               </a>
             {% endif %}
           {% endfor %}
+          </div>
         </section>
       {% endif %}
 

@@ -31,6 +31,9 @@ urlpatterns = [
     path('party/<int:party_id>/settings/search-tracks/', views.party_settings_search_tracks, name='party_settings_search_tracks'),
     path('party/<int:party_id>/settings/add-track/', views.add_track_to_party_playlist, name='add_track_to_party_playlist'),
     path('party/<int:party_id>/settings/delete-song/<int:song_id>/', views.delete_song_from_party_playlist, name='delete_song_from_party_playlist'),
+    path('party/<int:party_id>/toggle-auto-sync/', views.toggle_auto_sync, name='toggle_auto_sync'),
+    path('party/<int:party_id>/force-sync/', views.force_sync_playlist, name='force_sync_playlist'),
+    path('party/<int:party_id>/toggle-auto-analyze/', views.toggle_auto_analyze, name='toggle_auto_analyze'),
     path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
     path('buy-coins/', views.buy_votes, name='buy_votes'),
     path('buy-coins/success/', views.buy_votes_success, name='buy_votes_success'),
@@ -45,7 +48,7 @@ urlpatterns = [
 
     # Notificacions
     path('notifications/', views.notifications, name='notifications'),
-    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/read-all/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
 
     path('buttons/', views.buttons, name='buttons'),

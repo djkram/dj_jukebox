@@ -289,10 +289,10 @@
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="d-md-none pb-32" style="background: #f8f9fe; min-height: 100vh;">
+<div class="mobile-page-shell d-md-none">
   <!-- Missatges d'error -->
   {% if error %}
-  <div class="mx-4 mt-3">
+  <div class="mobile-page-content mobile-page-content--tight" style="padding-bottom: 0;">
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <i class="fas fa-exclamation-triangle me-2"></i>
       <strong>Error:</strong> {{ error }}
@@ -301,17 +301,17 @@
   </div>
   {% endif %}
 
-  <main class="px-4 pt-1" style="max-width: 40rem; margin: 0 auto;">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
     <!-- Header Section -->
-    <header class="mb-3">
+    <header class="mobile-section-header">
       <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.72rem; letter-spacing: 0.1em; font-family: 'Plus Jakarta Sans', sans-serif;">BOTIGA</span>
       <p class="font-body mb-0" style="color: #434656; line-height: 1.4; max-width: 92%; font-size: 0.95rem;">Alimenta l'ambient. Usa coins per demanar cançons i impulsar les teves favorites.</p>
     </header>
 
     <!-- Value Bundles (Bento Grid Style) -->
-    <div class="mb-3">
+    <section class="mobile-group-stack">
       <!-- Pro Pack (Highlighted/Featured) -->
-      <div class="position-relative overflow-hidden p-3 mb-2 d-flex flex-column justify-content-between" style="background: #2e5bff; color: #efefff; box-shadow: 0 20px 40px -10px rgba(0, 64, 224, 0.08); aspect-ratio: 16/7.6; border-radius: 1.1rem;">
+      <div class="position-relative overflow-hidden p-3 d-flex flex-column justify-content-between" style="background: #2e5bff; color: #efefff; box-shadow: 0 20px 40px -10px rgba(0, 64, 224, 0.08); aspect-ratio: 16/7.6; border-radius: 1.1rem;">
         <div class="position-absolute" style="top: -1.5rem; right: -1.5rem; width: 8rem; height: 8rem; background: rgba(0, 227, 253, 0.2); border-radius: 50%; filter: blur(3rem);"></div>
         <div style="position: relative; z-index: 1;">
           <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2" style="background: rgba(239, 239, 255, 0.2);">
@@ -383,11 +383,11 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Conversion Section -->
     {% if credits > 0 %}
-    <section class="bg-white p-3 mb-3 position-relative overflow-hidden" style="border: 1px solid rgba(196, 197, 217, 0.1); border-radius: 1.1rem;">
+    <section class="bg-white p-3 position-relative overflow-hidden" style="border: 1px solid rgba(196, 197, 217, 0.1); border-radius: 1.1rem;">
       <div class="position-relative" style="z-index: 1;">
         <div class="mb-2">
           <p class="font-body mb-0" style="font-size: 0.8rem; color: #434656;">Aconsegeix mes vots</p>

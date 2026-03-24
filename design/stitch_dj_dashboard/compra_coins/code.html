@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DJ Jukebox - Compra Coins</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#0040e0",
+                        "surface-dim": "#d7dadd",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary": "#0040e0",
+                        "on-background": "#181c1e",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#2e5bff",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "surface-variant": "#e0e3e6",
+                        "surface-container-low": "#f1f4f7",
+                        "primary": "#002ea8",
+                        "surface-bright": "#f7fafd",
+                        "primary-fixed-dim": "#b8c3ff",
+                        "background": "#f7fafd",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eef1f4",
+                        "on-tertiary-container": "#d0c2ff",
+                        "surface-container": "#ebeef1",
+                        "surface-tint": "#1b4ce9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#efefff",
+                        "tertiary": "#4500b9",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-primary-fixed-variant": "#0035be",
+                        "on-primary-container": "#bdc7ff",
+                        "outline-variant": "#c4c5d8",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary-fixed-variant": "#0035be",
+                        "secondary-fixed-dim": "#b8c3ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#e7deff",
+                        "on-primary-fixed": "#001356",
+                        "surface-container-highest": "#e0e3e6",
+                        "inverse-surface": "#2d3133",
+                        "inverse-primary": "#b8c3ff",
+                        "surface-container-high": "#e5e8eb",
+                        "surface": "#f7fafd",
+                        "secondary-fixed": "#dde1ff",
+                        "on-surface": "#181c1e",
+                        "outline": "#747687",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#5e24e1",
+                        "on-secondary-fixed": "#001356",
+                        "on-tertiary-fixed": "#20005f"
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-sonic-sidebar {
+            background: linear-gradient(to bottom, #0040e0, #2e5bff);
+        }
+        .bg-sonic-card {
+            background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- SideNavBar -->
+<aside class="bg-sonic-sidebar h-screen w-64 fixed left-0 top-0 overflow-y-auto z-50 flex flex-col py-6 shadow-2xl shadow-[#0040e0]/20">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-white font-headline">DJ Jukebox</h1>
+<p class="text-[10px] font-semibold text-white/60 uppercase tracking-widest">Electric Sonic</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs font-semibold">Inici</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-xs font-semibold">Maleta del DJ</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">audiotrack</span>
+<span class="text-xs font-semibold">Pistes</span>
+</a>
+<a class="bg-white/10 backdrop-blur-md text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="text-xs font-semibold">Botiga</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">event</span>
+<span class="text-xs font-semibold">Esdeveniments</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg mx-2 px-4 py-3 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-xs font-semibold">Configuració</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1 pt-6 border-t border-white/10">
+<button class="w-full bg-white text-primary-container font-headline font-bold py-3 rounded-xl mb-6 shadow-lg shadow-black/10 active:scale-95 transition-transform">
+                Nova Sessió
+            </button>
+<a class="text-white/70 hover:text-white rounded-lg px-4 py-2 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-xs font-semibold">Perfil</span>
+</a>
+<a class="text-white/70 hover:text-white rounded-lg px-4 py-2 flex items-center gap-3 transition-all hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-xs font-semibold">Sortir</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 h-20 z-40 bg-[#f7fafd]/80 backdrop-blur-xl flex justify-between items-center px-8 transition-opacity ease-out duration-200">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-2.5 bg-surface-container-highest border-none rounded-full focus:ring-2 focus:ring-primary-container/20 text-sm" placeholder="Cerca cançons, àlbums o artistes..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="flex items-center gap-3 border-l border-outline-variant/15 pl-6">
+<div class="text-right">
+<p class="text-sm font-bold font-headline text-on-surface">Marc Planagumà Valls</p>
+<p class="text-[10px] font-semibold text-primary uppercase">DJ Professional</p>
+</div>
+<img alt="Marc Planagumà Valls" class="w-10 h-10 rounded-full bg-surface-container-high object-cover" data-alt="Professional DJ user profile avatar headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAA89VraGBz6ddoY1_lDqT2GF6t1I-sqX-rotZyRf389d1YQ-J9ITRVB1XUQCvbRLiSL_Tli2E-nW0A0EhozX-Gd6jq5vqWX79uKjqOfGi_Dh8zjxXoZhTB590TccHt-qUZp5makwXNXH6F5rS-QJz9FlkCtf5ui-ihZRm9aK0Ejrtw6FRlkxwij-E1YDugTAjN53gfuaJMTuYjFkugBv_3NT1CuEF4u_Uw_kJ4xXrkVUei29v82XJQihphdKnWQjRGlEuecdLfanL1"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-20 p-8 min-h-screen">
+<div class="max-w-6xl mx-auto">
+<!-- Page Header -->
+<header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-5xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Compra Coins</h2>
+<p class="text-on-surface-variant max-w-lg">Gestiona els teus crèdits per interactuar amb la pista de ball i elevar la teva sessió.</p>
+</div>
+<div class="flex gap-4">
+<!-- Balance Summary Cards -->
+<div class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm flex items-center gap-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+</div>
+<div>
+<p class="text-[10px] font-bold text-outline uppercase tracking-wider">Coins actuals</p>
+<p class="text-2xl font-bold font-headline text-on-surface">142</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm flex items-center gap-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/10 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<div>
+<p class="text-[10px] font-bold text-outline uppercase tracking-wider">Vots disponibles</p>
+<p class="text-2xl font-bold font-headline text-on-surface">28</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Purchase Section (2/3) -->
+<section class="lg:col-span-2 space-y-8">
+<div>
+<div class="flex items-center gap-2 mb-6">
+<span class="w-8 h-1 bg-primary-container rounded-full"></span>
+<h3 class="text-xl font-bold font-headline">Comprar Coins amb diners reals</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Pack 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl group hover:bg-sonic-card transition-all duration-300 flex flex-col items-center text-center cursor-pointer shadow-sm shadow-[#0040e0]/5">
+<div class="w-16 h-16 rounded-full bg-primary-container/5 group-hover:bg-white/20 flex items-center justify-center mb-4 transition-colors">
+<span class="material-symbols-outlined text-4xl text-primary-container group-hover:text-white" style="font-variation-settings: 'FILL' 1;">toll</span>
+</div>
+<p class="text-3xl font-extrabold font-headline mb-1 group-hover:text-white">10 Coins</p>
+<p class="text-sm font-semibold text-on-surface-variant group-hover:text-white/70 mb-6">Iniciació sonora</p>
+<div class="mt-auto w-full">
+<span class="block text-2xl font-bold font-headline text-primary-container group-hover:text-white mb-4">4,99 €</span>
+<button class="w-full py-3 rounded-xl bg-surface-container-highest group-hover:bg-white group-hover:text-primary-container font-bold transition-all text-sm uppercase tracking-wider">Comprar</button>
+</div>
+</div>
+<!-- Pack 2 (Recommended) -->
+<div class="bg-sonic-card p-6 rounded-3xl flex flex-col items-center text-center cursor-pointer shadow-xl shadow-[#0040e0]/20 transform scale-105 relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-accent_cyan text-primary-container text-[10px] font-bold px-4 py-1 rounded-bl-xl uppercase tracking-tighter" style="background-color: #00e3fd;">Més popular</div>
+<div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-4xl text-white" style="font-variation-settings: 'FILL' 1;">poker_chip</span>
+</div>
+<p class="text-3xl font-extrabold font-headline mb-1 text-white">30 Coins</p>
+<p class="text-sm font-semibold text-white/70 mb-6">Pack Estàndard</p>
+<div class="mt-auto w-full">
+<span class="block text-2xl font-bold font-headline text-white mb-4">12,99 €</span>
+<button class="w-full py-3 rounded-xl bg-white text-primary-container font-bold hover:bg-surface-container-lowest transition-all text-sm uppercase tracking-wider">Comprar</button>
+</div>
+</div>
+<!-- Pack 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl group hover:bg-sonic-card transition-all duration-300 flex flex-col items-center text-center cursor-pointer shadow-sm shadow-[#0040e0]/5">
+<div class="w-16 h-16 rounded-full bg-primary-container/5 group-hover:bg-white/20 flex items-center justify-center mb-4 transition-colors">
+<span class="material-symbols-outlined text-4xl text-primary-container group-hover:text-white" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<p class="text-3xl font-extrabold font-headline mb-1 group-hover:text-white">70 Coins</p>
+<p class="text-sm font-semibold text-on-surface-variant group-hover:text-white/70 mb-6">Expert Sessions</p>
+<div class="mt-auto w-full">
+<span class="block text-2xl font-bold font-headline text-primary-container group-hover:text-white mb-4">24,99 €</span>
+<button class="w-full py-3 rounded-xl bg-surface-container-highest group-hover:bg-white group-hover:text-primary-container font-bold transition-all text-sm uppercase tracking-wider">Comprar</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Conversion Flow -->
+<div>
+<div class="flex items-center gap-2 mb-6">
+<span class="w-8 h-1 bg-tertiary rounded-full"></span>
+<h3 class="text-xl font-bold font-headline">Sistema de Bonus</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-3xl">
+<div class="flex flex-col md:flex-row items-center gap-6">
+<div class="flex-1 w-full bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+</div>
+<div>
+<p class="text-lg font-bold">5 Coins</p>
+<p class="text-xs text-on-surface-variant font-semibold">Conversió mínima</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<div class="flex items-center gap-4 text-right">
+<div>
+<p class="text-lg font-bold text-tertiary">11 Vots</p>
+<p class="text-xs text-on-surface-variant font-semibold">+10% Bonus</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+</div>
+</div>
+<div class="flex-1 w-full bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+</div>
+<div>
+<p class="text-lg font-bold">20 Coins</p>
+<p class="text-xs text-on-surface-variant font-semibold">Inversió mitjana</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">trending_flat</span>
+<div class="flex items-center gap-4 text-right">
+<div>
+<p class="text-lg font-bold text-tertiary">50 Vots</p>
+<p class="text-xs text-on-surface-variant font-semibold">+25% Bonus</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Info Panel (1/3) -->
+<aside class="space-y-6">
+<div class="bg-surface-container-high p-8 rounded-3xl sticky top-28">
+<div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-md">
+<span class="material-symbols-outlined text-3xl text-primary-container">help_center</span>
+</div>
+<h4 class="text-2xl font-bold font-headline mb-4">Com funciona?</h4>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center">1</div>
+<div>
+<p class="font-bold text-sm mb-1 uppercase tracking-wide">Adquireix Coins</p>
+<p class="text-sm text-on-surface-variant leading-relaxed">Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center">2</div>
+<div>
+<p class="font-bold text-sm mb-1 uppercase tracking-wide">Converteix a Vots</p>
+<p class="text-sm text-on-surface-variant leading-relaxed">Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center">3</div>
+<div>
+<p class="font-bold text-sm mb-1 uppercase tracking-wide">Participa al Show</p>
+<p class="text-sm text-on-surface-variant leading-relaxed">Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set.</p>
+</div>
+</div>
+</div>
+<div class="mt-10 p-4 rounded-2xl bg-primary-container/5 border border-primary-container/10">
+<p class="text-xs font-semibold text-primary-container mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">security</span>
+                                Pagament segur garantit
+                            </p>
+<div class="flex gap-2 grayscale opacity-50">
+<img alt="Visa" class="h-4" data-alt="Visa credit card payment logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0XLUaz0wvTDVYABVKs34Io-am-ChDyrI32AmLEbBhqV_mXVzjX4HYDC1lFViR04wxvgKqCPvtYWDw2p2asL97Z79wI1djWh956V_rRHlr0o71WeOnQjNBfajc_0mt2SC7eTqWUn62R2QlO3qVIONQy5KsAxVrNCnjaydEx6XrML3KhryF9mgdMOpLboiI98aHpWHrh1NNbfyB7ZMUdwm55ZXJxekzIB9-mSPKJdNbDJIQYxjV3XSzvUg7b32m4AiiKTpmNCpCWVHT"/>
+<img alt="Mastercard" class="h-4" data-alt="Mastercard payment provider logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIqonMWXxwLFLijRcwA15CtLrYB5bxo4fk5xiueswEOx2ctfDi-G_7l-XxZrCuZABvbnpO7jkN21wsVVtNQTK-majw3BK0Wa_ekDqB2X3An9x3TEBrjaK8qI6Y7FQO8F9Repn-p8SYBCJKedqMwUciNRajaNgxSs8EHPMsQIoW_5NkPNMaLsOWLfGVKFMGsh-KbyPDNvHN99AWySJDHO1u2uUsOOyDejZWSZBeG-qru_88DM0b88OEN7cstxP8qGLl9FnuvHmf14sN"/>
+<img alt="Paypal" class="h-4" data-alt="Paypal secure payment logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnohpZVlGN-Vwy2mTAvn1tWksdEO1k6kGz0fA6cHEinkS8FRxV7ESfNfXFFI0wV2Tr6S9EX63OANxiTXIzRUumcjoKbWmn-5c1TgyhfzReF1ffORmTKyf4CcoNnlu3wiQZnyaiMURme9EuBs5WyeaMOvDkZDk2AisgZRatSFWnKwB3-MekEad3hjT7lRoWQ79Jiaky0u-EHINQPIcWK67TN8nhMoOa55omeU15Vx7IvdoSjhquxCaCAQl-TyC_c2xHAAb5IaKMS_K1"/>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+</body></html>

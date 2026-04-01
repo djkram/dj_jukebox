@@ -1,6 +1,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 
@@ -372,21 +373,21 @@
           <span>DJ Jukebox</span>
         </div>
         <div class="login-hero-copy">
-          <span class="login-hero-kicker">Accés a la festa</span>
-          <h2 class="login-hero-title">Entra i viu la sessió des de dins.</h2>
-          <p class="login-hero-subtitle">Vota cançons, descobreix què sona i participa en directe des de la pista.</p>
+          <span class="login-hero-kicker">{% trans "Accés a la festa" %}</span>
+          <h2 class="login-hero-title">{% trans "Entra i viu la sessió des de dins." %}</h2>
+          <p class="login-hero-subtitle">{% trans "Vota cançons, descobreix què sona i participa en directe des de la pista." %}</p>
           <ul class="login-hero-points">
             <li class="login-hero-point">
               <span class="material-symbols-outlined">queue_music</span>
-              Fes peticions i segueix la música en temps real
+              {% trans "Fes peticions i segueix la música en temps real" %}
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">bolt</span>
-              Entrada ràpida amb Spotify o Google
+              {% trans "Entrada ràpida amb Spotify o Google" %}
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">music_note</span>
-              Mira què sona, la maleta del DJ i la sessió completa
+              {% trans "Mira què sona, la maleta del DJ i la sessió completa" %}
             </li>
           </ul>
         </div>
@@ -397,8 +398,8 @@
           <div class="login-logo">
             <span class="material-symbols-outlined">music_note</span>
           </div>
-          <h1 class="login-title">Benvingut de nou</h1>
-          <p class="login-subtitle">Entra per continuar a DJ Jukebox</p>
+          <h1 class="login-title">{% trans "Benvingut de nou" %}</h1>
+          <p class="login-subtitle">{% trans "Entra per continuar a DJ Jukebox" %}</p>
         </div>
 
         <!-- Login Form -->
@@ -416,7 +417,7 @@
                   >
                   <span>{{ field.label }}</span>
                 </label>
-                <a href="{% url 'account_reset_password' %}" class="login-meta-link">Has oblidat la contrasenya?</a>
+                <a href="{% url 'account_reset_password' %}" class="login-meta-link">{% trans "Has oblidat la contrasenya?" %}</a>
               </div>
             {% else %}
               <div class="login-form-group">
@@ -443,14 +444,14 @@
 
           <button type="submit" class="login-submit-btn">
             <span class="material-symbols-outlined" style="font-size: 1.125rem;">login</span>
-            Entra
+            {% trans "Entra" %}
           </button>
         </form>
 
         <!-- Divider -->
         <div class="login-divider">
           <div class="login-divider-line"></div>
-          <span class="login-divider-text">o continua amb</span>
+          <span class="login-divider-text">{% trans "o continua amb" %}</span>
           <div class="login-divider-line"></div>
         </div>
 
@@ -469,7 +470,7 @@
         <!-- Footer -->
         <div class="login-footer">
           <p class="login-footer-text">
-            No tens compte? <a href="{% url 'account_signup' %}" class="login-footer-link">Registra't</a>
+            {% trans "No tens compte?" %} <a href="{% url 'account_signup' %}" class="login-footer-link">{% trans "Registra't" %}</a>
           </p>
         </div>
       </div>
@@ -482,7 +483,7 @@
   <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
     <!-- Login Form -->
     <section class="mb-4">
-      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Login</h1>
+      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">{% trans "Login" %}</h1>
 
       <form method="post" class="space-y-2">
         {% csrf_token %}
@@ -499,7 +500,7 @@
                 >
                 <span>{{ field.label }}</span>
               </label>
-              <a href="{% url 'account_reset_password' %}" style="color: #0040e0; font-size: 0.72rem; font-weight: 700; text-decoration: none; white-space: nowrap;">Recupera-la</a>
+              <a href="{% url 'account_reset_password' %}" style="color: #0040e0; font-size: 0.72rem; font-weight: 700; text-decoration: none; white-space: nowrap;">{% trans "Recupera-la" %}</a>
             </div>
           {% else %}
             <div>
@@ -523,7 +524,7 @@
         {% endfor %}
 
         <button type="submit" class="w-100 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-2" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.92rem; padding-top: 0.74rem; padding-bottom: 0.74rem;">
-          Entra
+          {% trans "Entra" %}
         </button>
       </form>
     </section>
@@ -531,24 +532,24 @@
     <!-- Social Login -->
     <section class="space-y-2">
       <div class="text-center mb-2">
-        <span style="color: #747688; font-size: 0.76rem;">o connecta't amb</span>
+        <span style="color: #747688; font-size: 0.76rem;">{% trans "o connecta't amb" %}</span>
       </div>
 
       <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
         <i class="fab fa-spotify" style="font-size: 1rem;"></i>
-        Connecta't amb Spotify
+        {% trans "Connecta't amb Spotify" %}
       </a>
 
       <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
         <i class="fab fa-google" style="font-size: 1rem;"></i>
-        Connecta't amb Google
+        {% trans "Connecta't amb Google" %}
       </a>
     </section>
 
     <!-- Sign Up Link -->
     <div class="text-center mt-3">
       <p style="color: #747688; font-size: 0.78rem;">
-        No tens compte? <a href="{% url 'account_signup' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">Registra't</a>
+        {% trans "No tens compte?" %} <a href="{% url 'account_signup' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">{% trans "Registra't" %}</a>
       </p>
     </div>
   </main>

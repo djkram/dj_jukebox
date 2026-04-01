@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,6 +73,8 @@
 
     <!-- Custom styles for this template (legacy) -->
     <link href="{% static 'jukebox/css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
 
     <!-- Tailwind Config -->
     <script>
@@ -503,9 +506,9 @@
         }
 
         html.app-shell-desktop #accordionSidebar {
-            background:
-                radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
-                linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%) !important;
+            background: var(--color-primary) !important;
+            background-color: var(--color-primary) !important;
+            background-image: none !important;
             box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
         }
 
@@ -574,9 +577,9 @@
 
             /* Hide original sidebar on desktop, show Sonic sidebar */
             #accordionSidebar {
-                background:
-                    radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
-                    linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+                background: var(--color-primary);
+                background-color: var(--color-primary);
+                background-image: none;
                 box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
             }
 
@@ -588,8 +591,8 @@
             /* Show Material Icons on desktop, hide Font Awesome */
             .sidebar .material-symbols-outlined {
                 display: inline-block !important;
-                font-size: 1.25rem;
-                width: 1.5rem;
+                font-size: 1.15rem;
+                width: 1.2rem;
                 text-align: center;
             }
             .sidebar .fas, .sidebar .fab, .sidebar .sidebar-emoji-icon {
@@ -899,7 +902,9 @@
             text-transform: uppercase;
         }
         #accordionSidebar {
-            background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            background: var(--color-primary);
+            background-color: var(--color-primary);
+            background-image: none;
             box-shadow: inset -1px 0 0 rgba(255,255,255,.08);
         }
         #accordionSidebar .sidebar-brand {
@@ -1005,7 +1010,7 @@
             font-weight: 800;
             letter-spacing: .08em;
             text-transform: uppercase;
-            padding: 0 1.45rem;
+            padding: 0 1.2rem;
             margin: .15rem 0 .45rem;
         }
         #accordionSidebar .nav-item {
@@ -1014,11 +1019,11 @@
         #accordionSidebar .nav-item .nav-link,
         #accordionSidebar .nav-item .nav-link.btn-link {
             width: auto;
-            padding: .72rem .9rem;
+            padding: .68rem .75rem;
             border-radius: .95rem;
             display: flex;
             align-items: center;
-            gap: .8rem;
+            gap: .58rem;
             color: rgba(255,255,255,.86);
             font-weight: 600;
             transition: background-color .18s ease, transform .18s ease, color .18s ease;
@@ -1032,24 +1037,24 @@
         }
         #accordionSidebar .nav-item .nav-link i,
         #accordionSidebar .nav-item .nav-link.btn-link i {
-            width: 1.1rem;
+            width: .95rem;
             text-align: center;
             color: rgba(255,255,255,.72);
-            font-size: .98rem;
+            font-size: .92rem;
             margin-right: 0;
         }
         .sidebar-emoji-icon {
-            width: 1.1rem;
+            width: .95rem;
             text-align: center;
             color: #fff;
-            font-size: 1rem;
+            font-size: .92rem;
             line-height: 1;
             display: inline-block;
             filter: grayscale(1) brightness(2.25);
         }
         #accordionSidebar .nav-item .nav-link span,
         #accordionSidebar .nav-item .nav-link.btn-link span {
-            font-size: 1rem;
+            font-size: .93rem;
         }
         #accordionSidebar .nav-item.active .nav-link,
         #accordionSidebar .nav-item.active .nav-link.btn-link {
@@ -1945,19 +1950,19 @@
 
             {% if user.is_authenticated %}
                 {% if user.is_superuser %}
-                <div class="sidebar-heading">DJ Tools</div>
+                <div class="sidebar-heading">{% trans "DJ Tools" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'dj_dashboard' %}">
                         <i class="fas fa-sliders-h"></i>
                         <span class="material-symbols-outlined">dashboard</span>
-                        <span>Dashboard DJ</span>
+                        <span>{% trans "Dashboard DJ" %}</span>
                     </a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'manage_song_requests' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'manage_song_requests' %}">
                         <i class="fas fa-inbox"></i>
                         <span class="material-symbols-outlined">queue_music</span>
-                        <span>Gestionar peticions</span>
+                        <span>{% trans "Gestionar peticions" %}</span>
                     </a>
                 </li>
                 {% if selected_party %}
@@ -1965,7 +1970,7 @@
                     <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
                         <i class="fas fa-cog"></i>
                         <span class="material-symbols-outlined">settings</span>
-                        <span>Settings festa</span>
+                        <span>{% trans "Configuració festa" %}</span>
                     </a>
                 </li>
                 {% endif %}
@@ -1973,12 +1978,12 @@
                     <a class="nav-link" href="{% url 'dj_backoffice' %}">
                         <i class="fas fa-user-cog"></i>
                         <span class="material-symbols-outlined">admin_panel_settings</span>
-                        <span>Backoffice</span>
+                        <span>{% trans "Backoffice" %}</span>
                     </a>
                 </li>
                 {% endif %}
 
-                <div class="sidebar-heading">Festa</div>
+                <div class="sidebar-heading">{% trans "Festa" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'song_list' %}">
                         <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
@@ -1987,7 +1992,7 @@
                           {% if selected_party %}
                             {{ selected_party.name }}
                           {% else %}
-                            Festa activa
+                            {% trans "Festa activa" %}
                           {% endif %}
                         </span>
                     </a>
@@ -1996,36 +2001,36 @@
                     <a class="nav-link" href="{% url 'song_swipe' %}">
                         <i class="fas fa-heart"></i>
                         <span class="material-symbols-outlined">person_search</span>
-                        <span>Busca Match</span>
+                        <span>{% trans "Busca Match" %}</span>
                     </a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'request_song' %}">
                         <i class="fas fa-microphone-alt"></i>
                         <span class="material-symbols-outlined">add_to_photos</span>
-                        <span>Demanar cançó</span>
+                        <span>{% trans "Demanar cançó" %}</span>
                     </a>
                 </li>
-                <div class="sidebar-heading">General</div>
+                <div class="sidebar-heading">{% trans "General" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'buy_votes' %}">
                         <i class="fas fa-coins"></i>
                         <span class="material-symbols-outlined">payments</span>
-                        <span>Compra Coins</span>
+                        <span>{% trans "Compra Coins" %}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'select_party' %}">
                         <i class="fas fa-random"></i>
                         <span class="material-symbols-outlined">event_repeat</span>
-                        <span>Tria una altra festa</span>
+                        <span>{% trans "Tria una altra festa" %}</span>
                     </a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'profile' %}">
                         <i class="fas fa-user"></i>
                         <span class="material-symbols-outlined">person</span>
-                        <span>Perfil</span>
+                        <span>{% trans "Perfil" %}</span>
                     </a>
                 </li>
                 <div class="sidebar-subtle">
@@ -2035,7 +2040,7 @@
                             <button type="submit" class="nav-link btn btn-link">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span class="material-symbols-outlined">logout</span>
-                                <span>Tancar sessió</span>
+                                <span>{% trans "Tancar sessió" %}</span>
                             </button>
                         </form>
                     </li>
@@ -2144,24 +2149,24 @@
                                  aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="{% url 'profile' %}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Perfil
+                                    {% trans "Perfil" %}
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
                                         <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Sortir
+                                        {% trans "Sortir" %}
                                     </button>
                                 </form>
                             </div>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'account_login' %}">{% trans "Login" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                            <a class="nav-link" href="{% url 'account_signup' %}">{% trans "Registra't" %}</a>
                         </li>
                         {% endif %}
                     </ul>

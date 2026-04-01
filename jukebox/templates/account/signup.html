@@ -12,73 +12,185 @@
 <style>
   /* Signup Page - Sonic Architect Style (Desktop only) */
   @media (min-width: 768px) {
+    html.app-shell-desktop .topbar.d-none.d-md-flex {
+      display: none !important;
+      margin-bottom: 0 !important;
+      box-shadow: none !important;
+    }
     .signup-page-wrapper {
-      min-height: calc(100vh - 100px);
+      min-height: calc(100vh - 2rem);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 0.75rem 1.5rem;
     }
     .signup-card {
       background: #ffffff;
       border-radius: 1.5rem;
-      padding: 3rem;
       box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      max-width: 480px;
+      max-width: 1160px;
       width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+      overflow: hidden;
+    }
+    .signup-hero {
+      background:
+        radial-gradient(circle at top left, rgba(46, 91, 255, 0.22), transparent 42%),
+        linear-gradient(160deg, #0b2fc4 0%, #0040e0 45%, #5e24e1 100%);
+      color: #ffffff;
+      padding: 2rem 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .signup-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .signup-brand-badge {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 0.95rem;
+      background: rgba(255,255,255,0.14);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .signup-brand-badge .material-symbols-outlined {
+      font-size: 1.5rem;
+      color: #ffffff;
+      font-variation-settings: 'FILL' 1;
+    }
+    .signup-hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-width: 24rem;
+      margin-top: 1.25rem;
+    }
+    .signup-hero-kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+    }
+    .signup-hero-title {
+      margin: 0;
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 0.97;
+      letter-spacing: -0.04em;
+    }
+    .signup-hero-subtitle {
+      margin: 0;
+      font-size: 0.94rem;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.82);
+    }
+    .signup-hero-points {
+      display: grid;
+      gap: 0.65rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .signup-hero-point {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.86rem;
+      color: rgba(255,255,255,0.92);
+    }
+    .signup-hero-point .material-symbols-outlined {
+      font-size: 1.15rem;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14);
+    }
+    .signup-panel {
+      padding: 1.6rem 1.9rem 1.35rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .signup-header {
-      text-align: center;
-      margin-bottom: 2.5rem;
+      text-align: left;
+      margin-bottom: 0.95rem;
     }
     .signup-logo {
-      width: 4rem;
-      height: 4rem;
+      width: 3.25rem;
+      height: 3.25rem;
       background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
-      border-radius: 1rem;
+      border-radius: 0.9rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1.5rem;
-      box-shadow: 0 8px 24px rgba(0,64,224,0.2);
+      margin: 0 0 0.7rem;
+      box-shadow: 0 8px 20px rgba(0,64,224,0.18);
     }
     .signup-logo .material-symbols-outlined {
-      font-size: 2rem;
+      font-size: 1.7rem;
       color: white;
       font-variation-settings: 'FILL' 1;
     }
     .signup-title {
       font-family: 'Epilogue', sans-serif;
-      font-size: 2rem;
+      font-size: 1.85rem;
       font-weight: 800;
       color: #181c1e;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.03em;
+      line-height: 0.98;
+      margin: 0 0 0.25rem 0;
     }
     .signup-subtitle {
       color: #747687;
-      font-size: 0.875rem;
+      font-size: 0.88rem;
+      margin: 0;
     }
 
     .signup-form {
-      margin-bottom: 2rem;
+      margin-bottom: 0.85rem;
+    }
+    .signup-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 0.9rem;
     }
     .signup-form-group {
-      margin-bottom: 1.5rem;
+      min-width: 0;
+    }
+    .signup-form-group.signup-form-group--full {
+      grid-column: 1 / -1;
     }
     .signup-form-label {
       display: block;
       font-weight: 700;
       font-size: 0.875rem;
       color: #181c1e;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
     .signup-form-input {
       width: 100%;
       background: #f1f4f7;
       border: 2px solid transparent;
       border-radius: 0.75rem;
-      padding: 0.875rem 1rem;
+      padding: 0.68rem 0.9rem;
       font-size: 0.875rem;
       transition: all 200ms;
     }
@@ -91,12 +203,13 @@
     .signup-form-error {
       color: #ba1a1a;
       font-size: 0.75rem;
-      margin-top: 0.375rem;
+      margin-top: 0.25rem;
     }
     .signup-form-help {
       color: #747687;
-      font-size: 0.75rem;
-      margin-top: 0.375rem;
+      font-size: 0.68rem;
+      margin-top: 0.25rem;
+      line-height: 1.3;
     }
 
     .signup-submit-btn {
@@ -105,7 +218,7 @@
       color: white;
       border: none;
       border-radius: 0.75rem;
-      padding: 1rem;
+      padding: 0.8rem 1rem;
       font-weight: 700;
       font-size: 0.875rem;
       cursor: pointer;
@@ -125,7 +238,7 @@
       display: flex;
       align-items: center;
       gap: 1rem;
-      margin: 2rem 0;
+      margin: 0.9rem 0 0.8rem;
     }
     .signup-divider-line {
       flex: 1;
@@ -141,10 +254,10 @@
     }
 
     .signup-social-buttons {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.75rem;
-      margin-bottom: 2rem;
+      margin-bottom: 0.9rem;
     }
     .signup-social-btn {
       width: 100%;
@@ -152,14 +265,15 @@
       border-radius: 0.75rem;
       border: none;
       font-weight: 700;
-      font-size: 0.875rem;
+      font-size: 0.82rem;
       cursor: pointer;
       transition: all 200ms;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.55rem;
       text-decoration: none;
+      min-height: 2.75rem;
     }
     .signup-social-btn:hover {
       transform: translateY(-2px);
@@ -186,8 +300,8 @@
     }
 
     .signup-footer {
-      text-align: center;
-      padding-top: 1.5rem;
+      text-align: left;
+      padding-top: 0.8rem;
       border-top: 1px solid rgba(116,118,136,0.1);
     }
     .signup-footer-text {
@@ -204,6 +318,21 @@
       color: #002ea8;
       text-decoration: underline;
     }
+    @media (max-width: 1199.98px) {
+      .signup-card {
+        max-width: 980px;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      }
+      .signup-hero {
+        padding: 1.65rem;
+      }
+      .signup-panel {
+        padding: 1.45rem 1.65rem 1.2rem;
+      }
+      .signup-hero-title {
+        font-size: 2rem;
+      }
+    }
   }
 </style>
 
@@ -211,70 +340,105 @@
 <div class="d-none d-md-block">
   <div class="signup-page-wrapper">
     <div class="signup-card">
-      <!-- Header -->
-      <div class="signup-header">
-        <div class="signup-logo">
-          <span class="material-symbols-outlined">person_add</span>
+      <aside class="signup-hero">
+        <div class="signup-brand">
+          <span class="signup-brand-badge">
+            <span class="material-symbols-outlined">graphic_eq</span>
+          </span>
+          <span>DJ Jukebox</span>
         </div>
-        <h1 class="signup-title">Crea el teu compte</h1>
-        <p class="signup-subtitle">Uneix-te a la millor experiència musical</p>
-      </div>
+        <div class="signup-hero-copy">
+          <span class="signup-hero-kicker">Nou compte</span>
+          <h2 class="signup-hero-title">Crea el teu perfil i entra a la pista.</h2>
+          <p class="signup-hero-subtitle">Registra’t en una vista pensada per pantalles amples, amb menys alçada i més espai útil per completar el procés sense scroll.</p>
+          <ul class="signup-hero-points">
+            <li class="signup-hero-point">
+              <span class="material-symbols-outlined">library_music</span>
+              Accedeix a les festes i explora la música a l’instant
+            </li>
+            <li class="signup-hero-point">
+              <span class="material-symbols-outlined">favorite</span>
+              Guarda el teu perfil i fes match amb les cançons
+            </li>
+            <li class="signup-hero-point">
+              <span class="material-symbols-outlined">payments</span>
+              Compra coins i participa més durant la sessió
+            </li>
+          </ul>
+        </div>
+      </aside>
 
-      <!-- Signup Form -->
-      <form method="post" class="signup-form">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="signup-form-group">
-            <label for="{{ field.id_for_label }}" class="signup-form-label">{{ field.label }}</label>
-            <input
-              type="{{ field.field.widget.input_type }}"
-              name="{{ field.name }}"
-              id="{{ field.id_for_label }}"
-              {% if field.value %}value="{{ field.value }}"{% endif %}
-              class="signup-form-input"
-              placeholder="{{ field.label }}"
-            >
-            {% if field.help_text %}
-              <p class="signup-form-help">{{ field.help_text }}</p>
-            {% endif %}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="signup-form-error">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
+      <div class="signup-panel">
+        <div class="signup-header">
+          <div class="signup-logo">
+            <span class="material-symbols-outlined">person_add</span>
           </div>
-        {% endfor %}
+          <h1 class="signup-title">Crea el teu compte</h1>
+          <p class="signup-subtitle">Uneix-te a la millor experiència musical</p>
+        </div>
 
-        <button type="submit" class="signup-submit-btn">
-          <span class="material-symbols-outlined" style="font-size: 1.125rem;">person_add</span>
-          Registra't
-        </button>
-      </form>
+        <!-- Signup Form -->
+        <form method="post" class="signup-form">
+          {% csrf_token %}
+          <div class="signup-form-grid">
+            {% for field in form %}
+              <div class="signup-form-group {% if field.help_text and field.name != 'password1' %}signup-form-group--full{% endif %}">
+                <label for="{{ field.id_for_label }}" class="signup-form-label">{{ field.label }}</label>
+                <input
+                  type="{{ field.field.widget.input_type }}"
+                  name="{{ field.name }}"
+                  id="{{ field.id_for_label }}"
+                  {% if field.value %}value="{{ field.value }}"{% endif %}
+                  class="signup-form-input"
+                  placeholder="{{ field.label }}"
+                >
+                {% if field.name == 'password1' %}
+                  <p class="signup-form-help">Mínim 8 caràcters. Evita una clau fàcil o només numèrica.</p>
+                {% elif field.name == 'password2' %}
+                  <p class="signup-form-help">Repeteix la mateixa contrasenya.</p>
+                {% elif field.help_text %}
+                  <p class="signup-form-help">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                  {% for error in field.errors %}
+                    <p class="signup-form-error">{{ error }}</p>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
 
-      <!-- Divider -->
-      <div class="signup-divider">
-        <div class="signup-divider-line"></div>
-        <span class="signup-divider-text">o registra't amb</span>
-        <div class="signup-divider-line"></div>
-      </div>
+          <button type="submit" class="signup-submit-btn">
+            <span class="material-symbols-outlined" style="font-size: 1.125rem;">person_add</span>
+            Registra't
+          </button>
+        </form>
 
-      <!-- Social Signup -->
-      <div class="signup-social-buttons">
-        <a href="{% provider_login_url 'spotify' %}" class="signup-social-btn signup-social-btn-spotify">
-          <i class="fab fa-spotify" style="font-size: 1.25rem;"></i>
-          Registra't amb Spotify
-        </a>
-        <a href="{% provider_login_url 'google' %}" class="signup-social-btn signup-social-btn-google">
-          <i class="fab fa-google" style="font-size: 1.25rem;"></i>
-          Registra't amb Google
-        </a>
-      </div>
+        <!-- Divider -->
+        <div class="signup-divider">
+          <div class="signup-divider-line"></div>
+          <span class="signup-divider-text">o registra't amb</span>
+          <div class="signup-divider-line"></div>
+        </div>
 
-      <!-- Footer -->
-      <div class="signup-footer">
-        <p class="signup-footer-text">
-          Ja tens compte? <a href="{% url 'account_login' %}" class="signup-footer-link">Fes login</a>
-        </p>
+        <!-- Social Signup -->
+        <div class="signup-social-buttons">
+          <a href="{% provider_login_url 'spotify' %}" class="signup-social-btn signup-social-btn-spotify">
+            <i class="fab fa-spotify" style="font-size: 1.1rem;"></i>
+            Spotify
+          </a>
+          <a href="{% provider_login_url 'google' %}" class="signup-social-btn signup-social-btn-google">
+            <i class="fab fa-google" style="font-size: 1.05rem;"></i>
+            Google
+          </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="signup-footer">
+          <p class="signup-footer-text">
+            Ja tens compte? <a href="{% url 'account_login' %}" class="signup-footer-link">Fes login</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -282,62 +446,66 @@
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
 <div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
-  <main class="px-4 pt-6 pb-32 mx-auto" style="max-width: 32rem;">
+  <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
     <!-- Signup Form -->
-    <section class="mb-8">
-      <h1 class="font-headline font-extrabold text-center mb-6" style="font-size: 2rem; color: #191c1f; letter-spacing: -0.025em;">Registra't</h1>
+    <section class="mb-4">
+      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Registra't</h1>
 
-      <form method="post" class="space-y-4">
+      <form method="post" class="space-y-2">
         {% csrf_token %}
         {% for field in form %}
           <div>
-            <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-2" style="color: #191c1f; font-size: 0.875rem;">{{ field.label }}</label>
+            <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-1" style="color: #191c1f; font-size: 0.78rem;">{{ field.label }}</label>
             <input
               type="{{ field.field.widget.input_type }}"
               name="{{ field.name }}"
               id="{{ field.id_for_label }}"
               {% if field.value %}value="{{ field.value }}"{% endif %}
-              class="w-100 px-4 py-3 rounded-xl border"
-              style="border: 1px solid #c4c5d9; font-size: 1rem; background: white;"
+              class="w-100 px-3 rounded-xl border"
+              style="border: 1px solid #c4c5d9; font-size: 0.92rem; background: white; padding-top: 0.68rem; padding-bottom: 0.68rem;"
               placeholder="{{ field.label }}"
             >
-            {% if field.help_text %}
-              <p class="mt-1" style="font-size: 0.75rem; color: #747688;">{{ field.help_text }}</p>
+            {% if field.name == 'password1' %}
+              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">Mínim 8 caràcters. Evita una clau fàcil o només numèrica.</p>
+            {% elif field.name == 'password2' %}
+              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">Repeteix la mateixa contrasenya.</p>
+            {% elif field.help_text %}
+              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">{{ field.help_text }}</p>
             {% endif %}
             {% if field.errors %}
               {% for error in field.errors %}
-                <p class="text-danger mt-1" style="font-size: 0.875rem;">{{ error }}</p>
+                <p class="text-danger mt-1 mb-0" style="font-size: 0.72rem; line-height: 1.25;">{{ error }}</p>
               {% endfor %}
             {% endif %}
           </div>
         {% endfor %}
 
-        <button type="submit" class="w-100 py-3 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); font-size: 1rem;">
+        <button type="submit" class="w-100 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-3" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.92rem; padding-top: 0.74rem; padding-bottom: 0.74rem;">
           Registra't
         </button>
       </form>
     </section>
 
     <!-- Social Signup -->
-    <section class="space-y-3">
-      <div class="text-center mb-3">
-        <span style="color: #747688; font-size: 0.875rem;">o registra't amb</span>
+    <section class="space-y-2">
+      <div class="text-center mb-2">
+        <span style="color: #747688; font-size: 0.76rem;">o registra't amb</span>
       </div>
 
-      <a href="{% provider_login_url 'spotify' %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3); font-size: 1rem;">
-        <i class="fab fa-spotify" style="font-size: 1.25rem;"></i>
+      <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+        <i class="fab fa-spotify" style="font-size: 1rem;"></i>
         Registra't amb Spotify
       </a>
 
-      <a href="{% provider_login_url 'google' %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 12px rgba(219, 68, 55, 0.3); font-size: 1rem;">
-        <i class="fab fa-google" style="font-size: 1.25rem;"></i>
+      <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+        <i class="fab fa-google" style="font-size: 1rem;"></i>
         Registra't amb Google
       </a>
     </section>
 
     <!-- Login Link -->
-    <div class="text-center mt-6">
-      <p style="color: #747688; font-size: 0.875rem;">
+    <div class="text-center mt-4">
+      <p style="color: #747688; font-size: 0.78rem;">
         Ja tens compte? <a href="{% url 'account_login' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">Fes login</a>
       </p>
     </div>

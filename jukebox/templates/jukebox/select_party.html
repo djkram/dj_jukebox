@@ -133,7 +133,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
     }
     .select-party-meta-item {
       display: flex;
@@ -180,62 +180,105 @@
 
     /* Add new event card */
     .select-add-card {
-      border: 2px dashed rgba(196,197,216,0.4);
+      border: 1px solid rgba(0,64,224,0.12);
       border-radius: 1.5rem;
-      padding: 2rem;
+      padding: 1.75rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      text-align: center;
+      text-align: left;
       cursor: pointer;
       transition: all 300ms;
-      min-height: 400px;
+      min-height: 0;
+      aspect-ratio: 1 / 1;
       text-decoration: none;
       color: inherit;
+      background:
+        radial-gradient(circle at top right, rgba(94,36,225,0.16), transparent 42%),
+        linear-gradient(180deg, #fbfcff 0%, #eef3ff 100%);
+      box-shadow: 0 18px 36px rgba(0,64,224,0.06);
+      overflow: hidden;
     }
     .select-add-card:hover {
       border-color: #0040e0;
-      background: rgba(0,64,224,0.02);
+      background:
+        radial-gradient(circle at top right, rgba(94,36,225,0.24), transparent 42%),
+        linear-gradient(180deg, #ffffff 0%, #ebf1ff 100%);
+      box-shadow: 0 24px 44px rgba(0,64,224,0.10);
+      transform: translateY(-2px);
     }
     .select-add-icon {
       width: 4rem;
       height: 4rem;
-      background: #e5e8eb;
-      border-radius: 50%;
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      border-radius: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 1rem;
       transition: all 300ms;
+      box-shadow: 0 14px 28px rgba(0,64,224,0.18);
     }
     .select-add-card:hover .select-add-icon {
-      background: #dde1ff;
-      color: #0040e0;
+      transform: scale(1.04);
     }
     .select-add-icon .material-symbols-outlined {
       font-size: 1.875rem;
-      color: #434655;
+      color: #ffffff;
     }
     .select-add-card:hover .select-add-icon .material-symbols-outlined {
+      color: #ffffff;
+    }
+    .select-add-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.32rem 0.68rem;
+      border-radius: 9999px;
+      background: rgba(0,64,224,0.08);
       color: #0040e0;
+      font-size: 0.64rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
     }
     .select-add-title {
       font-family: 'Epilogue', sans-serif;
-      font-size: 1.125rem;
+      font-size: 1.35rem;
       font-weight: 700;
       color: #181c1e;
-      margin-bottom: 0.5rem;
+      line-height: 1.15;
+      margin-bottom: 0.6rem;
     }
     .select-add-text {
-      font-size: 0.875rem;
+      font-size: 0.84rem;
       color: #434655;
-      max-width: 200px;
+      max-width: 250px;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .select-add-cta {
+      margin-top: 0.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.78rem 0.95rem;
+      border-radius: 0.95rem;
+      background: #0040e0;
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 800;
+      box-shadow: 0 12px 24px rgba(0,64,224,0.18);
+    }
+    .select-add-cta .material-symbols-outlined {
+      font-size: 1rem;
     }
 
     /* Promo section */
     .select-promo-section {
-      margin-top: 4rem;
+      margin-top: 1.5rem;
       background: #0040e0;
       border-radius: 2rem;
       padding: 2.5rem;
@@ -387,13 +430,6 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
-  <div class="select-page-header">
-    <div class="select-filter-buttons" style="margin-left: auto;">
-      <button class="select-filter-btn secondary">Tots els esdeveniments</button>
-      <button class="select-filter-btn primary">Propers actes</button>
-    </div>
-  </div>
-
   {% if parties %}
     <div class="select-parties-grid">
       {% for party in parties %}
@@ -426,11 +462,6 @@
                 Entrar a la sessió
                 <span class="material-symbols-outlined">arrow_forward</span>
               </button>
-            {% else %}
-              <button class="select-party-button secondary">
-                Gestionar esdeveniment
-                <span class="material-symbols-outlined">edit</span>
-              </button>
             {% endif %}
           </div>
         </a>
@@ -438,10 +469,15 @@
 
       <a href="{% url 'dj_backoffice' %}" class="select-add-card">
         <div class="select-add-icon">
-          <span class="material-symbols-outlined">add</span>
+          <span class="material-symbols-outlined">celebration</span>
         </div>
-        <h3 class="select-add-title">Afegir nou esdeveniment</h3>
-        <p class="select-add-text">Configura una nova festa, llista de reproducció i assigna un DJ.</p>
+        <span class="select-add-kicker">Nou a DJ Jukebox</span>
+        <h3 class="select-add-title">Afegeix la teva festa</h3>
+        <p class="select-add-text">Publica-la a DJ Jukebox i activa l'experiència per als teus convidats.</p>
+        <div class="select-add-cta">
+          Crear festa
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </div>
       </a>
     </div>
 
@@ -449,8 +485,8 @@
       <div class="select-promo-bg-1"></div>
       <div class="select-promo-bg-2"></div>
       <div class="select-promo-content">
-        <h2 class="select-promo-title">Ets l'amo de la pista</h2>
-        <p class="select-promo-text">Gestioneu les peticions en temps real, sincronitzeu els llums i manteniu el ritme des d'un sol lloc.</p>
+        <h2 class="select-promo-title">Ets l'amo de la pista?</h2>
+        <p class="select-promo-text">Demana cançons al moment, mira què sona i recupera tota la sessió.</p>
         <div class="select-promo-stats">
           <div class="select-promo-stat">
             <p class="select-promo-stat-label">Sessions Totals</p>

@@ -12,73 +12,178 @@
 <style>
   /* Login Page - Sonic Architect Style (Desktop only) */
   @media (min-width: 768px) {
+    html.app-shell-desktop .topbar.d-none.d-md-flex {
+      display: none !important;
+      margin-bottom: 0 !important;
+      box-shadow: none !important;
+    }
     .login-page-wrapper {
-      min-height: calc(100vh - 100px);
+      min-height: calc(100vh - 2rem);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 0.75rem 1.5rem;
     }
     .login-card {
       background: #ffffff;
       border-radius: 1.5rem;
-      padding: 3rem;
       box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      max-width: 480px;
+      max-width: 1024px;
       width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      overflow: hidden;
+    }
+    .login-hero {
+      background:
+        radial-gradient(circle at top left, rgba(46, 91, 255, 0.22), transparent 42%),
+        linear-gradient(160deg, #0b2fc4 0%, #0040e0 45%, #5e24e1 100%);
+      color: #ffffff;
+      padding: 2rem 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+    .login-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .login-brand-badge {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 0.95rem;
+      background: rgba(255,255,255,0.14);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .login-brand-badge .material-symbols-outlined {
+      font-size: 1.5rem;
+      color: #ffffff;
+      font-variation-settings: 'FILL' 1;
+    }
+    .login-hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-width: 24rem;
+      margin-top: 1.25rem;
+    }
+    .login-hero-kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+    }
+    .login-hero-title {
+      margin: 0;
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2.35rem;
+      font-weight: 800;
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+    .login-hero-subtitle {
+      margin: 0;
+      font-size: 0.94rem;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.82);
+    }
+    .login-hero-points {
+      display: grid;
+      gap: 0.65rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .login-hero-point {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.86rem;
+      color: rgba(255,255,255,0.92);
+    }
+    .login-hero-point .material-symbols-outlined {
+      font-size: 1.15rem;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14);
+    }
+    .login-panel {
+      padding: 1.7rem 2rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .login-header {
-      text-align: center;
-      margin-bottom: 2.5rem;
+      text-align: left;
+      margin-bottom: 1rem;
     }
     .login-logo {
-      width: 4rem;
-      height: 4rem;
+      width: 3.25rem;
+      height: 3.25rem;
       background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
-      border-radius: 1rem;
+      border-radius: 0.9rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1.5rem;
-      box-shadow: 0 8px 24px rgba(0,64,224,0.2);
+      margin: 0 0 0.7rem;
+      box-shadow: 0 8px 20px rgba(0,64,224,0.18);
     }
     .login-logo .material-symbols-outlined {
-      font-size: 2rem;
+      font-size: 1.7rem;
       color: white;
       font-variation-settings: 'FILL' 1;
     }
     .login-title {
       font-family: 'Epilogue', sans-serif;
-      font-size: 2rem;
+      font-size: 1.85rem;
       font-weight: 800;
       color: #181c1e;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.03em;
+      line-height: 0.98;
+      margin: 0 0 0.25rem 0;
     }
     .login-subtitle {
       color: #747687;
-      font-size: 0.875rem;
+      font-size: 0.88rem;
+      margin: 0;
     }
 
     .login-form {
-      margin-bottom: 2rem;
+      margin-bottom: 0.85rem;
     }
     .login-form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
     }
     .login-form-label {
       display: block;
       font-weight: 700;
       font-size: 0.875rem;
       color: #181c1e;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
     .login-form-input {
       width: 100%;
       background: #f1f4f7;
       border: 2px solid transparent;
       border-radius: 0.75rem;
-      padding: 0.875rem 1rem;
+      padding: 0.68rem 0.9rem;
       font-size: 0.875rem;
       transition: all 200ms;
     }
@@ -91,12 +196,44 @@
     .login-form-error {
       color: #ba1a1a;
       font-size: 0.75rem;
-      margin-top: 0.375rem;
+      margin-top: 0.25rem;
     }
     .login-form-help {
       color: #747687;
       font-size: 0.75rem;
-      margin-top: 0.375rem;
+      margin-top: 0.25rem;
+    }
+    .login-form-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0.05rem 0 0.75rem;
+    }
+    .login-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: #434655;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+    .login-checkbox input {
+      width: 1rem;
+      height: 1rem;
+      accent-color: #0040e0;
+      margin: 0;
+    }
+    .login-meta-link {
+      color: #0040e0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .login-meta-link:hover {
+      color: #002ea8;
+      text-decoration: underline;
     }
 
     .login-submit-btn {
@@ -105,7 +242,7 @@
       color: white;
       border: none;
       border-radius: 0.75rem;
-      padding: 1rem;
+      padding: 0.8rem 1rem;
       font-weight: 700;
       font-size: 0.875rem;
       cursor: pointer;
@@ -125,7 +262,7 @@
       display: flex;
       align-items: center;
       gap: 1rem;
-      margin: 2rem 0;
+      margin: 0.9rem 0 0.8rem;
     }
     .login-divider-line {
       flex: 1;
@@ -141,10 +278,10 @@
     }
 
     .login-social-buttons {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.75rem;
-      margin-bottom: 2rem;
+      margin-bottom: 0.9rem;
     }
     .login-social-btn {
       width: 100%;
@@ -152,14 +289,15 @@
       border-radius: 0.75rem;
       border: none;
       font-weight: 700;
-      font-size: 0.875rem;
+      font-size: 0.82rem;
       cursor: pointer;
       transition: all 200ms;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.55rem;
       text-decoration: none;
+      min-height: 2.75rem;
     }
     .login-social-btn:hover {
       transform: translateY(-2px);
@@ -186,8 +324,8 @@
     }
 
     .login-footer {
-      text-align: center;
-      padding-top: 1.5rem;
+      text-align: left;
+      padding-top: 0.8rem;
       border-top: 1px solid rgba(116,118,136,0.1);
     }
     .login-footer-text {
@@ -204,6 +342,20 @@
       color: #002ea8;
       text-decoration: underline;
     }
+    @media (max-width: 1199.98px) {
+      .login-card {
+        max-width: 920px;
+      }
+      .login-hero {
+        padding: 1.65rem;
+      }
+      .login-panel {
+        padding: 1.5rem 1.65rem 1.25rem;
+      }
+      .login-hero-title {
+        font-size: 2.05rem;
+      }
+    }
   }
 </style>
 
@@ -211,70 +363,114 @@
 <div class="d-none d-md-block">
   <div class="login-page-wrapper">
     <div class="login-card">
-      <!-- Header -->
-      <div class="login-header">
-        <div class="login-logo">
-          <span class="material-symbols-outlined">music_note</span>
+      <aside class="login-hero">
+        <div class="login-brand">
+          <span class="login-brand-badge">
+            <span class="material-symbols-outlined">radio</span>
+          </span>
+          <span>DJ Jukebox</span>
         </div>
-        <h1 class="login-title">Benvingut de nou</h1>
-        <p class="login-subtitle">Entra per continuar a DJ Jukebox</p>
-      </div>
+        <div class="login-hero-copy">
+          <span class="login-hero-kicker">Accés DJ</span>
+          <h2 class="login-hero-title">Entra ràpid i torna a la festa.</h2>
+          <p class="login-hero-subtitle">Accedeix al teu espai, gestiona la música i continua exactament on ho vas deixar.</p>
+          <ul class="login-hero-points">
+            <li class="login-hero-point">
+              <span class="material-symbols-outlined">queue_music</span>
+              Control instantani de les peticions i la cua
+            </li>
+            <li class="login-hero-point">
+              <span class="material-symbols-outlined">bolt</span>
+              Entrada ràpida amb Spotify o Google
+            </li>
+            <li class="login-hero-point">
+              <span class="material-symbols-outlined">music_note</span>
+              Tot optimitzat per pantalles amples
+            </li>
+          </ul>
+        </div>
+      </aside>
 
-      <!-- Login Form -->
-      <form method="post" class="login-form">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="login-form-group">
-            <label for="{{ field.id_for_label }}" class="login-form-label">{{ field.label }}</label>
-            <input
-              type="{{ field.field.widget.input_type }}"
-              name="{{ field.name }}"
-              id="{{ field.id_for_label }}"
-              {% if field.value %}value="{{ field.value }}"{% endif %}
-              class="login-form-input"
-              placeholder="{{ field.label }}"
-            >
-            {% if field.help_text %}
-              <p class="login-form-help">{{ field.help_text }}</p>
-            {% endif %}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="login-form-error">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
+      <div class="login-panel">
+        <div class="login-header">
+          <div class="login-logo">
+            <span class="material-symbols-outlined">music_note</span>
           </div>
-        {% endfor %}
+          <h1 class="login-title">Benvingut de nou</h1>
+          <p class="login-subtitle">Entra per continuar a DJ Jukebox</p>
+        </div>
 
-        <button type="submit" class="login-submit-btn">
-          <span class="material-symbols-outlined" style="font-size: 1.125rem;">login</span>
-          Entra
-        </button>
-      </form>
+        <!-- Login Form -->
+        <form method="post" class="login-form">
+          {% csrf_token %}
+          {% for field in form %}
+            {% if field.field.widget.input_type == 'checkbox' %}
+              <div class="login-form-meta">
+                <label for="{{ field.id_for_label }}" class="login-checkbox">
+                  <input
+                    type="checkbox"
+                    name="{{ field.name }}"
+                    id="{{ field.id_for_label }}"
+                    {% if field.value %}checked{% endif %}
+                  >
+                  <span>{{ field.label }}</span>
+                </label>
+                <a href="{% url 'account_reset_password' %}" class="login-meta-link">Forgot your password?</a>
+              </div>
+            {% else %}
+              <div class="login-form-group">
+                <label for="{{ field.id_for_label }}" class="login-form-label">{{ field.label }}</label>
+                <input
+                  type="{{ field.field.widget.input_type }}"
+                  name="{{ field.name }}"
+                  id="{{ field.id_for_label }}"
+                  {% if field.value %}value="{{ field.value }}"{% endif %}
+                  class="login-form-input"
+                  placeholder="{{ field.label }}"
+                >
+                {% if field.help_text %}
+                  <p class="login-form-help">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                  {% for error in field.errors %}
+                    <p class="login-form-error">{{ error }}</p>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
 
-      <!-- Divider -->
-      <div class="login-divider">
-        <div class="login-divider-line"></div>
-        <span class="login-divider-text">o continua amb</span>
-        <div class="login-divider-line"></div>
-      </div>
+          <button type="submit" class="login-submit-btn">
+            <span class="material-symbols-outlined" style="font-size: 1.125rem;">login</span>
+            Entra
+          </button>
+        </form>
 
-      <!-- Social Login -->
-      <div class="login-social-buttons">
-        <a href="{% provider_login_url 'spotify' %}" class="login-social-btn login-social-btn-spotify">
-          <i class="fab fa-spotify" style="font-size: 1.25rem;"></i>
-          Connecta't amb Spotify
-        </a>
-        <a href="{% provider_login_url 'google' %}" class="login-social-btn login-social-btn-google">
-          <i class="fab fa-google" style="font-size: 1.25rem;"></i>
-          Connecta't amb Google
-        </a>
-      </div>
+        <!-- Divider -->
+        <div class="login-divider">
+          <div class="login-divider-line"></div>
+          <span class="login-divider-text">o continua amb</span>
+          <div class="login-divider-line"></div>
+        </div>
 
-      <!-- Footer -->
-      <div class="login-footer">
-        <p class="login-footer-text">
-          No tens compte? <a href="{% url 'account_signup' %}" class="login-footer-link">Registra't</a>
-        </p>
+        <!-- Social Login -->
+        <div class="login-social-buttons">
+          <a href="{% provider_login_url 'spotify' %}" class="login-social-btn login-social-btn-spotify">
+            <i class="fab fa-spotify" style="font-size: 1.1rem;"></i>
+            Spotify
+          </a>
+          <a href="{% provider_login_url 'google' %}" class="login-social-btn login-social-btn-google">
+            <i class="fab fa-google" style="font-size: 1.05rem;"></i>
+            Google
+          </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-footer">
+          <p class="login-footer-text">
+            No tens compte? <a href="{% url 'account_signup' %}" class="login-footer-link">Registra't</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -282,59 +478,75 @@
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
 <div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
-  <main class="px-4 pt-6 pb-32 mx-auto" style="max-width: 32rem;">
+  <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
     <!-- Login Form -->
-    <section class="mb-8">
-      <h1 class="font-headline font-extrabold text-center mb-6" style="font-size: 2rem; color: #191c1f; letter-spacing: -0.025em;">Login</h1>
+    <section class="mb-4">
+      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Login</h1>
 
-      <form method="post" class="space-y-4">
+      <form method="post" class="space-y-2">
         {% csrf_token %}
         {% for field in form %}
-          <div>
-            <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-2" style="color: #191c1f; font-size: 0.875rem;">{{ field.label }}</label>
-            <input
-              type="{{ field.field.widget.input_type }}"
-              name="{{ field.name }}"
-              id="{{ field.id_for_label }}"
-              {% if field.value %}value="{{ field.value }}"{% endif %}
-              class="w-100 px-4 py-3 rounded-xl border"
-              style="border: 1px solid #c4c5d9; font-size: 1rem; background: white;"
-              placeholder="{{ field.label }}"
-            >
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="text-danger mt-1" style="font-size: 0.875rem;">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
-          </div>
+          {% if field.field.widget.input_type == 'checkbox' %}
+            <div class="d-flex align-items-center justify-content-between gap-2" style="margin-top: 0.05rem;">
+              <label for="{{ field.id_for_label }}" class="d-inline-flex align-items-center mb-0" style="gap: 0.45rem; color: #191c1f; font-size: 0.82rem; font-weight: 600;">
+                <input
+                  type="checkbox"
+                  name="{{ field.name }}"
+                  id="{{ field.id_for_label }}"
+                  {% if field.value %}checked{% endif %}
+                  style="width: 0.95rem; height: 0.95rem; accent-color: #0040e0; margin: 0;"
+                >
+                <span>{{ field.label }}</span>
+              </label>
+              <a href="{% url 'account_reset_password' %}" style="color: #0040e0; font-size: 0.72rem; font-weight: 700; text-decoration: none; white-space: nowrap;">Recupera-la</a>
+            </div>
+          {% else %}
+            <div>
+              <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-1" style="color: #191c1f; font-size: 0.78rem;">{{ field.label }}</label>
+              <input
+                type="{{ field.field.widget.input_type }}"
+                name="{{ field.name }}"
+                id="{{ field.id_for_label }}"
+                {% if field.value %}value="{{ field.value }}"{% endif %}
+                class="w-100 px-3 rounded-xl border"
+                style="border: 1px solid #c4c5d9; font-size: 0.92rem; background: white; padding-top: 0.68rem; padding-bottom: 0.68rem;"
+                placeholder="{{ field.label }}"
+              >
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <p class="text-danger mt-1 mb-0" style="font-size: 0.72rem; line-height: 1.25;">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+          {% endif %}
         {% endfor %}
 
-        <button type="submit" class="w-100 py-3 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); font-size: 1rem;">
+        <button type="submit" class="w-100 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-2" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.92rem; padding-top: 0.74rem; padding-bottom: 0.74rem;">
           Entra
         </button>
       </form>
     </section>
 
     <!-- Social Login -->
-    <section class="space-y-3">
-      <div class="text-center mb-3">
-        <span style="color: #747688; font-size: 0.875rem;">o connecta't amb</span>
+    <section class="space-y-2">
+      <div class="text-center mb-2">
+        <span style="color: #747688; font-size: 0.76rem;">o connecta't amb</span>
       </div>
 
-      <a href="{% provider_login_url 'spotify' %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3); font-size: 1rem;">
-        <i class="fab fa-spotify" style="font-size: 1.25rem;"></i>
+      <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+        <i class="fab fa-spotify" style="font-size: 1rem;"></i>
         Connecta't amb Spotify
       </a>
 
-      <a href="{% provider_login_url 'google' %}" class="w-100 py-3 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 12px rgba(219, 68, 55, 0.3); font-size: 1rem;">
-        <i class="fab fa-google" style="font-size: 1.25rem;"></i>
+      <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+        <i class="fab fa-google" style="font-size: 1rem;"></i>
         Connecta't amb Google
       </a>
     </section>
 
     <!-- Sign Up Link -->
-    <div class="text-center mt-6">
-      <p style="color: #747688; font-size: 0.875rem;">
+    <div class="text-center mt-3">
+      <p style="color: #747688; font-size: 0.78rem;">
         No tens compte? <a href="{% url 'account_signup' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">Registra't</a>
       </p>
     </div>

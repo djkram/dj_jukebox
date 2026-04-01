@@ -489,6 +489,42 @@
             box-shadow: 0 1px 0 rgba(116, 118, 136, 0.1) !important;
         }
 
+        html.app-shell-desktop #accordionSidebar {
+            background:
+                radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
+                linear-gradient(180deg, #0038d1 0%, #0040e0 38%, #2e5bff 100%) !important;
+            box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
+        }
+
+        html.app-shell-desktop #accordionSidebar .sidebar-brand {
+            background: rgba(255,255,255,0.02);
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
+        }
+
+        html.app-shell-desktop #accordionSidebar .sidebar-heading {
+            color: rgba(255,255,255,0.58);
+        }
+
+        html.app-shell-desktop #accordionSidebar .nav-item .nav-link,
+        html.app-shell-desktop #accordionSidebar .nav-item .nav-link.btn-link {
+            color: rgba(255,255,255,0.92);
+        }
+
+        html.app-shell-desktop #accordionSidebar .nav-item .nav-link:hover,
+        html.app-shell-desktop #accordionSidebar .nav-item .nav-link.btn-link:hover {
+            background: rgba(255,255,255,0.11);
+        }
+
+        html.app-shell-desktop #accordionSidebar .nav-item.active .nav-link,
+        html.app-shell-desktop #accordionSidebar .nav-item.active .nav-link.btn-link {
+            background: rgba(255,255,255,0.16);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        html.app-shell-desktop #accordionSidebar .sidebar-divider {
+            border-top-color: rgba(255,255,255,0.12);
+        }
+
         /* ===== SONIC ARCHITECT STYLES (DESKTOP ONLY) ===== */
         @media (min-width: 768px) {
             /* Material Symbols Configuration */
@@ -525,11 +561,14 @@
 
             /* Hide original sidebar on desktop, show Sonic sidebar */
             #accordionSidebar {
-                background: linear-gradient(180deg, #0040e0 0%, #2e5bff 100%);
+                background:
+                    radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
+                    linear-gradient(180deg, #0038d1 0%, #0040e0 38%, #2e5bff 100%);
+                box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
             }
 
             #accordionSidebar .nav-item .nav-link:hover {
-                background: rgba(255,255,255,0.09);
+                background: rgba(255,255,255,0.11);
                 transform: translateX(2px);
             }
 
@@ -1891,102 +1930,127 @@
                 >
             </a>
 
-            {% if user.is_superuser %}
-            <div class="sidebar-heading">DJ Tools</div>
-            <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'dj_dashboard' %}">
-                    <i class="fas fa-sliders-h"></i>
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span>Dashboard DJ</span>
-                </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'manage_song_requests' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'manage_song_requests' %}">
-                    <i class="fas fa-inbox"></i>
-                    <span class="material-symbols-outlined">queue_music</span>
-                    <span>Gestionar peticions</span>
-                </a>
-            </li>
-            {% if selected_party %}
-            <li class="nav-item {% if request.resolver_match.url_name == 'party_settings' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
-                    <i class="fas fa-cog"></i>
-                    <span class="material-symbols-outlined">settings</span>
-                    <span>Settings festa</span>
-                </a>
-            </li>
-            {% endif %}
-            <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'dj_backoffice' %}">
-                    <i class="fas fa-user-cog"></i>
-                    <span class="material-symbols-outlined">admin_panel_settings</span>
-                    <span>Backoffice</span>
-                </a>
-            </li>
-            {% endif %}
-
-            <div class="sidebar-heading">Festa</div>
-            <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'song_list' %}">
-                    <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
-                    <span class="material-symbols-outlined">celebration</span>
-                    <span>
-                      {% if selected_party %}
-                        {{ selected_party.name }}
-                      {% else %}
-                        Festa activa
-                      {% endif %}
-                    </span>
-                </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'song_swipe' %}">
-                    <i class="fas fa-heart"></i>
-                    <span class="material-symbols-outlined">person_search</span>
-                    <span>Busca Match</span>
-                </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'request_song' %}">
-                    <i class="fas fa-microphone-alt"></i>
-                    <span class="material-symbols-outlined">add_to_photos</span>
-                    <span>Demanar cançó</span>
-                </a>
-            </li>
-            <div class="sidebar-heading">General</div>
-            <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'buy_votes' %}">
-                    <i class="fas fa-coins"></i>
-                    <span class="material-symbols-outlined">payments</span>
-                    <span>Compra Coins</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'select_party' %}">
-                    <i class="fas fa-random"></i>
-                    <span class="material-symbols-outlined">event_repeat</span>
-                    <span>Tria una altra festa</span>
-                </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'profile' %}">
-                    <i class="fas fa-user"></i>
-                    <span class="material-symbols-outlined">person</span>
-                    <span>Perfil</span>
-                </a>
-            </li>
-            <div class="sidebar-subtle">
-                <li class="nav-item">
-                    <form method="post" action="{% url 'account_logout' %}" style="display:block;">
-                        {% csrf_token %}
-                        <button type="submit" class="nav-link btn btn-link">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span class="material-symbols-outlined">logout</span>
-                            <span>Tancar sessió</span>
-                        </button>
-                    </form>
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <div class="sidebar-heading">DJ Tools</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'dj_dashboard' %}">
+                        <i class="fas fa-sliders-h"></i>
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>Dashboard DJ</span>
+                    </a>
                 </li>
-            </div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'manage_song_requests' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'manage_song_requests' %}">
+                        <i class="fas fa-inbox"></i>
+                        <span class="material-symbols-outlined">queue_music</span>
+                        <span>Gestionar peticions</span>
+                    </a>
+                </li>
+                {% if selected_party %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'party_settings' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
+                        <i class="fas fa-cog"></i>
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>Settings festa</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'dj_backoffice' %}">
+                        <i class="fas fa-user-cog"></i>
+                        <span class="material-symbols-outlined">admin_panel_settings</span>
+                        <span>Backoffice</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <div class="sidebar-heading">Festa</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'song_list' %}">
+                        <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
+                        <span class="material-symbols-outlined">celebration</span>
+                        <span>
+                          {% if selected_party %}
+                            {{ selected_party.name }}
+                          {% else %}
+                            Festa activa
+                          {% endif %}
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'song_swipe' %}">
+                        <i class="fas fa-heart"></i>
+                        <span class="material-symbols-outlined">person_search</span>
+                        <span>Busca Match</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'request_song' %}">
+                        <i class="fas fa-microphone-alt"></i>
+                        <span class="material-symbols-outlined">add_to_photos</span>
+                        <span>Demanar cançó</span>
+                    </a>
+                </li>
+                <div class="sidebar-heading">General</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'buy_votes' %}">
+                        <i class="fas fa-coins"></i>
+                        <span class="material-symbols-outlined">payments</span>
+                        <span>Compra Coins</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'select_party' %}">
+                        <i class="fas fa-random"></i>
+                        <span class="material-symbols-outlined">event_repeat</span>
+                        <span>Tria una altra festa</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'profile' %}">
+                        <i class="fas fa-user"></i>
+                        <span class="material-symbols-outlined">person</span>
+                        <span>Perfil</span>
+                    </a>
+                </li>
+                <div class="sidebar-subtle">
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'account_logout' %}" style="display:block;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link btn btn-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span class="material-symbols-outlined">logout</span>
+                                <span>Tancar sessió</span>
+                            </button>
+                        </form>
+                    </li>
+                </div>
+            {% else %}
+                <div class="sidebar-heading">Accés</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'select_party' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'select_party' %}">
+                        <i class="fas fa-random"></i>
+                        <span class="material-symbols-outlined">event_repeat</span>
+                        <span>Tria la teva festa</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'account_login' %}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="material-symbols-outlined">login</span>
+                        <span>Login</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'account_signup' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'account_signup' %}">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span>Register</span>
+                    </a>
+                </li>
+            {% endif %}
 
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -2141,38 +2205,59 @@
         <!-- Mobile Bottom Navigation - Nou Disseny -->
         <nav class="mobile-bottom-nav">
             <div class="nav-items">
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
-                    <a href="{% url 'song_list' %}">
-                        <i class="fas fa-music"></i>
-                        <span>Festa</span>
-                    </a>
-                </div>
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
-                    <a href="{% url 'song_swipe' %}">
-                        <i class="fas fa-random"></i>
-                        <span>Match</span>
-                    </a>
-                </div>
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
-                    <a href="{% url 'request_song' %}">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Petició</span>
-                    </a>
-                </div>
-                {% if user.is_superuser %}
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'dj_dashboard' or request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
-                    <a href="{% url 'dj_dashboard' %}">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Control</span>
-                    </a>
-                </div>
+                {% if user.is_authenticated %}
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
+                        <a href="{% url 'song_list' %}">
+                            <i class="fas fa-music"></i>
+                            <span>Festa</span>
+                        </a>
+                    </div>
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
+                        <a href="{% url 'song_swipe' %}">
+                            <i class="fas fa-random"></i>
+                            <span>Match</span>
+                        </a>
+                    </div>
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
+                        <a href="{% url 'request_song' %}">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Petició</span>
+                        </a>
+                    </div>
+                    {% if user.is_superuser %}
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'dj_dashboard' or request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
+                        <a href="{% url 'dj_dashboard' %}">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Control</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                        <a href="{% url 'profile' %}">
+                            <i class="fas fa-user"></i>
+                            <span>Perfil</span>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'select_party' %}active{% endif %}">
+                        <a href="{% url 'select_party' %}">
+                            <i class="fas fa-music"></i>
+                            <span>Festa</span>
+                        </a>
+                    </div>
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}">
+                        <a href="{% url 'account_login' %}">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login</span>
+                        </a>
+                    </div>
+                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'account_signup' %}active{% endif %}">
+                        <a href="{% url 'account_signup' %}">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Register</span>
+                        </a>
+                    </div>
                 {% endif %}
-                <div class="nav-item-bottom {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <a href="{% url 'profile' %}">
-                        <i class="fas fa-user"></i>
-                        <span>Perfil</span>
-                    </a>
-                </div>
             </div>
         </nav>
         <!-- End Mobile Bottom Navigation -->

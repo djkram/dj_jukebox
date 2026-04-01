@@ -1,6 +1,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 
@@ -374,8 +375,8 @@
           <div class="signup-logo">
             <span class="material-symbols-outlined">person_add</span>
           </div>
-          <h1 class="signup-title">Crea el teu compte</h1>
-          <p class="signup-subtitle">Uneix-te a la millor experiència musical</p>
+          <h1 class="signup-title">{% trans "Crea el teu compte" %}</h1>
+          <p class="signup-subtitle">{% trans "Uneix-te a la millor experiència musical" %}</p>
         </div>
 
         <!-- Signup Form -->
@@ -394,9 +395,9 @@
                   placeholder="{{ field.label }}"
                 >
                 {% if field.name == 'password1' %}
-                  <p class="signup-form-help">Mínim 8 caràcters. Evita una clau fàcil o només numèrica.</p>
+                  <p class="signup-form-help">{% trans "Mínim 8 caràcters. Evita una clau fàcil o només numèrica." %}</p>
                 {% elif field.name == 'password2' %}
-                  <p class="signup-form-help">Repeteix la mateixa contrasenya.</p>
+                  <p class="signup-form-help">{% trans "Repeteix la mateixa contrasenya." %}</p>
                 {% elif field.help_text %}
                   <p class="signup-form-help">{{ field.help_text }}</p>
                 {% endif %}
@@ -411,14 +412,14 @@
 
           <button type="submit" class="signup-submit-btn">
             <span class="material-symbols-outlined" style="font-size: 1.125rem;">person_add</span>
-            Registra't
+            {% trans "Registra't" %}
           </button>
         </form>
 
         <!-- Divider -->
         <div class="signup-divider">
           <div class="signup-divider-line"></div>
-          <span class="signup-divider-text">o registra't amb</span>
+          <span class="signup-divider-text">{% trans "o registra't amb" %}</span>
           <div class="signup-divider-line"></div>
         </div>
 
@@ -437,7 +438,7 @@
         <!-- Footer -->
         <div class="signup-footer">
           <p class="signup-footer-text">
-            Ja tens compte? <a href="{% url 'account_login' %}" class="signup-footer-link">Fes login</a>
+            {% trans "Ja tens compte?" %} <a href="{% url 'account_login' %}" class="signup-footer-link">{% trans "Fes login" %}</a>
           </p>
         </div>
       </div>
@@ -450,7 +451,7 @@
   <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
     <!-- Signup Form -->
     <section class="mb-4">
-      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Registra't</h1>
+      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">{% trans "Registra't" %}</h1>
 
       <form method="post" class="space-y-2">
         {% csrf_token %}
@@ -467,9 +468,9 @@
               placeholder="{{ field.label }}"
             >
             {% if field.name == 'password1' %}
-              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">Mínim 8 caràcters. Evita una clau fàcil o només numèrica.</p>
+              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">{% trans "Mínim 8 caràcters. Evita una clau fàcil o només numèrica." %}</p>
             {% elif field.name == 'password2' %}
-              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">Repeteix la mateixa contrasenya.</p>
+              <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">{% trans "Repeteix la mateixa contrasenya." %}</p>
             {% elif field.help_text %}
               <p class="mt-1 mb-0" style="font-size: 0.68rem; color: #747688; line-height: 1.25;">{{ field.help_text }}</p>
             {% endif %}
@@ -482,7 +483,7 @@
         {% endfor %}
 
         <button type="submit" class="w-100 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2 mt-3" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.92rem; padding-top: 0.74rem; padding-bottom: 0.74rem;">
-          Registra't
+          {% trans "Registra't" %}
         </button>
       </form>
     </section>
@@ -490,24 +491,24 @@
     <!-- Social Signup -->
     <section class="space-y-2">
       <div class="text-center mb-2">
-        <span style="color: #747688; font-size: 0.76rem;">o registra't amb</span>
+        <span style="color: #747688; font-size: 0.76rem;">{% trans "o registra't amb" %}</span>
       </div>
 
       <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
         <i class="fab fa-spotify" style="font-size: 1rem;"></i>
-        Registra't amb Spotify
+        {% trans "Registra't amb Spotify" %}
       </a>
 
       <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
         <i class="fab fa-google" style="font-size: 1rem;"></i>
-        Registra't amb Google
+        {% trans "Registra't amb Google" %}
       </a>
     </section>
 
     <!-- Login Link -->
     <div class="text-center mt-4">
       <p style="color: #747688; font-size: 0.78rem;">
-        Ja tens compte? <a href="{% url 'account_login' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">Fes login</a>
+        {% trans "Ja tens compte?" %} <a href="{% url 'account_login' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">{% trans "Fes login" %}</a>
       </p>
     </div>
   </main>

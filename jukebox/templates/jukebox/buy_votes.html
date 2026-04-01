@@ -1,5 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
-{% block page_title %}Compra Coins{% endblock %}
+{% load i18n %}
+{% block page_title %}{% trans "Compra Coins" %}{% endblock %}
 {% block content %}
 
 <style>
@@ -310,8 +311,8 @@
   {% if error %}
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="fas fa-exclamation-triangle me-2"></i>
-    <strong>Error:</strong> {{ error }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <strong>{% trans "Error:" %}</strong> {{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Tancar' %}"></button>
   </div>
   {% endif %}
 
@@ -323,7 +324,7 @@
           <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1;">monetization_on</span>
         </div>
         <div>
-          <div class="coins-stat-label">Coins actuals</div>
+          <div class="coins-stat-label">{% trans "Coins actuals" %}</div>
           <div class="coins-stat-value">{{ credits }}</div>
         </div>
       </div>
@@ -333,7 +334,7 @@
           <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1;">thumb_up</span>
         </div>
         <div>
-          <div class="coins-stat-label">Vots disponibles</div>
+          <div class="coins-stat-label">{% trans "Vots disponibles" %}</div>
           <div class="coins-stat-value">{{ votes_left }}</div>
         </div>
       </div>
@@ -348,7 +349,7 @@
       <div class="mb-5">
         <div class="coins-section-header">
           <div class="coins-section-marker"></div>
-          <h2 class="coins-section-title">Comprar Coins amb diners reals</h2>
+          <h2 class="coins-section-title">{% trans "Comprar Coins amb diners reals" %}</h2>
         </div>
         <div class="coins-packages-grid">
           <!-- Pack 1 -->
@@ -359,10 +360,10 @@
               <div class="coins-package-icon">
                 <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #0040e0; font-variation-settings: 'FILL' 1;">toll</span>
               </div>
-              <div class="coins-package-amount">10 Coins</div>
-              <div class="coins-package-label">Iniciació sonora</div>
+              <div class="coins-package-amount">{% trans "10 Coins" %}</div>
+              <div class="coins-package-label">{% trans "Iniciació sonora" %}</div>
               <div class="coins-package-price">2€</div>
-              <div class="coins-package-btn">Comprar</div>
+              <div class="coins-package-btn">{% trans "Comprar" %}</div>
             </button>
           </form>
 
@@ -371,14 +372,14 @@
             {% csrf_token %}
             <input type="hidden" name="votes" value="30">
             <button type="submit" class="coins-package-card featured" style="border: none; width: 100%;">
-              <div class="coins-package-badge">Més popular</div>
+              <div class="coins-package-badge">{% trans "Més popular" %}</div>
               <div class="coins-package-icon">
                 <span class="material-symbols-outlined" style="font-size: 2.5rem; font-variation-settings: 'FILL' 1;">poker_chip</span>
               </div>
-              <div class="coins-package-amount">30 Coins</div>
-              <div class="coins-package-label">Pack Estàndard</div>
+              <div class="coins-package-amount">{% trans "30 Coins" %}</div>
+              <div class="coins-package-label">{% trans "Pack Estàndard" %}</div>
               <div class="coins-package-price">5€</div>
-              <div class="coins-package-btn">Comprar</div>
+              <div class="coins-package-btn">{% trans "Comprar" %}</div>
             </button>
           </form>
 
@@ -390,10 +391,10 @@
               <div class="coins-package-icon">
                 <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #0040e0; font-variation-settings: 'FILL' 1;">payments</span>
               </div>
-              <div class="coins-package-amount">70 Coins</div>
-              <div class="coins-package-label">Expert Sessions</div>
+              <div class="coins-package-amount">{% trans "70 Coins" %}</div>
+              <div class="coins-package-label">{% trans "Expert Sessions" %}</div>
               <div class="coins-package-price">10€</div>
-              <div class="coins-package-btn">Comprar</div>
+              <div class="coins-package-btn">{% trans "Comprar" %}</div>
             </button>
           </form>
         </div>
@@ -403,7 +404,7 @@
       <div>
         <div class="coins-section-header">
           <div class="coins-section-marker" style="background: #5e24e1;"></div>
-          <h2 class="coins-section-title">Sistema de Bonus</h2>
+          <h2 class="coins-section-title">{% trans "Sistema de Bonus" %}</h2>
         </div>
         <div class="coins-bonus-card">
           <div class="coins-bonus-grid">
@@ -413,15 +414,15 @@
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
                 </div>
                 <div>
-                  <div class="coins-bonus-amount">5 Coins</div>
-                  <div class="coins-bonus-label">Conversió mínima</div>
+                  <div class="coins-bonus-amount">{% trans "5 Coins" %}</div>
+                  <div class="coins-bonus-label">{% trans "Conversió mínima" %}</div>
                 </div>
               </div>
               <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
               <div class="coins-bonus-to">
                 <div>
-                  <div class="coins-bonus-amount" style="color: #5e24e1;">11 Vots</div>
-                  <div class="coins-bonus-label">+10% Bonus</div>
+                  <div class="coins-bonus-amount" style="color: #5e24e1;">{% trans "11 Vots" %}</div>
+                  <div class="coins-bonus-label">{% trans "+10% Bonus" %}</div>
                 </div>
                 <div class="coins-bonus-icon tertiary">
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
@@ -435,15 +436,15 @@
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
                 </div>
                 <div>
-                  <div class="coins-bonus-amount">20 Coins</div>
-                  <div class="coins-bonus-label">Inversió mitjana</div>
+                  <div class="coins-bonus-amount">{% trans "20 Coins" %}</div>
+                  <div class="coins-bonus-label">{% trans "Inversió mitjana" %}</div>
                 </div>
               </div>
               <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
               <div class="coins-bonus-to">
                 <div>
-                  <div class="coins-bonus-amount" style="color: #5e24e1;">60 Vots</div>
-                  <div class="coins-bonus-label">+50% Bonus</div>
+                  <div class="coins-bonus-amount" style="color: #5e24e1;">{% trans "60 Vots" %}</div>
+                  <div class="coins-bonus-label">{% trans "+50% Bonus" %}</div>
                 </div>
                 <div class="coins-bonus-icon tertiary">
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
@@ -454,7 +455,7 @@
 
           {% if credits > 0 %}
           <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(196,197,216,0.2);">
-            <div style="margin-bottom: 1rem; font-weight: 700; font-size: 0.875rem;">Converteix els teus Coins ara:</div>
+            <div style="margin-bottom: 1rem; font-weight: 700; font-size: 0.875rem;">{% trans "Converteix els teus Coins ara:" %}</div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               {% if credits >= 1 %}
               <form method="post">
@@ -501,36 +502,36 @@
         <div class="coins-info-icon">
           <span class="material-symbols-outlined" style="font-size: 1.875rem; color: #0040e0;">help_center</span>
         </div>
-        <h3 class="coins-info-title">Com funciona?</h3>
+        <h3 class="coins-info-title">{% trans "Com funciona?" %}</h3>
 
         <div class="coins-info-step">
           <div class="coins-info-step-number">1</div>
           <div>
-            <div class="coins-info-step-title">Adquireix Coins</div>
-            <div class="coins-info-step-text">Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital.</div>
+            <div class="coins-info-step-title">{% trans "Adquireix Coins" %}</div>
+            <div class="coins-info-step-text">{% trans "Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital." %}</div>
           </div>
         </div>
 
         <div class="coins-info-step">
           <div class="coins-info-step-number">2</div>
           <div>
-            <div class="coins-info-step-title">Converteix a Vots</div>
-            <div class="coins-info-step-text">Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus.</div>
+            <div class="coins-info-step-title">{% trans "Converteix a Vots" %}</div>
+            <div class="coins-info-step-text">{% trans "Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus." %}</div>
           </div>
         </div>
 
         <div class="coins-info-step">
           <div class="coins-info-step-number">3</div>
           <div>
-            <div class="coins-info-step-title">Participa al Show</div>
-            <div class="coins-info-step-text">Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set.</div>
+            <div class="coins-info-step-title">{% trans "Participa al Show" %}</div>
+            <div class="coins-info-step-text">{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}</div>
           </div>
         </div>
 
         <div class="coins-info-secure">
           <div class="coins-info-secure-title">
             <span class="material-symbols-outlined" style="font-size: 0.875rem;">security</span>
-            Pagament segur garantit
+            {% trans "Pagament segur garantit" %}
           </div>
           <div style="display: flex; gap: 0.5rem; opacity: 0.5; filter: grayscale(1);">
             <img alt="Visa" style="height: 1rem;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Crect fill='%231434CB' width='48' height='16' rx='2'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3EVISA%3C/text%3E%3C/svg%3E" />
@@ -540,7 +541,7 @@
 
         <div style="margin-top: 1.5rem; text-align: center;">
           <a href="{% url 'song_list' %}" class="btn btn-outline-secondary" style="border-radius: 0.75rem; padding: 0.625rem 1.5rem; font-weight: 600;">
-            <span class="material-symbols-outlined me-1" style="font-size: 1rem; vertical-align: middle;">arrow_back</span> Tornar
+            <span class="material-symbols-outlined me-1" style="font-size: 1rem; vertical-align: middle;">arrow_back</span> {% trans "Tornar" %}
           </a>
         </div>
       </div>
@@ -555,8 +556,8 @@
   <div class="mobile-page-content mobile-page-content--tight" style="padding-bottom: 0;">
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <i class="fas fa-exclamation-triangle me-2"></i>
-      <strong>Error:</strong> {{ error }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <strong>{% trans "Error:" %}</strong> {{ error }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Tancar' %}"></button>
     </div>
   </div>
   {% endif %}
@@ -564,8 +565,8 @@
   <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
     <!-- Header Section -->
     <header class="mobile-section-header">
-      <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.72rem; letter-spacing: 0.1em; font-family: 'Plus Jakarta Sans', sans-serif;">BOTIGA</span>
-      <p class="font-body mb-0" style="color: #434656; line-height: 1.4; max-width: 92%; font-size: 0.95rem;">Alimenta l'ambient. Usa coins per demanar cançons i impulsar les teves favorites.</p>
+      <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.72rem; letter-spacing: 0.1em; font-family: 'Plus Jakarta Sans', sans-serif;">{% trans "BOTIGA" %}</span>
+      <p class="font-body mb-0" style="color: #434656; line-height: 1.4; max-width: 92%; font-size: 0.95rem;">{% trans "Alimenta l'ambient. Usa coins per demanar cançons i impulsar les teves favorites." %}</p>
     </header>
 
     <!-- Value Bundles (Bento Grid Style) -->
@@ -576,12 +577,12 @@
         <div style="position: relative; z-index: 1;">
           <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2" style="background: rgba(239, 239, 255, 0.2);">
             <i class="fas fa-star" style="font-size: 0.75rem;"></i>
-            <span class="font-bold text-uppercase" style="font-size: 0.625rem; letter-spacing: 0.1em;">MILLOR OFERTA</span>
+            <span class="font-bold text-uppercase" style="font-size: 0.625rem; letter-spacing: 0.1em;">{% trans "MILLOR OFERTA" %}</span>
           </div>
           <div class="d-flex align-items-end justify-content-between gap-3">
             <div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.6rem; line-height: 1.05;">Pack 70 Coins</h3>
-              <p class="font-body mb-0" style="font-size: 0.8rem; opacity: 0.8;">Millor valor</p>
+              <h3 class="font-headline font-bold mb-1" style="font-size: 1.6rem; line-height: 1.05;">{% trans "Pack 70 Coins" %}</h3>
+              <p class="font-body mb-0" style="font-size: 0.8rem; opacity: 0.8;">{% trans "Millor valor" %}</p>
             </div>
             <span class="font-headline flex-shrink-0" style="font-size: 2.1rem; font-weight: 900; line-height: 1;">10€</span>
           </div>
@@ -590,7 +591,7 @@
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="votes" value="70">
-            <button type="submit" class="px-4 py-2 rounded-pill font-bold shadow-lg" style="background: white; color: #0040e0; font-size: 0.82rem; border: none; transition: all 0.2s;">Compra Ara</button>
+            <button type="submit" class="px-4 py-2 rounded-pill font-bold shadow-lg" style="background: white; color: #0040e0; font-size: 0.82rem; border: none; transition: all 0.2s;">{% trans "Compra Ara" %}</button>
           </form>
         </div>
       </div>
@@ -607,14 +608,14 @@
                 </div>
                 <span class="d-block font-headline font-bold mb-0" style="font-size: 1.3rem; color: #191c1f; line-height: 1;">2€</span>
               </div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">10 Coins</h3>
-              <p class="font-body" style="font-size: 0.75rem; color: #434656;">Inicial</p>
+              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">{% trans "10 Coins" %}</h3>
+              <p class="font-body" style="font-size: 0.75rem; color: #434656;">{% trans "Inicial" %}</p>
             </div>
             <div class="mt-2 d-flex flex-column gap-2">
               <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="votes" value="10">
-                <button type="submit" class="w-100 py-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.72rem; border: none; transition: colors 0.2s;">Compra</button>
+                <button type="submit" class="w-100 py-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.72rem; border: none; transition: colors 0.2s;">{% trans "Compra" %}</button>
               </form>
             </div>
           </div>
@@ -630,14 +631,14 @@
                 </div>
                 <span class="d-block font-headline font-bold mb-0" style="font-size: 1.3rem; color: #191c1f; line-height: 1;">5€</span>
               </div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">30 Coins</h3>
-              <p class="font-body" style="font-size: 0.75rem; color: #434656;">Millor preu</p>
+              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">{% trans "30 Coins" %}</h3>
+              <p class="font-body" style="font-size: 0.75rem; color: #434656;">{% trans "Millor preu" %}</p>
             </div>
             <div class="mt-2 d-flex flex-column gap-2">
               <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="votes" value="30">
-                <button type="submit" class="w-100 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.72rem; border: none;">Compra</button>
+                <button type="submit" class="w-100 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.72rem; border: none;">{% trans "Compra" %}</button>
               </form>
             </div>
           </div>
@@ -650,7 +651,7 @@
     <section class="bg-white p-3 position-relative overflow-hidden" style="border: 1px solid rgba(196, 197, 217, 0.1); border-radius: 1.1rem;">
       <div class="position-relative" style="z-index: 1;">
         <div class="mb-2">
-          <p class="font-body mb-0" style="font-size: 0.8rem; color: #434656;">Aconsegeix mes vots</p>
+          <p class="font-body mb-0" style="font-size: 0.8rem; color: #434656;">{% trans "Aconsegeix mes vots" %}</p>
         </div>
 
         <!-- Conversion Options -->
@@ -677,7 +678,7 @@
                 </div>
               </div>
             </div>
-            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">Convertir</button>
+            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">{% trans "Convertir" %}</button>
           </form>
           {% endif %}
 
@@ -704,7 +705,7 @@
                 </div>
               </div>
             </div>
-            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">Convertir</button>
+            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">{% trans "Convertir" %}</button>
           </form>
           {% endif %}
 
@@ -731,7 +732,7 @@
                 </div>
               </div>
             </div>
-            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">Convertir</button>
+            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">{% trans "Convertir" %}</button>
           </form>
           {% endif %}
 
@@ -758,7 +759,7 @@
                 </div>
               </div>
             </div>
-            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">Convertir</button>
+            <button type="submit" class="px-3 py-2 rounded-pill font-bold shadow-md" style="background: linear-gradient(135deg, #0040e0, #2e5bff); color: white; font-size: 0.7rem; border: none; white-space: nowrap;">{% trans "Convertir" %}</button>
           </form>
           {% endif %}
         </div>
@@ -772,21 +773,21 @@
     <div class="d-flex align-items-center justify-content-around py-3 bg-white" style="background: #f2f3f8; border-radius: 1.1rem;">
       <div class="text-center">
         <a href="{% url 'buy_votes' %}" class="text-decoration-none">
-          <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">Moneder</p>
+          <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">{% trans "Moneder" %}</p>
           <p class="font-headline font-bold mb-0" style="font-size: 1.25rem; color: #0040e0;">{{ credits }}</p>
         </a>
       </div>
       <div style="height: 2rem; width: 1px; background: rgba(196, 197, 217, 0.3);"></div>
       <div class="text-center">
         <a href="{% url 'buy_votes' %}" class="text-decoration-none">
-          <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">Vots</p>
+          <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">{% trans "Vots" %}</p>
           <p class="font-headline font-bold mb-0" style="font-size: 1.25rem; color: #0040e0;">{{ votes_left }}</p>
         </a>
       </div>
       <div style="height: 2rem; width: 1px; background: rgba(196, 197, 217, 0.3);"></div>
       <div class="text-center">
-        <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">Influència</p>
-        <p class="font-headline font-bold mb-0" style="font-size: 1.25rem; color: #0040e0;">{% if user_votes_count > 10 %}Alta{% elif user_votes_count > 5 %}Mitjana{% else %}Baixa{% endif %}</p>
+        <p class="mb-1 font-bold text-uppercase" style="font-size: 0.625rem; color: #747688; letter-spacing: 0.1em;">{% trans "Influència" %}</p>
+        <p class="font-headline font-bold mb-0" style="font-size: 1.25rem; color: #0040e0;">{% if user_votes_count > 10 %}{% trans "Alta" %}{% elif user_votes_count > 5 %}{% trans "Mitjana" %}{% else %}{% trans "Baixa" %}{% endif %}</p>
       </div>
     </div>
   </main>

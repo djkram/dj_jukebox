@@ -198,6 +198,13 @@ LOCALE_PATHS = [
     BASE_DIR / 'jukebox' / 'locale',
 ]
 
+# Configuració per guardar preferència d'idioma
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 any (en segons)
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_HTTPONLY = False  # Permetre accés desde JavaScript
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

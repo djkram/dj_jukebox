@@ -28,4 +28,5 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('jukebox.urls')),
+    prefix_default_language=True,  # Afegir prefix fins i tot per l'idioma per defecte
 )

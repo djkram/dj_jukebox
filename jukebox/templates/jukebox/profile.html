@@ -506,6 +506,26 @@
             </a>
           {% endif %}
 
+          <!-- Language Selector -->
+          <div class="profile-action-btn" style="cursor: default; padding: 0.75rem 1.5rem;">
+            <div class="profile-action-btn-left">
+              <div class="profile-action-icon">
+                <span class="material-symbols-outlined">language</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.25rem; flex: 1;">
+                <span class="profile-action-text">{% trans "Idioma" %}</span>
+                {% load i18n %}
+                <select id="language-selector-desktop" style="border: 1px solid #e0e3e6; border-radius: 0.5rem; padding: 0.35rem 0.5rem; font-size: 0.875rem; color: #181c1e; background: white; cursor: pointer; min-width: 120px;">
+                  {% get_current_language as LANGUAGE_CODE %}
+                  {% get_available_languages as LANGUAGES %}
+                  {% for lang_code, lang_name in LANGUAGES %}
+                    <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <form method="post" action="{% url 'account_logout' %}" class="m-0">
             {% csrf_token %}
             <button type="submit" class="profile-action-btn logout">
@@ -626,6 +646,24 @@
         </a>
       {% endif %}
 
+      <!-- Language Selector -->
+      <div class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg" style="border: none;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
+            <i class="fas fa-language" style="color: #0040e0;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">{% trans "Idioma" %}</span>
+        </div>
+        {% load i18n %}
+        <select id="language-selector-mobile" style="border: 1px solid #e0e3e6; border-radius: 0.5rem; padding: 0.35rem 0.5rem; font-size: 0.875rem; color: #181c1e; background: white; cursor: pointer; min-width: 100px;">
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% for lang_code, lang_name in LANGUAGES %}
+            <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
       <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
         <button type="submit" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg transition-colors" style="border: none;">
@@ -642,4 +680,57 @@
     </section>
   </main>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Language selector script loaded');
+
+  // Desktop and mobile language selectors
+  const desktopSelector = document.getElementById('language-selector-desktop');
+  const mobileSelector = document.getElementById('language-selector-mobile');
+
+  function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = name + '=' + value + ';expires=' + expires.toUTCString() + ';path=/';
+    console.log('Cookie set:', name + '=' + value);
+  }
+
+  function changeLanguage(newLang) {
+    const currentPath = window.location.pathname;
+    console.log('Language changed to:', newLang);
+    console.log('Current path:', currentPath);
+
+    // Set the language cookie explicitly
+    setCookie('django_language', newLang, 365);
+
+    // Remove current language prefix (ca/ or en/)
+    const pathWithoutLang = currentPath.replace(/^\/(ca|en)\//, '/');
+    console.log('Path without lang:', pathWithoutLang);
+
+    // Build new URL with selected language
+    const newPath = '/' + newLang + pathWithoutLang;
+    console.log('New path:', newPath);
+
+    // Redirect to new URL
+    console.log('Redirecting to:', newPath);
+    window.location.href = newPath;
+  }
+
+  if (desktopSelector) {
+    desktopSelector.addEventListener('change', function() {
+      changeLanguage(this.value);
+    });
+  }
+
+  if (mobileSelector) {
+    mobileSelector.addEventListener('change', function() {
+      changeLanguage(this.value);
+    });
+  }
+
+  console.log('Handlers attached. Desktop:', !!desktopSelector, 'Mobile:', !!mobileSelector);
+});
+</script>
+
 {% endblock %}

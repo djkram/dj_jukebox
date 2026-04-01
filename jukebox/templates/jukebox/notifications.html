@@ -1,5 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
-{% block page_title %}Notificacions{% endblock %}
+{% load i18n %}
+{% block page_title %}{% trans "Notificacions" %}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -344,7 +345,7 @@
                   {% if not notification.is_read %}
                     <span class="notif-badge-new">
                       <span class="material-symbols-outlined" style="font-size: 0.75rem;">fiber_new</span>
-                      Nou
+                      {% trans "Nou" %}
                     </span>
                   {% endif %}
                 </div>
@@ -358,12 +359,12 @@
                   {% if notification.amount is not None %}
                     <span class="notif-meta-badge coins">
                       <span class="material-symbols-outlined" style="font-size: 0.875rem;">monetization_on</span>
-                      Cost: {{ notification.amount }} Coins
+                      {% trans "Cost:" %} {{ notification.amount }} {% trans "Coins" %}
                     </span>
                   {% else %}
                     <span class="notif-meta-badge free">
                       <span class="material-symbols-outlined" style="font-size: 0.875rem;">card_giftcard</span>
-                      Sense càrrec
+                      {% trans "Sense càrrec" %}
                     </span>
                   {% endif %}
                 {% elif notification.type == 'song_played' %}
@@ -389,7 +390,7 @@
               <div class="notif-info-icon">
                 <span class="material-symbols-outlined" style="color: #5e24e1;">info</span>
               </div>
-              <h3 class="notif-info-title">Com funciona</h3>
+              <h3 class="notif-info-title">{% trans "Com funciona" %}</h3>
             </div>
 
             <div class="notif-info-list">
@@ -398,8 +399,8 @@
                   <span class="material-symbols-outlined">check</span>
                 </div>
                 <div>
-                  <span class="notif-info-item-label">Cançó acceptada</span>
-                  <p class="notif-info-item-text">El DJ accepta la teva petició</p>
+                  <span class="notif-info-item-label">{% trans "Cançó acceptada" %}</span>
+                  <p class="notif-info-item-text">{% trans "El DJ accepta la teva petició" %}</p>
                 </div>
               </div>
               <div class="notif-info-item">
@@ -407,8 +408,8 @@
                   <span class="material-symbols-outlined">play_arrow</span>
                 </div>
                 <div>
-                  <span class="notif-info-item-label">Cançó reproduïda</span>
-                  <p class="notif-info-item-text">S'ha reproduït una cançó votada</p>
+                  <span class="notif-info-item-label">{% trans "Cançó reproduïda" %}</span>
+                  <p class="notif-info-item-text">{% trans "S'ha reproduït una cançó votada" %}</p>
                 </div>
               </div>
               <div class="notif-info-item">
@@ -416,8 +417,8 @@
                   <span class="material-symbols-outlined">shopping_cart</span>
                 </div>
                 <div>
-                  <span class="notif-info-item-label">Compra realitzada</span>
-                  <p class="notif-info-item-text">Coins afegits al teu saldo</p>
+                  <span class="notif-info-item-label">{% trans "Compra realitzada" %}</span>
+                  <p class="notif-info-item-text">{% trans "Coins afegits al teu saldo" %}</p>
                 </div>
               </div>
               <div class="notif-info-item">
@@ -425,15 +426,15 @@
                   <span class="material-symbols-outlined">card_giftcard</span>
                 </div>
                 <div>
-                  <span class="notif-info-item-label">Coins de regal</span>
-                  <p class="notif-info-item-text">Has rebut coins gratuïts</p>
+                  <span class="notif-info-item-label">{% trans "Coins de regal" %}</span>
+                  <p class="notif-info-item-text">{% trans "Has rebut coins gratuïts" %}</p>
                 </div>
               </div>
             </div>
 
             <div class="notif-info-alert">
               <span class="material-symbols-outlined">lightbulb</span>
-              <p class="notif-info-alert-text">Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina.</p>
+              <p class="notif-info-alert-text">{% trans "Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina." %}</p>
             </div>
           </div>
         </div>
@@ -446,16 +447,16 @@
           <div class="notif-empty-icon">
             <span class="material-symbols-outlined">notifications_off</span>
           </div>
-          <h3 class="notif-empty-title">No tens notificacions</h3>
-          <p class="notif-empty-text">Quan succeixin esdeveniments importants a les festes, rebràs notificacions aquí!</p>
+          <h3 class="notif-empty-title">{% trans "No tens notificacions" %}</h3>
+          <p class="notif-empty-text">{% trans "Quan succeixin esdeveniments importants a les festes, rebràs notificacions aquí!" %}</p>
           <div class="notif-empty-actions">
             <a href="{% url 'song_list' %}" class="notif-empty-btn notif-empty-btn-primary">
               <span class="material-symbols-outlined" style="font-size: 1.125rem;">music_note</span>
-              Vota cançons
+              {% trans "Vota cançons" %}
             </a>
             <a href="{% url 'request_song' %}" class="notif-empty-btn notif-empty-btn-secondary">
               <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
-              Demana cançó
+              {% trans "Demana cançó" %}
             </a>
           </div>
         </div>
@@ -470,10 +471,10 @@
     <!-- Header Section -->
     <header class="mobile-section-header">
       <span class="d-block fw-semibold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.65rem; letter-spacing: 0.15em;">
-        <i class="fas fa-bell me-1"></i>Actualitzacions
+        <i class="fas fa-bell me-1"></i>{% trans "Actualitzacions" %}
       </span>
-      <h2 class="fw-bold mb-1" style="font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.025em; color: #191c1f;">Activitat</h2>
-      <p style="color: #434656; font-size: 0.75rem;">Mantén-te al dia del pols de la festa.</p>
+      <h2 class="fw-bold mb-1" style="font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.025em; color: #191c1f;">{% trans "Activitat" %}</h2>
+      <p style="color: #434656; font-size: 0.75rem;">{% trans "Mantén-te al dia del pols de la festa." %}</p>
     </header>
 
     {% if notifications %}
@@ -494,7 +495,7 @@
                 <p class="mb-2" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
                 <div class="px-2 py-1 rounded-pill d-inline-flex align-items-center" style="background: #eceef3; gap: 0.25rem;">
                   <i class="fas fa-play-circle" style="font-size: 0.7rem; color: #0040e0;"></i>
-                  <span class="fw-semibold" style="font-size: 0.65rem; color: #0040e0;">Up Next</span>
+                  <span class="fw-semibold" style="font-size: 0.65rem; color: #0040e0;">{% trans "Up Next" %}</span>
                 </div>
               </div>
             </div>
@@ -539,12 +540,12 @@
       <div class="p-3 position-relative overflow-hidden" style="border-radius: 12px; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
         <div class="position-relative d-flex align-items-center justify-content-between" style="z-index: 10;">
           <div>
-            <h3 class="fw-bold mb-1" style="font-size: 1rem;">Demana una Cançó</h3>
-            <p class="mb-0" style="color: rgba(239, 239, 255, 0.8); font-size: 0.7rem;">Sigues l'ànima de la festa.</p>
+            <h3 class="fw-bold mb-1" style="font-size: 1rem;">{% trans "Demana una Cançó" %}</h3>
+            <p class="mb-0" style="color: rgba(239, 239, 255, 0.8); font-size: 0.7rem;">{% trans "Sigues l'ànima de la festa." %}</p>
           </div>
           <a href="{% url 'request_song' %}" class="btn fw-bold d-inline-flex align-items-center" style="background: white; color: #0040e0; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; text-decoration: none; gap: 0.25rem;">
             <i class="fas fa-plus-circle"></i>
-            Crear
+            {% trans "Crear" %}
           </a>
         </div>
       </div>
@@ -557,14 +558,14 @@
             <i class="fas fa-bell-slash" style="font-size: 2rem; color: #42a5f5;"></i>
           </div>
         </div>
-        <h4 class="fw-bold mb-2" style="color: #191c1f; font-size: 1.1rem;">No tens notificacions</h4>
-        <p class="mb-3" style="color: #434656; font-size: 0.85rem;">Quan succeixin esdeveniments importants, apareixeran aquí!</p>
+        <h4 class="fw-bold mb-2" style="color: #191c1f; font-size: 1.1rem;">{% trans "No tens notificacions" %}</h4>
+        <p class="mb-3" style="color: #434656; font-size: 0.85rem;">{% trans "Quan succeixin esdeveniments importants, apareixeran aquí!" %}</p>
         <div class="d-flex flex-column gap-2">
           <a href="{% url 'song_list' %}" class="btn btn-primary btn-sm">
-            <i class="fas fa-music me-2"></i>Vota cançons
+            <i class="fas fa-music me-2"></i>{% trans "Vota cançons" %}
           </a>
           <a href="{% url 'request_song' %}" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-plus me-2"></i>Demana cançó
+            <i class="fas fa-plus me-2"></i>{% trans "Demana cançó" %}
           </a>
         </div>
       </div>

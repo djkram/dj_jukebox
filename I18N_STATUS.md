@@ -41,13 +41,13 @@ LOCALE_PATHS = [BASE_DIR / 'locale', BASE_DIR / 'jukebox' / 'locale']
 
 ---
 
-## ⏳ Fase 2: Marcar textos en templates (PENDENT)
+## 🔄 Fase 2: Marcar textos en templates (EN CURS - 80%)
 
 **Prioritat alta:**
-- [ ] login.html - `{% load i18n %}` + `{% trans %}`
-- [ ] signup.html
-- [ ] admin_base.html (navbar, sidebar, dropdown)
-- [ ] song_list.html
+- [x] login.html - `{% load i18n %}` + `{% trans %}` ✅
+- [x] signup.html ✅
+- [x] admin_base.html (navbar, sidebar, dropdown) ✅
+- [x] song_list.html ✅
 - [ ] select_party.html
 
 **Prioritat mitjana:**
@@ -198,12 +198,12 @@ urlpatterns += i18n_patterns(
 
 ```
 Fase 1: ████████████████████████████████ 100% ✅
-Fase 2: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Fase 2: █████████████████████████░░░░░░░  80% 🔄
 Fase 3: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 4: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 5: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  14%
+Total:  ████████████░░░░░░░░░░░░░░░░░░░░  40%
 ```

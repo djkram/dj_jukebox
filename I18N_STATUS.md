@@ -41,7 +41,7 @@ LOCALE_PATHS = [BASE_DIR / 'locale', BASE_DIR / 'jukebox' / 'locale']
 
 ---
 
-## 🔄 Fase 2: Marcar textos en templates (EN CURS - 94%)
+## ✅ Fase 2: Marcar textos en templates (COMPLETADA - 100%)
 
 **Prioritat alta:**
 - [x] login.html - `{% load i18n %}` + `{% trans %}` ✅
@@ -54,14 +54,16 @@ LOCALE_PATHS = [BASE_DIR / 'locale', BASE_DIR / 'jukebox' / 'locale']
 - [x] buy_votes.html ✅
 - [x] profile.html ✅
 - [x] notifications.html ✅
-- [ ] password_reset.html
-- [ ] email_confirm.html
+- [x] password_reset.html ✅
+- [x] email_confirm.html ✅
 
-**Prioritat baixa:**
+**Prioritat baixa (opcional):**
 - [ ] dj_dashboard.html
 - [ ] dj_backoffice.html
 - [ ] party_settings.html
 - [ ] manage_song_requests.html
+
+**Nota:** Tots els templates d'alta i mitjana prioritat estan completats. Els templates de baixa prioritat són opcionals i es poden implementar segons necessitat.
 
 **Exemples de marcat:**
 ```django
@@ -198,12 +200,12 @@ urlpatterns += i18n_patterns(
 
 ```
 Fase 1: ████████████████████████████████ 100% ✅
-Fase 2: ██████████████████████████████░░  94% 🔄
+Fase 2: ████████████████████████████████ 100% ✅
 Fase 3: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 4: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 5: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  ████████████████░░░░░░░░░░░░░░░░  50%
+Total:  ██████████░░░░░░░░░░░░░░░░░░░░░░  32%
 ```

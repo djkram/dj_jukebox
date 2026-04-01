@@ -2118,11 +2118,6 @@
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <!-- Nav Item - Language Selector -->
-                        <li class="nav-item no-arrow mx-1">
-                            {% include "jukebox/language_selector.html" %}
-                        </li>
-
                         <!-- Nav Item - Notificacions -->
                         {% if user.is_authenticated %}
                         <li class="nav-item no-arrow mx-1">
@@ -2190,21 +2185,15 @@
                             </h1>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex items-center gap-2">
-                            <!-- Language Selector -->
-                            {% include "jukebox/language_selector.html" %}
-
-                            <!-- Notifications -->
-                            {% if user.is_authenticated %}
-                            <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
-                                <i class="fas fa-bell text-xl text-brand-blue"></i>
-                                {% if unread_notifications_count > 0 %}
-                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                {% endif %}
-                            </a>
+                        <!-- Notifications -->
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
+                            <i class="fas fa-bell text-xl text-brand-blue"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                             {% endif %}
-                        </div>
+                        </a>
+                        {% endif %}
                     </div>
                 </nav>
                 <!-- End of Topbar -->

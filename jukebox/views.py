@@ -34,6 +34,7 @@ from .spotify_api import (
 )
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
+from datetime import datetime
 from .audio_analysis import analyze_song_from_temporary_mp3
 
 from django.contrib.auth import get_user_model
@@ -951,6 +952,32 @@ def dj_dashboard(request):
     for index, song in enumerate(played_songs_list):
         song.display_order = played_songs_count - index
 
+    is_djjukebox_active = party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE
+    party_status_step_map = {
+        Party.STATUS_HIDDEN: 0,
+        Party.STATUS_SHOW_PARTY: 1,
+        Party.STATUS_REQUESTS_OPEN: 2,
+        Party.STATUS_DJJUKEBOX_ACTIVE: 3,
+    }
+    is_party_finished = party.party_status == Party.STATUS_FINISHED
+    party_status_step = party_status_step_map.get(party.party_status, 0)
+
+    if party.party_status == Party.STATUS_HIDDEN:
+        party_status_label = 'Festa Pausada'
+        party_status_help = "La festa està pausada i encara no és visible pels usuaris."
+    elif party.party_status == Party.STATUS_SHOW_PARTY:
+        party_status_label = 'Mostrar festa'
+        party_status_help = "La festa està visible, però encara no s'han obert les peticions."
+    elif party.party_status == Party.STATUS_REQUESTS_OPEN:
+        party_status_label = 'Obrir peticions'
+        party_status_help = "Ja es pot votar i demanar cançons, però el DJ encara no les està puntant."
+    elif party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE:
+        party_status_label = 'Iniciar Jukebox'
+        party_status_help = "El DJ ja està marcant les cançons que van sonant."
+    else:
+        party_status_label = 'Acabar festa'
+        party_status_help = "La festa queda tancada i ja no s'accepten més accions."
+
     # ==========================================
     # Nous KPIs per Dashboard Compacte
     # ==========================================
@@ -1017,6 +1044,11 @@ def dj_dashboard(request):
         'songs_with_votes': songs_with_votes,
         'songs_with_votes_percentage': songs_with_votes_percentage,
         'total_coins_spent': total_coins_spent,
+        'is_djjukebox_active': is_djjukebox_active,
+        'is_party_finished': is_party_finished,
+        'party_status_label': party_status_label,
+        'party_status_help': party_status_help,
+        'party_status_step': party_status_step,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
 
@@ -1024,13 +1056,34 @@ def dj_dashboard(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 @require_POST
-def toggle_jukebox_active(request, party_id):
-    """Activa o desactiva el jukebox de la festa."""
+def update_party_status(request, party_id):
+    """Actualitza l'estat operatiu de la festa i l'hora prevista del DJJukebox."""
     party = get_object_or_404(Party, id=party_id)
-    party.is_jukebox_active = not party.is_jukebox_active
-    party.save(update_fields=['is_jukebox_active'])
+    requested_status = request.POST.get('party_status', party.party_status)
+    allowed_statuses = {
+        Party.STATUS_HIDDEN,
+        Party.STATUS_SHOW_PARTY,
+        Party.STATUS_REQUESTS_OPEN,
+        Party.STATUS_DJJUKEBOX_ACTIVE,
+        Party.STATUS_FINISHED,
+    }
 
-    logger.info(f"[JUKEBOX_ACTIVE] Party {party_id} jukebox {'enabled' if party.is_jukebox_active else 'disabled'}")
+    if requested_status not in allowed_statuses:
+        requested_status = party.party_status
+
+    starts_at_raw = (request.POST.get('jukebox_starts_at') or '').strip()
+    jukebox_starts_at = None
+    if starts_at_raw:
+        try:
+            jukebox_starts_at = datetime.strptime(starts_at_raw, '%H:%M').time()
+        except ValueError:
+            jukebox_starts_at = party.jukebox_starts_at
+
+    party.party_status = requested_status
+    party.jukebox_starts_at = jukebox_starts_at
+    party.save(update_fields=['party_status', 'jukebox_starts_at', 'is_jukebox_active'])
+
+    logger.info(f"[PARTY_STATUS] Party {party_id} status updated to {party.party_status}")
     return redirect('dj_dashboard')
 
 

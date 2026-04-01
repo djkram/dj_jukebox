@@ -874,68 +874,84 @@ let spotifyPlayer = null;
 let spotifyDeviceId = null;
 const SPOTIFY_TOKEN = '{{ spotify_token }}';
 const HAS_SPOTIFY_PLAYER = true;
+let spotifySdkReady = false;
+let spotifyPlayerInitPromise = null;
 
-// Initialize Spotify Player
 window.onSpotifyWebPlaybackSDKReady = () => {
-  spotifyPlayer = new Spotify.Player({
-    name: 'DJ Jukebox Web Player',
-    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
-    volume: 0.7
-  });
-
-  // Ready
-  spotifyPlayer.addListener('ready', ({ device_id }) => {
-    console.log('[SPOTIFY] Player ready with Device ID:', device_id);
-    spotifyDeviceId = device_id;
-
-    // Test if we can control playback (check permissions)
-    fetch('https://api.spotify.com/v1/me/player', {
-      headers: { 'Authorization': `Bearer ${SPOTIFY_TOKEN}` }
-    }).then(response => {
-      if (response.status === 401) {
-        console.warn('[SPOTIFY] Token invalid - user needs to reconnect');
-        showMessage('⚠️ Reconnecta el teu compte de Spotify des del perfil per activar la reproducció completa', false);
-      }
-    });
-  });
-
-  // Not Ready
-  spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-    console.log('[SPOTIFY] Device ID has gone offline:', device_id);
-  });
-
-  // Player state changed
-  spotifyPlayer.addListener('player_state_changed', state => {
-    if (!state) return;
-
-    isPlaying = !state.paused;
-    updatePlayButton();
-  });
-
-  // Connect to the player
-  spotifyPlayer.connect().then(success => {
-    if (success) {
-      console.log('[SPOTIFY] Connected successfully');
-    }
-  });
+  spotifySdkReady = true;
 };
+
+function ensureSpotifyPlayer() {
+  if (spotifyPlayer && spotifyDeviceId) {
+    return Promise.resolve(spotifyPlayer);
+  }
+
+  if (!spotifySdkReady || !window.Spotify) {
+    showMessage('El reproductor de Spotify no està llest. Espera uns segons...', false);
+    return Promise.reject(new Error('Spotify SDK not ready'));
+  }
+
+  if (spotifyPlayerInitPromise) {
+    return spotifyPlayerInitPromise;
+  }
+
+  spotifyPlayerInitPromise = new Promise((resolve, reject) => {
+    spotifyPlayer = new Spotify.Player({
+      name: 'DJ Jukebox Web Player',
+      getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+      volume: 0.7
+    });
+
+    spotifyPlayer.addListener('ready', ({ device_id }) => {
+      console.log('[SPOTIFY] Player ready with Device ID:', device_id);
+      spotifyDeviceId = device_id;
+
+      fetch('https://api.spotify.com/v1/me/player', {
+        headers: { 'Authorization': `Bearer ${SPOTIFY_TOKEN}` }
+      }).then(response => {
+        if (response.status === 401) {
+          console.warn('[SPOTIFY] Token invalid - user needs to reconnect');
+          showMessage('⚠️ Reconnecta el teu compte de Spotify des del perfil per activar la reproducció completa', false);
+        }
+      });
+
+      resolve(spotifyPlayer);
+    });
+
+    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+      console.log('[SPOTIFY] Device ID has gone offline:', device_id);
+    });
+
+    spotifyPlayer.addListener('player_state_changed', state => {
+      if (!state) return;
+
+      isPlaying = !state.paused;
+      updatePlayButton();
+    });
+
+    spotifyPlayer.connect().then(success => {
+      if (!success) {
+        reject(new Error('Spotify player connection failed'));
+      }
+    }).catch(reject);
+  }).catch(error => {
+    spotifyPlayerInitPromise = null;
+    throw error;
+  });
+
+  return spotifyPlayerInitPromise;
+}
 
 // Function to play a track using Spotify SDK
 function playSpotifyTrack(spotifyId) {
-  if (!spotifyPlayer || !spotifyDeviceId) {
-    console.error('[SPOTIFY] Player not ready');
-    showMessage('El reproductor de Spotify no està llest. Espera uns segons...', false);
-    return Promise.reject('Player not ready');
-  }
-
-  return fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+  return ensureSpotifyPlayer().then(() => fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
     method: 'PUT',
     body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${SPOTIFY_TOKEN}`
     },
-  }).then(response => {
+  })).then(response => {
     if (response.ok) {
       console.log('[SPOTIFY] Playing track:', spotifyId);
       return response;
@@ -1055,9 +1071,39 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (audioElement) {
       audioElement.pause();
       audioElement.currentTime = 0;
+      audioElement.removeAttribute('src');
+      audioElement.load();
       isPlaying = false;
       updatePlayButton();
     }
+  }
+
+  function cleanupPlaybackSession() {
+    if (HAS_SPOTIFY_PLAYER && spotifyPlayer) {
+      try {
+        spotifyPlayer.pause();
+      } catch (e) {
+        console.warn('[SPOTIFY] Error pausing player during cleanup:', e);
+      }
+      try {
+        spotifyPlayer.disconnect();
+      } catch (e) {
+        console.warn('[SPOTIFY] Error disconnecting player during cleanup:', e);
+      }
+    }
+    spotifyPlayer = null;
+    spotifyDeviceId = null;
+    spotifyPlayerInitPromise = null;
+
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      audioElement.removeAttribute('src');
+      audioElement.load();
+    }
+
+    isPlaying = false;
+    updatePlayButton();
   }
 
   function getCurrentSongSpotifyId() {
@@ -1082,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (isPlaying) {
-          spotifyPlayer.pause().then(() => {
+          ensureSpotifyPlayer().then(() => spotifyPlayer.pause()).then(() => {
             isPlaying = false;
             updatePlayButton();
           });
@@ -1157,6 +1203,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load preview for first card
   loadCurrentPreview();
   updateProgress();
+
+  window.addEventListener('pagehide', cleanupPlaybackSession);
+  window.addEventListener('beforeunload', cleanupPlaybackSession);
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      cleanupPlaybackSession();
+    }
+  });
 
   // Afegir event listeners als botons (fora de cada carta en mòbil, dins en desktop)
   if (isMobile) {

@@ -134,6 +134,355 @@
   .dashboard-reco-card .sonic-reco-meta {
     min-width: 0 !important;
   }
+
+  .dashboard-history-order {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    background: #eef2ff;
+    color: #4f46e5;
+    flex-shrink: 0;
+  }
+
+  .dashboard-history-item-current {
+    background: rgba(139, 92, 246, 0.09);
+    border: 1px solid rgba(139, 92, 246, 0.28);
+  }
+
+  .dashboard-history-order.is-current {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    color: #ffffff;
+  }
+
+  .dashboard-now-playing-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(139, 92, 246, 0.14);
+    color: #7c3aed;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .mobile-list-card-current {
+    background: rgba(139, 92, 246, 0.09) !important;
+    border: 1px solid rgba(139, 92, 246, 0.22) !important;
+  }
+
+  .mobile-history-order-current {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+    color: #ffffff !important;
+  }
+
+  .dashboard-jukebox-bar {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .dashboard-status-card,
+  .dashboard-fader-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 0.55rem 0.9rem;
+    box-shadow: 0 4px 18px rgba(0, 64, 224, 0.06);
+    border: 1px solid rgba(116, 118, 136, 0.1);
+  }
+
+  .dashboard-status-card {
+    min-height: 9.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .dashboard-fader-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .dashboard-jukebox-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  .dashboard-jukebox-state.is-active {
+    background: rgba(28, 200, 138, 0.12);
+    color: #1cc88a;
+  }
+
+  .dashboard-jukebox-state.is-scheduled {
+    background: rgba(0, 64, 224, 0.1);
+    color: #0040e0;
+  }
+
+  .dashboard-jukebox-state.is-preview {
+    background: rgba(116, 118, 136, 0.12);
+    color: #5d6072;
+  }
+
+  .dashboard-jukebox-state.is-inactive {
+    background: rgba(186, 26, 26, 0.1);
+    color: #ba1a1a;
+  }
+
+  .dashboard-status-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-status-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #747687;
+  }
+
+  .dashboard-status-help {
+    font-size: 0.78rem;
+    color: #747687;
+    margin-top: 0.3rem;
+  }
+
+  .dashboard-status-options {
+    display: none;
+  }
+
+  .dashboard-status-option {
+    display: none;
+  }
+
+  .dashboard-status-fader {
+    width: min(100%, 28rem);
+  }
+
+  .dashboard-fader-scale {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    padding: 0 1.15rem;
+    margin-top: 0.12rem;
+  }
+
+  .dashboard-fader-labels {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    padding: 0 1.15rem;
+    margin-bottom: 0.16rem;
+  }
+
+  .dashboard-fader-label {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #5d6072;
+    line-height: 1;
+  }
+
+  .dashboard-fader-label.is-selected {
+    color: #00d7f8;
+    text-shadow: 0 0 10px rgba(0, 215, 248, 0.35);
+  }
+
+  .dashboard-fader-scale-mark {
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: rgba(67, 70, 85, 0.58);
+    line-height: 1;
+  }
+
+  .dashboard-fader-scale-mark.is-selected {
+    color: #00d7f8;
+    text-shadow: 0 0 10px rgba(0, 215, 248, 0.35);
+  }
+
+  .dashboard-fader-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    min-height: 2.45rem;
+    padding: 0.3rem 0.7rem 0.3rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #d8dde4 0%, #eef2f6 42%, #f7fafd 100%);
+    border: 1px solid rgba(116, 118, 136, 0.2);
+    box-shadow: inset 0 2px 5px rgba(24, 28, 30, 0.08), 0 8px 18px rgba(0, 64, 224, 0.06);
+  }
+
+  .dashboard-fader-thumb {
+    position: absolute;
+    top: 0.78rem;
+    left: calc(0.7rem + (var(--step, 0) * ((100% - 1.4rem) / 4)) + (((100% - 1.4rem) / 4) - 2.6rem) / 2);
+    width: 2.6rem;
+    height: 1.15rem;
+    border-radius: 0.7rem;
+    background: linear-gradient(180deg, #ffffff 0%, #eef2f6 55%, #d9dee4 100%);
+    border: 1px solid rgba(116, 118, 136, 0.28);
+    box-shadow: 0 5px 14px rgba(24, 28, 30, 0.18), inset 0 1px 0 rgba(255,255,255,0.95);
+    transition: left 0.24s ease, transform 0.24s ease;
+    pointer-events: none;
+  }
+
+  .dashboard-fader-track.is-finished .dashboard-fader-thumb {
+    display: none;
+  }
+
+  .dashboard-fader-rail {
+    position: absolute;
+    left: 1.2rem;
+    right: 1.2rem;
+    top: 1.35rem;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(116, 118, 136, 0.2) 0%, rgba(116, 118, 136, 0.52) 50%, rgba(116, 118, 136, 0.2) 100%);
+    pointer-events: none;
+  }
+
+  .dashboard-fader-knob-lines {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+  }
+
+  .dashboard-fader-knob-lines span {
+    display: block;
+    width: 1.2rem;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(0, 64, 224, 0.7);
+  }
+
+  .dashboard-fader-knob-lines span:nth-child(2) {
+    opacity: 0.55;
+  }
+
+  .dashboard-fader-knob-lines span:nth-child(3) {
+    opacity: 0.35;
+  }
+
+  .dashboard-fader-segment {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dashboard-fader-button {
+    width: 100%;
+    min-height: 2.45rem;
+    border: none;
+    background: transparent;
+    color: transparent;
+    font-size: 0;
+    line-height: 0;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .dashboard-poweroff-button {
+    min-height: 2.35rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 999px;
+    background: #fff1f1;
+    color: #ba1a1a;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1199.98px) {
+    .dashboard-jukebox-bar {
+      grid-template-columns: 1fr;
+    }
+
+    .dashboard-status-card {
+      min-height: auto;
+    }
+
+    .dashboard-fader-card {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile {
+    min-height: 2.2rem;
+    padding: 0.25rem 0.45rem 0.25rem;
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-rail {
+    left: 0.85rem;
+    right: 0.85rem;
+    top: 1.18rem;
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-thumb {
+    top: 0.68rem;
+    width: 2.15rem;
+    height: 0.95rem;
+    left: calc(0.45rem + (var(--step, 0) * ((100% - 0.9rem) / 4)) + (((100% - 0.9rem) / 4) - 2.15rem) / 2);
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-button {
+    min-height: 2.2rem;
+  }
+
+  .dashboard-fader-scale.dashboard-fader-scale-mobile {
+    padding: 0 0.8rem;
+    margin-top: 0.18rem;
+  }
+
+  .dashboard-fader-scale.dashboard-fader-scale-mobile .dashboard-fader-scale-mark {
+    font-size: 0.52rem;
+  }
+
+  .dashboard-fader-labels.dashboard-fader-labels-mobile {
+    padding: 0 0.8rem;
+    margin-bottom: 0.22rem;
+  }
+
+  .dashboard-fader-labels.dashboard-fader-labels-mobile .dashboard-fader-label {
+    font-size: 0.62rem;
+  }
+
 </style>
 
 <div id="dashboard-request-message" class="sonic-mb-4"></div>
@@ -143,6 +492,88 @@
 
     <!-- COLUMNA ESQUERRA (60%) -->
     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+        <section class="dashboard-jukebox-bar">
+            <div class="dashboard-status-card">
+                <div class="dashboard-jukebox-state {% if party.party_status == 'hidden' %}is-preview{% elif party.party_status == 'show_party' %}is-preview{% elif party.party_status == 'djjukebox_active' %}is-active{% elif party.party_status == 'requests_open' %}is-scheduled{% else %}is-inactive{% endif %}">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">{% if party.party_status == 'hidden' %}visibility_off{% elif party.party_status == 'show_party' %}visibility{% elif party.party_status == 'djjukebox_active' %}equalizer{% elif party.party_status == 'requests_open' %}schedule{% else %}celebration{% endif %}</span>
+                    {{ party_status_label }}
+                </div>
+                <div class="dashboard-status-help">
+                    {{ party_status_help }}
+                    {% if party.party_status == 'requests_open' and party.jukebox_starts_at %}
+                        Propera hora d'inici: {{ party.jukebox_starts_at|time:"H:i" }}.
+                    {% endif %}
+                </div>
+            </div>
+            <div class="dashboard-fader-card">
+                <div class="dashboard-status-fader">
+                    <div class="dashboard-fader-labels">
+                        <div class="dashboard-fader-label {% if party.party_status == 'hidden' %}is-selected{% endif %}">Festa Pausada</div>
+                        <div class="dashboard-fader-label {% if party.party_status == 'show_party' %}is-selected{% endif %}">Mostrar</div>
+                        <div class="dashboard-fader-label {% if party.party_status == 'requests_open' %}is-selected{% endif %}">Peticions</div>
+                        <div class="dashboard-fader-label {% if party.party_status == 'djjukebox_active' %}is-selected{% endif %}">Jukebox</div>
+                    </div>
+                    <div class="dashboard-fader-track {% if is_party_finished %}is-finished{% endif %}" style="--step: {{ party_status_step }};">
+                        <div class="dashboard-fader-rail"></div>
+                        <div class="dashboard-fader-thumb">
+                            <div class="dashboard-fader-knob-lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="dashboard-fader-segment">
+                            <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="party_status" value="hidden">
+                                <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                                <button type="submit" class="dashboard-fader-button" aria-label="Festa Pausada"></button>
+                            </form>
+                        </div>
+                        <div class="dashboard-fader-segment">
+                            <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="party_status" value="show_party">
+                                <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                                <button type="submit" class="dashboard-fader-button" aria-label="Mostrar"></button>
+                            </form>
+                        </div>
+                        <div class="dashboard-fader-segment">
+                            <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="party_status" value="requests_open">
+                                <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                                <button type="submit" class="dashboard-fader-button" aria-label="Peticions"></button>
+                            </form>
+                        </div>
+                        <div class="dashboard-fader-segment">
+                            <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="party_status" value="djjukebox_active">
+                                <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                                <button type="submit" class="dashboard-fader-button" aria-label="Jukebox"></button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="dashboard-fader-scale">
+                        <div class="dashboard-fader-scale-mark {% if party.party_status == 'hidden' %}is-selected{% endif %}">-24dB</div>
+                        <div class="dashboard-fader-scale-mark {% if party.party_status == 'show_party' %}is-selected{% endif %}">-12dB</div>
+                        <div class="dashboard-fader-scale-mark {% if party.party_status == 'requests_open' %}is-selected{% endif %}">-6dB</div>
+                        <div class="dashboard-fader-scale-mark {% if party.party_status == 'djjukebox_active' %}is-selected{% endif %}">0dB</div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="party_status" value="finished">
+                    <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                    <button type="submit" class="dashboard-poweroff-button">
+                        <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: text-bottom;">power_settings_new</span>
+                        Tancar festa
+                    </button>
+                </form>
+            </div>
+        </section>
 
         <!-- Stats Grid -->
         <div class="sonic-grid-4col">
@@ -244,6 +675,18 @@
                     <span class="material-symbols-outlined sonic-text-primary">featured_play_list</span>
                     Maleta del DJ
                 </h3>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <div class="position-relative" style="max-width: 26rem;">
+                    <span class="material-symbols-outlined position-absolute" style="left: 0.9rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
+                    <input
+                        id="song-search"
+                        type="search"
+                        class="form-control"
+                        placeholder="Cerca a la maleta del DJ..."
+                        style="height: 3rem; padding-left: 2.6rem; border: 1px solid rgba(116, 118, 136, 0.18); border-radius: 0.8rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.03);"
+                    >
+                </div>
             </div>
             <div class="sonic-table-container">
                 <table class="sonic-table">
@@ -432,7 +875,8 @@
             </div>
             <div class="sonic-history-container">
                 {% for song in played_songs_list|slice:":10" %}
-                <div class="sonic-history-item">
+                <div class="sonic-history-item {% if is_djjukebox_active and forloop.first %}dashboard-history-item-current{% endif %}">
+                    <span class="dashboard-history-order {% if is_djjukebox_active and forloop.first %}is-current{% endif %}">{{ song.display_order }}</span>
                     {% if song.album_image_url %}
                     <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="sonic-history-img">
                     {% else %}
@@ -445,6 +889,12 @@
                         <div class="sonic-history-subtitle">{{ song.artist }}</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                        {% if is_djjukebox_active and forloop.first %}
+                        <span class="dashboard-now-playing-badge">
+                            <span class="material-symbols-outlined" style="font-size: 0.85rem;">radio_button_checked</span>
+                            Està sonant
+                        </span>
+                        {% endif %}
                         <span style="font-size: 0.625rem; font-weight: 700; color: #e74a3b;">{{ song.num_likes }}</span>
                         <span class="material-symbols-outlined" style="color: #e74a3b; font-size: 0.75rem;">favorite</span>
                     </div>
@@ -613,6 +1063,88 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </section>
 
+    <section>
+      <div class="mobile-surface-card p-3">
+        <div style="font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #747688; margin-bottom: 0.35rem;">Estat de la festa</div>
+        <div class="d-inline-flex align-items-center gap-2" style="padding: 0.35rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; {% if party.party_status == 'hidden' %}background: rgba(116, 118, 136, 0.12); color: #5d6072;{% elif party.party_status == 'show_party' %}background: rgba(116, 118, 136, 0.12); color: #5d6072;{% elif party.party_status == 'djjukebox_active' %}background: rgba(28, 200, 138, 0.12); color: #1cc88a;{% elif party.party_status == 'requests_open' %}background: rgba(0, 64, 224, 0.1); color: #0040e0;{% else %}background: rgba(186, 26, 26, 0.1); color: #ba1a1a;{% endif %}">
+          <i class="fas {% if party.party_status == 'hidden' %}fa-eye-slash{% elif party.party_status == 'show_party' %}fa-eye{% elif party.party_status == 'djjukebox_active' %}fa-sliders-h{% elif party.party_status == 'requests_open' %}fa-clock{% else %}fa-flag-checkered{% endif %}" style="font-size: 0.78rem;"></i>
+          {{ party_status_label }}
+        </div>
+        <div style="font-size: 0.78rem; color: #747688; margin-top: 0.6rem; line-height: 1.35;">
+          {{ party_status_help }}
+        </div>
+        <div class="mt-3 d-flex flex-column gap-2">
+          <div class="d-flex flex-column gap-2">
+            <div class="dashboard-status-fader">
+              <div class="dashboard-status-label" style="margin-bottom: 0.35rem;">Fader d'estat</div>
+              <div class="dashboard-fader-labels dashboard-fader-labels-mobile">
+                <div class="dashboard-fader-label {% if party.party_status == 'hidden' %}is-selected{% endif %}">Festa Pausada</div>
+                <div class="dashboard-fader-label {% if party.party_status == 'show_party' %}is-selected{% endif %}">Mostrar</div>
+                <div class="dashboard-fader-label {% if party.party_status == 'requests_open' %}is-selected{% endif %}">Peticions</div>
+                <div class="dashboard-fader-label {% if party.party_status == 'djjukebox_active' %}is-selected{% endif %}">Jukebox</div>
+              </div>
+              <div class="dashboard-fader-track dashboard-fader-track-mobile {% if is_party_finished %}is-finished{% endif %}" style="--step: {{ party_status_step }};">
+                <div class="dashboard-fader-rail"></div>
+                <div class="dashboard-fader-thumb">
+                  <div class="dashboard-fader-knob-lines">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+                <div class="dashboard-fader-segment">
+                  <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="party_status" value="hidden">
+                    <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                    <button type="submit" class="dashboard-fader-button" aria-label="Festa Pausada"></button>
+                  </form>
+                </div>
+                <div class="dashboard-fader-segment">
+                  <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="party_status" value="show_party">
+                    <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                    <button type="submit" class="dashboard-fader-button" aria-label="Mostrar"></button>
+                  </form>
+                </div>
+                <div class="dashboard-fader-segment">
+                  <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="party_status" value="requests_open">
+                    <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                    <button type="submit" class="dashboard-fader-button" aria-label="Peticions"></button>
+                  </form>
+                </div>
+                <div class="dashboard-fader-segment">
+                  <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="party_status" value="djjukebox_active">
+                    <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+                    <button type="submit" class="dashboard-fader-button" aria-label="Jukebox"></button>
+                  </form>
+                </div>
+              </div>
+            <form method="post" action="{% url 'update_party_status' party.id %}" style="margin: 0;">
+              {% csrf_token %}
+              <input type="hidden" name="party_status" value="finished">
+              <input type="hidden" name="jukebox_starts_at" value="{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:'H:i' }}{% endif %}">
+              <button type="submit" class="dashboard-poweroff-button" style="width: 100%;">
+                <i class="fas fa-power-off" style="margin-right: 0.35rem;"></i>
+                Tancar festa
+              </button>
+                  </form>
+                </div>
+              </div>
+              <div class="dashboard-fader-scale dashboard-fader-scale-mobile">
+                <div class="dashboard-fader-scale-mark {% if party.party_status == 'hidden' %}is-selected{% endif %}">-24dB</div>
+                <div class="dashboard-fader-scale-mark {% if party.party_status == 'show_party' %}is-selected{% endif %}">-12dB</div>
+                <div class="dashboard-fader-scale-mark {% if party.party_status == 'requests_open' %}is-selected{% endif %}">-6dB</div>
+                <div class="dashboard-fader-scale-mark {% if party.party_status == 'djjukebox_active' %}is-selected{% endif %}">0dB</div>
+              </div>
+            </div>
+    </section>
+
     <!-- Stats Grid - 8 KPIs Compactes -->
     <section class="mobile-stat-grid mobile-stat-grid--4">
       <div class="mobile-stat-card" style="padding: 0.55rem 0.35rem;">
@@ -779,7 +1311,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <div id="dashboard-mobile-tab-played" class="d-none mobile-list-stack">
         {% for song in played_songs_list %}
-          <div class="mobile-list-card mobile-list-card--positive d-flex align-items-center gap-2 p-2">
+          <div class="mobile-list-card mobile-list-card--positive d-flex align-items-center gap-2 p-2{% if is_djjukebox_active and forloop.first %} mobile-list-card-current{% endif %}">
+            <div class="d-inline-flex align-items-center justify-content-center flex-shrink-0{% if is_djjukebox_active and forloop.first %} mobile-history-order-current{% endif %}" style="width: 2rem; height: 2rem; border-radius: 999px; background: #eef2ff; color: #4f46e5; font-size: 0.75rem; font-weight: 800; line-height: 1;">
+              {{ song.display_order }}
+            </div>
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -800,6 +1335,14 @@ document.addEventListener('DOMContentLoaded', function() {
                   <span class="camelot-key camelot-{{ song.key }} flex-shrink-0" style="font-size: 0.65rem; padding: 0.15rem 0.35rem;">{{ song.key }}</span>
                 {% endif %}
               </div>
+              {% if is_djjukebox_active and forloop.first %}
+                <div class="mt-2">
+                  <span class="dashboard-now-playing-badge">
+                    <i class="fas fa-circle" style="font-size: 0.45rem;"></i>
+                    Està sonant
+                  </span>
+                </div>
+              {% endif %}
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
               <div class="d-flex flex-column align-items-center" style="min-width: 1.5rem;">

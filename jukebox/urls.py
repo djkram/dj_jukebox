@@ -11,6 +11,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('dj/', views.dj_backoffice, name='dj_backoffice'),
     path('dj/dashboard/', views.dj_dashboard, name='dj_dashboard'),
+    path('party/<int:party_id>/update-status/', views.update_party_status, name='update_party_status'),
     path('dj/mark_played/<int:song_id>/', views.mark_song_played, name='mark_song_played'),
     
     path('login/', RedirectView.as_view(url=reverse_lazy('account_login'), permanent=False)),

@@ -366,6 +366,21 @@
   .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
   .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
 
+  .songs-played-order {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    background: #eef2ff;
+    color: #4f46e5;
+    flex-shrink: 0;
+  }
+
   /* Mobile: mostrar play overlay sempre visible */
   @media (max-width: 767.98px) {
     .play-overlay {
@@ -697,6 +712,7 @@
                   <tr class="songs-table-row played-song-row" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
                     <td class="songs-table-cell-first">
                       <div class="d-flex align-items-center gap-3">
+                        <span class="songs-played-order">{{ song.display_order }}</span>
                         <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
                             <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -936,6 +952,9 @@
           {% for song in played_songs %}
             <div class="song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
               <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
+                <div class="d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 2rem; height: 2rem; border-radius: 999px; background: #eef2ff; color: #4f46e5; font-size: 0.75rem; font-weight: 800; line-height: 1;">
+                  {{ song.display_order }}
+                </div>
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
                     <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -1039,107 +1058,118 @@ let spotifyDeviceId = null;
 let currentPlayingSpotifyId = null;
 let isCurrentlyPlaying = false;
 const SPOTIFY_TOKEN = '{{ spotify_token }}';
+let spotifySdkReady = false;
+let spotifyPlayerInitPromise = null;
 
-// Initialize Spotify Player
 window.onSpotifyWebPlaybackSDKReady = () => {
-  spotifyPlayer = new Spotify.Player({
-    name: 'DJ Jukebox Web Player',
-    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
-    volume: 0.7
-  });
+  spotifySdkReady = true;
+};
 
-  // Ready
-  spotifyPlayer.addListener('ready', ({ device_id }) => {
-    console.log('[SPOTIFY] Player ready with Device ID:', device_id);
-    spotifyDeviceId = device_id;
-  });
+function updateSpotifyButtons(track_id, isPlaying) {
+  document.querySelectorAll('.spotify-play-btn').forEach(btn => {
+    const btnSpotifyId = btn.dataset.spotifyId;
+    const icon = btn.querySelector('i, span.material-symbols-outlined');
+    const overlay = btn.closest('.play-overlay');
 
-  // Not Ready
-  spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-    console.log('[SPOTIFY] Device ID has gone offline:', device_id);
-  });
-
-  // Player state changed
-  spotifyPlayer.addListener('player_state_changed', state => {
-    if (!state) {
-      currentPlayingSpotifyId = null;
-      isCurrentlyPlaying = false;
-      return;
-    }
-
-    const isPlaying = !state.paused;
-    const track_id = state.track_window.current_track.id;
-
-    console.log('[SPOTIFY] State changed:', { track_id, isPlaying });
-
-    // Update global state
-    currentPlayingSpotifyId = track_id;
-    isCurrentlyPlaying = isPlaying;
-
-    // Update ALL button icons and overlays
-    document.querySelectorAll('.spotify-play-btn').forEach(btn => {
-      const btnSpotifyId = btn.dataset.spotifyId;
-      const icon = btn.querySelector('i, span.material-symbols-outlined');
-      const overlay = btn.closest('.play-overlay');
-
-      if (btnSpotifyId === track_id) {
-        // This is the current track
-        if (isPlaying) {
-          // Currently playing
-          if (icon.classList.contains('material-symbols-outlined')) {
-            icon.textContent = 'pause';
-          } else {
-            icon.classList.remove('fa-play');
-            icon.classList.add('fa-pause');
-          }
-          if (overlay) overlay.classList.add('is-playing');
+    if (btnSpotifyId === track_id) {
+      if (isPlaying) {
+        if (icon.classList.contains('material-symbols-outlined')) {
+          icon.textContent = 'pause';
         } else {
-          // Current track but paused
-          if (icon.classList.contains('material-symbols-outlined')) {
-            icon.textContent = 'play_arrow';
-          } else {
-            icon.classList.remove('fa-pause');
-            icon.classList.add('fa-play');
-          }
-          if (overlay) overlay.classList.add('is-playing');
+          icon.classList.remove('fa-play');
+          icon.classList.add('fa-pause');
         }
       } else {
-        // Different track - reset to play
         if (icon.classList.contains('material-symbols-outlined')) {
           icon.textContent = 'play_arrow';
         } else {
           icon.classList.remove('fa-pause');
           icon.classList.add('fa-play');
         }
-        if (overlay) overlay.classList.remove('is-playing');
       }
-    });
-  });
-
-  // Connect to the player
-  spotifyPlayer.connect().then(success => {
-    if (success) {
-      console.log('[SPOTIFY] Connected successfully');
+      if (overlay) overlay.classList.add('is-playing');
+    } else {
+      if (icon.classList.contains('material-symbols-outlined')) {
+        icon.textContent = 'play_arrow';
+      } else {
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+      }
+      if (overlay) overlay.classList.remove('is-playing');
     }
   });
-};
+}
+
+function ensureSpotifyPlayer() {
+  if (spotifyPlayer && spotifyDeviceId) {
+    return Promise.resolve(spotifyPlayer);
+  }
+
+  if (!spotifySdkReady || !window.Spotify) {
+    showSpotifyAlert('{% trans "El reproductor de Spotify no està llest. Espera uns segons..." %}', 'info');
+    return Promise.reject(new Error('Spotify SDK not ready'));
+  }
+
+  if (spotifyPlayerInitPromise) {
+    return spotifyPlayerInitPromise;
+  }
+
+  spotifyPlayerInitPromise = new Promise((resolve, reject) => {
+    spotifyPlayer = new Spotify.Player({
+      name: 'DJ Jukebox Web Player',
+      getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+      volume: 0.7
+    });
+
+    spotifyPlayer.addListener('ready', ({ device_id }) => {
+      console.log('[SPOTIFY] Player ready with Device ID:', device_id);
+      spotifyDeviceId = device_id;
+      resolve(spotifyPlayer);
+    });
+
+    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+      console.log('[SPOTIFY] Device ID has gone offline:', device_id);
+    });
+
+    spotifyPlayer.addListener('player_state_changed', state => {
+      if (!state) {
+        currentPlayingSpotifyId = null;
+        isCurrentlyPlaying = false;
+        updateSpotifyButtons(null, false);
+        return;
+      }
+
+      const isPlaying = !state.paused;
+      const track_id = state.track_window.current_track.id;
+
+      currentPlayingSpotifyId = track_id;
+      isCurrentlyPlaying = isPlaying;
+      updateSpotifyButtons(track_id, isPlaying);
+    });
+
+    spotifyPlayer.connect().then(success => {
+      if (!success) {
+        reject(new Error('Spotify player connection failed'));
+      }
+    }).catch(reject);
+  }).catch(error => {
+    spotifyPlayerInitPromise = null;
+    throw error;
+  });
+
+  return spotifyPlayerInitPromise;
+}
 
 // Function to play a track using Spotify SDK
 function playSpotifyTrack(spotifyId) {
-  if (!spotifyPlayer || !spotifyDeviceId) {
-    console.error('[SPOTIFY] Player not ready');
-    showSpotifyAlert('{% trans "El reproductor de Spotify no està llest. Espera uns segons..." %}', 'info');
-    return;
-  }
-
-  fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+  return ensureSpotifyPlayer().then(() => fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
     method: 'PUT',
     body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${SPOTIFY_TOKEN}`
     },
-  }).then(response => {
+  })).then(response => {
     if (response.ok) {
       console.log('[SPOTIFY] Playing track:', spotifyId);
     } else if (response.status === 403) {
@@ -1170,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isCurrentlyPlaying) {
           // Currently playing, so pause
           console.log('[SPOTIFY] Pausing track');
-          spotifyPlayer.pause().then(() => {
+          ensureSpotifyPlayer().then(() => spotifyPlayer.pause()).then(() => {
             console.log('[SPOTIFY] Paused successfully');
           }).catch(err => {
             console.error('[SPOTIFY] Error pausing:', err);
@@ -1178,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           // Currently paused, so resume
           console.log('[SPOTIFY] Resuming track');
-          spotifyPlayer.resume().then(() => {
+          ensureSpotifyPlayer().then(() => spotifyPlayer.resume()).then(() => {
             console.log('[SPOTIFY] Resumed successfully');
           }).catch(err => {
             console.error('[SPOTIFY] Error resuming:', err);
@@ -1203,6 +1233,35 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.click();
       }
     });
+  });
+
+  function cleanupSpotifyPlayback() {
+    if (spotifyPlayer) {
+      try {
+        spotifyPlayer.pause();
+      } catch (e) {
+        console.warn('[SPOTIFY] Error pausing player during cleanup:', e);
+      }
+      try {
+        spotifyPlayer.disconnect();
+      } catch (e) {
+        console.warn('[SPOTIFY] Error disconnecting player during cleanup:', e);
+      }
+    }
+    spotifyPlayer = null;
+    spotifyDeviceId = null;
+    spotifyPlayerInitPromise = null;
+    currentPlayingSpotifyId = null;
+    isCurrentlyPlaying = false;
+    updateSpotifyButtons(null, false);
+  }
+
+  window.addEventListener('pagehide', cleanupSpotifyPlayback);
+  window.addEventListener('beforeunload', cleanupSpotifyPlayback);
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      cleanupSpotifyPlayback();
+    }
   });
 });
 </script>

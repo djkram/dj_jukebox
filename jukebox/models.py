@@ -19,6 +19,19 @@ class Playlist(models.Model):
         return self.name
 
 class Party(models.Model):
+    STATUS_HIDDEN = 'hidden'
+    STATUS_SHOW_PARTY = 'show_party'
+    STATUS_REQUESTS_OPEN = 'requests_open'
+    STATUS_DJJUKEBOX_ACTIVE = 'djjukebox_active'
+    STATUS_FINISHED = 'finished'
+    STATUS_CHOICES = [
+        (STATUS_HIDDEN, _('Festa oculta')),
+        (STATUS_SHOW_PARTY, _('Mostrar festa')),
+        (STATUS_REQUESTS_OPEN, _('Obrir peticions')),
+        (STATUS_DJJUKEBOX_ACTIVE, _('Iniciar Jukebox')),
+        (STATUS_FINISHED, _('Acabar festa')),
+    ]
+
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
@@ -27,6 +40,8 @@ class Party(models.Model):
     max_votes_per_user = models.PositiveIntegerField(default=5)  # Vots gratuïts per usuari
     free_coins_per_user = models.PositiveIntegerField(default=0)  # Coins gratuïts per usuari (per festa)
     song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó
+    party_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_HIDDEN)
+    jukebox_starts_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista d'activació del DJJukebox"))
     is_jukebox_active = models.BooleanField(default=True, help_text=_("Indica si el jukebox està actiu per aquesta festa"))
     auto_sync_playlist = models.BooleanField(default=False, help_text=_("Sincronitzar automàticament amb Spotify cada 5 minuts"))
     last_sync_at = models.DateTimeField(null=True, blank=True, help_text=_("Última sincronització exitosa"))
@@ -36,6 +51,7 @@ class Party(models.Model):
     def save(self, *args, **kwargs):
         if not self.code:
             self.code = uuid.uuid4().hex[:8]
+        self.is_jukebox_active = self.party_status == self.STATUS_DJJUKEBOX_ACTIVE
         super().save(*args, **kwargs)
 
     def __str__(self):

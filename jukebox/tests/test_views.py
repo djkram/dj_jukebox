@@ -116,6 +116,39 @@ class SongListViewTests(TestCase):
         pos_song0 = content.find('Song 0')
         self.assertLess(pos_song4, pos_song0)
 
+    def test_song_list_can_remove_existing_vote_and_restore_vote_left(self):
+        """Test que es pot desfer un vot des de /songs/ i es recupera el vot disponible"""
+        self.client.login(username='user', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+        song = self.songs[0]
+        Vote.objects.create(user=self.user, song=song, party=self.party, vote_type='like')
+
+        response = self.client.post(reverse('song_list'), {'unvote_song_id': song.id})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Vote.objects.filter(user=self.user, song=song, party=self.party).exists())
+
+        response = self.client.get(reverse('song_list'))
+        self.assertEqual(response.context['votes_left'], 5)
+
+    def test_song_list_can_remove_dislike_vote(self):
+        """Test que es pot desfer un vot negatiu des de /songs/"""
+        self.client.login(username='user', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+        song = self.songs[1]
+        Vote.objects.create(user=self.user, song=song, party=self.party, vote_type='dislike')
+
+        response = self.client.post(reverse('song_list'), {'unvote_song_id': song.id})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Vote.objects.filter(user=self.user, song=song, party=self.party).exists())
+
 
 class VoteViewTests(TestCase):
     """Tests per la view de votació"""

@@ -2095,7 +2095,7 @@
                     {% endblock %}
 
                     <!-- Topbar Search -->
-                    {% if request.resolver_match.url_name == 'song_list' or request.resolver_match.url_name == 'dj_dashboard' %}
+                    {% if request.resolver_match.url_name == 'song_list' %}
                     <form method="get" action="" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                       <div class="input-group">
                         <input
@@ -2118,6 +2118,11 @@
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - Language Selector -->
+                        <li class="nav-item no-arrow mx-1">
+                            {% include "jukebox/language_selector.html" %}
+                        </li>
+
                         <!-- Nav Item - Notificacions -->
                         {% if user.is_authenticated %}
                         <li class="nav-item no-arrow mx-1">
@@ -2185,15 +2190,21 @@
                             </h1>
                         </div>
 
-                        <!-- Notifications -->
-                        {% if user.is_authenticated %}
-                        <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
-                            <i class="fas fa-bell text-xl text-brand-blue"></i>
-                            {% if unread_notifications_count > 0 %}
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2">
+                            <!-- Language Selector -->
+                            {% include "jukebox/language_selector.html" %}
+
+                            <!-- Notifications -->
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
+                                <i class="fas fa-bell text-xl text-brand-blue"></i>
+                                {% if unread_notifications_count > 0 %}
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                                {% endif %}
+                            </a>
                             {% endif %}
-                        </a>
-                        {% endif %}
+                        </div>
                     </div>
                 </nav>
                 <!-- End of Topbar -->

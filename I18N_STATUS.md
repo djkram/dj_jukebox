@@ -168,18 +168,25 @@ urlpatterns += i18n_patterns(
 
 ---
 
-## ⏳ Fase 6: Selector d'idioma UI (PENDENT)
+## ✅ Fase 6: Selector d'idioma UI (COMPLETADA)
 
-**Template a crear:**
-- [ ] `jukebox/templates/jukebox/language_selector.html`
+**Template creat:**
+- [x] `jukebox/templates/jukebox/language_selector.html` ✅
 
-**Integració:**
-- [ ] Afegir selector a `admin_base.html` (topbar desktop)
-- [ ] Afegir selector a versió mobile
+**Integració completada:**
+- [x] Selector afegit a `admin_base.html` topbar desktop ✅
+- [x] Selector afegit a topbar mobile ✅
 
-**Estils:**
-- [ ] CSS Sonic Architect (desktop)
-- [ ] CSS Tailwind (mobile)
+**Estils implementats:**
+- [x] CSS Sonic Architect (desktop) - Selector glassmorphism ✅
+- [x] CSS Tailwind (mobile) - Selector integrat amb disseny ✅
+
+**Funcionalitat:**
+- Formulari que fa POST a `/i18n/setlang/`
+- Canvi automàtic d'idioma amb onchange
+- Detecció idioma actual amb `{% get_current_language %}`
+- Llistat idiomes disponibles amb `{% get_available_languages %}`
+- Integrat visualment amb ambdós dissenys (Sonic + Tailwind)
 
 ---
 
@@ -219,8 +226,8 @@ Fase 2: ████████████████████████
 Fase 3: ████████████████████████████████ 100% ✅
 Fase 4: ████████████████████████████████ 100% ✅
 Fase 5: ████████████████████████████████ 100% ✅
-Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Fase 6: ████████████████████████████████ 100% ✅
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  █████████████████████░░░░░░░░░░░  74%
+Total:  ███████████████████████████░░░░░  88%
 ```

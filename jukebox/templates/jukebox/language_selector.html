@@ -1,0 +1,108 @@
+{% load i18n %}
+
+<!-- Language Selector - Desktop (Sonic Architect) -->
+<div class="d-none d-md-block">
+  <form action="{% url 'set_language' %}" method="post" class="language-selector-form">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <select name="language" onchange="this.form.submit()" class="language-select">
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% for lang_code, lang_name in LANGUAGES %}
+        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+          {{ lang_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<!-- Language Selector - Mobile (Tailwind) -->
+<div class="d-md-none">
+  <form action="{% url 'set_language' %}" method="post" class="language-selector-form-mobile">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <select name="language" onchange="this.form.submit()" class="language-select-mobile">
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% for lang_code, lang_name in LANGUAGES %}
+        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+          {{ lang_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<style>
+  /* Desktop - Sonic Architect Style */
+  @media (min-width: 768px) {
+    .language-selector-form {
+      display: inline-block;
+    }
+
+    .language-select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 200ms;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      min-width: 100px;
+    }
+
+    .language-select:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .language-select:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    .language-select option {
+      background: #181c1e;
+      color: white;
+    }
+  }
+
+  /* Mobile - Tailwind Style */
+  @media (max-width: 767px) {
+    .language-selector-form-mobile {
+      display: inline-block;
+    }
+
+    .language-select-mobile {
+      background: white;
+      border: 1px solid #e0e3e6;
+      border-radius: 0.75rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      color: #181c1e;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 200ms;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23181c1e' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      min-width: 100px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .language-select-mobile:focus {
+      outline: none;
+      border-color: #0040e0;
+      box-shadow: 0 0 0 3px rgba(0, 64, 224, 0.1);
+    }
+  }
+</style>

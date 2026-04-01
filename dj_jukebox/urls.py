@@ -16,9 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.i18n import i18n_patterns
 
+# URLs sense prefix d'idioma (necessàries per al canvi d'idioma)
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+# URLs amb prefix d'idioma (ca/, en/, etc.)
+urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('jukebox.urls')),
-]
+)

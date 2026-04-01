@@ -141,22 +141,30 @@ Les traduccions es poden fer:
 
 ---
 
-## ⏳ Fase 5: URLs per canvi d'idioma (PENDENT)
+## ✅ Fase 5: URLs per canvi d'idioma (COMPLETADA)
 
-**dj_jukebox/urls.py:**
+**dj_jukebox/urls.py actualitzat:**
 ```python
 from django.conf.urls.i18n import i18n_patterns
 
+# URLs sense prefix d'idioma
 urlpatterns = [
-    path('i18n/', include('django.conf.urls.i18n')),
+    path('i18n/', include('django.conf.urls.i18n')),  # Per canviar idioma
 ]
 
+# URLs amb prefix d'idioma (ca/, en/, etc.)
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('jukebox.urls')),
 )
 ```
+
+**Funcionalitat implementada:**
+- ✅ Endpoint `/i18n/setlang/` per canviar idioma via POST
+- ✅ URLs amb prefix d'idioma: `/ca/`, `/en/`, etc.
+- ✅ Django detecta automàticament l'idioma segons el prefix URL
+- ✅ L'idioma es guarda a la sessió de l'usuari
 
 ---
 
@@ -210,9 +218,9 @@ Fase 1: ████████████████████████
 Fase 2: ████████████████████████████████ 100% ✅
 Fase 3: ████████████████████████████████ 100% ✅
 Fase 4: ████████████████████████████████ 100% ✅
-Fase 5: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Fase 5: ████████████████████████████████ 100% ✅
 Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  ██████████████████░░░░░░░░░░░░░░  60%
+Total:  █████████████████████░░░░░░░░░░░  74%
 ```

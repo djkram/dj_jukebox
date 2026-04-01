@@ -110,27 +110,34 @@ name = forms.CharField(label=_("Nom de la festa"))
 
 ---
 
-## ⏳ Fase 4: Generar fitxers de traducció (PENDENT)
+## ✅ Fase 4: Generar fitxers de traducció (COMPLETADA)
 
-**Comandes a executar:**
+**Comandes executades:**
 ```bash
 # 1. Generar/actualitzar fitxers .po
-python manage.py makemessages -l ca --no-obsolete
-python manage.py makemessages -l en --no-obsolete
+python manage.py makemessages -l ca --no-obsolete ✅
+python manage.py makemessages -l en --no-obsolete ✅
 
 # 2. Compilar traduccions
-python manage.py compilemessages
-
-# 3. Verificar
-python manage.py runserver
-# Canviar idioma i comprovar textos
+python manage.py compilemessages ✅
 ```
 
 **Fitxers generats:**
-- [ ] `locale/ca/LC_MESSAGES/django.mo` (compilat)
-- [ ] `locale/en/LC_MESSAGES/django.mo` (compilat)
-- [ ] `jukebox/locale/ca/LC_MESSAGES/django.mo` (compilat)
-- [ ] `jukebox/locale/en/LC_MESSAGES/django.mo` (compilat)
+- [x] `jukebox/locale/ca/LC_MESSAGES/django.po` (350+ strings) ✅
+- [x] `jukebox/locale/ca/LC_MESSAGES/django.mo` (compilat) ✅
+- [x] `jukebox/locale/en/LC_MESSAGES/django.po` (350+ strings) ✅
+- [x] `jukebox/locale/en/LC_MESSAGES/django.mo` (compilat) ✅
+
+**Nota important:** Els fitxers .po per català estan generats amb strings originals en català (msgstr buits o iguals). Per anglès, caldrà afegir traduccions angleses als msgstr.
+
+**Pendent (opcional):**
+- Traduir els 350+ strings de `jukebox/locale/en/LC_MESSAGES/django.po` a anglès
+- Recompilar amb `python manage.py compilemessages` després de traduir
+
+Les traduccions es poden fer:
+1. Manualment editant el fitxer .po
+2. Usant eines com Poedit (https://poedit.net/)
+3. Amb serveis de traducció automàtica (Google Translate, DeepL)
 
 ---
 
@@ -202,10 +209,10 @@ urlpatterns += i18n_patterns(
 Fase 1: ████████████████████████████████ 100% ✅
 Fase 2: ████████████████████████████████ 100% ✅
 Fase 3: ████████████████████████████████ 100% ✅
-Fase 4: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Fase 4: ████████████████████████████████ 100% ✅
 Fase 5: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  ██████████████░░░░░░░░░░░░░░░░░░  46%
+Total:  ██████████████████░░░░░░░░░░░░░░  60%
 ```

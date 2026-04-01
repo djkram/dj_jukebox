@@ -1,5 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount %}
+{% load static %}
 
 {% block content %}
 
@@ -371,13 +372,13 @@
           <span>DJ Jukebox</span>
         </div>
         <div class="login-hero-copy">
-          <span class="login-hero-kicker">Accés DJ</span>
-          <h2 class="login-hero-title">Entra ràpid i torna a la festa.</h2>
-          <p class="login-hero-subtitle">Accedeix al teu espai, gestiona la música i continua exactament on ho vas deixar.</p>
+          <span class="login-hero-kicker">Accés a la festa</span>
+          <h2 class="login-hero-title">Entra i viu la sessió des de dins.</h2>
+          <p class="login-hero-subtitle">Vota cançons, descobreix què sona i participa en directe des de la pista.</p>
           <ul class="login-hero-points">
             <li class="login-hero-point">
               <span class="material-symbols-outlined">queue_music</span>
-              Control instantani de les peticions i la cua
+              Fes peticions i segueix la música en temps real
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">bolt</span>
@@ -385,7 +386,7 @@
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">music_note</span>
-              Tot optimitzat per pantalles amples
+              Mira què sona, la maleta del DJ i la sessió completa
             </li>
           </ul>
         </div>
@@ -479,13 +480,6 @@
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
 <div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
   <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
-    <!-- Brand Logo -->
-    <section class="text-center mb-4">
-      <div class="d-inline-block p-3" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
-        <img src="{% static 'jukebox/img/DJJukebox_logo.png' %}" alt="DJ Jukebox" style="height: 48px; width: auto; display: block;">
-      </div>
-    </section>
-
     <!-- Login Form -->
     <section class="mb-4">
       <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Login</h1>

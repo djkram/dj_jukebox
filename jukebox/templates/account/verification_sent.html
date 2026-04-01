@@ -1,24 +1,131 @@
 {% extends "jukebox/admin_base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <h1 class="mb-4">Verifica el teu correu</h1>
-            <p>
-                T'hem enviat un correu de verificació.<br>
-                Revisa la safata d'entrada i segueix l'enllaç per activar el teu compte.
-            </p>
-            <p class="text-muted">
-                No el trobes? Comprova també el correu brossa (spam).<br>
-                Si tens problemes, contacta amb nosaltres!
-            </p>
-            {% if email %}
-                <div class="alert alert-success mt-4">
-                    Correu enviat a <b>{{ email }}</b>
-                </div>
-            {% endif %}
-        </div>
+<style>
+  /* Verification Sent - Sonic Architect Style (Desktop) */
+  @media (min-width: 768px) {
+    .verification-wrapper {
+      min-height: calc(100vh - 6rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+    .verification-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      max-width: 640px;
+      width: 100%;
+      padding: 3rem 2.5rem;
+      text-align: center;
+    }
+    .verification-icon {
+      width: 5rem;
+      height: 5rem;
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      border-radius: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 12px 28px rgba(0,64,224,0.25);
+    }
+    .verification-icon .material-symbols-outlined {
+      font-size: 2.5rem;
+      color: white;
+      font-variation-settings: 'FILL' 1;
+    }
+    .verification-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #181c1e;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.75rem 0;
+    }
+    .verification-text {
+      color: #434655;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .verification-text strong {
+      color: #181c1e;
+      font-weight: 700;
+    }
+    .verification-email {
+      background: #f1f4f7;
+      color: #0040e0;
+      font-weight: 700;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      display: inline-block;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+    }
+    .verification-help {
+      color: #747687;
+      font-size: 0.875rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(116,118,136,0.15);
+    }
+  }
+</style>
+
+<!-- Vista Desktop - Sonic Architect -->
+<div class="d-none d-md-block">
+  <div class="verification-wrapper">
+    <div class="verification-card">
+      <div class="verification-icon">
+        <span class="material-symbols-outlined">forward_to_inbox</span>
+      </div>
+      <h1 class="verification-title">Verifica el teu correu</h1>
+      <p class="verification-text">
+        T'hem enviat un correu de verificació. Revisa la safata d'entrada i segueix l'enllaç per activar el teu compte.
+      </p>
+      {% if email %}
+        <div class="verification-email">{{ email }}</div>
+      {% endif %}
+      <p class="verification-text">
+        No el trobes? Comprova també el <strong>correu brossa (spam)</strong>.
+      </p>
+      <div class="verification-help">
+        Si tens problemes, contacta amb nosaltres!
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Vista Mòbil - Tailwind -->
+<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
+  <main class="px-3 pt-5 pb-20 mx-auto text-center" style="max-width: 27rem;">
+    <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width: 4.5rem; height: 4.5rem; background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%); border-radius: 1.25rem; box-shadow: 0 10px 24px rgba(0,64,224,0.3);">
+      <i class="fas fa-paper-plane" style="font-size: 2rem; color: white;"></i>
+    </div>
+
+    <h1 class="font-headline font-extrabold mb-3" style="font-size: 1.65rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Verifica el teu correu</h1>
+
+    <p style="color: #434655; font-size: 0.92rem; line-height: 1.5; margin-bottom: 0.75rem;">
+      T'hem enviat un correu de verificació. Revisa la safata d'entrada i segueix l'enllaç.
+    </p>
+
+    {% if email %}
+      <div class="mb-3 p-3 rounded-xl" style="background: #f1f4f7;">
+        <p class="mb-0" style="color: #0040e0; font-weight: 700; font-size: 0.95rem;">{{ email }}</p>
+      </div>
+    {% endif %}
+
+    <p style="color: #434655; font-size: 0.92rem; line-height: 1.5; margin-bottom: 1.5rem;">
+      No el trobes? Comprova també el <strong style="color: #191c1f;">correu brossa (spam)</strong>.
+    </p>
+
+    <div class="pt-3" style="border-top: 1px solid rgba(196,197,216,0.3);">
+      <p style="color: #747688; font-size: 0.78rem;">
+        Si tens problemes, contacta amb nosaltres!
+      </p>
+    </div>
+  </main>
 </div>
 {% endblock %}

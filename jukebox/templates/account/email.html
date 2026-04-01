@@ -1,65 +1,301 @@
 {% extends "jukebox/admin_base.html" %}
 
 {% block content %}
+<style>
+  /* Email Management - Sonic Architect Style (Desktop) */
+  @media (min-width: 768px) {
+    .email-mgmt-wrapper {
+      min-height: calc(100vh - 6rem);
+      padding: 2rem 1.5rem;
+    }
+    .email-mgmt-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .email-mgmt-header {
+      margin-bottom: 2rem;
+    }
+    .email-mgmt-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #181c1e;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.5rem 0;
+    }
+    .email-mgmt-subtitle {
+      color: #747687;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .email-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .email-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .email-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .email-address {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #181c1e;
+    }
+    .email-badge {
+      padding: 0.25rem 0.65rem;
+      border-radius: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .email-badge.verified {
+      background: rgba(34,197,94,0.15);
+      color: #16a34a;
+    }
+    .email-badge.unverified {
+      background: rgba(234,179,8,0.15);
+      color: #ca8a04;
+    }
+    .email-badge.primary {
+      background: rgba(0,64,224,0.15);
+      color: #0040e0;
+    }
+    .email-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .email-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .email-btn-primary {
+      background: #0040e0;
+      color: white;
+    }
+    .email-btn-primary:hover {
+      background: #002ea8;
+    }
+    .email-btn-warning {
+      background: #eab308;
+      color: white;
+    }
+    .email-btn-warning:hover {
+      background: #ca8a04;
+    }
+    .email-btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .email-btn-danger:hover {
+      background: #dc2626;
+    }
+    .email-add-section {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .email-add-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin: 0 0 1rem 0;
+    }
+    .email-add-form {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .email-add-input {
+      flex: 1;
+      background: #f1f4f7;
+      border: 2px solid transparent;
+      border-radius: 0.75rem;
+      padding: 0.68rem 0.9rem;
+      font-size: 0.875rem;
+      transition: all 200ms;
+    }
+    .email-add-input:focus {
+      outline: none;
+      border-color: #0040e0;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(0,64,224,0.1);
+    }
+    .email-add-btn {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.68rem 1.5rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 200ms;
+      box-shadow: 0 4px 16px rgba(34,197,94,0.25);
+      white-space: nowrap;
+    }
+    .email-add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(34,197,94,0.35);
+    }
+    .email-empty {
+      text-align: center;
+      padding: 2rem;
+      color: #747687;
+      font-size: 0.95rem;
+    }
+  }
+</style>
 
-<div class="container">
-    <div class="py-4">
-        <h2 class="mb-4" style="font-size:2.5rem;font-weight:600;">Adreces de correu electrònic</h2>
-        <p>Les següents adreces de correu estan associades amb el teu compte:</p>
-        <ul style="list-style:none;padding-left:0;">
-            {% for emailaddress in emailaddresses %}
-                <li class="mb-2 d-flex align-items-center">
-                    <span>
-                        {% if emailaddress.primary %}
-                            <strong>{{ emailaddress.email }}</strong>
-                        {% else %}
-                            {{ emailaddress.email }}
-                        {% endif %}
-                    </span>
-                    {% if emailaddress.verified %}
-                        <span class="badge bg-success mx-2">Verificada</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark mx-2">No verificada</span>
-                    {% endif %}
-                    {% if emailaddress.primary %}
-                        <span class="badge bg-primary mx-1">Principal</span>
-                    {% else %}
-                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
-                            {% csrf_token %}
-                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_primary" class="btn btn-sm btn-outline-primary">Fes principal</button>
-                        </form>
-                    {% endif %}
-                    {% if not emailaddress.verified %}
-                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
-                            {% csrf_token %}
-                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_send" class="btn btn-sm btn-outline-warning">Reenvia verificació</button>
-                        </form>
-                    {% endif %}
-                    {% if not emailaddress.primary %}
-                        <form method="post" action="{% url 'account_email' %}" class="d-inline mx-1">
-                            {% csrf_token %}
-                            <input type="hidden" name="email" value="{{ emailaddress.email }}">
-                            <button type="submit" name="action_remove" class="btn btn-sm btn-outline-danger">Elimina</button>
-                        </form>
-                    {% endif %}
-                </li>
-            {% empty %}
-                <li>No tens cap adreça de correu afegida.</li>
-            {% endfor %}
-        </ul>
+<!-- Vista Desktop - Sonic Architect -->
+<div class="d-none d-md-block">
+  <div class="email-mgmt-wrapper">
+    <div class="email-mgmt-container">
+      <div class="email-mgmt-header">
+        <h1 class="email-mgmt-title">Gestió d'emails</h1>
+        <p class="email-mgmt-subtitle">Gestiona les adreces de correu associades amb el teu compte</p>
+      </div>
 
-        <hr class="my-4">
-
-        <h4 class="mb-3">Afegeix una adreça nova</h4>
-        <form method="post" action="{% url 'account_email' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <input type="email" name="email" class="form-control" placeholder="Adreça de correu" required>
+      <div class="email-list">
+        {% for emailaddress in emailaddresses %}
+          <div class="email-card">
+            <div class="email-info">
+              <span class="email-address">{{ emailaddress.email }}</span>
+              {% if emailaddress.verified %}
+                <span class="email-badge verified">Verificada</span>
+              {% else %}
+                <span class="email-badge unverified">No verificada</span>
+              {% endif %}
+              {% if emailaddress.primary %}
+                <span class="email-badge primary">Principal</span>
+              {% endif %}
             </div>
-            <button type="submit" name="action_add" class="btn btn-success">Afegeix adreça</button>
+            <div class="email-actions">
+              {% if not emailaddress.primary %}
+                <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                  <button type="submit" name="action_primary" class="email-btn email-btn-primary">Fes principal</button>
+                </form>
+              {% endif %}
+              {% if not emailaddress.verified %}
+                <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                  <button type="submit" name="action_send" class="email-btn email-btn-warning">Reenvia</button>
+                </form>
+              {% endif %}
+              {% if not emailaddress.primary %}
+                <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                  <button type="submit" name="action_remove" class="email-btn email-btn-danger">Elimina</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="email-empty">No tens cap adreça de correu afegida.</div>
+        {% endfor %}
+      </div>
+
+      <div class="email-add-section">
+        <h3 class="email-add-title">Afegeix una adreça nova</h3>
+        <form method="post" action="{% url 'account_email' %}" class="email-add-form">
+          {% csrf_token %}
+          <input type="email" name="email" class="email-add-input" placeholder="nou-email@exemple.com" required>
+          <button type="submit" name="action_add" class="email-add-btn">Afegeix</button>
         </form>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Vista Mòbil - Tailwind -->
+<div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
+  <main class="px-3 pt-4 pb-20 mx-auto" style="max-width: 27rem;">
+    <div class="mb-4">
+      <h1 class="font-headline font-extrabold mb-2" style="font-size: 1.65rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">Gestió d'emails</h1>
+      <p style="color: #747688; font-size: 0.88rem; line-height: 1.4;">Gestiona les teves adreces de correu</p>
+    </div>
+
+    <div class="d-flex flex-column gap-2 mb-4">
+      {% for emailaddress in emailaddresses %}
+        <div class="p-3 rounded-xl" style="background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+          <div class="mb-2">
+            <div style="font-weight: 700; font-size: 0.92rem; color: #191c1f; margin-bottom: 0.5rem;">{{ emailaddress.email }}</div>
+            <div class="d-flex gap-2 flex-wrap">
+              {% if emailaddress.verified %}
+                <span class="badge rounded-pill" style="background: rgba(34,197,94,0.15); color: #16a34a; font-size: 0.68rem; padding: 0.25rem 0.6rem;">Verificada</span>
+              {% else %}
+                <span class="badge rounded-pill" style="background: rgba(234,179,8,0.15); color: #ca8a04; font-size: 0.68rem; padding: 0.25rem 0.6rem;">No verificada</span>
+              {% endif %}
+              {% if emailaddress.primary %}
+                <span class="badge rounded-pill" style="background: rgba(0,64,224,0.15); color: #0040e0; font-size: 0.68rem; padding: 0.25rem 0.6rem;">Principal</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            {% if not emailaddress.primary %}
+              <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                <button type="submit" name="action_primary" class="btn btn-sm rounded-pill" style="background: #0040e0; color: white; font-size: 0.7rem; padding: 0.35rem 0.85rem; font-weight: 600;">Fes principal</button>
+              </form>
+            {% endif %}
+            {% if not emailaddress.verified %}
+              <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                <button type="submit" name="action_send" class="btn btn-sm rounded-pill" style="background: #eab308; color: white; font-size: 0.7rem; padding: 0.35rem 0.85rem; font-weight: 600;">Reenvia</button>
+              </form>
+            {% endif %}
+            {% if not emailaddress.primary %}
+              <form method="post" action="{% url 'account_email' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ emailaddress.email }}">
+                <button type="submit" name="action_remove" class="btn btn-sm rounded-pill" style="background: #ef4444; color: white; font-size: 0.7rem; padding: 0.35rem 0.85rem; font-weight: 600;">Elimina</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center py-4" style="color: #747688; font-size: 0.88rem;">
+          No tens cap adreça de correu afegida.
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="p-3 rounded-xl" style="background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+      <h3 class="mb-2" style="font-size: 1rem; font-weight: 700; color: #191c1f;">Afegeix adreça nova</h3>
+      <form method="post" action="{% url 'account_email' %}">
+        {% csrf_token %}
+        <input type="email" name="email" class="w-100 px-3 rounded-xl border mb-2" style="border: 1px solid #c4c5d9; font-size: 0.92rem; background: white; padding-top: 0.68rem; padding-bottom: 0.68rem;" placeholder="nou-email@exemple.com" required>
+        <button type="submit" name="action_add" class="w-100 rounded-xl font-bold text-white d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25); font-size: 0.88rem; padding-top: 0.68rem; padding-bottom: 0.68rem;">Afegeix</button>
+      </form>
+    </div>
+  </main>
 </div>
 {% endblock %}

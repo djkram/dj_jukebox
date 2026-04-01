@@ -1,7 +1,8 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount %}
+{% load i18n %}
 
-{% block page_title %}Perfil{% endblock %}
+{% block page_title %}{% trans "Perfil" %}{% endblock %}
 
 {% block content %}
 
@@ -375,7 +376,7 @@
       <div class="profile-user-info">
         <span class="profile-user-badge">
           <span class="material-symbols-outlined" style="font-size: 0.875rem;">star</span>
-          {% if user.credits > 50 %}Membre Premium{% else %}Membre{% endif %}
+          {% if user.credits > 50 %}{% trans "Membre Premium" %}{% else %}{% trans "Membre" %}{% endif %}
         </span>
         <h2 class="profile-user-name">{{ user_display_name|default:user.username }}</h2>
         <p class="profile-user-email">{{ user.email }}</p>
@@ -389,7 +390,7 @@
           <span class="material-symbols-outlined" style="color: #f6c23e;">monetization_on</span>
         </div>
         <div>
-          <p class="profile-stat-label">Els teus Coins</p>
+          <p class="profile-stat-label">{% trans "Els teus Coins" %}</p>
           <p class="profile-stat-value">{{ user.credits }}</p>
         </div>
       </div>
@@ -398,8 +399,8 @@
           <span class="material-symbols-outlined" style="color: #0040e0;">how_to_vote</span>
         </div>
         <div>
-          <p class="profile-stat-label">Estat</p>
-          <p class="profile-stat-value" style="font-size: 1rem;">{% if user.credits > 0 %}Actiu{% else %}Inactiu{% endif %}</p>
+          <p class="profile-stat-label">{% trans "Estat" %}</p>
+          <p class="profile-stat-value" style="font-size: 1rem;">{% if user.credits > 0 %}{% trans "Actiu" %}{% else %}{% trans "Inactiu" %}{% endif %}</p>
         </div>
       </div>
       <a href="{% url 'buy_votes' %}" class="profile-stat-card" style="text-decoration: none; color: inherit;">
@@ -407,8 +408,8 @@
           <span class="material-symbols-outlined" style="color: #1cc88a;">shopping_cart</span>
         </div>
         <div>
-          <p class="profile-stat-label">Comprar més</p>
-          <p class="profile-stat-value" style="font-size: 0.875rem;">Coins →</p>
+          <p class="profile-stat-label">{% trans "Comprar més" %}</p>
+          <p class="profile-stat-value" style="font-size: 0.875rem;">{% trans "Coins →" %}</p>
         </div>
       </a>
     </div>
@@ -417,11 +418,11 @@
     <div class="profile-info-box">
       <span class="material-symbols-outlined">info</span>
       <div>
-        <p class="profile-info-text"><strong>Els Coins són la moneda virtual.</strong> Compra Coins i converteix-los en Vots per votar a les festes. Més converteixes, més bonus reps!</p>
+        <p class="profile-info-text"><strong>{% trans "Els Coins són la moneda virtual." %}</strong> {% trans "Compra Coins i converteix-los en Vots per votar a les festes. Més converteixes, més bonus reps!" %}</p>
         <ul class="profile-info-list">
-          <li>5 Coins → 11 Vots (+120% bonus)</li>
-          <li>10 Coins → 25 Vots (+150% bonus)</li>
-          <li>20 Coins → 60 Vots (+200% bonus)</li>
+          <li>{% trans "5 Coins → 11 Vots (+120% bonus)" %}</li>
+          <li>{% trans "10 Coins → 25 Vots (+150% bonus)" %}</li>
+          <li>{% trans "20 Coins → 60 Vots (+200% bonus)" %}</li>
         </ul>
       </div>
     </div>
@@ -437,25 +438,25 @@
             <div class="profile-spotify-logo">
               <i class="fab fa-spotify" style="font-size: 1.5rem; color: white;"></i>
             </div>
-            <span class="profile-spotify-status">{% if has_spotify %}Connectat{% else %}Desconnectat{% endif %}</span>
+            <span class="profile-spotify-status">{% if has_spotify %}{% trans "Connectat" %}{% else %}{% trans "Desconnectat" %}{% endif %}</span>
           </div>
-          <h3 class="profile-spotify-title">Integració Spotify</h3>
+          <h3 class="profile-spotify-title">{% trans "Integració Spotify" %}</h3>
           <p class="profile-spotify-text">
             {% if has_spotify %}
-              El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les connexions socials des del botó inferior.
+              {% trans "El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les connexions socials des del botó inferior." %}
             {% else %}
-              Connecta el teu compte de Spotify per sincronitzar les teves llistes i gaudir de la reproducció integrada.
+              {% trans "Connecta el teu compte de Spotify per sincronitzar les teves llistes i gaudir de la reproducció integrada." %}
             {% endif %}
           </p>
           {% if not has_spotify %}
             <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="profile-spotify-btn">
               <i class="fab fa-spotify" style="font-size: 1.125rem;"></i>
-              Connectar Spotify
+              {% trans "Connectar Spotify" %}
             </a>
           {% else %}
             <a href="{% url 'socialaccount_connections' %}" class="profile-spotify-btn">
               <span class="material-symbols-outlined" style="font-size: 1.125rem;">settings</span>
-              Gestionar connexions
+              {% trans "Gestionar connexions" %}
             </a>
           {% endif %}
         </div>
@@ -469,7 +470,7 @@
           <div class="profile-section-icon" style="background: rgba(0,64,224,0.1);">
             <span class="material-symbols-outlined" style="color: #0040e0;">settings</span>
           </div>
-          <h3 class="profile-section-title">Configuració</h3>
+          <h3 class="profile-section-title">{% trans "Configuració" %}</h3>
         </div>
 
         <div class="profile-actions-list">
@@ -478,7 +479,7 @@
               <div class="profile-action-icon">
                 <span class="material-symbols-outlined">mail</span>
               </div>
-              <span class="profile-action-text">Editar email</span>
+              <span class="profile-action-text">{% trans "Editar email" %}</span>
             </div>
             <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
           </a>
@@ -488,7 +489,7 @@
               <div class="profile-action-icon">
                 <span class="material-symbols-outlined">lock</span>
               </div>
-              <span class="profile-action-text">{% if not user.has_usable_password %}Establir contrasenya{% else %}Canviar contrasenya{% endif %}</span>
+              <span class="profile-action-text">{% if not user.has_usable_password %}{% trans "Establir contrasenya" %}{% else %}{% trans "Canviar contrasenya" %}{% endif %}</span>
             </div>
             <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
           </a>
@@ -499,7 +500,7 @@
                 <div class="profile-action-icon">
                   <i class="fab fa-spotify" style="font-size: 1.25rem; color: #0040e0;"></i>
                 </div>
-                <span class="profile-action-text">Connexions socials</span>
+                <span class="profile-action-text">{% trans "Connexions socials" %}</span>
               </div>
               <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
             </a>
@@ -512,7 +513,7 @@
                 <div class="profile-action-icon">
                   <span class="material-symbols-outlined">logout</span>
                 </div>
-                <span class="profile-action-text">Tancar sessió</span>
+                <span class="profile-action-text">{% trans "Tancar sessió" %}</span>
               </div>
               <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
             </button>
@@ -547,7 +548,7 @@
       </div>
       <div class="mt-3 text-center">
         <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">
-          {% if user.credits > 50 %}Membre Premium{% else %}Membre{% endif %}
+          {% if user.credits > 50 %}{% trans "Membre Premium" %}{% else %}{% trans "Membre" %}{% endif %}
         </span>
         <h2 class="font-headline font-extrabold mb-0" style="font-size: 1.5rem; color: #191c1f; letter-spacing: -0.025em;">{{ user_display_name|default:user.username }}</h2>
         <p class="font-body mt-1 mb-0" style="color: #747688; font-size: 0.9rem;">{{ user.email }}</p>
@@ -561,23 +562,23 @@
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 1.9rem; height: 1.9rem; background: #1DB954;">
             <i class="fab fa-spotify text-white" style="font-size: 1.05rem;"></i>
           </div>
-          <span class="font-headline font-semibold" style="font-size: 1rem;">Estat Spotify</span>
+          <span class="font-headline font-semibold" style="font-size: 1rem;">{% trans "Estat Spotify" %}</span>
         </div>
         <div class="d-flex flex-column gap-1">
           <p class="font-body font-medium mb-0" style="font-size: 0.95rem; color: #191c1f;">
-            {% if has_spotify %}Connectat Actualment{% else %}Desconnectat Actualment{% endif %}
+            {% if has_spotify %}{% trans "Connectat Actualment" %}{% else %}{% trans "Desconnectat Actualment" %}{% endif %}
           </p>
           <p class="font-body mb-0" style="font-size: 0.78rem; color: #747688; line-height: 1.35;">
             {% if has_spotify %}
-              El teu compte de Spotify està connectat i sincronitzat.
+              {% trans "El teu compte de Spotify està connectat i sincronitzat." %}
             {% else %}
-              Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb la festa.
+              {% trans "Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb la festa." %}
             {% endif %}
           </p>
         </div>
         {% if not has_spotify %}
           <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="text-white px-4 py-2 rounded-pill font-headline font-bold d-flex align-items-center justify-content-center gap-2 mt-1 text-decoration-none" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08); font-size: 0.9rem;">
-            Connectar Spotify
+            {% trans "Connectar Spotify" %}
             <i class="fas fa-external-link-alt" style="font-size: 1rem;"></i>
           </a>
         {% endif %}
@@ -588,7 +589,7 @@
 
     <!-- Settings List (No-Line Grid) -->
     <section class="mobile-group-stack">
-      <h3 class="font-headline font-bold px-2 mb-0" style="font-size: 1.05rem;">Preferències</h3>
+      <h3 class="font-headline font-bold px-2 mb-0" style="font-size: 1.05rem;">{% trans "Preferències" %}</h3>
 
       <div class="mobile-list-stack">
       <a href="{% url 'account_email' %}" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
@@ -596,7 +597,7 @@
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
             <i class="fas fa-envelope" style="color: #0040e0;"></i>
           </div>
-          <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">Editar Email</span>
+          <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">{% trans "Editar Email" %}</span>
         </div>
         <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
       </a>
@@ -607,7 +608,7 @@
             <i class="fas fa-lock" style="color: #0040e0;"></i>
           </div>
           <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">
-            {% if not user.has_usable_password %}Establir Contrasenya{% else %}Canviar Contrasenya{% endif %}
+            {% if not user.has_usable_password %}{% trans "Establir Contrasenya" %}{% else %}{% trans "Canviar Contrasenya" %}{% endif %}
           </span>
         </div>
         <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
@@ -619,7 +620,7 @@
             <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
               <i class="fab fa-spotify" style="color: #0040e0;"></i>
             </div>
-            <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">Connexions Socials</span>
+            <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">{% trans "Connexions Socials" %}</span>
           </div>
           <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
         </a>
@@ -632,7 +633,7 @@
             <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #ffdad6;">
               <i class="fas fa-sign-out-alt" style="color: #ba1a1a;"></i>
             </div>
-            <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #ba1a1a;">Tancar Sessió</span>
+            <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #ba1a1a;">{% trans "Tancar Sessió" %}</span>
           </div>
           <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
         </button>

@@ -5,93 +5,522 @@
 
 {% block content %}
 
-<!-- Vista Desktop (ORIGINAL) -->
-<div class="container mt-5 d-none d-md-block">
-    <!-- Coins disponibles -->
-    <div class="row mb-4">
-        <div class="col-md-6 col-lg-4">
-            <div class="card {% if user.credits == 0 %}border-danger{% else %}border-warning{% endif %}">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-coins fa-3x {% if user.credits == 0 %}text-danger{% else %}text-warning{% endif %}"></i>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-0 text-muted">Coins disponibles</h6>
-                            <h2 class="mb-0 text-warning">{{ user.credits }}</h2>
-                            {% if user.credits == 0 %}
-                                <small class="text-danger">Sense Coins</small>
-                            {% else %}
-                                <small class="text-success">{{ user.credits }} Coins</small>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-8">
-            <div class="alert alert-info mb-0 h-100 d-flex align-items-center">
-                <div>
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Els Coins són la moneda virtual</strong><br>
-                    Compra Coins i converteix-los en Vots per votar a les festes.
-                    <strong>Més converteixes, més bonus reps!</strong>
-                    <ul class="mb-0 mt-2">
-                        <li>5 Coins → 6 Vots (+20% bonus)</li>
-                        <li>10 Coins → 12 Vots (+20% bonus)</li>
-                        <li>20 Coins → 25 Vots (+25% bonus)</li>
-                    </ul>
-                    {% if user.credits < 5 %}
-                        <a href="{% url 'buy_votes' %}" class="alert-link ms-2">Compra més Coins</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+<style>
+  /* Profile Page - Sonic Architect Style (Desktop only) */
+  @media (min-width: 768px) {
+    .profile-main-card {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 1.5rem;
+    }
+    .profile-avatar-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(116,118,136,0.1);
+    }
+    .profile-avatar {
+      width: 8rem;
+      height: 8rem;
+      border-radius: 1rem;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: 'Epilogue', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+    }
+    .profile-avatar-badge {
+      position: absolute;
+      bottom: -0.5rem;
+      right: -0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: #1cc88a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid #f1f4f7;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .profile-avatar-badge .material-symbols-outlined {
+      color: white;
+      font-size: 1.25rem;
+      font-variation-settings: 'FILL' 1;
+    }
+    .profile-user-info {
+      flex-grow: 1;
+    }
+    .profile-user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      background: rgba(94,36,225,0.1);
+      color: #5e24e1;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+    .profile-user-name {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #181c1e;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+    .profile-user-email {
+      color: #747687;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .profile-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .profile-stat-card {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 200ms;
+    }
+    .profile-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .profile-stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .profile-stat-icon .material-symbols-outlined {
+      font-size: 1.5rem;
+      font-variation-settings: 'FILL' 1;
+    }
+    .profile-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+      margin: 0;
+      line-height: 1;
+    }
+    .profile-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      font-family: 'Epilogue', sans-serif;
+      color: #181c1e;
+      margin: 0.25rem 0 0 0;
+      line-height: 1;
+    }
+
+    .profile-section-card {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 1.5rem;
+    }
+    .profile-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(116,118,136,0.1);
+    }
+    .profile-section-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-section-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+      color: #181c1e;
+    }
+
+    .profile-spotify-card {
+      background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      color: white;
+      box-shadow: 0 4px 16px rgba(29,185,84,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-spotify-glow {
+      position: absolute;
+      top: -3rem;
+      right: -3rem;
+      width: 12rem;
+      height: 12rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      filter: blur(3rem);
+    }
+    .profile-spotify-content {
+      position: relative;
+      z-index: 10;
+    }
+    .profile-spotify-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .profile-spotify-logo {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: rgba(255,255,255,0.2);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-spotify-status {
+      font-size: 0.625rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.2);
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .profile-spotify-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+    .profile-spotify-text {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.875rem;
+      margin: 0 0 1.5rem 0;
+    }
+    .profile-spotify-btn {
+      background: white;
+      color: #1DB954;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 200ms;
+      border: none;
+      cursor: pointer;
+    }
+    .profile-spotify-btn:hover {
+      transform: scale(1.02);
+      color: #1DB954;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .profile-actions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .profile-action-btn {
+      background: #f1f4f7;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: #181c1e;
+      transition: all 200ms;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+    .profile-action-btn:hover {
+      background: #e5e8eb;
+      color: #181c1e;
+    }
+    .profile-action-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .profile-action-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: #ffffff;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-action-icon .material-symbols-outlined {
+      font-size: 1.25rem;
+      color: #0040e0;
+    }
+    .profile-action-text {
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+    .profile-action-arrow {
+      color: #c4c5d8;
+    }
+    .profile-action-btn.logout .profile-action-icon {
+      background: rgba(186,26,26,0.1);
+    }
+    .profile-action-btn.logout .profile-action-icon .material-symbols-outlined {
+      color: #ba1a1a;
+    }
+    .profile-action-btn.logout .profile-action-text {
+      color: #ba1a1a;
+    }
+
+    .profile-info-box {
+      background: #eef2ff;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .profile-info-box .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .profile-info-text {
+      font-size: 0.875rem;
+      color: #434655;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .profile-info-text strong {
+      color: #181c1e;
+    }
+    .profile-info-list {
+      margin: 0.5rem 0 0 0;
+      padding-left: 1.25rem;
+    }
+    .profile-info-list li {
+      font-size: 0.75rem;
+      color: #434655;
+      margin-bottom: 0.25rem;
+    }
+  }
+</style>
+
+<!-- Vista Desktop - Sonic Architect -->
+<div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
+  <!-- Main Profile Card -->
+  <div class="profile-main-card">
+    <!-- Avatar & User Info -->
+    <div class="profile-avatar-section">
+      <div class="profile-avatar">
+        {% if user_avatar_url %}
+          <img src="{{ user_avatar_url }}" alt="{{ user.username }}">
+        {% else %}
+          <div class="profile-avatar-placeholder">{{ user_avatar_initial|default:"U" }}</div>
+        {% endif %}
+        {% if has_spotify %}
+          <div class="profile-avatar-badge">
+            <span class="material-symbols-outlined">check</span>
+          </div>
+        {% endif %}
+      </div>
+      <div class="profile-user-info">
+        <span class="profile-user-badge">
+          <span class="material-symbols-outlined" style="font-size: 0.875rem;">star</span>
+          {% if user.credits > 50 %}Membre Premium{% else %}Membre{% endif %}
+        </span>
+        <h2 class="profile-user-name">{{ user_display_name|default:user.username }}</h2>
+        <p class="profile-user-email">{{ user.email }}</p>
+      </div>
     </div>
 
-    <div class="card shadow rounded-4 p-4">
-        <p class="lead">Benvingut, <b>{{ user_display_name|default:user.username }}</b>!</p>
-        <div class="row">
-            <div class="col-md-6">
-                <h5 class="mb-2">Les meves dades</h5>
-                <ul class="list-group mb-3">
-                    <li class="list-group-item"><b>Email:</b> {{ user.email }}</li>
-                    <li class="list-group-item"><b>Usuari:</b> {{ user_display_name|default:user.username }}</li>
-                </ul>
-                <a class="btn btn-outline-primary mb-2 w-100" href="{% url 'account_email' %}">
-                    Edita el teu email
-                </a>
-                {% if not user.has_usable_password %}
-                    <a class="btn btn-warning mb-2 w-100" href="{% url 'account_set_password' %}">
-                        Estableix una contrasenya
-                    </a>
-                {% else %}
-                    <a class="btn btn-outline-secondary mb-2 w-100" href="{% url 'account_change_password' %}">
-                        Canvia la teva contrasenya
-                    </a>
-                {% endif %}
-            </div>
-            <div class="col-md-6">
-                <h5 class="mb-2">Integració amb Spotify</h5>
-                {% if not has_spotify %}
-                    <a class="btn btn-success w-100 mb-2" href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}">
-                        <i class="fab fa-spotify"></i> Connecta amb Spotify
-                    </a>
-                    <div class="alert alert-info mt-2">
-                        Encara no tens el teu compte Spotify connectat!
-                    </div>
-                {% else %}
-                    <div class="alert alert-success">
-                        <i class="fab fa-spotify"></i>
-                        Compte de Spotify <b>ja connectat</b>!
-                    </div>
-                    <a class="btn btn-outline-danger w-100" href="{% url 'socialaccount_connections' %}">
-                        Gestiona connexions socials
-                    </a>
-                {% endif %}
-            </div>
+    <!-- Stats -->
+    <div class="profile-stats-row">
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon" style="background: rgba(246,194,62,0.15);">
+          <span class="material-symbols-outlined" style="color: #f6c23e;">monetization_on</span>
         </div>
+        <div>
+          <p class="profile-stat-label">Els teus Coins</p>
+          <p class="profile-stat-value">{{ user.credits }}</p>
+        </div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon" style="background: rgba(0,64,224,0.15);">
+          <span class="material-symbols-outlined" style="color: #0040e0;">how_to_vote</span>
+        </div>
+        <div>
+          <p class="profile-stat-label">Estat</p>
+          <p class="profile-stat-value" style="font-size: 1rem;">{% if user.credits > 0 %}Actiu{% else %}Inactiu{% endif %}</p>
+        </div>
+      </div>
+      <a href="{% url 'buy_votes' %}" class="profile-stat-card" style="text-decoration: none; color: inherit;">
+        <div class="profile-stat-icon" style="background: rgba(28,200,138,0.15);">
+          <span class="material-symbols-outlined" style="color: #1cc88a;">shopping_cart</span>
+        </div>
+        <div>
+          <p class="profile-stat-label">Comprar més</p>
+          <p class="profile-stat-value" style="font-size: 0.875rem;">Coins →</p>
+        </div>
+      </a>
     </div>
+
+    <!-- Info Box -->
+    <div class="profile-info-box">
+      <span class="material-symbols-outlined">info</span>
+      <div>
+        <p class="profile-info-text"><strong>Els Coins són la moneda virtual.</strong> Compra Coins i converteix-los en Vots per votar a les festes. Més converteixes, més bonus reps!</p>
+        <ul class="profile-info-list">
+          <li>5 Coins → 11 Vots (+120% bonus)</li>
+          <li>10 Coins → 25 Vots (+150% bonus)</li>
+          <li>20 Coins → 60 Vots (+200% bonus)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Spotify -->
+    <div class="col-lg-6">
+      <div class="profile-spotify-card">
+        <div class="profile-spotify-glow"></div>
+        <div class="profile-spotify-content">
+          <div class="profile-spotify-header">
+            <div class="profile-spotify-logo">
+              <i class="fab fa-spotify" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <span class="profile-spotify-status">{% if has_spotify %}Connectat{% else %}Desconnectat{% endif %}</span>
+          </div>
+          <h3 class="profile-spotify-title">Integració Spotify</h3>
+          <p class="profile-spotify-text">
+            {% if has_spotify %}
+              El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les connexions socials des del botó inferior.
+            {% else %}
+              Connecta el teu compte de Spotify per sincronitzar les teves llistes i gaudir de la reproducció integrada.
+            {% endif %}
+          </p>
+          {% if not has_spotify %}
+            <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="profile-spotify-btn">
+              <i class="fab fa-spotify" style="font-size: 1.125rem;"></i>
+              Connectar Spotify
+            </a>
+          {% else %}
+            <a href="{% url 'socialaccount_connections' %}" class="profile-spotify-btn">
+              <span class="material-symbols-outlined" style="font-size: 1.125rem;">settings</span>
+              Gestionar connexions
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Actions -->
+    <div class="col-lg-6">
+      <div class="profile-section-card">
+        <div class="profile-section-header">
+          <div class="profile-section-icon" style="background: rgba(0,64,224,0.1);">
+            <span class="material-symbols-outlined" style="color: #0040e0;">settings</span>
+          </div>
+          <h3 class="profile-section-title">Configuració</h3>
+        </div>
+
+        <div class="profile-actions-list">
+          <a href="{% url 'account_email' %}" class="profile-action-btn">
+            <div class="profile-action-btn-left">
+              <div class="profile-action-icon">
+                <span class="material-symbols-outlined">mail</span>
+              </div>
+              <span class="profile-action-text">Editar email</span>
+            </div>
+            <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
+          </a>
+
+          <a href="{% if not user.has_usable_password %}{% url 'account_set_password' %}{% else %}{% url 'account_change_password' %}{% endif %}" class="profile-action-btn">
+            <div class="profile-action-btn-left">
+              <div class="profile-action-icon">
+                <span class="material-symbols-outlined">lock</span>
+              </div>
+              <span class="profile-action-text">{% if not user.has_usable_password %}Establir contrasenya{% else %}Canviar contrasenya{% endif %}</span>
+            </div>
+            <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
+          </a>
+
+          {% if has_spotify %}
+            <a href="{% url 'socialaccount_connections' %}" class="profile-action-btn">
+              <div class="profile-action-btn-left">
+                <div class="profile-action-icon">
+                  <i class="fab fa-spotify" style="font-size: 1.25rem; color: #0040e0;"></i>
+                </div>
+                <span class="profile-action-text">Connexions socials</span>
+              </div>
+              <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
+            </a>
+          {% endif %}
+
+          <form method="post" action="{% url 'account_logout' %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="profile-action-btn logout">
+              <div class="profile-action-btn-left">
+                <div class="profile-action-icon">
+                  <span class="material-symbols-outlined">logout</span>
+                </div>
+                <span class="profile-action-text">Tancar sessió</span>
+              </div>
+              <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->

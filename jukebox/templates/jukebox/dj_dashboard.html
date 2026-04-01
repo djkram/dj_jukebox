@@ -4,16 +4,64 @@
 
 {% block content %}
 
-<!-- Vista Desktop (ORIGINAL) -->
-<div class="d-none d-md-block">
+<!-- Vista Desktop (SONIC ARCHITECT) -->
+<div class="d-none d-md-block sonic-page-container dashboard-desktop-view">
 <style>
+  @media (orientation: portrait) {
+    .dashboard-desktop-view {
+      display: none !important;
+    }
+
+    .dashboard-mobile-view {
+      display: block !important;
+    }
+
+    #accordionSidebar,
+    .topbar.d-none.d-md-flex,
+    .sticky-footer {
+      display: none !important;
+    }
+
+    .glass-nav.d-md-none,
+    .mobile-bottom-nav {
+      display: block !important;
+    }
+
+    #wrapper {
+      display: block !important;
+    }
+
+    #content-wrapper {
+      width: 100% !important;
+      margin-left: 0 !important;
+      padding-bottom: 70px !important;
+    }
+
+    .container-fluid {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  }
+
+  .sonic-page-container {
+    padding-top: 0.5rem !important;
+  }
+
+  #dashboard-request-message:empty {
+    display: none !important;
+  }
+
+  #dashboard-request-message:not(:empty) {
+    margin-bottom: 1rem !important;
+  }
+
   /* Camelot Key Colors */
   .camelot-key {
     display: inline-block;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: white;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
@@ -30,562 +78,427 @@
   .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
   .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
 
-  /* Status Badges - Compacte estil mòbil */
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.75rem;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    letter-spacing: 0.02em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    white-space: nowrap;
-    line-height: 1.2;
-  }
-  .status-badge i {
-    font-size: 0.7rem;
-  }
-  .status-accepted {
-    background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
-  }
-  .status-rejected {
-    background: linear-gradient(135deg, #e74a3b 0%, #d32f2f 100%);
-  }
-  .status-pending {
-    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
-    color: #333;
-    text-shadow: none;
+  /* Dashboard Reco Grid - FORCE OVERRIDE amb !important */
+  .dashboard-reco-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
   }
 
-  .dj-song-cell {
-    display: flex;
-    align-items: center;
-    gap: .9rem;
-    min-width: 0;
+  .dashboard-reco-card {
+    background: #ffffff !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid rgba(196, 197, 216, 0.1) !important;
+    padding: 0.625rem !important;
+    transition: all 300ms ease-out !important;
+    min-width: 0 !important;
   }
-  .dj-song-cover {
-    width: 54px;
-    height: 54px;
-    border-radius: .85rem;
-    object-fit: cover;
-    flex-shrink: 0;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .14);
+
+  .dashboard-reco-card:hover {
+    box-shadow: 0 10px 40px rgba(0, 64, 224, 0.08) !important;
+    transform: translateY(-2px) !important;
   }
-  .dj-song-cover-fallback {
-    width: 54px;
-    height: 54px;
-    border-radius: .85rem;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #edf2ff, #dbe7ff);
-    color: #4e73df;
-    font-size: 1.2rem;
-    box-shadow: inset 0 0 0 1px rgba(78, 115, 223, .12);
+
+  .dashboard-reco-img {
+    width: auto !important;
+    height: 0 !important;
+    padding-bottom: 50% !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 0.5rem !important;
+    margin: 0 0 0.5rem !important;
+    aspect-ratio: unset !important; /* Remove any conflicting aspect-ratio */
   }
-  .dj-song-meta {
-    min-width: 0;
+
+  .dashboard-reco-img img,
+  .dashboard-reco-img > div:not(.sonic-reco-overlay) {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    transition: transform 500ms ease-out !important;
   }
-  .dj-song-title {
-    font-weight: 700;
-    color: #4b5563;
-    line-height: 1.2;
-    margin-bottom: .2rem;
+
+  .dashboard-reco-card:hover .dashboard-reco-img img {
+    transform: scale(1.1) !important;
   }
-  .dj-song-artist {
-    color: #8a93a6;
-    font-size: .92rem;
-    line-height: 1.2;
+
+  /* Ensure overlay is positioned correctly */
+  .dashboard-reco-img .sonic-reco-overlay {
+    position: absolute !important;
+    right: 0.5rem !important;
+    bottom: 0.5rem !important;
+    width: auto !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    transition: none !important;
+    pointer-events: none !important;
   }
-  .desktop-reco-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: .55rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: .7rem;
+
+  .dashboard-reco-img .sonic-reco-overlay form {
+    pointer-events: auto !important;
   }
-  .desktop-reco-cover {
-    width: 74px;
-    height: 74px;
-    object-fit: cover;
-    border-radius: .65rem;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
-    flex-shrink: 0;
+
+  .dashboard-reco-img .sonic-reco-play-btn {
+    width: auto !important;
+    height: 2rem !important;
+    padding: 0 0.7rem !important;
+    border-radius: 9999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    background: #ffffff !important;
+    color: #1d4ed8 !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+    transform: none !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
   }
-  .desktop-reco-body {
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  .desktop-request-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: .55rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-  }
-  .desktop-request-cover {
-    width: 74px;
-    height: 74px;
-    border-radius: .65rem;
-    object-fit: cover;
-    flex-shrink: 0;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
-  }
-  .desktop-request-meta {
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  .desktop-request-title {
-    color: #374151;
-    font-weight: 700;
-    line-height: 1.05;
-    margin-bottom: 0;
-  }
-  .desktop-request-subtitle {
-    color: #8a93a6;
-    font-size: .78rem;
-    line-height: 1.05;
+
+  .dashboard-reco-card .sonic-reco-title,
+  .dashboard-reco-card .sonic-reco-artist,
+  .dashboard-reco-card .sonic-reco-meta {
+    min-width: 0 !important;
   }
 </style>
-<!-- Dashboard KPIs - Compacte 4x2 -->
-<style>
-.kpi-card-compact {
-    background: #fff;
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    border-left: 2px solid;
-    height: 100%;
-    min-height: 38px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-}
-.kpi-card-compact .kpi-icon {
-    font-size: 1rem;
-    opacity: 0.85;
-    flex-shrink: 0;
-}
-.kpi-card-compact .kpi-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
-    flex: 1;
-    min-width: 0;
-}
-.kpi-card-compact .kpi-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    margin: 0;
-    flex-shrink: 0;
-    white-space: nowrap;
-    display: flex;
-    align-items: baseline;
-}
-.kpi-card-compact .kpi-subvalue {
-    font-size: 0.7rem;
-    color: #6c757d;
-    margin-left: 0.35rem;
-    font-weight: 500;
-}
-.kpi-primary { border-left-color: #4e73df; }
-.kpi-primary .kpi-label { color: #4e73df; }
-.kpi-success { border-left-color: #1cc88a; }
-.kpi-success .kpi-label { color: #1cc88a; }
-.kpi-info { border-left-color: #36b9cc; }
-.kpi-info .kpi-label { color: #36b9cc; }
-.kpi-warning { border-left-color: #f6c23e; }
-.kpi-warning .kpi-label { color: #f6c23e; }
-.kpi-danger { border-left-color: #e74a3b; }
-.kpi-danger .kpi-label { color: #e74a3b; }
-.kpi-purple { border-left-color: #6f42c1; }
-.kpi-purple .kpi-label { color: #6f42c1; }
-</style>
 
-<div class="row g-2 mb-3">
-    <!-- Fila 1: 4 KPIs principals -->
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-primary">
-            <div class="kpi-icon">🎵</div>
-            <div class="kpi-label">Temes festa</div>
-            <div class="kpi-value">{{ total_songs }}</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-success">
-            <div class="kpi-icon">💜</div>
-            <div class="kpi-label">Total vots</div>
-            <div class="kpi-value">{{ total_votes }}</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-info">
-            <div class="kpi-icon">👥</div>
-            <div class="kpi-label">Usuaris actius</div>
-            <div class="kpi-value">{{ active_users }}</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-warning">
-            <div class="kpi-icon">⚡</div>
-            <div class="kpi-label">Vots 30 min</div>
-            <div class="kpi-value">{{ recent_votes }}</div>
-        </div>
-    </div>
-</div>
+<div id="dashboard-request-message" class="sonic-mb-4"></div>
 
-<div class="row g-2 mb-3">
-    <!-- Fila 2: 4 KPIs secundaris -->
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-danger">
-            <div class="kpi-icon">📝</div>
-            <div class="kpi-label">Peticions pend.</div>
-            <div class="kpi-value">{{ pending_requests_count }}</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-success">
-            <div class="kpi-icon">✅</div>
-            <div class="kpi-label">Temes votats</div>
-            <div class="kpi-value">{{ songs_with_votes }}<span class="kpi-subvalue">{{ songs_with_votes_percentage }}%</span></div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-purple">
-            <div class="kpi-icon">💰</div>
-            <div class="kpi-label">Coins gastats</div>
-            <div class="kpi-value">{{ total_coins_spent }}</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3 col-lg-3">
-        <div class="kpi-card-compact kpi-info">
-            <div class="kpi-icon">✓</div>
-            <div class="kpi-label">Temes posats</div>
-            <div class="kpi-value">{{ played_songs }}</div>
-        </div>
-    </div>
-</div>
+<!-- Layout 2 columnes: 60% / 40% -->
+<div style="display: grid; grid-template-columns: 6fr 4fr; gap: 1.25rem;">
 
-<div id="dashboard-request-message" class="mb-3"></div>
+    <!-- COLUMNA ESQUERRA (60%) -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
 
-<!-- Recomanacions intel·ligents -->
-<div class="row g-4 mb-4">
-    <div class="col-xl-6">
-        <div class="card shadow h-100">
-            <div class="card-header py-3 bg-gradient-primary">
-                <h6 class="m-0 font-weight-bold text-white">
-                    <i class="fas fa-lightbulb me-2"></i>Recomanacions intel·ligents
-                </h6>
-            </div>
-            <div class="card-body">
-                {% if recommended_songs %}
-                <div class="row g-3">
-                    {% for song in recommended_songs|slice:":6" %}
-                    <div class="col-4">
-                        <div class="desktop-reco-card">
-                            {% if song.album_image_url %}
-                                <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="desktop-reco-cover">
-                            {% else %}
-                                <div class="bg-secondary d-flex align-items-center justify-content-center desktop-reco-cover">
-                                    <i class="fas fa-music text-white fa-lg"></i>
-                                </div>
-                            {% endif %}
-                            <div class="desktop-reco-body">
-                                <div class="fw-bold small mb-0 text-truncate" style="line-height: 1.05;" title="{{ song.title }}">{{ song.title }}</div>
-                                <div class="text-muted small mb-1 text-truncate" style="font-size: .78rem; line-height: 1.05;" title="{{ song.artist }}">{{ song.artist }}</div>
-                                <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
-                                    {% if song.bpm %}
-                                        <span class="badge bg-info text-white small">{{ song.bpm|floatformat:0 }} BPM</span>
-                                    {% endif %}
-                                    {% if song.key %}
-                                        <span class="camelot-key camelot-{{ song.key }} small">{{ song.key }}</span>
-                                    {% endif %}
-                                </div>
-                                <form method="post" action="{% url 'mark_song_played' song.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-success w-100 py-1" style="font-size: .88rem; line-height: 1.1;">
-                                        <i class="fas fa-compact-disc me-1"></i>Posada
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+        <!-- Stats Grid -->
+        <div class="sonic-grid-4col">
+            <div class="sonic-stat-card">
+                <div class="sonic-stat-icon primary">
+                    <span class="material-symbols-outlined">library_music</span>
                 </div>
-                {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="fas fa-lightbulb fa-2x mb-2"></i>
-                    <div>No hi ha recomanacions disponibles.</div>
+                <div class="sonic-stat-content">
+                    <div class="sonic-stat-label">Temes festa</div>
+                    <div class="sonic-stat-value">{{ total_songs }}</div>
                 </div>
-                {% endif %}
+            </div>
+            <div class="sonic-stat-card">
+                <div class="sonic-stat-icon tertiary">
+                    <span class="material-symbols-outlined">thumb_up</span>
+                </div>
+                <div class="sonic-stat-content">
+                    <div class="sonic-stat-label">Total vots</div>
+                    <div class="sonic-stat-value">{{ total_votes }}</div>
+                </div>
+            </div>
+            <div class="sonic-stat-card">
+                <div class="sonic-stat-icon cyan">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <div class="sonic-stat-content">
+                    <div class="sonic-stat-label">Usuaris actius</div>
+                    <div class="sonic-stat-value">{{ active_users }}</div>
+                </div>
+            </div>
+            <div class="sonic-stat-card">
+                <div class="sonic-stat-icon tertiary">
+                    <span class="material-symbols-outlined">bolt</span>
+                </div>
+                <div class="sonic-stat-content">
+                    <div class="sonic-stat-label">Vots 30 min</div>
+                    <div class="sonic-stat-value">{{ recent_votes }}</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-xl-6">
-        <div class="card shadow h-100">
-            <div class="card-header py-3 bg-white">
-                <h6 class="m-0 font-weight-bold text-dark">
-                    <i class="fas fa-microphone-alt me-2 text-primary"></i>Temes demanats
-                </h6>
+        <!-- Recomanacions intel·ligents -->
+        <section>
+            <div class="sonic-section-header">
+                <h3 class="sonic-section-title">
+                    <span class="material-symbols-outlined sonic-text-tertiary">auto_awesome</span>
+                    Recomanacions intel·ligents
+                </h3>
             </div>
-            <div class="card-body">
-                {% if pending_requests or accepted_unplayed_requests %}
-                    <div class="row g-3">
-                    {% if pending_requests %}
-                    {% for req in pending_requests %}
-                    <div class="col-4">
-                        <div class="desktop-request-card">
-                            {% if req.album_image_url %}
-                                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
-                            {% else %}
-                                <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 74px; height: 74px; border-radius: .65rem;">
-                                    <i class="fas fa-music"></i>
-                                </div>
-                            {% endif %}
-                            <div class="desktop-request-meta">
-                                <div class="desktop-request-title small text-truncate">{{ req.title }}</div>
-                                <div class="desktop-request-subtitle text-truncate">{{ req.artist }}</div>
-                                <div class="desktop-request-subtitle mb-1 text-truncate">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
-                                <div class="d-flex gap-2 mt-2">
-                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="request_id" value="{{ req.id }}">
-                                        <input type="hidden" name="action" value="accept">
-                                        <button type="submit" class="btn btn-sm btn-warning w-100 py-1" title="Acceptar">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </form>
-                                    <form method="post" action="{% url 'manage_song_requests' %}" class="flex-fill dashboard-request-action-form">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="request_id" value="{{ req.id }}">
-                                        <input type="hidden" name="action" value="reject">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 py-1" title="Rebutjar">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    {% if accepted_unplayed_requests %}
-                    {% for req in accepted_unplayed_requests %}
-                    <div class="col-4">
-                        <div class="desktop-request-card">
-                            {% if req.album_image_url %}
-                                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="desktop-request-cover">
-                            {% else %}
-                                <div class="dj-song-cover-fallback" aria-hidden="true" style="width: 74px; height: 74px; border-radius: .65rem;">
-                                    <i class="fas fa-music"></i>
-                                </div>
-                            {% endif %}
-                            <div class="desktop-request-meta">
-                                <div class="desktop-request-title small text-truncate">{{ req.title }}</div>
-                                <div class="desktop-request-subtitle text-truncate">{{ req.artist }}</div>
-                                <div class="desktop-request-subtitle mb-1 text-truncate">{{ req.user.username }} · {{ req.coins_cost }} coins</div>
-                                {% if req.linked_song_id %}
-                                <form method="post" action="{% url 'mark_song_played' req.linked_song_id %}" class="mt-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-success w-100 py-1" title="Posada">
-                                        <i class="fas fa-compact-disc"></i>
-                                    </button>
-                                </form>
-                                {% else %}
-                                <button type="button" class="btn btn-sm btn-outline-success w-100 py-1 mt-2" disabled title="Acceptada">
-                                    <i class="fas fa-check-circle"></i>
+            {% if recommended_songs %}
+            <div class="dashboard-reco-grid">
+                {% for song in recommended_songs|slice:":6" %}
+                <div class="dashboard-reco-card">
+                    <!-- Portada quadrada fixa amb padding-bottom trick -->
+                    <div class="dashboard-reco-img">
+                        {% if song.album_image_url %}
+                        <img src="{{ song.album_image_url }}" alt="{{ song.title }}">
+                        <div class="sonic-reco-overlay">
+                            <form method="post" action="{% url 'mark_song_played' song.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="sonic-reco-play-btn" style="border: none; cursor: pointer;">
+                                    <span class="material-symbols-outlined" style="font-size: 1rem;">eject</span>
+                                    <span>LOAD</span>
                                 </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: #747687; font-size: 2rem;">music_note</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- Info de la cançó -->
+                    <div class="sonic-reco-title">{{ song.title }}</div>
+                    <div class="sonic-reco-artist">{{ song.artist }}</div>
+                    <div class="sonic-reco-meta">
+                        {% if song.bpm %}
+                        <span class="sonic-badge-primary">{{ song.bpm|floatformat:0 }} BPM</span>
+                        {% endif %}
+                        {% if song.key %}
+                        <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sonic-card" style="text-align: center; padding: 3rem; color: #747687;">
+                <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem; display: block;">lightbulb</span>
+                <div>No hi ha recomanacions disponibles.</div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Maleta del DJ -->
+        <section>
+            <div class="sonic-section-header">
+                <h3 class="sonic-section-title">
+                    <span class="material-symbols-outlined sonic-text-primary">featured_play_list</span>
+                    Maleta del DJ
+                </h3>
+            </div>
+            <div class="sonic-table-container">
+                <table class="sonic-table">
+                    <thead>
+                        <tr>
+                            <th>Cançó</th>
+                            <th class="text-center">BPM</th>
+                            <th class="text-center">Key</th>
+                            <th class="text-center">
+                                <span class="material-symbols-outlined" style="color: #e74a3b; font-size: 1rem;">favorite</span>
+                            </th>
+                            <th class="text-center">
+                                <span class="material-symbols-outlined" style="color: #858796; font-size: 1rem;">heart_broken</span>
+                            </th>
+                            <th class="text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for song in pending_songs %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+                                    {% if song.album_image_url %}
+                                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="sonic-table-img">
+                                    {% else %}
+                                    <div class="sonic-table-img" style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                                        <span class="material-symbols-outlined" style="color: #747687; font-size: 1rem;">music_note</span>
+                                    </div>
+                                    {% endif %}
+                                    <div style="min-width: 0;">
+                                        <div class="sonic-table-title">{{ song.title }}</div>
+                                        <div class="sonic-table-subtitle">{{ song.artist }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {% if song.bpm %}
+                                <span class="sonic-badge-primary">{{ song.bpm|floatformat:0 }}</span>
+                                {% else %}
+                                <span style="color: #c4c5d8;">—</span>
                                 {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if song.key %}
+                                <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                                {% else %}
+                                <span style="color: #c4c5d8;">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span style="font-weight: 700; color: #e74a3b;">{{ song.num_likes }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span style="font-weight: 700; color: #858796;">{{ song.num_dislikes }}</span>
+                            </td>
+                            <td class="text-right">
+                                <form method="post" action="{% url 'mark_song_played' song.id %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="sonic-btn sonic-btn-primary sonic-btn-sm">
+                                        <span class="material-symbols-outlined" style="font-size: 0.875rem;">eject</span>
+                                        Posada
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 3rem; color: #747687;">
+                                <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem; display: block;">check_circle</span>
+                                <div>Tots els temes ja s'han posat!</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+    <!-- FI COLUMNA ESQUERRA -->
+
+    <!-- COLUMNA DRETA (40%) -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+        <!-- Temes demanats -->
+        <section>
+            <div class="sonic-section-header">
+                <h3 class="sonic-section-title">
+                    <span class="material-symbols-outlined sonic-text-tertiary">queue_music</span>
+                    Temes demanats
+                </h3>
+                {% if pending_requests_count > 0 %}
+                <span class="sonic-badge-tertiary">{{ pending_requests_count }}</span>
+                {% endif %}
+            </div>
+            {% if pending_requests or accepted_unplayed_requests %}
+            <div class="sonic-space-y-3">
+                {% for req in pending_requests %}
+                <div class="sonic-request-card">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+                        {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="sonic-request-img">
+                        {% else %}
+                        <div class="sonic-request-img" style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
+                        </div>
+                        {% endif %}
+                        <div class="sonic-request-content">
+                            <div class="sonic-request-title">{{ req.title }}</div>
+                            <div class="sonic-request-subtitle">{{ req.artist }}</div>
+                            <div class="sonic-request-coins">
+                                <span class="material-symbols-outlined" style="font-size: 0.75rem;">payments</span>
+                                {{ req.user.username }} · {{ req.coins_cost }} Coins
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
+                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                        <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" value="{{ req.id }}">
+                            <input type="hidden" name="action" value="accept">
+                            <button type="submit" class="sonic-btn sonic-btn-tertiary sonic-btn-sm">
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">check</span>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" value="{{ req.id }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="border-color: #ba1a1a; color: #ba1a1a;">
+                                <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for req in accepted_unplayed_requests %}
+                <div class="sonic-request-card" style="border-color: rgba(28, 200, 138, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+                        {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="sonic-request-img">
+                        {% else %}
+                        <div class="sonic-request-img" style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
+                        </div>
+                        {% endif %}
+                        <div class="sonic-request-content">
+                            <div class="sonic-request-title">{{ req.title }}</div>
+                            <div class="sonic-request-subtitle">{{ req.artist }}</div>
+                            <div class="sonic-request-coins">
+                                <span class="material-symbols-outlined" style="font-size: 0.75rem;">payments</span>
+                                {{ req.user.username }} · {{ req.coins_cost }} Coins
+                            </div>
+                        </div>
+                    </div>
+                    {% if req.linked_song_id %}
+                    <form method="post" action="{% url 'mark_song_played' req.linked_song_id %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="sonic-btn sonic-btn-primary sonic-btn-sm">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">eject</span>
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="sonic-badge-success" style="padding: 0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">check_circle</span>
+                    </span>
                     {% endif %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-inbox fa-2x mb-2"></i>
-                        <div>No hi ha temes demanats pendents.</div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-lg-6">
-        <div class="card shadow h-100">
-            <div class="card-header py-3 bg-warning text-dark">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-list me-2"></i>Maleta del DJ
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Cançó</th>
-                                <th>BPM</th>
-                                <th>Key</th>
-                                <th><i class="fas fa-heart text-danger"></i></th>
-                                <th><i class="fas fa-heart-broken text-secondary"></i></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for song in pending_songs %}
-                            <tr>
-                                <td>
-                                    <div class="dj-song-cell">
-                                        {% if song.album_image_url %}
-                                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="dj-song-cover">
-                                        {% else %}
-                                            <div class="dj-song-cover-fallback" aria-hidden="true">
-                                                <i class="fas fa-music"></i>
-                                            </div>
-                                        {% endif %}
-                                        <div class="dj-song-meta">
-                                            <div class="dj-song-title">{{ song.title }}</div>
-                                            <div class="dj-song-artist">{{ song.artist }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                  {% if song.bpm %}
-                                    {{ song.bpm|floatformat:1 }}
-                                  {% else %}
-                                    &mdash;
-                                  {% endif %}
-                                </td>
-                                <td>
-                                  {% if song.key %}
-                                    <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
-                                  {% else %}
-                                    —
-                                  {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge badge-danger">{{ song.num_likes }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-secondary">{{ song.num_dislikes }}</span>
-                                </td>
-                                <td>
-                                    <form method="post" action="{% url 'mark_song_played' song.id %}">
-                                        {% csrf_token %}
-                                        <button class="btn btn-sm btn-success">
-                                          <i class="fas fa-compact-disc me-1"></i>Posada
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                              <td colspan="5" class="text-center py-4 text-muted">
-                                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                <div>Tots els temes ja s'han posat!</div>
-                              </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
+                {% endfor %}
             </div>
-        </div>
-    </div>
+            {% else %}
+            <div class="sonic-card" style="text-align: center; padding: 2rem 1rem; color: #747687;">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block;">inbox</span>
+                <div style="font-size: 0.875rem;">No hi ha temes demanats</div>
+            </div>
+            {% endif %}
+        </section>
 
-    <div class="col-lg-6">
-        <div class="card shadow h-100">
-            <div class="card-header py-3 bg-success text-white">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-check-circle me-2"></i>Temes ja posats
-                </h6>
+        <!-- Temes ja posats -->
+        <section>
+            <div class="sonic-section-header">
+                <h3 class="sonic-section-title">
+                    <span class="material-symbols-outlined" style="color: #1cc88a;">check_circle</span>
+                    Historial
+                </h3>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Cançó</th>
-                                <th>BPM</th>
-                                <th>Key</th>
-                                <th><i class="fas fa-heart text-danger"></i></th>
-                                <th><i class="fas fa-heart-broken text-secondary"></i></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for song in played_songs_list %}
-                            <tr class="table-success">
-                                <td>
-                                    <div class="dj-song-cell">
-                                        {% if song.album_image_url %}
-                                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="dj-song-cover">
-                                        {% else %}
-                                            <div class="dj-song-cover-fallback" aria-hidden="true">
-                                                <i class="fas fa-music"></i>
-                                            </div>
-                                        {% endif %}
-                                        <div class="dj-song-meta">
-                                            <div class="dj-song-title">{{ song.title }}</div>
-                                            <div class="dj-song-artist">{{ song.artist }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                  {% if song.bpm %}
-                                    {{ song.bpm|floatformat:1 }}
-                                  {% else %}
-                                    &mdash;
-                                  {% endif %}
-                                </td>
-                                <td>
-                                  {% if song.key %}
-                                    <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
-                                  {% else %}
-                                    —
-                                  {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge badge-danger">{{ song.num_likes }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-secondary">{{ song.num_dislikes }}</span>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                              <td colspan="4" class="text-center py-4 text-muted">
-                                <i class="fas fa-hourglass-start fa-2x mb-2"></i>
-                                <div>Encara no ha començat la festa</div>
-                              </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="sonic-history-container">
+                {% for song in played_songs_list|slice:":10" %}
+                <div class="sonic-history-item">
+                    {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="sonic-history-img">
+                    {% else %}
+                    <div class="sonic-history-img" style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                        <span class="material-symbols-outlined" style="color: #1cc88a; font-size: 0.875rem;">music_note</span>
+                    </div>
+                    {% endif %}
+                    <div class="sonic-history-content">
+                        <div class="sonic-history-title">{{ song.title }}</div>
+                        <div class="sonic-history-subtitle">{{ song.artist }}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                        <span style="font-size: 0.625rem; font-weight: 700; color: #e74a3b;">{{ song.num_likes }}</span>
+                        <span class="material-symbols-outlined" style="color: #e74a3b; font-size: 0.75rem;">favorite</span>
+                    </div>
                 </div>
+                {% empty %}
+                <div style="text-align: center; padding: 2rem 1rem; color: #747687;">
+                    <span class="material-symbols-outlined" style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block;">hourglass_empty</span>
+                    <div style="font-size: 0.875rem;">Encara no ha començat</div>
+                </div>
+                {% endfor %}
             </div>
-        </div>
+        </section>
+
     </div>
+    <!-- FI COLUMNA DRETA -->
+
 </div>
+<!-- FI LAYOUT 2 COLUMNES -->
 
 <!-- Bootstrap Confirmation Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
@@ -726,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
-<div class="mobile-page-shell d-md-none">
+<div class="mobile-page-shell d-md-none dashboard-mobile-view">
   <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
     <div class="mobile-group-stack" style="gap: 0.5rem;">
     <section>

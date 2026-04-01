@@ -23,78 +23,305 @@
     transition: transform 0.2s;
   }
 
-  /* Compact KPI Cards */
-  .kpi-card-compact {
-    background: #fff;
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    border-left: 2px solid;
-    height: 100%;
-    min-height: 38px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
+  /* Compact KPI Cards - Sonic Style (Desktop only) */
+  @media (min-width: 768px) {
+    .kpi-card-compact {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 4px 24px rgba(0, 64, 224, 0.06);
+      border-left: 3px solid;
+      height: 100%;
+      min-height: 70px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 200ms ease-out;
+    }
+    .kpi-card-compact:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(0, 64, 224, 0.08);
+    }
   }
-  .kpi-card-compact .kpi-icon {
-    font-size: 1rem;
-    line-height: 1;
-    flex-shrink: 0;
+  @media (min-width: 768px) {
+    .kpi-card-compact .kpi-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .kpi-card-compact .kpi-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #434655;
+      line-height: 1.2;
+      flex: 1;
+    }
+    .kpi-card-compact .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: 'Epilogue', sans-serif;
+      color: #181c1e;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
   }
-  .kpi-card-compact .kpi-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: #858796;
-    line-height: 1.2;
-    flex: 1;
+  /* Sonic Architect KPI Colors (Desktop only) */
+  @media (min-width: 768px) {
+    .kpi-primary { border-left-color: #0040e0; }
+    .kpi-success { border-left-color: #1cc88a; }
+    .kpi-info { border-left-color: #00e3fd; }
+    .kpi-warning { border-left-color: #f6c23e; }
+    .kpi-danger { border-left-color: #ba1a1a; }
+    .kpi-secondary { border-left-color: #747688; }
+    .kpi-purple { border-left-color: #5e24e1; }
+    .kpi-orange { border-left-color: #fd7e14; }
   }
-  .kpi-card-compact .kpi-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #2c3e50;
-    line-height: 1;
-    flex-shrink: 0;
-    margin-left: auto;
-  }
-  .kpi-primary { border-left-color: #4e73df; }
-  .kpi-success { border-left-color: #1cc88a; }
-  .kpi-info { border-left-color: #36b9cc; }
-  .kpi-warning { border-left-color: #f6c23e; }
-  .kpi-danger { border-left-color: #e74a3b; }
-  .kpi-secondary { border-left-color: #858796; }
-  .kpi-purple { border-left-color: #6f42c1; }
-  .kpi-orange { border-left-color: #fd7e14; }
 
-  /* Party info card special */
-  .kpi-party-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    flex: 1;
-    min-width: 0;
+  /* Party info card special - Sonic Style (Desktop only) */
+  @media (min-width: 768px) {
+    .kpi-party-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .kpi-party-name {
+      font-size: 1rem;
+      font-weight: 800;
+      font-family: 'Epilogue', sans-serif;
+      color: #181c1e;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kpi-party-date {
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: #747688;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .kpi-change-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      line-height: 1;
+      white-space: nowrap;
+      border-radius: 0.5rem;
+      font-weight: 600;
+    }
   }
-  .kpi-party-name {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #2c3e50;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .kpi-party-date {
-    font-size: 0.65rem;
-    color: #858796;
-    line-height: 1;
-  }
-  .kpi-change-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1;
-    white-space: nowrap;
+
+  /* Songs Page - Sonic Architect Style (Desktop only) */
+  @media (min-width: 768px) {
+    .songs-page-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .songs-page-stats {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .songs-page-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #ffffff;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .songs-page-stat .material-symbols-outlined {
+      font-size: 1.5rem;
+    }
+    .songs-page-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+      margin: 0;
+      line-height: 1;
+    }
+    .songs-page-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      font-family: 'Epilogue', sans-serif;
+      color: #181c1e;
+      margin: 0.25rem 0 0 0;
+      line-height: 1;
+    }
+
+    .songs-column-card {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid rgba(116,118,136,0.1);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .songs-column-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(116,118,136,0.1);
+    }
+    .songs-column-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+      color: #181c1e;
+    }
+    .songs-column-search {
+      width: 100%;
+      background: #e0e3e6;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      font-size: 0.875rem;
+      transition: all 200ms;
+    }
+    .songs-column-search:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,64,224,0.2);
+      background: #ffffff;
+    }
+
+    .songs-column-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .songs-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+    }
+    .songs-table thead tr {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #747687;
+    }
+    .songs-table thead th {
+      padding: 0 1rem 0.75rem 1rem;
+      font-weight: 700;
+    }
+    .songs-table-row {
+      background: #ffffff;
+      transition: all 200ms;
+      cursor: pointer;
+    }
+    .songs-table-row:hover {
+      background: #e5e8eb;
+    }
+    .songs-table-cell {
+      padding: 0.75rem 1rem;
+    }
+    .songs-table-cell-first {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    .songs-table-cell-last {
+      padding: 0.75rem 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .songs-table-song-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #181c1e;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .songs-table-song-artist {
+      font-size: 0.75rem;
+      color: #747687;
+      margin: 0.25rem 0 0 0;
+      line-height: 1;
+    }
+    .songs-table-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    .songs-table-badge-bpm {
+      background: rgba(0, 64, 224, 0.08);
+      color: #0040e0;
+    }
+    .songs-table-badge-key {
+      background: rgba(94, 36, 225, 0.08);
+      color: #5e24e1;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .songs-table-votes-count {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #181c1e;
+    }
+    .songs-table-empty {
+      text-align: center;
+      padding: 3rem 1rem !important;
+      color: #747687;
+      font-size: 0.875rem;
+    }
+
+    .songs-vote-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: #747687;
+      cursor: pointer;
+      transition: all 200ms;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .songs-vote-btn:hover {
+      background: rgba(231,76,60,0.1);
+      color: #e74c3c;
+    }
+    .songs-vote-btn .material-symbols-outlined {
+      font-size: 1.25rem;
+    }
+    .songs-vote-btn-active {
+      color: #e74c3c;
+      cursor: default;
+    }
+    .songs-vote-btn-active:hover {
+      background: transparent;
+    }
+    .songs-vote-btn-locked {
+      color: #c4c5d8;
+      cursor: not-allowed;
+    }
+    .songs-vote-btn-locked:hover {
+      background: transparent;
+      color: #c4c5d8;
+    }
   }
 
   /* Camelot Key Colors */
@@ -164,14 +391,6 @@
   .song-card:nth-child(4) { animation-delay: 0.2s; }
   .song-card:nth-child(5) { animation-delay: 0.25s; }
 
-  /* Millor hover en cards */
-  .song-card .card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .song-card .card:active {
-    transform: scale(0.98);
-  }
 
   /* Badge de vots més gran i visible */
   .song-card .badge {
@@ -213,230 +432,247 @@
     }
   }
 </style>
-<div class="container-fluid">
-  <!-- KPI BOXES (només desktop) - 4 columnes en una línia -->
-  <div class="row g-2 mb-3 d-none d-md-flex">
-    <div class="col-md-4">
-      <div class="kpi-card-compact kpi-primary">
-        <div class="kpi-icon">🎉</div>
-        <div class="kpi-party-info">
-          <div class="kpi-party-name">{{ party.name }}</div>
-          {% if party.date %}
-            <div class="kpi-party-date">{{ party.date|date:"d/m/Y H:i" }}</div>
-          {% endif %}
+<div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
+  <!-- Page Header -->
+  <div class="songs-page-header">
+    <div class="songs-page-stats">
+      <div class="songs-page-stat">
+        <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">play_circle</span>
+        <div>
+          <p class="songs-page-stat-label">Sonades</p>
+          <p class="songs-page-stat-value">{{ songs_played }}</p>
         </div>
-        <a href="{% url 'select_party' %}" class="btn btn-sm btn-primary kpi-change-btn">
-          <i class="fas fa-exchange-alt"></i>
-        </a>
       </div>
-    </div>
-    <div class="col-md-3">
-      <div class="kpi-card-compact kpi-success">
-        <div class="kpi-icon"><i class="fas fa-play-circle"></i></div>
-        <div class="kpi-label">Sonades</div>
-        <div class="kpi-value">{{ songs_played }}</div>
+      <div class="songs-page-stat">
+        <span class="material-symbols-outlined" style="color: #e74c3c; font-variation-settings: 'FILL' 1;">favorite</span>
+        <div>
+          <p class="songs-page-stat-label">Vots totals</p>
+          <p class="songs-page-stat-value">{{ total_votes }}</p>
+        </div>
       </div>
-    </div>
-    <div class="col-md-3">
-      <div class="kpi-card-compact kpi-danger">
-        <div class="kpi-icon"><i class="fas fa-heart"></i></div>
-        <div class="kpi-label">Vots totals</div>
-        <div class="kpi-value">{{ total_votes }}</div>
+      <div class="songs-page-stat">
+        <span class="material-symbols-outlined" style="color: #0040e0; font-variation-settings: 'FILL' 1;">how_to_vote</span>
+        <div>
+          <p class="songs-page-stat-label">Disponibles</p>
+          <p class="songs-page-stat-value">{{ votes_left }}</p>
+        </div>
       </div>
-    </div>
-    <div class="col-md-2">
-      <div class="kpi-card-compact kpi-info">
-        <div class="kpi-icon"><i class="fas fa-vote-yea"></i></div>
-        <div class="kpi-label">Disponibles</div>
-        <div class="kpi-value">{{ votes_left }}</div>
-      </div>
+      <a href="{% url 'select_party' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined" style="font-size: 1.25rem;">event_repeat</span>
+        Canviar Festa
+      </a>
     </div>
   </div>
 
   {% if songs %}
-    <!-- Vista de taules per desktop -->
-    <div class="row g-4 d-none d-md-flex">
+    <!-- Songs Grid - Two Columns -->
+    <div class="row g-4">
+      <!-- Column 1: Maleta del DJ -->
       <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
-          <div class="card-header bg-warning text-dark">
-            <strong><i class="fas fa-briefcase me-2"></i>Maleta del DJ</strong>
+        <div class="songs-column-card">
+          <div class="songs-column-header">
+            <div class="d-flex align-items-center gap-3">
+              <div style="background: rgba(246, 194, 62, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
+                <span class="material-symbols-outlined" style="color: #f6c23e;">work</span>
+              </div>
+              <h3 class="songs-column-title">Maleta del DJ</h3>
+            </div>
+            <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
+              <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
+              <input id="search-pending" type="search" class="songs-column-search" placeholder="Cerca...">
+            </div>
           </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped align-middle w-100 mb-0">
-                <thead>
-                  <tr>
-                    <th style="width: 80px;"></th>
-                    <th>Títol</th>
-                    <th>Artista</th>
-                    <th>BPM</th>
-                    <th>Key</th>
-                    <th class="text-center">Etiqueta</th>
-                    <th class="text-center">Acció</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for song in pending_songs %}
-                    <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
-                      <td>
-                        <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
+          <div class="songs-column-body">
+            <table class="songs-table">
+              <thead>
+                <tr>
+                  <th>Títol i Artista</th>
+                  <th>BPM</th>
+                  <th>Key</th>
+                  <th class="text-center">Vots</th>
+                  <th class="text-center">Acció</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for song in pending_songs %}
+                  <tr class="songs-table-row pending-song-row" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
+                    <td class="songs-table-cell-first">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                                 class="rounded w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
                           {% else %}
-                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
-                              <i class="fas fa-music text-white"></i>
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
+                              <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
                             </div>
                           {% endif %}
-
                           {% if has_spotify %}
-                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
-                               style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
-                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
-                                    data-song-id="{{ song.id }}"
-                                    data-spotify-id="{{ song.spotify_id }}"
-                                    style="color: white; font-size: 2rem; line-height: 1;">
-                              <i class="fas fa-play"></i>
+                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer; border-radius: 0.5rem;">
+                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent" data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id }}" style="color: white;">
+                              <span class="material-symbols-outlined" style="font-size: 1.125rem;">play_arrow</span>
                             </button>
                           </div>
                           {% endif %}
                         </div>
-                      </td>
-                      <td>{{ song.title }}</td>
-                      <td>{{ song.artist }}</td>
-                      <td>
-                        {% if song.bpm %}
-                          {{ song.bpm|floatformat:0 }}
-                        {% else %}
-                          <span class="text-muted">-</span>
-                        {% endif %}
-                      </td>
-                      <td>
-                        {% if song.key %}
-                          <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
-                        {% else %}
-                          <span class="text-muted">-</span>
-                        {% endif %}
-                      </td>
-                      <td class="text-center">
-                        <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.7rem; padding: 0.35rem 0.6rem; font-weight: 600;">
+                        <div style="min-width: 0;">
+                          <p class="songs-table-song-title">{{ song.title }}</p>
+                          <p class="songs-table-song-artist">{{ song.artist }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="songs-table-cell">
+                      {% if song.bpm %}
+                        <span class="songs-table-badge songs-table-badge-bpm">{{ song.bpm|floatformat:0 }}</span>
+                      {% else %}
+                        <span style="color: #747687;">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="songs-table-cell">
+                      {% if song.key %}
+                        <span class="songs-table-badge songs-table-badge-key">{{ song.key }}</span>
+                      {% else %}
+                        <span style="color: #747687;">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="songs-table-cell text-center">
+                      <div class="d-flex flex-column align-items-center">
+                        <span class="songs-table-votes-count">{{ song.vote_count|default:"0" }}</span>
+                        <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.5rem; padding: 0.125rem 0.375rem; font-weight: 600; border-radius: 0.25rem; text-transform: uppercase;">
                           {{ song.badge_label }}
                         </span>
-                      </td>
-                      <td class="text-center">
-                        {% if user_votes_dict|get_item:song.id %}
-                          <i class="fas fa-heart" style="color: #e74c3c; font-size: 1.25rem;"></i>
+                      </div>
+                    </td>
+                    <td class="songs-table-cell-last text-center">
+                      {% if user_votes_dict|get_item:song.id %}
+                        <button class="songs-vote-btn songs-vote-btn-active" disabled>
+                          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                        </button>
+                      {% else %}
+                        {% if votes_left > 0 or credits > 0 %}
+                          <form method="post" class="d-inline">{% csrf_token %}
+                            <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                            <input type="hidden" name="vote_type" value="like">
+                            <button type="submit" class="songs-vote-btn">
+                              <span class="material-symbols-outlined">favorite</span>
+                            </button>
+                          </form>
                         {% else %}
-                          {% if votes_left > 0 or credits > 0 %}
-                            <form method="post" style="display: inline;">{% csrf_token %}
-                              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                              <input type="hidden" name="vote_type" value="like">
-                              <button type="submit" class="btn btn-link p-0" style="font-size: 1.25rem; color: #e74c3c;">
-                                <i class="far fa-heart"></i>
-                              </button>
-                            </form>
-                          {% else %}
-                            <span class="text-muted" data-bs-toggle="tooltip" title="Necessites Coins per votar">
-                              <i class="fas fa-lock"></i>
-                            </span>
-                          {% endif %}
+                          <button class="songs-vote-btn songs-vote-btn-locked" data-bs-toggle="tooltip" title="Necessites Coins per votar">
+                            <span class="material-symbols-outlined">lock</span>
+                          </button>
                         {% endif %}
-                      </td>
-                    </tr>
-                  {% empty %}
-                    <tr>
-                      <td colspan="7" class="text-center py-4 text-muted">No queden temes pendents.</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5" class="songs-table-empty">No queden temes pendents.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
+      <!-- Column 2: Ja posades -->
       <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
-          <div class="card-header bg-success text-white">
-            <strong><i class="fas fa-check-circle me-2"></i>Ja posades</strong>
+        <div class="songs-column-card">
+          <div class="songs-column-header">
+            <div class="d-flex align-items-center gap-3">
+              <div style="background: rgba(28, 200, 138, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
+                <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">check_circle</span>
+              </div>
+              <h3 class="songs-column-title">Ja posades</h3>
+            </div>
+            <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
+              <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
+              <input id="search-played" type="search" class="songs-column-search" placeholder="Cerca...">
+            </div>
           </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped align-middle w-100 mb-0">
-                <thead>
-                  <tr>
-                    <th style="width: 80px;"></th>
-                    <th>Títol</th>
-                    <th>Artista</th>
-                    <th>BPM</th>
-                    <th>Key</th>
-                    <th class="text-center">Etiqueta</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for song in played_songs %}
-                    <tr data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
-                      <td>
-                        <div class="position-relative album-cover-container" style="width: 60px; height: 60px;">
+          <div class="songs-column-body">
+            <table class="songs-table">
+              <thead>
+                <tr>
+                  <th>Títol i Artista</th>
+                  <th>BPM</th>
+                  <th>Key</th>
+                  <th class="text-center">Vots</th>
+                  <th class="text-center">Estat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for song in played_songs %}
+                  <tr class="songs-table-row played-song-row" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
+                    <td class="songs-table-cell-first">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                                 class="rounded w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
                           {% else %}
-                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
-                              <i class="fas fa-music text-white"></i>
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
+                              <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
                             </div>
                           {% endif %}
-
                           {% if has_spotify %}
-                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
-                               style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
-                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
-                                    data-song-id="{{ song.id }}"
-                                    data-spotify-id="{{ song.spotify_id }}"
-                                    style="color: white; font-size: 2rem; line-height: 1;">
-                              <i class="fas fa-play"></i>
+                          <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer; border-radius: 0.5rem;">
+                            <button class="spotify-play-btn btn p-0 border-0 bg-transparent" data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id }}" style="color: white;">
+                              <span class="material-symbols-outlined" style="font-size: 1.125rem;">play_arrow</span>
                             </button>
                           </div>
                           {% endif %}
                         </div>
-                      </td>
-                      <td>{{ song.title }}</td>
-                      <td>{{ song.artist }}</td>
-                      <td>
-                        {% if song.bpm %}
-                          {{ song.bpm|floatformat:0 }}
-                        {% else %}
-                          <span class="text-muted">-</span>
-                        {% endif %}
-                      </td>
-                      <td>
-                        {% if song.key %}
-                          <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
-                        {% else %}
-                          <span class="text-muted">-</span>
-                        {% endif %}
-                      </td>
-                      <td class="text-center">
-                        <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.7rem; padding: 0.35rem 0.6rem; font-weight: 600;">
-                          {{ song.badge_label }}
-                        </span>
-                      </td>
-                    </tr>
-                  {% empty %}
-                    <tr>
-                      <td colspan="6" class="text-center py-4 text-muted">Encara no ha començat la festa.</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
+                        <div style="min-width: 0;">
+                          <p class="songs-table-song-title">{{ song.title }}</p>
+                          <p class="songs-table-song-artist">{{ song.artist }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="songs-table-cell">
+                      {% if song.bpm %}
+                        <span class="songs-table-badge songs-table-badge-bpm">{{ song.bpm|floatformat:0 }}</span>
+                      {% else %}
+                        <span style="color: #747687;">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="songs-table-cell">
+                      {% if song.key %}
+                        <span class="songs-table-badge songs-table-badge-key">{{ song.key }}</span>
+                      {% else %}
+                        <span style="color: #747687;">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="songs-table-cell text-center">
+                      <span class="songs-table-votes-count">{{ song.vote_count|default:"0" }}</span>
+                    </td>
+                    <td class="songs-table-cell-last text-center">
+                      <span class="material-symbols-outlined" style="color: #1cc88a; font-size: 1.25rem; font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="5" class="songs-table-empty">Encara no ha començat la festa.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
+  {% else %}
+    <!-- Vista desktop - No songs -->
+    <div class="songs-column-card" style="padding: 3rem; text-align: center;">
+      <span class="material-symbols-outlined" style="font-size: 4rem; color: #c4c5d8;">music_off</span>
+      <h3 style="font-family: 'Epilogue', sans-serif; font-weight: 700; color: #181c1e; margin: 1rem 0 0.5rem 0;">No hi ha cançons</h3>
+      <p style="color: #747687;">Aquesta festa encara no té cançons disponibles</p>
+    </div>
+  {% endif %}
+</div>
 
-    <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
-    <div class="mobile-songs-grid mobile-page-shell d-md-none">
+<!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
+{% if songs %}
+<div class="mobile-songs-grid mobile-page-shell d-md-none">
       <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
         <div class="mobile-group-stack" style="gap: 0.5rem;">
         <!-- Party Info Card -->
@@ -646,21 +882,16 @@
         {% endif %}
       </main>
     </div>
-
-  {% else %}
-    <!-- Vista desktop - No songs -->
-    <div class="alert alert-info d-none d-md-block">No hi ha cançons per aquesta festa!</div>
-
-    <!-- Vista mòbil - No songs -->
-    <div class="mobile-page-shell d-md-none">
-      <div class="mobile-page-content text-center py-4">
-        <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
-        <h4 class="fw-bold mb-1" style="color: #191c1f;">No hi ha cançons</h4>
-        <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Aquesta festa encara no té cançons disponibles</p>
-      </div>
-    </div>
-  {% endif %}
+{% else %}
+<!-- Vista mòbil - No songs -->
+<div class="mobile-page-shell d-md-none">
+  <div class="mobile-page-content text-center py-4">
+    <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
+    <h4 class="fw-bold mb-1" style="color: #191c1f;">No hi ha cançons</h4>
+    <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Aquesta festa encara no té cançons disponibles</p>
+  </div>
 </div>
+{% endif %}
 
 <!-- Alert area for Spotify errors -->
 <div id="spotify-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
@@ -742,26 +973,38 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     // Update ALL button icons and overlays
     document.querySelectorAll('.spotify-play-btn').forEach(btn => {
       const btnSpotifyId = btn.dataset.spotifyId;
-      const icon = btn.querySelector('i');
+      const icon = btn.querySelector('i, span.material-symbols-outlined');
       const overlay = btn.closest('.play-overlay');
 
       if (btnSpotifyId === track_id) {
         // This is the current track
         if (isPlaying) {
           // Currently playing
-          icon.classList.remove('fa-play');
-          icon.classList.add('fa-pause');
+          if (icon.classList.contains('material-symbols-outlined')) {
+            icon.textContent = 'pause';
+          } else {
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-pause');
+          }
           if (overlay) overlay.classList.add('is-playing');
         } else {
           // Current track but paused
-          icon.classList.remove('fa-pause');
-          icon.classList.add('fa-play');
+          if (icon.classList.contains('material-symbols-outlined')) {
+            icon.textContent = 'play_arrow';
+          } else {
+            icon.classList.remove('fa-pause');
+            icon.classList.add('fa-play');
+          }
           if (overlay) overlay.classList.add('is-playing');
         }
       } else {
         // Different track - reset to play
-        icon.classList.remove('fa-pause');
-        icon.classList.add('fa-play');
+        if (icon.classList.contains('material-symbols-outlined')) {
+          icon.textContent = 'play_arrow';
+        } else {
+          icon.classList.remove('fa-pause');
+          icon.classList.add('fa-play');
+        }
         if (overlay) overlay.classList.remove('is-playing');
       }
     });
@@ -897,16 +1140,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Filtrat de cançons
-  var desktopInput = document.getElementById('song-search');
-  if (desktopInput) {
-    desktopInput.addEventListener('input', function() {
-      var q = desktopInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('table tbody tr');
+  // Filtrat de cançons desktop - Pending songs
+  var searchPendingInput = document.getElementById('search-pending');
+  if (searchPendingInput) {
+    searchPendingInput.addEventListener('input', function() {
+      var q = searchPendingInput.value.trim().toLowerCase();
+      var rows = document.querySelectorAll('.pending-song-row');
 
       rows.forEach(function(row) {
-        var title = row.getAttribute('data-song-title').toLowerCase();
-        var artist = row.getAttribute('data-song-artist').toLowerCase();
+        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
+        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
+        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // Filtrat de cançons desktop - Played songs
+  var searchPlayedInput = document.getElementById('search-played');
+  if (searchPlayedInput) {
+    searchPlayedInput.addEventListener('input', function() {
+      var q = searchPlayedInput.value.trim().toLowerCase();
+      var rows = document.querySelectorAll('.played-song-row');
+
+      rows.forEach(function(row) {
+        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
+        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
         row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
       });
     });

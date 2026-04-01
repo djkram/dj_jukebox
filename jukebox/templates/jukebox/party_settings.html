@@ -6,7 +6,7 @@
 
 {% block content %}
 <style>
-  /* Album cover play overlay */
+  /* Mobile styles - unchanged */
   .album-cover-container:hover .play-overlay {
     opacity: 1 !important;
   }
@@ -36,6 +36,354 @@
 
   .spotify-play-btn {
     transition: transform 0.2s;
+  }
+
+  /* Desktop Sonic Architect styles */
+  @media (min-width: 768px) {
+    .settings-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 2rem;
+    }
+    .settings-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+    }
+
+    /* Form card */
+    .settings-form-card {
+      background: #f1f4f7;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(196, 197, 216, 0.1);
+    }
+    .settings-form-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .settings-form-header .material-symbols-outlined {
+      color: #002ea8;
+    }
+    .settings-form-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .settings-field {
+      margin-bottom: 1.25rem;
+    }
+    .settings-label {
+      display: block;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+      margin-bottom: 0.375rem;
+      padding-left: 0.25rem;
+    }
+    .settings-input {
+      width: 100%;
+      background: #ffffff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 200ms;
+    }
+    .settings-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,46,168,0.2);
+    }
+    .settings-help {
+      font-size: 0.75rem;
+      color: #747687;
+      margin-top: 0.375rem;
+      line-height: 1.4;
+    }
+
+    /* Spotify card */
+    .settings-spotify-card {
+      background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+    .settings-spotify-card::after {
+      content: '';
+      position: absolute;
+      top: -3rem;
+      right: -3rem;
+      width: 8rem;
+      height: 8rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      filter: blur(60px);
+    }
+    .settings-spotify-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .settings-spotify-logo {
+      background: rgba(255,255,255,0.2);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      backdrop-filter: blur(10px);
+    }
+    .settings-spotify-badge {
+      font-size: 0.625rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .settings-spotify-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      position: relative;
+      z-index: 1;
+    }
+    .settings-spotify-text {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    .settings-spotify-playlist {
+      background: rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(5px);
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .settings-spotify-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .settings-spotify-icon .material-symbols-outlined {
+      color: rgba(255,255,255,0.5);
+    }
+    .settings-spotify-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .settings-spotify-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .settings-spotify-meta {
+      font-size: 0.625rem;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* Songs table */
+    .settings-songs-card {
+      background: #f1f4f7;
+      border-radius: 0.75rem;
+      padding: 0.25rem;
+      border: 1px solid rgba(196, 197, 216, 0.1);
+    }
+    .settings-songs-header {
+      padding: 1.5rem 1.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .settings-songs-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .settings-songs-icon {
+      background: rgba(0,64,224,0.1);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+    .settings-songs-icon .material-symbols-outlined {
+      color: #002ea8;
+    }
+    .settings-songs-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .settings-songs-search {
+      flex: 1;
+      max-width: 24rem;
+      position: relative;
+    }
+    .settings-songs-search .material-symbols-outlined {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #747687;
+    }
+    .settings-songs-search input {
+      width: 100%;
+      background: #e0e3e6;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.625rem 1rem 0.625rem 2.5rem;
+      font-size: 0.875rem;
+    }
+    .settings-songs-search input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,46,168,0.2);
+    }
+
+    .settings-songs-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+      padding: 0 1.5rem 1.5rem;
+    }
+    .settings-songs-table thead th {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+      padding: 0.5rem 1rem;
+      text-align: left;
+    }
+    .settings-songs-table tbody tr {
+      background: #ffffff;
+      transition: all 200ms;
+      cursor: pointer;
+    }
+    .settings-songs-table tbody tr:hover {
+      background: #e5e8eb;
+    }
+    .settings-songs-table tbody td {
+      padding: 0.75rem 1rem;
+    }
+    .settings-songs-table tbody tr td:first-child {
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    .settings-songs-table tbody tr td:last-child {
+      border-radius: 0 0.5rem 0.5rem 0;
+      text-align: right;
+    }
+
+    .settings-song-cover {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.375rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .settings-song-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .settings-song-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .settings-song-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #181c1e;
+    }
+    .settings-song-artist {
+      font-size: 0.75rem;
+      color: #747687;
+      margin-top: 0.125rem;
+    }
+
+    .settings-bpm-badge {
+      background: rgba(0,46,168,0.05);
+      color: #002ea8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+    }
+    .settings-key-badge {
+      background: rgba(94,36,225,0.05);
+      color: #5e24e1;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .settings-song-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .settings-action-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: #747687;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .settings-action-btn:hover {
+      background: #e0e3e6;
+      color: #002ea8;
+    }
+    .settings-action-btn.delete:hover {
+      background: rgba(186,26,26,0.1);
+      color: #ba1a1a;
+    }
   }
 
   .settings-toggle-control {
@@ -222,75 +570,108 @@
   }
 </style>
 
-<div class="container mt-4 d-none d-md-block">
-  <div class="row gx-4">
+<div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
+  <!-- Page Actions -->
+  <div class="settings-page-header">
+    <div class="settings-actions" style="margin-left: auto;">
+      <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary">
+        Torna
+      </a>
+      <button type="submit" form="partySettingsForm" class="btn btn-primary" id="saveButton">
+        <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">save</span>
+        Desa canvis
+      </button>
+    </div>
+  </div>
+
+  <div class="settings-grid">
     {# ── COL. ESQUERRA: FORMULARI ──────────────────────────────────────── #}
-    <div class="col-lg-4">
-      <div class="card shadow-sm p-4 rounded-4 mb-4">
+    <div>
+      <div class="settings-form-card">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">tune</span>
+          <h3 class="settings-form-title">Detalls de la festa</h3>
+        </div>
         <form method="post" id="partySettingsForm">
           {% csrf_token %}
 
-          <div class="mb-3">
-            {{ form.name.label_tag }}
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
             {{ form.name }}
           </div>
 
-          <div class="mb-3">
-            {{ form.date.label_tag }}
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
             {{ form.date }}
           </div>
 
-          <div class="mb-3">
-            {{ form.max_votes_per_user.label_tag }}
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.max_votes_per_user.id_for_label }}">{{ form.max_votes_per_user.label }}</label>
             {{ form.max_votes_per_user }}
-            <small class="form-text text-muted">
-              Vots gratuïts per festa. Si puges el valor, els usuaris reben més vots automàticament. Si el bajes, només redueix els disponibles però NO toca els vots ja fets.
-            </small>
+            <p class="settings-help">
+              Vots gratuïts per festa. Si puges el valor, els usuaris reben més vots automàticament.
+            </p>
           </div>
 
-          <div class="mb-3">
-            {{ form.free_coins_per_user.label_tag }}
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.free_coins_per_user.id_for_label }}">{{ form.free_coins_per_user.label }}</label>
             {{ form.free_coins_per_user }}
-            <small class="form-text text-muted">
-              Coins gratuïts de festa. Funciona igual que els vots: si puges el valor, els usuaris reben la diferència. Si el bajes, només redueix els disponibles.
-            </small>
+            <p class="settings-help">
+              Coins gratuïts de festa. Funciona igual que els vots: si puges el valor, els usuaris reben la diferència.
+            </p>
           </div>
 
-          <div class="mb-3">
-            {{ form.song_request_cost.label_tag }}
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.song_request_cost.id_for_label }}">{{ form.song_request_cost.label }}</label>
             {{ form.song_request_cost }}
-            <small class="form-text text-muted">
+            <p class="settings-help">
               Cost en Coins que un usuari ha de pagar per demanar una cançó nova.
-            </small>
+            </p>
           </div>
-
-          <button type="submit" class="btn btn-primary me-2" id="saveButton">
-            Desa canvis
-          </button>
-          <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary">
-            Torna
-          </a>
         </form>
       </div>
 
-      <div class="card shadow-sm p-4 rounded-4 mb-4">
-        <h3 class="h5 mb-3">Playlist de Spotify</h3>
-        {% if party.playlist %}
-          <div class="mb-3">
-            <label class="form-label">Playlist assignada</label>
-            <p class="form-control-plaintext mb-2" id="playlistAssignedName">
-              {{ party.playlist.name }} ({{ party.playlist.owner }})
-            </p>
-            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-              <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm">
-                <i class="fas fa-sync-alt me-1"></i>Recarregar cançons
-              </button>
-              <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm">
-                Neteja playlist
-              </a>
+      <div class="settings-spotify-card">
+        <div class="settings-spotify-header">
+          <div class="settings-spotify-logo">
+            <span class="material-symbols-outlined" style="color: white;">queue_music</span>
+          </div>
+          {% if party.playlist %}
+          <span class="settings-spotify-badge">Connectat</span>
+          {% endif %}
+        </div>
+        <h3 class="settings-spotify-title">Playlist de Spotify</h3>
+        <p class="settings-spotify-text">Sincronització automàtica amb el teu compte professional.</p>
 
-              <!-- Auto-Sync Toggle -->
-              <label class="settings-toggle-control ms-2" for="autoSyncToggle">
+        {% if party.playlist %}
+          <div class="settings-spotify-playlist">
+            <div class="settings-spotify-icon">
+              <span class="material-symbols-outlined">music_note</span>
+            </div>
+            <div class="settings-spotify-info">
+              <p class="settings-spotify-name" id="playlistAssignedName">{{ party.playlist.name }}</p>
+              <p class="settings-spotify-meta">{{ party.playlist.owner }}</p>
+            </div>
+            <span class="material-symbols-outlined" style="color: rgba(255,255,255,0.5); font-size: 0.875rem;">open_in_new</span>
+          </div>
+
+          <div class="d-flex gap-2 mb-3" style="position: relative; z-index: 1;">
+            <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm flex-fill">
+              <i class="fas fa-sync-alt me-1"></i>Recarrega
+            </button>
+            <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm flex-fill">
+              Neteja
+            </a>
+          </div>
+
+          <!-- Auto-Sync Toggle -->
+          <div class="mb-3" style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 0.5rem; position: relative; z-index: 1;">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div style="font-weight: 600; font-size: 0.875rem;">Auto-sync cada 5 min</div>
+                <small style="color: rgba(255,255,255,0.7); font-size: 0.75rem;">Sincronitza automàticament</small>
+              </div>
+              <label class="settings-toggle-control" for="autoSyncToggle">
                 <span class="settings-toggle">
                   <input class="settings-toggle-input"
                          type="checkbox"
@@ -298,91 +679,80 @@
                          {% if party.auto_sync_playlist %}checked{% endif %}>
                   <span class="settings-toggle-switch" aria-hidden="true"></span>
                 </span>
-                <span class="settings-toggle-copy">Auto-sync cada 5 min</span>
               </label>
-
-              <!-- Badge indicador -->
+            </div>
+            {% if party.auto_sync_playlist or party.last_sync_at %}
+            <div class="mt-2">
               <span class="badge bg-success" id="autoSyncBadge"
-                    style="{% if not party.auto_sync_playlist %}display: none;{% endif %}">
+                    style="font-size: 0.7rem; {% if not party.auto_sync_playlist %}display: none;{% endif %}">
                 <i class="fas fa-check-circle me-1"></i>Actiu
               </span>
+              {% if party.last_sync_at %}
+              <small class="text-white-50 d-block mt-1" style="font-size: 0.7rem;">
+                <i class="fas fa-clock me-1"></i>Última sync: {{ party.last_sync_at|timesince }} enrere
+              </small>
+              {% endif %}
             </div>
-
-            <!-- Timestamp última sync -->
-            {% if party.last_sync_at %}
-            <small class="text-muted d-block">
-              <i class="fas fa-clock me-1"></i>
-              Última sync: {{ party.last_sync_at|timesince }} enrere
-            </small>
             {% endif %}
           </div>
 
           {% if has_spotify %}
-            <div class="border-top pt-3">
-              <label for="spotify-track-search" class="form-label">Afegeix una cançó</label>
+            <div style="position: relative; z-index: 1;">
+              <label class="settings-label" style="color: rgba(255,255,255,0.7);" for="spotify-track-search">Afegeix una cançó</label>
               <div class="input-group mb-2">
-                <input id="spotify-track-search" class="form-control" placeholder="Cerca tema o artista a Spotify..." />
-                <button type="button" id="spotify-track-search-btn" class="btn btn-outline-primary">
-                  <i class="fas fa-search me-1"></i>Cerca
+                <input id="spotify-track-search" class="form-control" placeholder="Cerca tema o artista..." />
+                <button type="button" id="spotify-track-search-btn" class="btn btn-light">
+                  <i class="fas fa-search"></i>
                 </button>
               </div>
-              <small class="text-muted">La cançó s'afegirà a la playlist de Spotify i també a la llista de la festa.</small>
-              <div id="spotify-track-search-results" class="d-flex flex-column gap-2 mt-3"></div>
+              <div id="spotify-track-search-results" class="d-flex flex-column gap-2"></div>
             </div>
           {% endif %}
 
         {% elif playlists %}
-          <div class="mb-3">
+          <div style="position: relative; z-index: 1;">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <label for="id_spotify_playlist" class="form-label mb-0">Selecciona una playlist de Spotify</label>
-              <button type="button" id="reloadPlaylistsBtn" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-sync-alt"></i> Recarrega
+              <label class="settings-label" style="color: rgba(255,255,255,0.7);" for="id_spotify_playlist">Selecciona playlist</label>
+              <button type="button" id="reloadPlaylistsBtn" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-sync-alt"></i>
               </button>
             </div>
-            <div class="mb-2">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded"
-                       {% if only_owned %}checked{% endif %}>
-                <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
-                  Només les meves playlists
-                </label>
-              </div>
+            <div class="form-check mb-2" style="color: rgba(255,255,255,0.8);">
+              <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded" {% if only_owned %}checked{% endif %}>
+              <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
+                Només les meves playlists
+              </label>
             </div>
-            <select id="id_spotify_playlist" class="form-control">
+            <select id="id_spotify_playlist" class="form-control mb-3">
               <option value="">-- Selecciona una playlist --</option>
               {% for pl in playlists %}
-                <option value="{{ pl.id }}">
-                  {{ pl.name }} ({{ pl.owner }})
-                </option>
+                <option value="{{ pl.id }}">{{ pl.name }} ({{ pl.owner }})</option>
               {% endfor %}
             </select>
-            <button type="button" id="assignPlaylistBtn" class="btn btn-primary mt-3 w-100">
-              <i class="fab fa-spotify me-1"></i>Assigna playlist a la festa
+            <button type="button" id="assignPlaylistBtn" class="btn btn-light w-100">
+              <i class="fab fa-spotify me-1"></i>Assigna playlist
             </button>
           </div>
 
         {% else %}
-          <div class="mb-3">
+          <div style="position: relative; z-index: 1;">
             {% if has_spotify %}
-              <div class="mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox"
-                         {% if only_owned %}checked{% endif %}>
-                  <label class="form-check-label" for="onlyOwnedCheckbox">
-                    Només les meves playlists
-                  </label>
-                </div>
+              <div class="form-check mb-2" style="color: rgba(255,255,255,0.8);">
+                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox" {% if only_owned %}checked{% endif %}>
+                <label class="form-check-label" for="onlyOwnedCheckbox">
+                  Només les meves playlists
+                </label>
               </div>
-              <a href="?load_spotify=1" class="btn btn-success me-2" id="loadPlaylistsBtn">
-                <i class="fas fa-sync-alt me-1"></i>Carrega playlists de Spotify
-              </a>
-              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
-                 class="btn btn-outline-success btn-sm">
-                <i class="fas fa-redo me-1"></i>Reconnecta Spotify
-              </a>
+              <div class="d-grid gap-2">
+                <a href="?load_spotify=1" class="btn btn-light" id="loadPlaylistsBtn">
+                  <i class="fas fa-sync-alt me-1"></i>Carrega playlists
+                </a>
+                <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-outline-light">
+                  <i class="fas fa-redo me-1"></i>Reconnecta
+                </a>
+              </div>
             {% else %}
-              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}"
-                 class="btn btn-success">
+              <a href="{% provider_login_url 'spotify' process='connect' next=request.path %}" class="btn btn-light w-100">
                 <i class="fab fa-spotify me-1"></i>Connecta Spotify
               </a>
             {% endif %}
@@ -392,7 +762,7 @@
     </div>
 
     {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
-    <div class="col-lg-8">
+    <div>
       {# Barra de progrés #}
       <div id="loadingProgress" class="mb-3" style="display: none;">
         <div class="alert alert-info">
@@ -405,130 +775,139 @@
         </div>
       </div>
 
-      <div class="card shadow-sm p-4 rounded-4 mb-4">
-        <h3 class="h5 mb-3">Cançons de la playlist</h3>
-        {% if songs %}
-          <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-            <input
-              id="song-search"
-              class="form-control"
-              placeholder="Filtra per títol o artista…"
-              style="flex: 1; min-width: 200px;"
-            />
-            <button
-              id="bulk-analyze-btn"
-              class="btn btn-outline-primary"
-              title="Analitza totes les cançons pendents"
-              style="white-space: nowrap;">
-              <i class="fas fa-chart-line me-1"></i>Analitza pendents ({{ pending_analysis_count }})
-            </button>
-
-            <!-- Auto-Analyze Toggle -->
-            <label class="settings-toggle-control ms-2" for="autoAnalyzeToggle">
-              <span class="settings-toggle">
-                <input class="settings-toggle-input"
-                       type="checkbox"
-                       id="autoAnalyzeToggle"
-                       {% if party.auto_analyze_audio %}checked{% endif %}>
-                <span class="settings-toggle-switch" aria-hidden="true"></span>
-              </span>
-              <span class="settings-toggle-copy">Auto-anàlisi cada 5 min</span>
-            </label>
-
-            <!-- Badge indicador -->
-            <span class="badge bg-info" id="autoAnalyzeBadge"
-                  style="{% if not party.auto_analyze_audio %}display: none;{% endif %}">
-              <i class="fas fa-robot me-1"></i>Actiu
-            </span>
+      <div class="settings-songs-card">
+        <div class="settings-songs-header">
+          <div class="settings-songs-title-wrap">
+            <div class="settings-songs-icon">
+              <span class="material-symbols-outlined">playlist_play</span>
+            </div>
+            <h3 class="settings-songs-title">Cançons de la playlist</h3>
           </div>
-
-          <!-- Progress info (opcional) -->
-          {% if party.auto_analyze_audio %}
-          <div class="mb-3">
-            <small class="text-muted">
-              <i class="fas fa-chart-line me-1"></i>
-              Auto-anàlisi actiu: processant cançons pendents automàticament
-              {% if party.last_analyze_at %}
-              <br><i class="fas fa-clock me-1"></i>Última anàlisi: {{ party.last_analyze_at|timesince }} enrere
-              {% endif %}
-            </small>
+          {% if songs %}
+          <div class="settings-songs-search">
+            <span class="material-symbols-outlined">search</span>
+            <input id="song-search" placeholder="Filtra per títol, artista o BPM..." />
           </div>
+          <button id="bulk-analyze-btn" class="btn btn-outline-primary" title="Analitza totes les cançons pendents">
+            <i class="fas fa-chart-line me-1"></i>Analitza ({{ pending_analysis_count }})
+          </button>
           {% endif %}
-          <table class="table table-striped w-100">
+        </div>
+
+        {% if songs %}
+          <!-- Auto-Analyze Toggle -->
+          <div class="px-4 pb-3">
+            <div style="background: #e0e3e6; padding: 0.75rem; border-radius: 0.5rem;">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.875rem; color: #181c1e;">Auto-anàlisi cada 5 min</div>
+                  <small style="color: #747687; font-size: 0.75rem;">Analitza cançons automàticament</small>
+                </div>
+                <label class="settings-toggle-control" for="autoAnalyzeToggle">
+                  <span class="settings-toggle">
+                    <input class="settings-toggle-input"
+                           type="checkbox"
+                           id="autoAnalyzeToggle"
+                           {% if party.auto_analyze_audio %}checked{% endif %}>
+                    <span class="settings-toggle-switch" aria-hidden="true"></span>
+                  </span>
+                </label>
+              </div>
+              {% if party.auto_analyze_audio or party.last_analyze_at %}
+              <div class="mt-2">
+                <span class="badge bg-info" id="autoAnalyzeBadge"
+                      style="font-size: 0.7rem; {% if not party.auto_analyze_audio %}display: none;{% endif %}">
+                  <i class="fas fa-robot me-1"></i>Actiu
+                </span>
+                {% if party.last_analyze_at %}
+                <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+                  <i class="fas fa-clock me-1"></i>Última anàlisi: {{ party.last_analyze_at|timesince }} enrere
+                </small>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <table class="settings-songs-table">
             <thead>
               <tr>
-                <th style="width: 55px;"></th>
-                <th>Títol</th>
-                <th>Artista</th>
+                <th>Títol i Artista</th>
                 <th>BPM</th>
                 <th>Key</th>
-                <th><i class="fas fa-heart text-danger"></i></th>
-                <th><i class="fas fa-heart-broken text-secondary"></i></th>
-                <th>Accions</th>
+                <th style="text-align: center;">Vots</th>
+                <th style="text-align: right;">Accions</th>
               </tr>
             </thead>
             <tbody id="songs-table-body">
               {% for song in songs %}
                 <tr data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id }}">
                   <td>
-                    <div class="position-relative album-cover-container" style="width: 45px; height: 45px;">
-                      {% if song.album_image_url %}
-                        <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                             class="rounded w-100 h-100" style="object-fit: cover;">
-                      {% else %}
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100">
-                          <i class="fas fa-music text-white"></i>
-                        </div>
-                      {% endif %}
+                    <div class="settings-song-info">
+                      <div class="settings-song-cover">
+                        {% if song.album_image_url %}
+                          <img src="{{ song.album_image_url }}" alt="{{ song.title }}">
+                        {% else %}
+                          <div style="width: 100%; height: 100%; background: #e0e3e6; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
+                          </div>
+                        {% endif %}
 
-                      {% if has_spotify %}
-                      <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded"
-                           style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
-                        <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
-                                data-song-id="{{ song.id }}"
-                                data-spotify-id="{{ song.spotify_id }}"
-                                style="color: white; font-size: 1.5rem; line-height: 1;">
-                          <i class="fas fa-play"></i>
-                        </button>
+                        {% if has_spotify %}
+                        <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                             style="background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.2s; cursor: pointer;">
+                          <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                                  data-song-id="{{ song.id }}"
+                                  data-spotify-id="{{ song.spotify_id }}"
+                                  style="color: white; font-size: 1.25rem; line-height: 1;">
+                            <i class="fas fa-play"></i>
+                          </button>
+                        </div>
+                        {% endif %}
                       </div>
-                      {% endif %}
+                      <div>
+                        <div class="settings-song-title">{{ song.title }}</div>
+                        <div class="settings-song-artist">{{ song.artist }}</div>
+                      </div>
                     </div>
                   </td>
-                  <td>{{ song.title }}</td>
-                  <td>{{ song.artist }}</td>
                   <td class="bpm-cell">
                     {% if song.bpm %}
-                      {{ song.bpm|floatformat:0 }}
+                      <span class="settings-bpm-badge">{{ song.bpm|floatformat:0 }} BPM</span>
                     {% else %}
                       <span class="text-muted">-</span>
                     {% endif %}
                   </td>
                   <td class="key-cell">
                     {% if song.key %}
-                      <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
+                      <span class="settings-key-badge">{{ song.key }}</span>
                     {% else %}
                       <span class="text-muted">-</span>
                     {% endif %}
                   </td>
-                  <td>{{ song.num_likes }}</td>
-                  <td>{{ song.num_dislikes }}</td>
+                  <td style="text-align: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                      <span style="font-weight: 700; font-size: 0.875rem;">{{ song.num_likes }}</span>
+                      <span style="font-size: 0.625rem; text-transform: uppercase; font-weight: 700; color: #00e3fd;">
+                        {% if song.num_likes > 100 %}Hot{% endif %}
+                      </span>
+                    </div>
+                  </td>
                   <td class="analyze-cell">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="settings-song-actions">
                       {% if not song.bpm or not song.key %}
-                        <button class="btn btn-sm btn-primary analyze-audio-btn"
+                        <button class="settings-action-btn analyze-audio-btn"
                                 data-song-id="{{ song.id }}"
-                                title="Analitza BPM i Key"
-                                style="padding: 0.25rem 0.4rem;">
-                          <i class="fas fa-chart-line"></i>
+                                title="Analitza BPM i Key">
+                          <span class="material-symbols-outlined" style="font-size: 1.125rem;">analytics</span>
                         </button>
                       {% else %}
-                        <span class="text-success small"><i class="fas fa-check"></i></span>
+                        <span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>
                       {% endif %}
-                      <button class="btn btn-sm btn-outline-danger delete-song-btn"
+                      <button class="settings-action-btn delete delete-song-btn"
                               data-song-id="{{ song.id }}"
-                              title="Elimina de la playlist i de la festa"
-                              style="padding: 0.25rem 0.45rem;">
-                        <i class="fas fa-trash"></i>
+                              title="Elimina de la playlist i de la festa">
+                        <span class="material-symbols-outlined" style="font-size: 1.125rem;">delete</span>
                       </button>
                     </div>
                   </td>
@@ -537,7 +916,9 @@
             </tbody>
           </table>
         {% else %}
-          <p class="text-muted">No hi ha cançons per mostrar.</p>
+          <div style="padding: 3rem 1.5rem; text-align: center; color: #747687;">
+            No hi ha cançons per mostrar.
+          </div>
         {% endif %}
       </div>
     </div>

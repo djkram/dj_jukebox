@@ -1,116 +1,443 @@
 {% extends "jukebox/admin_base.html" %}
 {% block page_title %}Demanar cançó{% endblock %}
 {% block content %}
-<div class="container-fluid d-none d-md-block">
+
+<style>
+  /* Request Song Page - Sonic Architect Style (Desktop only) */
+  @media (min-width: 768px) {
+    .request-stats-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .request-stat-card {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+    }
+    .request-stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .request-stat-icon .material-symbols-outlined {
+      font-size: 1.5rem;
+    }
+    .request-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+      margin: 0;
+      line-height: 1;
+    }
+    .request-stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: 'Epilogue', sans-serif;
+      color: #181c1e;
+      margin: 0.25rem 0 0 0;
+      line-height: 1;
+    }
+    .request-info-card {
+      background: #eef2ff;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+    .request-info-card .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1.25rem;
+    }
+    .request-info-text {
+      font-size: 0.875rem;
+      color: #434655;
+      margin: 0;
+    }
+
+    .request-search-card {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+    .request-search-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      position: relative;
+    }
+    .request-search-input-wrapper {
+      flex-grow: 1;
+      position: relative;
+    }
+    .request-search-input {
+      width: 100%;
+      background: #ffffff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      font-size: 0.875rem;
+      transition: all 200ms;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .request-search-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,64,224,0.15);
+    }
+    .request-search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #747687;
+    }
+    .request-search-btn {
+      background: #0040e0;
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .request-search-btn:hover {
+      background: #002ea8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,64,224,0.25);
+    }
+
+    .request-results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .request-result-card {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 200ms;
+      text-align: center;
+    }
+    .request-result-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .request-result-img {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      margin-bottom: 0.75rem;
+    }
+    .request-result-placeholder {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #e0e3e6;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .request-result-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #181c1e;
+      margin: 0 0 0.25rem 0;
+      line-height: 1.2;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .request-result-artist {
+      font-size: 0.75rem;
+      color: #747687;
+      margin: 0 0 0.75rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .request-result-btn {
+      width: 100%;
+      background: #1cc88a;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+    }
+    .request-result-btn:hover {
+      background: #17a673;
+    }
+
+    .request-history-card {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .request-history-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(116,118,136,0.1);
+    }
+    .request-history-icon {
+      background: rgba(0,64,224,0.1);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+    .request-history-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+      color: #181c1e;
+    }
+    .request-history-body {
+      padding: 1.5rem;
+    }
+    .request-history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+    }
+    .request-history-table thead tr {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #747687;
+    }
+    .request-history-table thead th {
+      padding: 0 1rem 0.75rem 1rem;
+      font-weight: 700;
+    }
+    .request-history-row {
+      background: #ffffff;
+      transition: all 200ms;
+    }
+    .request-history-row:hover {
+      background: #e5e8eb;
+    }
+    .request-history-cell {
+      padding: 0.75rem 1rem;
+    }
+    .request-history-cell-first {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem 0 0 0.5rem;
+    }
+    .request-history-cell-last {
+      padding: 0.75rem 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .request-history-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.5rem;
+      object-fit: cover;
+    }
+    .request-history-placeholder {
+      width: 48px;
+      height: 48px;
+      background: #e0e3e6;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .request-history-song-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: #181c1e;
+      margin: 0;
+    }
+    .request-history-song-artist {
+      font-size: 0.75rem;
+      color: #747687;
+      margin: 0;
+    }
+    .request-status-badge {
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-block;
+    }
+    .request-status-pending {
+      background: rgba(246,194,62,0.15);
+      color: #b8860b;
+    }
+    .request-status-accepted {
+      background: rgba(28,200,138,0.15);
+      color: #0f7c4d;
+    }
+    .request-status-rejected {
+      background: rgba(186,26,26,0.15);
+      color: #ba1a1a;
+    }
+    .request-history-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #747687;
+      font-size: 0.875rem;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  }
+</style>
+
+<div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
   <div id="message-area" class="mb-3"></div>
 
-  <div class="row g-2 mb-3">
-    <div class="col-6 col-md-4">
-      <div class="card shadow-sm" style="border-left: 4px solid #f6c23e; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="text-warning fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-            COINS
-          </div>
-          <div class="fs-2 fw-bold text-warning" style="line-height: 1;">{{ user_credits }}</div>
-        </div>
+  <!-- Stats Row -->
+  <div class="request-stats-row">
+    <div class="request-stat-card">
+      <div class="request-stat-icon" style="background: rgba(246,194,62,0.1);">
+        <span class="material-symbols-outlined" style="color: #f6c23e; font-variation-settings: 'FILL' 1;">monetization_on</span>
+      </div>
+      <div>
+        <p class="request-stat-label">Els teus Coins</p>
+        <p class="request-stat-value">{{ user_credits }}</p>
       </div>
     </div>
-    <div class="col-6 col-md-4">
-      <div class="card shadow-sm" style="border-left: 4px solid #36b9cc; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="text-info fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-            COST PETICIÓ
-          </div>
-          <div class="fs-2 fw-bold text-info" style="line-height: 1;">{{ request_cost }}</div>
-        </div>
+    <div class="request-stat-card">
+      <div class="request-stat-icon" style="background: rgba(0,227,253,0.1);">
+        <span class="material-symbols-outlined" style="color: #00e3fd;">request_quote</span>
+      </div>
+      <div>
+        <p class="request-stat-label">Cost per petició</p>
+        <p class="request-stat-value">{{ request_cost }}</p>
       </div>
     </div>
-    <div class="col-12 col-md-4">
-      <div class="alert alert-info py-2 px-2 mb-0 h-100 d-flex align-items-center">
-        <small>
-          <i class="fas fa-info-circle me-1"></i>
-          Només es cobra si el DJ accepta
-        </small>
-      </div>
+    <div class="request-info-card">
+      <span class="material-symbols-outlined">info</span>
+      <p class="request-info-text">Només es cobra si el DJ accepta la teva petició</p>
     </div>
   </div>
 
-  <div class="card shadow-sm mb-3">
-    <div class="card-body p-2">
-      <div class="input-group">
-        <input type="text" id="search-input" class="form-control"
-               placeholder="Cerca cançó o artista...">
-        <button class="btn btn-primary" type="button" id="search-btn">
-          <i class="fas fa-search"></i>
-        </button>
+  <!-- Search Card -->
+  <div class="request-search-card">
+    <div class="request-search-wrapper">
+      <div class="request-search-input-wrapper">
+        <span class="material-symbols-outlined request-search-icon">search</span>
+        <input type="text" id="search-input" class="request-search-input" placeholder="Cerca cançó o artista a Spotify...">
       </div>
+      <button class="request-search-btn" type="button" id="search-btn">
+        <span class="material-symbols-outlined">search</span>
+        Cercar
+      </button>
     </div>
   </div>
 
+  <!-- Search Results -->
   <div id="search-results" class="mb-4"></div>
 
-  <div class="card shadow-sm">
-    <div class="card-header py-2">
-      <h5 class="mb-0">
-        <i class="fas fa-clock me-2"></i>Les meves peticions
-      </h5>
+  <!-- History -->
+  <div class="request-history-card">
+    <div class="request-history-header">
+      <div class="request-history-icon">
+        <span class="material-symbols-outlined" style="color: #0040e0;">history</span>
+      </div>
+      <h3 class="request-history-title">Les meves peticions</h3>
     </div>
-    <div class="card-body p-2">
+    <div class="request-history-body">
       {% if user_requests %}
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th style="width: 60px;"></th>
-                <th>Cançó</th>
-                <th>Artista</th>
-                <th>Estat</th>
-                <th>Cost</th>
-                <th>Data</th>
+        <table class="request-history-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;"></th>
+              <th>Cançó</th>
+              <th>Artista</th>
+              <th>Estat</th>
+              <th>Cost</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in user_requests %}
+              <tr class="request-history-row">
+                <td class="request-history-cell-first">
+                  {% if req.album_image_url %}
+                    <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="request-history-img">
+                  {% else %}
+                    <div class="request-history-placeholder">
+                      <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
+                    </div>
+                  {% endif %}
+                </td>
+                <td class="request-history-cell">
+                  <p class="request-history-song-title">{{ req.title }}</p>
+                </td>
+                <td class="request-history-cell">
+                  <p class="request-history-song-artist">{{ req.artist }}</p>
+                </td>
+                <td class="request-history-cell">
+                  {% if req.status == 'pending' %}
+                    <span class="request-status-badge request-status-pending">Pendent</span>
+                  {% elif req.status == 'accepted' %}
+                    <span class="request-status-badge request-status-accepted">Acceptada</span>
+                  {% else %}
+                    <span class="request-status-badge request-status-rejected">Rebutjada</span>
+                  {% endif %}
+                </td>
+                <td class="request-history-cell">
+                  {% if req.status == 'accepted' %}
+                    <span style="font-weight: 600; color: #181c1e;">{{ req.coins_cost }} Coins</span>
+                  {% elif req.status == 'rejected' %}
+                    <span style="color: #747687;">0 Coins</span>
+                  {% else %}
+                    <span style="color: #747687;">{{ req.coins_cost }} Coins</span>
+                  {% endif %}
+                </td>
+                <td class="request-history-cell-last">
+                  <span style="font-size: 0.75rem; color: #747687;">{{ req.created_at|date:"d/m/Y H:i" }}</span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {% for req in user_requests %}
-                <tr>
-                  <td>
-                    {% if req.album_image_url %}
-                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                           class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
-                    {% else %}
-                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                           style="width: 50px; height: 50px;">
-                        <i class="fas fa-music text-white"></i>
-                      </div>
-                    {% endif %}
-                  </td>
-                  <td>{{ req.title }}</td>
-                  <td>{{ req.artist }}</td>
-                  <td>
-                    {% if req.status == 'pending' %}
-                      <span class="badge bg-warning">Pendent</span>
-                    {% elif req.status == 'accepted' %}
-                      <span class="badge bg-success">Acceptada</span>
-                    {% else %}
-                      <span class="badge bg-danger">Rebutjada</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if req.status == 'accepted' %}
-                      {{ req.coins_cost }} Coins
-                    {% elif req.status == 'rejected' %}
-                      <span class="text-muted">0 Coins</span>
-                    {% else %}
-                      {{ req.coins_cost }} Coins (si s'accepta)
-                    {% endif %}
-                  </td>
-                  <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+            {% endfor %}
+          </tbody>
+        </table>
       {% else %}
-        <p class="text-muted">Encara no has demanat cap cançó per aquesta festa.</p>
+        <div class="request-history-empty">
+          <span class="material-symbols-outlined" style="font-size: 3rem; color: #c4c5d8; display: block; margin-bottom: 0.5rem;">inbox</span>
+          Encara no has demanat cap cançó per aquesta festa.
+        </div>
       {% endif %}
     </div>
   </div>
@@ -277,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     resultsDiv.innerHTML = isMobile
       ? '<div class="mobile-empty-state"><i class="fas fa-spinner fa-spin fa-2x mb-2"></i><p class="mb-0">Cercant...</p></div>'
-      : '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+      : '<div class="request-history-empty"><span class="material-symbols-outlined" style="font-size: 3rem; color: #0040e0; display: block; margin-bottom: 0.5rem; animation: spin 1s linear infinite;">progress_activity</span>Cercant al catàleg de Spotify...</div>';
 
     fetch(`{% url "request_song" %}?search=${encodeURIComponent(query)}`)
       .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
@@ -291,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (data.data.tracks && data.data.tracks.length > 0) {
-          let html = isMobile ? '<div class="mobile-list-stack">' : '<div class="row g-2">';
+          let html = isMobile ? '<div class="mobile-list-stack">' : '<div class="request-results-grid">';
           data.data.tracks.forEach(track => {
             const safeTitle = track.title.replace(/"/g, '&quot;');
             const safeArtist = track.artist.replace(/"/g, '&quot;');
@@ -325,26 +652,23 @@ document.addEventListener('DOMContentLoaded', function() {
               `;
             } else {
               html += `
-                <div class="col-6 col-md-4 col-lg-3">
-                  <div class="card h-100 shadow-sm" style="border-radius: 1rem;">
-                    <div class="card-body p-2 text-center">
-                      ${track.album_image_url ?
-                        `<img src="${track.album_image_url}" class="rounded w-100 mb-2" style="aspect-ratio: 1; object-fit: cover;">` :
-                        `<div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-2" style="width: 100%; aspect-ratio: 1;">
-                          <i class="fas fa-music text-white fa-2x"></i>
-                        </div>`
-                      }
-                      <h6 class="mb-1" style="font-size: 0.85rem; line-height: 1.2;">${track.title}</h6>
-                      <p class="text-muted mb-2" style="font-size: 0.75rem;">${track.artist}</p>
-                      <button class="btn btn-success btn-sm w-100 request-song-btn"
-                              data-id="${track.id}"
-                              data-title="${safeTitle}"
-                              data-artist="${safeArtist}"
-                              data-image="${track.album_image_url || ''}">
-                        <i class="fas fa-plus me-1"></i>Demanar ({{ request_cost }} Coins)
-                      </button>
-                    </div>
-                  </div>
+                <div class="request-result-card">
+                  ${track.album_image_url ?
+                    `<img src="${track.album_image_url}" class="request-result-img" alt="${safeTitle}">` :
+                    `<div class="request-result-placeholder">
+                      <span class="material-symbols-outlined" style="font-size: 2rem; color: #747687;">music_note</span>
+                    </div>`
+                  }
+                  <h6 class="request-result-title">${track.title}</h6>
+                  <p class="request-result-artist">${track.artist}</p>
+                  <button class="request-result-btn request-song-btn"
+                          data-id="${track.id}"
+                          data-title="${safeTitle}"
+                          data-artist="${safeArtist}"
+                          data-image="${track.album_image_url || ''}">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">add</span>
+                    Demanar ({{ request_cost }} Coins)
+                  </button>
                 </div>
               `;
             }
@@ -361,14 +685,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           resultsDiv.innerHTML = isMobile
             ? '<div class="mobile-empty-state"><i class="fas fa-search fa-2x mb-2"></i><p class="mb-0">No s\'han trobat resultats</p></div>'
-            : '<div class="alert alert-warning">No s\'han trobat resultats</div>';
+            : '<div class="request-history-empty"><span class="material-symbols-outlined" style="font-size: 3rem; color: #c4c5d8; display: block; margin-bottom: 0.5rem;">search_off</span>No s\'han trobat resultats per aquesta cerca</div>';
         }
       })
       .catch(error => {
         console.error('Error:', error);
         resultsDiv.innerHTML = isMobile
           ? `<div class="mobile-empty-state"><i class="fas fa-exclamation-triangle fa-2x mb-2" style="color: #e74c3c;"></i><p class="mb-0">${error.message || 'Error al cercar cançons'}</p></div>`
-          : `<div class="alert alert-danger">${error.message || 'Error al cercar cançons'}</div>`;
+          : `<div class="request-history-empty"><span class="material-symbols-outlined" style="font-size: 3rem; color: #ba1a1a; display: block; margin-bottom: 0.5rem;">error</span>${error.message || 'Error al cercar cançons'}</div>`;
       });
   }
 

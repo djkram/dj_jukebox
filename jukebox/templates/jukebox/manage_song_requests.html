@@ -2,7 +2,7 @@
 {% block page_title %}Gestionar peticions{% endblock %}
 {% block content %}
 <style>
-  /* Status Badges - Compacte estil mòbil */
+  /* Mobile styles - unchanged */
   .status-badge {
     display: inline-flex;
     align-items: center;
@@ -32,72 +32,364 @@
     color: #333;
     text-shadow: none;
   }
+
+  /* Desktop Sonic Architect styles */
+  @media (min-width: 768px) {
+    /* Pending section header */
+    .pending-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-left: 0.25rem;
+    }
+    .pending-section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pending-section-marker {
+      width: 0.5rem;
+      height: 1.5rem;
+      background: #5e24e1;
+      border-radius: 9999px;
+    }
+    .pending-section-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .pending-section-badge {
+      background: #e7deff;
+      color: #20005f;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* Pending requests table */
+    .pending-table-container {
+      background: #f1f4f7;
+      border-radius: 2rem;
+      padding: 1rem;
+      overflow: hidden;
+    }
+    .pending-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+    }
+    .pending-table thead th {
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #747687;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 1rem 1rem;
+      text-align: left;
+    }
+    .pending-table tbody tr {
+      background: #ffffff;
+      transition: all 200ms ease;
+    }
+    .pending-table tbody tr:hover {
+      background: #e5e8eb;
+    }
+    .pending-table tbody td {
+      padding: 0.75rem 1rem;
+    }
+    .pending-table tbody tr td:first-child {
+      border-radius: 0.75rem 0 0 0.75rem;
+    }
+    .pending-table tbody tr td:last-child {
+      border-radius: 0 0.75rem 0.75rem 0;
+      text-align: right;
+    }
+
+    /* Album covers */
+    .pending-album-img {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      object-fit: cover;
+    }
+    .pending-album-placeholder {
+      width: 3rem;
+      height: 3rem;
+      background: #e0e3e6;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Song info */
+    .pending-song-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .pending-song-title {
+      font-weight: 700;
+      color: #181c1e;
+      font-size: 0.875rem;
+    }
+    .pending-artist {
+      color: #747687;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 0.125rem;
+    }
+
+    /* User info */
+    .pending-user-avatar {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 9999px;
+      background: #dde1ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #002ea8;
+    }
+    .pending-username {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pending-credits {
+      font-size: 0.75rem;
+      color: #747687;
+      font-style: italic;
+    }
+
+    /* Status badges */
+    .pending-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.625rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .pending-status-badge .status-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 9999px;
+    }
+    .pending-status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .pending-status-pending .status-dot {
+      background: #f59e0b;
+    }
+    .pending-status-accepted {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .pending-status-accepted .status-dot {
+      background: #22c55e;
+    }
+    .pending-status-rejected {
+      background: #ffdad6;
+      color: #93000a;
+    }
+    .pending-status-rejected .status-dot {
+      background: #ba1a1a;
+    }
+
+    /* Action buttons */
+    .pending-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .pending-btn-accept {
+      padding: 0.5rem 1.25rem;
+      background: #5e24e1;
+      color: white;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 100ms ease;
+      font-family: 'Epilogue', sans-serif;
+    }
+    .pending-btn-accept:hover {
+      transform: scale(0.98);
+    }
+    .pending-btn-reject {
+      padding: 0.5rem 1.25rem;
+      background: transparent;
+      color: #434655;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: background 200ms ease;
+      font-family: 'Epilogue', sans-serif;
+    }
+    .pending-btn-reject:hover {
+      background: #e0e3e6;
+    }
+
+    /* History section */
+    .history-section-container {
+      background: #f1f4f7;
+      border-radius: 2rem;
+      padding: 1rem;
+      overflow: hidden;
+      margin-top: 3rem;
+    }
+    .history-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(224, 227, 230, 0.3);
+    }
+    .history-section-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-style: italic;
+      margin: 0;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+    }
+    .history-table thead th {
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: #747687;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 1rem 1rem;
+      text-align: left;
+    }
+    .history-table tbody tr {
+      background: #ffffff;
+      transition: all 200ms ease;
+    }
+    .history-table tbody tr:hover {
+      background: #e5e8eb;
+    }
+    .history-table tbody td {
+      padding: 0.75rem 1rem;
+      font-size: 0.8125rem;
+    }
+    .history-table tbody tr td:first-child {
+      border-radius: 0.75rem 0 0 0.75rem;
+    }
+    .history-table tbody tr td:last-child {
+      border-radius: 0 0.75rem 0.75rem 0;
+    }
+
+    .history-album-img {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      object-fit: cover;
+    }
+
+    .history-empty {
+      padding: 3rem;
+      text-align: center;
+      color: #747687;
+      font-weight: 500;
+    }
+  }
 </style>
 <div class="container-fluid">
   <!-- Missatges -->
   <div id="message-area" class="mb-3"></div>
 
-  <!-- Peticions pendents -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-warning text-dark">
-      <h4 class="mb-0">
-        <i class="fas fa-clock me-2"></i>
-        Peticions pendents ({{ pending_requests.count }})
-      </h4>
-    </div>
-    <div class="card-body">
+  <!-- Desktop Layout -->
+  <div class="d-none d-md-block" style="padding-top: 1rem;">
+    <!-- Peticions pendents -->
+    <section>
+      <div class="pending-section-header">
+        <div class="pending-section-title-wrap">
+          <div class="pending-section-marker"></div>
+          <h3 class="pending-section-title">Peticions pendents</h3>
+        </div>
+        <span class="pending-section-badge">{{ pending_requests.count }} Sol·licituds</span>
+      </div>
       {% if pending_requests %}
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
+        <div class="pending-table-container">
+          <table class="pending-table">
             <thead>
               <tr>
-                <th style="width: 80px;"></th>
-                <th>Cançó</th>
-                <th>Artista</th>
-                <th>Demanat per</th>
+                <th>Cançó / Artista</th>
+                <th>Usuari</th>
                 <th>Cost</th>
-                <th>Data</th>
-                <th class="text-center" style="width: 200px;">Accions</th>
+                <th>Data i Hora</th>
+                <th>Accions</th>
               </tr>
             </thead>
             <tbody>
               {% for req in pending_requests %}
-                <tr id="request-{{ req.id }}">
+                <tr id="request-desktop-{{ req.id }}">
                   <td>
-                    {% if req.album_image_url %}
-                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                           class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                    {% else %}
-                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                           style="width: 60px; height: 60px;">
-                        <i class="fas fa-music text-white"></i>
+                    <div class="pending-song-info">
+                      {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="pending-album-img">
+                      {% else %}
+                        <div class="pending-album-placeholder">
+                          <span class="material-symbols-outlined">music_note</span>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <div class="pending-song-title">{{ req.title }}</div>
+                        <div class="pending-artist">{{ req.artist }}</div>
                       </div>
-                    {% endif %}
-                  </td>
-                  <td><strong>{{ req.title }}</strong></td>
-                  <td>{{ req.artist }}</td>
-                  <td>
-                    <i class="fas fa-user me-1"></i>{{ req.user.username }}
-                    <br>
-                    <small class="text-muted">Coins disponibles: {{ req.user.credits }}</small>
+                    </div>
                   </td>
                   <td>
-                    <span class="status-badge status-pending">
-                      <i class="fas fa-coins"></i>{{ req.coins_cost }}
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <div class="pending-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
+                      <div>
+                        <div class="pending-username">{{ req.user.username }}</div>
+                        <div class="pending-credits">{{ req.user.credits }} coins</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="pending-status-badge pending-status-pending">
+                      <span class="status-dot"></span>
+                      {{ req.coins_cost }} coins
                     </span>
                   </td>
-                  <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
-                  <td class="text-center">
-                    <button class="btn btn-success btn-sm me-2 accept-btn"
-                            data-id="{{ req.id }}"
-                            data-user-credits="{{ req.user.credits }}"
-                            data-cost="{{ req.coins_cost }}">
-                      <i class="fas fa-check me-1"></i>Acceptar
-                    </button>
-                    <button class="btn btn-danger btn-sm reject-btn"
-                            data-id="{{ req.id }}">
-                      <i class="fas fa-times me-1"></i>Rebutjar
-                    </button>
+                  <td>
+                    <span style="color: #747687; font-size: 0.75rem;">{{ req.created_at|date:"d/m/Y H:i" }}</span>
+                  </td>
+                  <td>
+                    <div class="pending-actions">
+                      <button class="pending-btn-accept accept-btn"
+                              data-id="{{ req.id }}"
+                              data-user-credits="{{ req.user.credits }}"
+                              data-cost="{{ req.coins_cost }}">
+                        Acceptar
+                      </button>
+                      <button class="pending-btn-reject reject-btn"
+                              data-id="{{ req.id }}">
+                        Rebutjar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
@@ -105,75 +397,229 @@
           </table>
         </div>
       {% else %}
-        <div class="alert alert-info mb-0">
-          <i class="fas fa-info-circle me-2"></i>
+        <div class="history-empty">
           No hi ha peticions pendents en aquest moment.
         </div>
       {% endif %}
+    </section>
+  </div>
+
+  <!-- Mobile Layout -->
+  <div class="d-md-none">
+    <!-- Peticions pendents -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">
+          <i class="fas fa-clock me-2"></i>
+          Peticions pendents ({{ pending_requests.count }})
+        </h4>
+      </div>
+      <div class="card-body">
+        {% if pending_requests %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th style="width: 80px;"></th>
+                  <th>Cançó</th>
+                  <th>Artista</th>
+                  <th>Demanat per</th>
+                  <th>Cost</th>
+                  <th>Data</th>
+                  <th class="text-center" style="width: 200px;">Accions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for req in pending_requests %}
+                  <tr id="request-mobile-{{ req.id }}">
+                    <td>
+                      {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
+                             class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                      {% else %}
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                             style="width: 60px; height: 60px;">
+                          <i class="fas fa-music text-white"></i>
+                        </div>
+                      {% endif %}
+                    </td>
+                    <td><strong>{{ req.title }}</strong></td>
+                    <td>{{ req.artist }}</td>
+                    <td>
+                      <i class="fas fa-user me-1"></i>{{ req.user.username }}
+                      <br>
+                      <small class="text-muted">Coins disponibles: {{ req.user.credits }}</small>
+                    </td>
+                    <td>
+                      <span class="status-badge status-pending">
+                        <i class="fas fa-coins"></i>{{ req.coins_cost }}
+                      </span>
+                    </td>
+                    <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="text-center">
+                      <button class="btn btn-success btn-sm me-2 accept-btn"
+                              data-id="{{ req.id }}"
+                              data-user-credits="{{ req.user.credits }}"
+                              data-cost="{{ req.coins_cost }}">
+                        <i class="fas fa-check me-1"></i>Acceptar
+                      </button>
+                      <button class="btn btn-danger btn-sm reject-btn"
+                              data-id="{{ req.id }}">
+                        <i class="fas fa-times me-1"></i>Rebutjar
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            No hi ha peticions pendents en aquest moment.
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 
-  <!-- Peticions processades (últimes 20) -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-secondary text-white">
-      <h4 class="mb-0">
-        <i class="fas fa-history me-2"></i>
-        Historial de peticions
-      </h4>
-    </div>
-    <div class="card-body">
+  <!-- Desktop History Section -->
+  <div class="d-none d-md-block">
+    <section class="history-section-container">
+      <div class="history-section-header">
+        <h3 class="history-section-title">Historial de peticions</h3>
+      </div>
       {% if processed_requests %}
-        <div class="table-responsive">
-          <table class="table table-sm align-middle">
-            <thead>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Cançó / Artista</th>
+              <th>Usuari</th>
+              <th>Estat</th>
+              <th>Processat per</th>
+              <th>Data i Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in processed_requests %}
               <tr>
-                <th style="width: 60px;"></th>
-                <th>Cançó</th>
-                <th>Artista</th>
-                <th>Usuari</th>
-                <th>Estat</th>
-                <th>Processat per</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for req in processed_requests %}
-                <tr>
-                  <td>
+                <td>
+                  <div class="pending-song-info">
                     {% if req.album_image_url %}
-                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                           class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="history-album-img">
                     {% else %}
-                      <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                           style="width: 40px; height: 40px;">
-                        <i class="fas fa-music text-white fa-xs"></i>
+                      <div class="pending-album-placeholder">
+                        <span class="material-symbols-outlined">music_note</span>
                       </div>
                     {% endif %}
-                  </td>
-                  <td>{{ req.title }}</td>
-                  <td>{{ req.artist }}</td>
-                  <td>{{ req.user.username }}</td>
-                  <td>
-                    {% if req.status == 'accepted' %}
-                      <span class="status-badge status-accepted">
-                        <i class="fas fa-check-circle"></i>Acceptada
-                      </span>
-                    {% else %}
-                      <span class="status-badge status-rejected">
-                        <i class="fas fa-times-circle"></i>Rebutjada
-                      </span>
-                    {% endif %}
-                  </td>
-                  <td>{{ req.processed_by.username|default:"-" }}</td>
-                  <td>{{ req.processed_at|date:"d/m/Y H:i" }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+                    <div>
+                      <div class="pending-song-title">{{ req.title }}</div>
+                      <div class="pending-artist">{{ req.artist }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="pending-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
+                    <span class="pending-username">{{ req.user.username }}</span>
+                  </div>
+                </td>
+                <td>
+                  {% if req.status == 'accepted' %}
+                    <span class="pending-status-badge pending-status-accepted">
+                      <span class="status-dot"></span>
+                      Acceptat
+                    </span>
+                  {% else %}
+                    <span class="pending-status-badge pending-status-rejected">
+                      <span class="status-dot"></span>
+                      Rebutjada
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span style="color: #434655; font-size: 0.75rem; font-weight: 500; font-style: italic;">
+                    {{ req.processed_by.username|default:"-" }}
+                  </span>
+                </td>
+                <td>
+                  <span style="color: #747687; font-size: 0.75rem;">{{ req.processed_at|date:"d/m/Y H:i" }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       {% else %}
-        <p class="text-muted mb-0">Encara no s'ha processat cap petició.</p>
+        <div class="history-empty">
+          Encara no s'ha processat cap petició.
+        </div>
       {% endif %}
+    </section>
+  </div>
+
+  <!-- Mobile History Section -->
+  <div class="d-md-none">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0">
+          <i class="fas fa-history me-2"></i>
+          Historial de peticions
+        </h4>
+      </div>
+      <div class="card-body">
+        {% if processed_requests %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th style="width: 60px;"></th>
+                  <th>Cançó</th>
+                  <th>Artista</th>
+                  <th>Usuari</th>
+                  <th>Estat</th>
+                  <th>Processat per</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for req in processed_requests %}
+                  <tr>
+                    <td>
+                      {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
+                             class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                      {% else %}
+                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px;">
+                          <i class="fas fa-music text-white fa-xs"></i>
+                        </div>
+                      {% endif %}
+                    </td>
+                    <td>{{ req.title }}</td>
+                    <td>{{ req.artist }}</td>
+                    <td>{{ req.user.username }}</td>
+                    <td>
+                      {% if req.status == 'accepted' %}
+                        <span class="status-badge status-accepted">
+                          <i class="fas fa-check-circle"></i>Acceptada
+                        </span>
+                      {% else %}
+                        <span class="status-badge status-rejected">
+                          <i class="fas fa-times-circle"></i>Rebutjada
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td>{{ req.processed_by.username|default:"-" }}</td>
+                    <td>{{ req.processed_at|date:"d/m/Y H:i" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">Encara no s'ha processat cap petició.</p>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

@@ -3,76 +3,302 @@
 
 {% block extra_head %}
 <style>
-  .notification-card {
-    transition: all 0.3s ease;
-    border: 1px solid #e3e6f0;
-  }
+  /* Notifications Page - Sonic Architect Style (Desktop only) */
+  @media (min-width: 768px) {
+    .notif-card {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 200ms;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      border-left: 4px solid transparent;
+    }
+    .notif-card:hover {
+      background: #f7fafd;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .notif-card.unread {
+      border-left-color: #0040e0;
+      background: #f7fafd;
+    }
 
-  .notification-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #4e73df;
-  }
+    .notif-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 200ms;
+    }
+    .notif-card:hover .notif-icon {
+      transform: scale(1.05);
+    }
+    .notif-icon .material-symbols-outlined {
+      font-size: 1.75rem;
+      font-variation-settings: 'FILL' 1;
+    }
+    .notif-icon-accepted {
+      background: rgba(28,200,138,0.15);
+      color: #1cc88a;
+    }
+    .notif-icon-played {
+      background: rgba(0,64,224,0.15);
+      color: #0040e0;
+    }
+    .notif-icon-purchased {
+      background: rgba(246,194,62,0.15);
+      color: #f6c23e;
+    }
+    .notif-icon-received {
+      background: rgba(0,227,253,0.15);
+      color: #00e3fd;
+    }
 
-  .notification-card.unread {
-    background: linear-gradient(to right, #f8f9fe, #ffffff);
-    border-left: 4px solid #4e73df;
-  }
+    .notif-content {
+      flex-grow: 1;
+      min-width: 0;
+    }
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+      gap: 1rem;
+    }
+    .notif-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin: 0;
+      line-height: 1.3;
+    }
+    .notif-time {
+      font-size: 0.75rem;
+      color: #747687;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .notif-message {
+      font-size: 0.875rem;
+      color: #434655;
+      margin: 0 0 0.75rem 0;
+      line-height: 1.5;
+    }
+    .notif-badge-new {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      background: #0040e0;
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .notif-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .notif-meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+    }
+    .notif-meta-badge.coins {
+      background: rgba(246,194,62,0.15);
+      color: #f6c23e;
+    }
+    .notif-meta-badge.free {
+      background: rgba(28,200,138,0.15);
+      color: #1cc88a;
+    }
+    .notif-album-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 200ms;
+    }
+    .notif-card:hover .notif-album-img {
+      transform: scale(1.05);
+    }
 
-  .notification-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
+    .notif-sidebar {
+      position: sticky;
+      top: 20px;
+    }
+    .notif-info-card {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .notif-info-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(116,118,136,0.1);
+    }
+    .notif-info-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: rgba(94,36,225,0.15);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notif-info-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+      color: #181c1e;
+    }
+    .notif-info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .notif-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .notif-info-item-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .notif-info-item-icon .material-symbols-outlined {
+      font-size: 1rem;
+    }
+    .notif-info-item-text {
+      font-size: 0.75rem;
+      color: #434655;
+      margin: 0;
+    }
+    .notif-info-item-label {
+      font-weight: 700;
+      color: #181c1e;
+      display: block;
+      margin-bottom: 0.125rem;
+    }
+    .notif-info-alert {
+      background: rgba(0,64,224,0.08);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .notif-info-alert .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+    }
+    .notif-info-alert-text {
+      font-size: 0.75rem;
+      color: #434655;
+      margin: 0;
+      line-height: 1.4;
+    }
 
-  .notification-card:hover .notification-icon {
-    transform: scale(1.1);
-  }
-
-  .icon-song-accepted {
-    background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-  }
-
-  .icon-song-played {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-  }
-
-  .icon-coins-purchased {
-    background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
-  }
-
-  .icon-coins-received {
-    background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
-  }
-
-  .date-divider {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #5a5c69;
-    margin: 1.5rem 0 1rem 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .album-preview {
-    transition: transform 0.3s ease;
-  }
-
-  .notification-card:hover .album-preview {
-    transform: scale(1.05);
-  }
-
-  .badge-new {
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    .notif-empty {
+      background: #f1f4f7;
+      border-radius: 1rem;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    .notif-empty-icon {
+      width: 8rem;
+      height: 8rem;
+      margin: 0 auto 1.5rem;
+      background: rgba(0,64,224,0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notif-empty-icon .material-symbols-outlined {
+      font-size: 4rem;
+      color: #0040e0;
+    }
+    .notif-empty-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin-bottom: 0.5rem;
+    }
+    .notif-empty-text {
+      color: #747687;
+      margin-bottom: 1.5rem;
+    }
+    .notif-empty-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    .notif-empty-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 200ms;
+    }
+    .notif-empty-btn-primary {
+      background: #0040e0;
+      color: white;
+    }
+    .notif-empty-btn-primary:hover {
+      background: #002ea8;
+      color: white;
+    }
+    .notif-empty-btn-secondary {
+      background: #e0e3e6;
+      color: #181c1e;
+    }
+    .notif-empty-btn-secondary:hover {
+      background: #d7dadd;
+      color: #181c1e;
+    }
   }
 
   /* Mobile touch effects */
@@ -86,93 +312,70 @@
       opacity: 0.9;
     }
   }
-
-  /* Smooth page entry animation */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .notification-card, .mobile-notification-card {
-    animation: fadeInUp 0.5s ease forwards;
-  }
-
-  .notification-card:nth-child(1) { animation-delay: 0.05s; }
-  .notification-card:nth-child(2) { animation-delay: 0.1s; }
-  .notification-card:nth-child(3) { animation-delay: 0.15s; }
-  .notification-card:nth-child(4) { animation-delay: 0.2s; }
-  .notification-card:nth-child(5) { animation-delay: 0.25s; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Vista Desktop (ENHANCED) -->
-<div class="container-fluid d-none d-md-block">
+<!-- Vista Desktop - Sonic Architect -->
+<div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
+
   {% if notifications %}
-    <div class="row">
+    <div class="row g-4">
       <div class="col-lg-8">
         {% for notification in notifications %}
-          <div class="card notification-card mb-3 {% if not notification.is_read %}unread{% endif %}">
-            <div class="card-body p-4">
-              <div class="d-flex align-items-start">
-                <!-- Icon with colored background -->
-                <div class="notification-icon me-4 {% if notification.type == 'song_accepted' %}icon-song-accepted{% elif notification.type == 'song_played' %}icon-song-played{% elif notification.type == 'coins_purchased' %}icon-coins-purchased{% elif notification.type == 'coins_received' %}icon-coins-received{% endif %}">
-                  <i class="fas {% if notification.type == 'song_accepted' %}fa-check-circle{% elif notification.type == 'song_played' %}fa-play-circle{% elif notification.type == 'coins_purchased' %}fa-shopping-cart{% elif notification.type == 'coins_received' %}fa-gift{% endif %} fa-2x text-white"></i>
-                </div>
+          <div class="notif-card {% if not notification.is_read %}unread{% endif %}">
+            <!-- Icon -->
+            <div class="notif-icon {% if notification.type == 'song_accepted' %}notif-icon-accepted{% elif notification.type == 'song_played' %}notif-icon-played{% elif notification.type == 'coins_purchased' %}notif-icon-purchased{% elif notification.type == 'coins_received' %}notif-icon-received{% endif %}">
+              <span class="material-symbols-outlined">
+                {% if notification.type == 'song_accepted' %}check_circle{% elif notification.type == 'song_played' %}play_circle{% elif notification.type == 'coins_purchased' %}shopping_cart{% elif notification.type == 'coins_received' %}card_giftcard{% endif %}
+              </span>
+            </div>
 
-                <!-- Content -->
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="mb-0 fw-bold" style="color: #2e3440;">{{ notification.title }}</h5>
-                    <div class="text-end">
-                      <small class="text-muted d-block" style="font-size: 0.8rem;">
-                        <i class="far fa-clock me-1"></i>{{ notification.created_at|timesince }} enrere
-                      </small>
-                      {% if not notification.is_read %}
-                        <span class="badge bg-primary badge-new mt-2">
-                          <i class="fas fa-star me-1"></i>Nou
-                        </span>
-                      {% endif %}
-                    </div>
-                  </div>
-
-                  <p class="mb-2 text-muted" style="font-size: 0.95rem;">{{ notification.message }}</p>
-
-                  <!-- Type-specific content -->
-                  {% if notification.type == 'song_accepted' %}
-                    <div class="mt-3">
-                      {% if notification.amount is not None %}
-                        <span class="badge bg-light text-dark border">
-                          <i class="fas fa-coins me-1"></i>Cost: {{ notification.amount }} Coins
-                        </span>
-                      {% else %}
-                        <span class="badge bg-success-soft text-success">
-                          <i class="fas fa-gift me-1"></i>Sense càrrec
-                        </span>
-                      {% endif %}
-                    </div>
-                  {% elif notification.type == 'song_played' %}
-                    {% if notification.song.album_image_url %}
-                      <div class="mt-3">
-                        <img src="{{ notification.song.album_image_url }}" alt="{{ notification.song.title }}"
-                             class="rounded shadow-sm album-preview" style="width: 80px; height: 80px; object-fit: cover;">
-                      </div>
-                    {% endif %}
-                  {% elif notification.type == 'coins_purchased' or notification.type == 'coins_received' %}
-                    <div class="mt-3">
-                      <span class="badge {% if notification.type == 'coins_purchased' %}bg-warning{% else %}bg-info{% endif %} text-white" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                        <i class="fas fa-plus-circle me-1"></i>{{ notification.amount }} Coins
-                      </span>
-                    </div>
+            <!-- Content -->
+            <div class="notif-content">
+              <div class="notif-header">
+                <h3 class="notif-title">{{ notification.title }}</h3>
+                <div class="d-flex flex-column align-items-end gap-1">
+                  <p class="notif-time">
+                    <span class="material-symbols-outlined" style="font-size: 0.875rem;">schedule</span>
+                    {{ notification.created_at|timesince }}
+                  </p>
+                  {% if not notification.is_read %}
+                    <span class="notif-badge-new">
+                      <span class="material-symbols-outlined" style="font-size: 0.75rem;">fiber_new</span>
+                      Nou
+                    </span>
                   {% endif %}
                 </div>
+              </div>
+
+              <p class="notif-message">{{ notification.message }}</p>
+
+              <!-- Type-specific content -->
+              <div class="notif-meta">
+                {% if notification.type == 'song_accepted' %}
+                  {% if notification.amount is not None %}
+                    <span class="notif-meta-badge coins">
+                      <span class="material-symbols-outlined" style="font-size: 0.875rem;">monetization_on</span>
+                      Cost: {{ notification.amount }} Coins
+                    </span>
+                  {% else %}
+                    <span class="notif-meta-badge free">
+                      <span class="material-symbols-outlined" style="font-size: 0.875rem;">card_giftcard</span>
+                      Sense càrrec
+                    </span>
+                  {% endif %}
+                {% elif notification.type == 'song_played' %}
+                  {% if notification.song.album_image_url %}
+                    <img src="{{ notification.song.album_image_url }}" alt="{{ notification.song.title }}" class="notif-album-img">
+                  {% endif %}
+                {% elif notification.type == 'coins_purchased' or notification.type == 'coins_received' %}
+                  <span class="notif-meta-badge coins">
+                    <span class="material-symbols-outlined" style="font-size: 0.875rem;">add_circle</span>
+                    +{{ notification.amount }} Coins
+                  </span>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -180,57 +383,57 @@
       </div>
 
       <div class="col-lg-4">
-        <!-- Info Card -->
-        <div class="card border-0 shadow-sm sticky-top mb-4" style="top: 20px;">
-          <div class="card-header border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-            <h5 class="mb-0 fw-bold">
-              <i class="fas fa-info-circle me-2"></i>
-              Sobre les notificacions
-            </h5>
-          </div>
-          <div class="card-body p-4">
-            <p class="mb-3 fw-semibold" style="color: #5a5c69;">Rebràs notificacions quan:</p>
-            <ul class="list-unstyled">
-              <li class="mb-3 d-flex align-items-start">
-                <div class="notification-icon icon-song-accepted me-3" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                  <i class="fas fa-check text-white"></i>
+        <div class="notif-sidebar">
+          <div class="notif-info-card">
+            <div class="notif-info-header">
+              <div class="notif-info-icon">
+                <span class="material-symbols-outlined" style="color: #5e24e1;">info</span>
+              </div>
+              <h3 class="notif-info-title">Com funciona</h3>
+            </div>
+
+            <div class="notif-info-list">
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-accepted">
+                  <span class="material-symbols-outlined">check</span>
                 </div>
                 <div>
-                  <strong class="d-block">Cançó acceptada</strong>
-                  <small class="text-muted">El DJ accepta la teva petició</small>
+                  <span class="notif-info-item-label">Cançó acceptada</span>
+                  <p class="notif-info-item-text">El DJ accepta la teva petició</p>
                 </div>
-              </li>
-              <li class="mb-3 d-flex align-items-start">
-                <div class="notification-icon icon-song-played me-3" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                  <i class="fas fa-play text-white"></i>
-                </div>
-                <div>
-                  <strong class="d-block">Cançó reproduïda</strong>
-                  <small class="text-muted">S'ha reproduït una cançó votada</small>
-                </div>
-              </li>
-              <li class="mb-3 d-flex align-items-start">
-                <div class="notification-icon icon-coins-purchased me-3" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                  <i class="fas fa-shopping-cart text-white"></i>
+              </div>
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-played">
+                  <span class="material-symbols-outlined">play_arrow</span>
                 </div>
                 <div>
-                  <strong class="d-block">Compra realitzada</strong>
-                  <small class="text-muted">Coins afegits al teu saldo</small>
+                  <span class="notif-info-item-label">Cançó reproduïda</span>
+                  <p class="notif-info-item-text">S'ha reproduït una cançó votada</p>
                 </div>
-              </li>
-              <li class="mb-3 d-flex align-items-start">
-                <div class="notification-icon icon-coins-received me-3" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                  <i class="fas fa-gift text-white"></i>
+              </div>
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-purchased">
+                  <span class="material-symbols-outlined">shopping_cart</span>
                 </div>
                 <div>
-                  <strong class="d-block">Coins de regal</strong>
-                  <small class="text-muted">Has rebut coins gratuïts</small>
+                  <span class="notif-info-item-label">Compra realitzada</span>
+                  <p class="notif-info-item-text">Coins afegits al teu saldo</p>
                 </div>
-              </li>
-            </ul>
-            <div class="alert alert-light border mb-0 mt-3">
-              <i class="fas fa-lightbulb text-warning me-2"></i>
-              <small class="text-muted">Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina.</small>
+              </div>
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-received">
+                  <span class="material-symbols-outlined">card_giftcard</span>
+                </div>
+                <div>
+                  <span class="notif-info-item-label">Coins de regal</span>
+                  <p class="notif-info-item-text">Has rebut coins gratuïts</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="notif-info-alert">
+              <span class="material-symbols-outlined">lightbulb</span>
+              <p class="notif-info-alert-text">Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina.</p>
             </div>
           </div>
         </div>
@@ -238,22 +441,21 @@
     </div>
   {% else %}
     <div class="row justify-content-center">
-      <div class="col-lg-6">
-        <div class="card border-0 shadow-sm text-center p-5">
-          <div class="mb-4">
-            <div class="d-inline-flex align-items-center justify-content-center rounded-circle"
-                 style="width: 120px; height: 120px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-              <i class="fas fa-bell-slash fa-3x" style="color: #42a5f5;"></i>
-            </div>
+      <div class="col-lg-8">
+        <div class="notif-empty">
+          <div class="notif-empty-icon">
+            <span class="material-symbols-outlined">notifications_off</span>
           </div>
-          <h3 class="mb-3 fw-bold" style="color: #2e3440;">No tens notificacions</h3>
-          <p class="text-muted mb-4">Quan succeixin esdeveniments importants a les festes, rebràs notificacions aquí!</p>
-          <div class="d-flex justify-content-center gap-2">
-            <a href="{% url 'song_list' %}" class="btn btn-primary">
-              <i class="fas fa-music me-2"></i>Vota cançons
+          <h3 class="notif-empty-title">No tens notificacions</h3>
+          <p class="notif-empty-text">Quan succeixin esdeveniments importants a les festes, rebràs notificacions aquí!</p>
+          <div class="notif-empty-actions">
+            <a href="{% url 'song_list' %}" class="notif-empty-btn notif-empty-btn-primary">
+              <span class="material-symbols-outlined" style="font-size: 1.125rem;">music_note</span>
+              Vota cançons
             </a>
-            <a href="{% url 'request_song' %}" class="btn btn-outline-primary">
-              <i class="fas fa-plus me-2"></i>Demana cançó
+            <a href="{% url 'request_song' %}" class="notif-empty-btn notif-empty-btn-secondary">
+              <span class="material-symbols-outlined" style="font-size: 1.125rem;">add</span>
+              Demana cançó
             </a>
           </div>
         </div>

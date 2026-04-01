@@ -2,8 +2,310 @@
 {% block page_title %}Compra Coins{% endblock %}
 {% block content %}
 
-<!-- Vista Desktop (ORIGINAL) -->
-<div class="container py-2 d-none d-md-block">
+<style>
+  /* Sonic Desktop Styles */
+  @media (min-width: 768px) {
+    .coins-page-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .coins-stats-row {
+      display: flex;
+      gap: 1rem;
+    }
+    .coins-stat-card {
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 200px;
+    }
+    .coins-stat-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .coins-stat-icon.primary {
+      background: rgba(0,64,224,0.1);
+      color: #0040e0;
+    }
+    .coins-stat-icon.tertiary {
+      background: rgba(94,36,225,0.1);
+      color: #5e24e1;
+    }
+    .coins-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #747687;
+    }
+    .coins-stat-value {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #181c1e;
+      line-height: 1;
+    }
+
+    .coins-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+    }
+
+    .coins-section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .coins-section-marker {
+      width: 2rem;
+      height: 0.25rem;
+      background: #0040e0;
+      border-radius: 9999px;
+    }
+    .coins-section-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .coins-packages-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .coins-package-card {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 300ms;
+      box-shadow: 0 1px 3px rgba(0,64,224,0.05);
+      position: relative;
+    }
+    .coins-package-card:hover {
+      background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,64,224,0.2);
+    }
+    .coins-package-card:hover * {
+      color: white !important;
+    }
+    .coins-package-card.featured {
+      background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+      transform: scale(1.05);
+      box-shadow: 0 12px 24px rgba(0,64,224,0.3);
+    }
+    .coins-package-card.featured * {
+      color: white !important;
+    }
+    .coins-package-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #00e3fd;
+      color: #0040e0;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.25rem 1rem;
+      border-radius: 0 1.5rem 0 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .coins-package-icon {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      background: rgba(0,64,224,0.05);
+      transition: background 300ms;
+    }
+    .coins-package-card:hover .coins-package-icon,
+    .coins-package-card.featured .coins-package-icon {
+      background: rgba(255,255,255,0.2);
+    }
+    .coins-package-amount {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.875rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      color: #181c1e;
+    }
+    .coins-package-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #434655;
+      margin-bottom: 1.5rem;
+    }
+    .coins-package-price {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0040e0;
+      margin-bottom: 1rem;
+    }
+    .coins-package-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      background: #e0e3e6;
+      color: #181c1e;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .coins-package-card:hover .coins-package-btn,
+    .coins-package-card.featured .coins-package-btn {
+      background: white;
+      color: #0040e0;
+    }
+
+    .coins-bonus-card {
+      background: #f1f4f7;
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+    }
+    .coins-bonus-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    .coins-bonus-item {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .coins-bonus-from, .coins-bonus-to {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .coins-bonus-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .coins-bonus-icon.primary {
+      background: rgba(0,64,224,0.1);
+      color: #0040e0;
+    }
+    .coins-bonus-icon.tertiary {
+      background: rgba(94,36,225,0.1);
+      color: #5e24e1;
+    }
+    .coins-bonus-amount {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+    .coins-bonus-label {
+      font-size: 0.75rem;
+      color: #434655;
+      font-weight: 600;
+    }
+
+    .coins-info-panel {
+      background: #e5e8eb;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      position: sticky;
+      top: 7rem;
+    }
+    .coins-info-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      background: white;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+    .coins-info-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .coins-info-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .coins-info-step-number {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: #0040e0;
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .coins-info-step-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .coins-info-step-text {
+      font-size: 0.875rem;
+      color: #434655;
+      line-height: 1.5;
+    }
+    .coins-info-secure {
+      margin-top: 2.5rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: rgba(0,64,224,0.05);
+      border: 1px solid rgba(0,64,224,0.1);
+    }
+    .coins-info-secure-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0040e0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+
+<!-- Vista Desktop (SONIC) -->
+<div class="container-fluid py-4 d-none d-md-block" style="max-width: 1200px;">
   <!-- Missatges d'error -->
   {% if error %}
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -13,278 +315,236 @@
   </div>
   {% endif %}
 
-  <!-- Resum: Coins, Vots i Com funciona -->
-  <div class="row mb-2 g-2">
-    <div class="col-md-4 col-lg-3">
-      <div class="card border-warning shadow-sm" style="border-left-width: 4px; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <i class="fas fa-coins fa-lg text-warning"></i>
-            </div>
-            <div class="flex-grow-1 ms-2">
-              <div class="text-muted" style="font-size: 0.7rem;">Coins actuals</div>
-              <div class="fs-4 fw-bold text-warning mb-0" style="line-height: 1;">{{ credits }}</div>
-              {% if credits == 0 %}
-                <small class="text-muted" style="font-size: 0.7rem;">Compra coins</small>
-              {% else %}
-                <small class="text-success" style="font-size: 0.7rem;">Pots convertir</small>
-              {% endif %}
-            </div>
-          </div>
+  <!-- Stats -->
+  <div class="coins-page-header">
+    <div class="coins-stats-row">
+      <div class="coins-stat-card">
+        <div class="coins-stat-icon primary">
+          <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1;">monetization_on</span>
+        </div>
+        <div>
+          <div class="coins-stat-label">Coins actuals</div>
+          <div class="coins-stat-value">{{ credits }}</div>
         </div>
       </div>
-    </div>
-    <div class="col-md-4 col-lg-3">
-      <div class="card border-primary shadow-sm" style="border-left-width: 4px; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="d-flex align-items-center">
-            <div class="flex-shrink-0">
-              <i class="fas fa-vote-yea fa-lg text-primary"></i>
-            </div>
-            <div class="flex-grow-1 ms-2">
-              <div class="text-muted" style="font-size: 0.7rem;">Vots disponibles</div>
-              <div class="fs-4 fw-bold text-primary mb-0" style="line-height: 1;">{{ votes_left }}</div>
-              {% if votes_left == 0 %}
-                <small class="text-danger" style="font-size: 0.7rem;">Converteix coins</small>
-              {% else %}
-                <small class="text-success" style="font-size: 0.7rem;">A punt per votar</small>
-              {% endif %}
-            </div>
-          </div>
+
+      <div class="coins-stat-card">
+        <div class="coins-stat-icon tertiary">
+          <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1;">thumb_up</span>
         </div>
-      </div>
-    </div>
-    <div class="col-md-4 col-lg-6">
-      <div class="alert alert-info py-1 px-2 mb-0 h-100 d-flex flex-column justify-content-center">
-        <small class="mb-1 fw-bold">
-          <i class="fas fa-info-circle me-1"></i>Com funciona?
-        </small>
-        <ol class="mb-1 ps-3" style="font-size: 0.7rem;">
-          <li><strong>Compra Coins</strong> amb diners reals</li>
-          <li><strong>Converteix Coins a Vots</strong> (amb bonus)</li>
-          <li><strong>Vota</strong> les teves cançons favorites</li>
-        </ol>
-        <p class="mb-0" style="font-size: 0.65rem;">
-          <i class="fas fa-lightbulb text-warning me-1"></i>
-          Pots comprar Coins ara i convertir-los més tard!
-        </p>
+        <div>
+          <div class="coins-stat-label">Vots disponibles</div>
+          <div class="coins-stat-value">{{ votes_left }}</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Convertir Coins a Vots amb botons -->
-  {% if credits > 0 %}
-  <div class="card border-info shadow-sm mb-2">
-    <div class="card-header bg-info text-white py-1 px-2">
-      <small class="mb-0 fw-bold">
-        <i class="fas fa-sync-alt me-1"></i>
-        Converteix Coins a Vots (més converteixes, més bonus)
-      </small>
-    </div>
-    <div class="card-body p-2">
-      <div class="row g-1">
-        {% if credits >= 1 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="1">
-            <button type="submit" class="btn btn-outline-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>1</strong> Coin</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>2</strong> Vots</div>
-            </button>
-          </form>
+  <!-- Grid Layout -->
+  <div class="coins-grid">
+    <!-- Left Column: Purchase & Conversion -->
+    <div>
+      <!-- Purchase Packs -->
+      <div class="mb-5">
+        <div class="coins-section-header">
+          <div class="coins-section-marker"></div>
+          <h2 class="coins-section-title">Comprar Coins amb diners reals</h2>
         </div>
-        {% endif %}
-        {% if credits >= 2 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="2">
-            <button type="submit" class="btn btn-outline-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>2</strong> Coins</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>4</strong> Vots</div>
-            </button>
-          </form>
-        </div>
-        {% endif %}
-        {% if credits >= 3 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="3">
-            <button type="submit" class="btn btn-outline-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>3</strong> Coins</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>6</strong> Vots</div>
-            </button>
-          </form>
-        </div>
-        {% endif %}
-        {% if credits >= 5 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="5">
-            <button type="submit" class="btn btn-outline-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>5</strong> Coins</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>11</strong> Vots</div>
-              <div style="font-size: 0.6rem;" class="text-success">🌟 +1</div>
-            </button>
-          </form>
-        </div>
-        {% endif %}
-        {% if credits >= 10 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="10">
-            <button type="submit" class="btn btn-outline-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>10</strong> Coins</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>25</strong> Vots</div>
-              <div style="font-size: 0.6rem;" class="text-success">🌟🌟 +5</div>
-            </button>
-          </form>
-        </div>
-        {% endif %}
-        {% if credits >= 20 %}
-        <div class="col-6 col-sm-4 col-md-2">
-          <form method="post" class="h-100">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="convert_coins">
-            <input type="hidden" name="coins_to_convert" value="20">
-            <button type="submit" class="btn btn-info btn-sm w-100 h-100 py-1">
-              <div style="font-size: 0.7rem;"><strong>20</strong> Coins</div>
-              <i class="fas fa-arrow-down" style="font-size: 0.6rem;"></i>
-              <div style="font-size: 0.7rem;"><strong>60</strong> Vots</div>
-              <div style="font-size: 0.6rem;" class="text-white">🌟🌟🌟 +20</div>
-            </button>
-          </form>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Paquets amb botons grans -->
-  <div class="card shadow-sm mb-2">
-    <div class="card-header bg-warning text-dark py-1 px-2">
-      <small class="mb-0 fw-bold">
-        <i class="fas fa-shopping-cart me-1"></i>
-        Comprar Coins amb diners reals
-      </small>
-    </div>
-    <div class="card-body p-2">
-      <div class="row g-2">
-        <!-- Paquet 1: 10 coins -->
-        <div class="col-4">
+        <div class="coins-packages-grid">
+          <!-- Pack 1 -->
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="votes" value="10">
-            <button type="submit" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center py-2">
-              <i class="fas fa-coins fa-lg mb-1 text-warning"></i>
-              <div class="fw-bold small">10 Coins</div>
-              <small class="text-muted">2€</small>
+            <button type="submit" class="coins-package-card" style="border: none; width: 100%;">
+              <div class="coins-package-icon">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #0040e0; font-variation-settings: 'FILL' 1;">toll</span>
+              </div>
+              <div class="coins-package-amount">10 Coins</div>
+              <div class="coins-package-label">Iniciació sonora</div>
+              <div class="coins-package-price">2€</div>
+              <div class="coins-package-btn">Comprar</div>
             </button>
           </form>
-        </div>
 
-        <!-- Paquet 2: 30 coins -->
-        <div class="col-4">
+          <!-- Pack 2 (Featured) -->
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="votes" value="30">
-            <button type="submit" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center py-2">
-              <i class="fas fa-coins fa-lg mb-1 text-warning"></i>
-              <div class="fw-bold small">30 Coins</div>
-              <small class="text-muted">5€</small>
+            <button type="submit" class="coins-package-card featured" style="border: none; width: 100%;">
+              <div class="coins-package-badge">Més popular</div>
+              <div class="coins-package-icon">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; font-variation-settings: 'FILL' 1;">poker_chip</span>
+              </div>
+              <div class="coins-package-amount">30 Coins</div>
+              <div class="coins-package-label">Pack Estàndard</div>
+              <div class="coins-package-price">5€</div>
+              <div class="coins-package-btn">Comprar</div>
             </button>
           </form>
-        </div>
 
-        <!-- Paquet 3: 70 coins -->
-        <div class="col-4">
+          <!-- Pack 3 -->
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="votes" value="70">
-            <button type="submit" class="btn btn-outline-warning btn-sm w-100 d-flex flex-column align-items-center justify-content-center py-2 position-relative">
-              <span class="badge bg-success position-absolute top-0 end-0" style="font-size: 0.6rem;">Millor</span>
-              <i class="fas fa-coins fa-lg mb-1 text-warning"></i>
-              <div class="fw-bold small">70 Coins</div>
-              <small class="text-muted">10€</small>
+            <button type="submit" class="coins-package-card" style="border: none; width: 100%;">
+              <div class="coins-package-icon">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #0040e0; font-variation-settings: 'FILL' 1;">payments</span>
+              </div>
+              <div class="coins-package-amount">70 Coins</div>
+              <div class="coins-package-label">Expert Sessions</div>
+              <div class="coins-package-price">10€</div>
+              <div class="coins-package-btn">Comprar</div>
             </button>
           </form>
         </div>
       </div>
 
-      <div class="text-center mt-2">
-        <a href="{% url 'song_list' %}" class="btn btn-outline-secondary btn-sm py-0 px-2">
-          <i class="fas fa-arrow-left"></i> Tornar
-        </a>
-      </div>
-    </div>
-  </div>
+      <!-- Bonus System -->
+      <div>
+        <div class="coins-section-header">
+          <div class="coins-section-marker" style="background: #5e24e1;"></div>
+          <h2 class="coins-section-title">Sistema de Bonus</h2>
+        </div>
+        <div class="coins-bonus-card">
+          <div class="coins-bonus-grid">
+            <div class="coins-bonus-item">
+              <div class="coins-bonus-from">
+                <div class="coins-bonus-icon primary">
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                </div>
+                <div>
+                  <div class="coins-bonus-amount">5 Coins</div>
+                  <div class="coins-bonus-label">Conversió mínima</div>
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
+              <div class="coins-bonus-to">
+                <div>
+                  <div class="coins-bonus-amount" style="color: #5e24e1;">11 Vots</div>
+                  <div class="coins-bonus-label">+10% Bonus</div>
+                </div>
+                <div class="coins-bonus-icon tertiary">
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                </div>
+              </div>
+            </div>
 
-  <!-- Sistema de bonus -->
-  <div class="card border-success">
-    <div class="card-header bg-success text-white py-1 px-2">
-      <small class="mb-0 fw-bold">
-        <i class="fas fa-gift me-1"></i>
-        Sistema de Bonus
-      </small>
-    </div>
-    <div class="card-body p-2">
-      <div class="row text-center g-1">
-        <div class="col-3">
-          <div class="border rounded p-1">
-            <div class="text-warning fw-bold" style="font-size: 0.7rem;">1-3 Coins</div>
-            <i class="fas fa-arrow-down text-muted" style="font-size: 0.6rem;"></i>
-            <div class="text-primary fw-bold" style="font-size: 0.7rem;">x2 Vots</div>
-            <div class="text-muted" style="font-size: 0.6rem;">-</div>
-          </div>
-        </div>
-        <div class="col-3">
-          <div class="border rounded p-1">
-            <div class="text-warning fw-bold" style="font-size: 0.7rem;">5 Coins</div>
-            <i class="fas fa-arrow-down text-muted" style="font-size: 0.6rem;"></i>
-            <div class="text-primary fw-bold" style="font-size: 0.7rem;">11 Vots</div>
-            <div class="text-success" style="font-size: 0.6rem;"><i class="fas fa-star"></i> +1</div>
-          </div>
-        </div>
-        <div class="col-3">
-          <div class="border rounded p-1">
-            <div class="text-warning fw-bold" style="font-size: 0.7rem;">10 Coins</div>
-            <i class="fas fa-arrow-down text-muted" style="font-size: 0.6rem;"></i>
-            <div class="text-primary fw-bold" style="font-size: 0.7rem;">25 Vots</div>
-            <div class="text-success" style="font-size: 0.6rem;"><i class="fas fa-star"></i><i class="fas fa-star"></i> +5</div>
-          </div>
-        </div>
-        <div class="col-3">
-          <div class="border rounded p-1 bg-light">
-            <div class="text-warning fw-bold" style="font-size: 0.7rem;">20 Coins</div>
-            <i class="fas fa-arrow-down text-muted" style="font-size: 0.6rem;"></i>
-            <div class="text-primary fw-bold" style="font-size: 0.7rem;">60 Vots</div>
-            <div class="text-success fw-bold" style="font-size: 0.6rem;">
-              <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> +20
+            <div class="coins-bonus-item">
+              <div class="coins-bonus-from">
+                <div class="coins-bonus-icon primary">
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                </div>
+                <div>
+                  <div class="coins-bonus-amount">20 Coins</div>
+                  <div class="coins-bonus-label">Inversió mitjana</div>
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
+              <div class="coins-bonus-to">
+                <div>
+                  <div class="coins-bonus-amount" style="color: #5e24e1;">60 Vots</div>
+                  <div class="coins-bonus-label">+50% Bonus</div>
+                </div>
+                <div class="coins-bonus-icon tertiary">
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                </div>
+              </div>
             </div>
           </div>
+
+          {% if credits > 0 %}
+          <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(196,197,216,0.2);">
+            <div style="margin-bottom: 1rem; font-weight: 700; font-size: 0.875rem;">Converteix els teus Coins ara:</div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              {% if credits >= 1 %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="convert_coins">
+                <input type="hidden" name="coins_to_convert" value="1">
+                <button type="submit" class="btn btn-sm" style="background: #0040e0; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none;">1 → 2</button>
+              </form>
+              {% endif %}
+              {% if credits >= 5 %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="convert_coins">
+                <input type="hidden" name="coins_to_convert" value="5">
+                <button type="submit" class="btn btn-sm" style="background: #5e24e1; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none;">5 → 11 ⭐</button>
+              </form>
+              {% endif %}
+              {% if credits >= 10 %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="convert_coins">
+                <input type="hidden" name="coins_to_convert" value="10">
+                <button type="submit" class="btn btn-sm" style="background: #5e24e1; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none;">10 → 25 ⭐⭐</button>
+              </form>
+              {% endif %}
+              {% if credits >= 20 %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="convert_coins">
+                <input type="hidden" name="coins_to_convert" value="20">
+                <button type="submit" class="btn btn-sm" style="background: linear-gradient(135deg, #0040e0, #5e24e1); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none; box-shadow: 0 4px 8px rgba(0,64,224,0.3);">20 → 60 ⭐⭐⭐</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
-      <p class="text-center text-muted mb-0 mt-1" style="font-size: 0.7rem;">
-        <i class="fas fa-lightbulb text-warning"></i>
-        Més converteixes, més bonus!
-      </p>
     </div>
+
+    <!-- Right Column: Info Panel -->
+    <aside>
+      <div class="coins-info-panel">
+        <div class="coins-info-icon">
+          <span class="material-symbols-outlined" style="font-size: 1.875rem; color: #0040e0;">help_center</span>
+        </div>
+        <h3 class="coins-info-title">Com funciona?</h3>
+
+        <div class="coins-info-step">
+          <div class="coins-info-step-number">1</div>
+          <div>
+            <div class="coins-info-step-title">Adquireix Coins</div>
+            <div class="coins-info-step-text">Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital.</div>
+          </div>
+        </div>
+
+        <div class="coins-info-step">
+          <div class="coins-info-step-number">2</div>
+          <div>
+            <div class="coins-info-step-title">Converteix a Vots</div>
+            <div class="coins-info-step-text">Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus.</div>
+          </div>
+        </div>
+
+        <div class="coins-info-step">
+          <div class="coins-info-step-number">3</div>
+          <div>
+            <div class="coins-info-step-title">Participa al Show</div>
+            <div class="coins-info-step-text">Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set.</div>
+          </div>
+        </div>
+
+        <div class="coins-info-secure">
+          <div class="coins-info-secure-title">
+            <span class="material-symbols-outlined" style="font-size: 0.875rem;">security</span>
+            Pagament segur garantit
+          </div>
+          <div style="display: flex; gap: 0.5rem; opacity: 0.5; filter: grayscale(1);">
+            <img alt="Visa" style="height: 1rem;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Crect fill='%231434CB' width='48' height='16' rx='2'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3EVISA%3C/text%3E%3C/svg%3E" />
+            <img alt="Mastercard" style="height: 1rem;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Crect fill='%23EB001B' width='20' height='16' x='10' rx='2'/%3E%3Crect fill='%23FF5F00' width='20' height='16' x='18' rx='2' opacity='0.8'/%3E%3C/svg%3E" />
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center;">
+          <a href="{% url 'song_list' %}" class="btn btn-outline-secondary" style="border-radius: 0.75rem; padding: 0.625rem 1.5rem; font-weight: 600;">
+            <span class="material-symbols-outlined me-1" style="font-size: 1rem; vertical-align: middle;">arrow_back</span> Tornar
+          </a>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
 

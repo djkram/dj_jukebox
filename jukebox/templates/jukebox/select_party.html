@@ -3,35 +3,493 @@
 {% block page_title %}Selecciona una festa{% endblock %}
 {% block content %}
 
-<!-- Vista Desktop (ORIGINAL) -->
-<div class="container mt-4 d-none d-md-block">
-    {% if parties %}
-        <div class="row">
-            {% for party in parties %}
-                <div class="col-12 col-sm-6 col-lg-4 mb-3">
-                    <a href="{% url 'set_party' party.id %}" style="text-decoration:none;" tabindex="0" aria-label="Selecciona {{ party.name }}">
-                        <div class="card shadow-sm h-100 hover-shadow" style="cursor:pointer; border-radius: 1.2rem;">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ party.name }}</h5>
-                                {% if party.date %}
-                                    <div class="card-text text-muted small">
-                                        {{ party.date|date:"d/m/Y H:i" }}
-                                    </div>
-                                {% endif %}
-                                {% if party.playlist %}
-                                    <div class="text-secondary mt-2">🎶 {{ party.playlist.name }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
+<style>
+  /* Desktop Sonic Architect styles */
+  @media (min-width: 768px) {
+    .select-page-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+    .select-filter-buttons {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .select-filter-btn {
+      padding: 0.625rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .select-filter-btn.secondary {
+      background: #e0e3e6;
+      color: #181c1e;
+    }
+    .select-filter-btn.secondary:hover {
+      background: #e5e8eb;
+    }
+    .select-filter-btn.primary {
+      background: #0040e0;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(0,64,224,0.15);
+    }
+    .select-filter-btn.primary:hover {
+      transform: scale(1.02);
+    }
+
+    .select-parties-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .select-party-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 300ms;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .select-party-card:hover {
+      box-shadow: 0 20px 40px rgba(0,64,224,0.08);
+      transform: translateY(-2px);
+    }
+
+    .select-party-image {
+      height: 12rem;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+    }
+    .select-party-card:hover .select-party-image-placeholder {
+      transform: scale(1.1);
+    }
+    .select-party-image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 500ms;
+    }
+    .select-party-image-placeholder .material-symbols-outlined {
+      font-size: 4rem;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .select-party-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(94,36,225,0.95);
+      backdrop-filter: blur(8px);
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .select-party-badge-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+      background: white;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .select-party-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .select-party-name {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin-bottom: 1rem;
+    }
+    .select-party-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .select-party-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #434655;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .select-party-meta-item .material-symbols-outlined {
+      font-size: 0.875rem;
+      color: #0040e0;
+    }
+
+    .select-party-button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #0040e0;
+      color: white;
+      font-weight: 700;
+      border-radius: 0.75rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 200ms;
+      margin-top: auto;
+    }
+    .select-party-card:hover .select-party-button {
+      background: #002ea8;
+    }
+    .select-party-button .material-symbols-outlined {
+      font-size: 0.875rem;
+    }
+
+    .select-party-button.secondary {
+      background: #e5e8eb;
+      color: #181c1e;
+    }
+    .select-party-card:hover .select-party-button.secondary {
+      background: #e0e3e6;
+    }
+
+    /* Add new event card */
+    .select-add-card {
+      border: 2px dashed rgba(196,197,216,0.4);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 300ms;
+      min-height: 400px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .select-add-card:hover {
+      border-color: #0040e0;
+      background: rgba(0,64,224,0.02);
+    }
+    .select-add-icon {
+      width: 4rem;
+      height: 4rem;
+      background: #e5e8eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      transition: all 300ms;
+    }
+    .select-add-card:hover .select-add-icon {
+      background: #dde1ff;
+      color: #0040e0;
+    }
+    .select-add-icon .material-symbols-outlined {
+      font-size: 1.875rem;
+      color: #434655;
+    }
+    .select-add-card:hover .select-add-icon .material-symbols-outlined {
+      color: #0040e0;
+    }
+    .select-add-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin-bottom: 0.5rem;
+    }
+    .select-add-text {
+      font-size: 0.875rem;
+      color: #434655;
+      max-width: 200px;
+    }
+
+    /* Promo section */
+    .select-promo-section {
+      margin-top: 4rem;
+      background: #0040e0;
+      border-radius: 2rem;
+      padding: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .select-promo-bg-1 {
+      position: absolute;
+      right: -5rem;
+      bottom: -5rem;
+      width: 20rem;
+      height: 20rem;
+      background: #5e24e1;
+      border-radius: 50%;
+      opacity: 0.2;
+      filter: blur(4rem);
+    }
+    .select-promo-bg-2 {
+      position: absolute;
+      left: -2.5rem;
+      top: -2.5rem;
+      width: 15rem;
+      height: 15rem;
+      background: #2e5bff;
+      border-radius: 50%;
+      opacity: 0.1;
+      filter: blur(2rem);
+    }
+    .select-promo-content {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+    }
+    .select-promo-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 1rem;
+    }
+    .select-promo-text {
+      color: #bdc7ff;
+      max-width: 32rem;
+      margin-bottom: 2rem;
+    }
+    .select-promo-stats {
+      display: flex;
+      gap: 1rem;
+    }
+    .select-promo-stat {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+    }
+    .select-promo-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #bdc7ff;
+    }
+    .select-promo-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .select-promo-cards {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .select-promo-card {
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 16rem;
+    }
+    .select-promo-card:first-child {
+      transform: rotate(-2deg);
+    }
+    .select-promo-card:last-child {
+      transform: rotate(3deg);
+    }
+    .select-promo-card-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .select-promo-card-icon.purple {
+      background: #5e24e1;
+      color: white;
+    }
+    .select-promo-card-icon.blue {
+      background: #2e5bff;
+      color: white;
+    }
+    .select-promo-card-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #434655;
+    }
+    .select-promo-card-value {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #181c1e;
+    }
+
+    .select-empty {
+      background: #ffffff;
+      padding: 4rem 2rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      border: 2px dashed rgba(196,197,216,0.3);
+    }
+    .select-empty .material-symbols-outlined {
+      font-size: 4rem;
+      color: #c4c5d8;
+      margin-bottom: 1rem;
+    }
+    .select-empty-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #181c1e;
+      margin-bottom: 0.5rem;
+    }
+    .select-empty-text {
+      color: #747687;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<!-- Desktop Layout -->
+<div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
+  <div class="select-page-header">
+    <div class="select-filter-buttons" style="margin-left: auto;">
+      <button class="select-filter-btn secondary">Tots els esdeveniments</button>
+      <button class="select-filter-btn primary">Propers actes</button>
+    </div>
+  </div>
+
+  {% if parties %}
+    <div class="select-parties-grid">
+      {% for party in parties %}
+        <a href="{% url 'set_party' party.id %}" class="select-party-card">
+          <div class="select-party-image">
+            <div class="select-party-image-placeholder">
+              <span class="material-symbols-outlined">music_note</span>
+            </div>
+            {% if selected_party and party.id == selected_party.id %}
+              <div class="select-party-badge">
+                <span class="select-party-badge-dot"></span>
+                EN DIRECTE
+              </div>
+            {% endif %}
+          </div>
+          <div class="select-party-content">
+            <h3 class="select-party-name">{{ party.name }}</h3>
+            <div class="select-party-meta">
+              <div class="select-party-meta-item">
+                <span class="material-symbols-outlined">calendar_today</span>
+                <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}Data per confirmar{% endif %}</span>
+              </div>
+              <div class="select-party-meta-item">
+                <span class="material-symbols-outlined">queue_music</span>
+                <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}Sense playlist assignada{% endif %}</span>
+              </div>
+            </div>
+            {% if selected_party and party.id == selected_party.id %}
+              <button class="select-party-button">
+                Entrar a la sessió
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            {% else %}
+              <button class="select-party-button secondary">
+                Gestionar esdeveniment
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+
+      <a href="{% url 'dj_backoffice' %}" class="select-add-card">
+        <div class="select-add-icon">
+          <span class="material-symbols-outlined">add</span>
         </div>
-    {% else %}
-        <div class="alert alert-danger" role="alert">
-            No hi ha festes disponibles!
+        <h3 class="select-add-title">Afegir nou esdeveniment</h3>
+        <p class="select-add-text">Configura una nova festa, llista de reproducció i assigna un DJ.</p>
+      </a>
+    </div>
+
+    <section class="select-promo-section">
+      <div class="select-promo-bg-1"></div>
+      <div class="select-promo-bg-2"></div>
+      <div class="select-promo-content">
+        <h2 class="select-promo-title">Ets l'amo de la pista</h2>
+        <p class="select-promo-text">Gestioneu les peticions en temps real, sincronitzeu els llums i manteniu el ritme des d'un sol lloc.</p>
+        <div class="select-promo-stats">
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">Sessions Totals</p>
+            <p class="select-promo-stat-value">{{ parties.count }}</p>
+          </div>
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">Festes Actives</p>
+            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
+          </div>
         </div>
-    {% endif %}
+      </div>
+      <div class="select-promo-cards">
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon purple">
+            <span class="material-symbols-outlined">favorite</span>
+          </div>
+          <div>
+            <p class="select-promo-card-label">Sistema</p>
+            <p class="select-promo-card-value">100% Operatiu</p>
+          </div>
+        </div>
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon blue">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <div>
+            <p class="select-promo-card-label">Estat</p>
+            <p class="select-promo-card-value">En línia</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% else %}
+    <div class="select-empty">
+      <span class="material-symbols-outlined">event_busy</span>
+      <div class="select-empty-title">No hi ha festes disponibles</div>
+      <p class="select-empty-text">Crea una nova festa al backoffice per començar</p>
+    </div>
+  {% endif %}
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->

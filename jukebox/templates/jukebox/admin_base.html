@@ -17,6 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{% static 'jukebox/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
 
+    <!-- Material Symbols Icons (for desktop Sonic design) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
     <!-- Custom styles for this template (legacy) -->
     <link href="{% static 'jukebox/css/sb-admin-2.min.css' %}" rel="stylesheet">
 
@@ -35,6 +38,28 @@
                         "surface-container": "#eceef3",
                         "on-surface": "#191c1f",
                         "outline": "#747688",
+                        "primary": "#002ea8",
+                        "secondary": "#0040e0",
+                        "tertiary": "#4500b9",
+                        "background": "#f7fafd",
+                        "surface-bright": "#f7fafd",
+                        "surface-container-high": "#e5e8eb",
+                        "surface-container-low": "#f1f4f7",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e6",
+                        "on-surface-variant": "#434655",
+                        "outline-variant": "#c4c5d8",
+                        "primary-container": "#0040e0",
+                        "secondary-container": "#2e5bff",
+                        "tertiary-container": "#5e24e1",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "accent-cyan": "#00e3fd",
                     },
                     fontFamily: {
                         "headline": ["Epilogue", "sans-serif"],
@@ -79,6 +104,89 @@
         /* Hide scrollbar but keep functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ===== SONIC ARCHITECT STYLES (DESKTOP ONLY) ===== */
+        @media (min-width: 768px) {
+            /* Material Symbols Configuration */
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                vertical-align: middle;
+            }
+
+            /* Sonic Shadow */
+            .sonic-shadow {
+                box-shadow: 0 4px 24px rgba(0, 64, 224, 0.06);
+            }
+
+            .sonic-shadow-lg {
+                box-shadow: 0 10px 40px rgba(0, 64, 224, 0.08);
+            }
+
+            /* Sonic Transitions */
+            .transition-sonic {
+                transition: all 200ms ease-out;
+            }
+
+            /* Hover lift effect */
+            .hover-lift:hover {
+                transform: translateY(-2px);
+            }
+
+            /* Glassmorphism Topbar */
+            .sonic-topbar-glass {
+                background: rgba(247, 250, 253, 0.8);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
+
+            /* Hide original sidebar on desktop, show Sonic sidebar */
+            #accordionSidebar {
+                background: linear-gradient(180deg, #0040e0 0%, #2e5bff 100%);
+            }
+
+            #accordionSidebar .nav-item .nav-link:hover {
+                background: rgba(255,255,255,0.09);
+                transform: translateX(2px);
+            }
+
+            /* Show Material Icons on desktop, hide Font Awesome */
+            .sidebar .material-symbols-outlined {
+                display: inline-block !important;
+                font-size: 1.25rem;
+                width: 1.5rem;
+                text-align: center;
+            }
+            .sidebar .fas, .sidebar .fab, .sidebar .sidebar-emoji-icon {
+                display: none !important;
+            }
+
+            /* Topbar Material Icons */
+            .topbar .material-symbols-outlined {
+                display: inline-block !important;
+                font-size: 1.25rem;
+            }
+            .topbar .fas {
+                display: none !important;
+            }
+
+            /* Topbar desktop styling */
+            .topbar.d-none.d-md-flex {
+                background: rgba(247, 250, 253, 0.8) !important;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: 0 1px 0 rgba(116, 118, 136, 0.1) !important;
+            }
+        }
+
+        /* Hide Material Icons on mobile, show Font Awesome */
+        @media (max-width: 767.98px) {
+            .material-symbols-outlined {
+                display: none !important;
+            }
+            .fas, .fab, .sidebar-emoji-icon {
+                display: inline-block !important;
+            }
+        }
 
         @media (max-width: 767.98px) {
             :root {
@@ -702,6 +810,677 @@
                 font-size: 1rem !important;
             }
         }
+
+        /* ===== SONIC ARCHITECT - DESKTOP ONLY STYLES ===== */
+        @media (min-width: 768px) {
+            /* === Layout Containers === */
+            .sonic-page-container {
+                padding: 2rem;
+                background: #f7fafd;
+                min-height: calc(100vh - 5rem);
+            }
+
+            .sonic-grid-2col {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 2rem;
+            }
+
+            .sonic-grid-3col {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.875rem;
+            }
+
+            .sonic-grid-4col {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.875rem;
+            }
+
+            .sonic-section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+            }
+
+            .sonic-section-title {
+                font-family: 'Epilogue', sans-serif;
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #181c1e;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            /* === Cards === */
+            .sonic-card {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 24px rgba(0, 64, 224, 0.04);
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                padding: 1.5rem;
+                transition: all 200ms ease-out;
+            }
+
+            .sonic-card:hover {
+                box-shadow: 0 10px 40px rgba(0, 64, 224, 0.08);
+            }
+
+            .sonic-card-compact {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 24px rgba(0, 64, 224, 0.04);
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                padding: 0.75rem;
+            }
+
+            /* === Stat Cards === */
+            .sonic-stat-card {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 24px rgba(0, 64, 224, 0.04);
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                padding: 0.875rem 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.875rem;
+            }
+
+            .sonic-stat-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 0.625rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+            }
+
+            .sonic-stat-icon.primary {
+                background: rgba(0, 64, 224, 0.1);
+                color: #0040e0;
+            }
+
+            .sonic-stat-icon.tertiary {
+                background: rgba(94, 36, 225, 0.1);
+                color: #5e24e1;
+            }
+
+            .sonic-stat-icon.cyan {
+                background: rgba(0, 227, 253, 0.1);
+                color: #00a3b8;
+            }
+
+            .sonic-stat-content {
+                flex: 1;
+            }
+
+            .sonic-stat-label {
+                font-size: 0.5625rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #434655;
+                margin-bottom: 0.125rem;
+            }
+
+            .sonic-stat-value {
+                font-family: 'Epilogue', sans-serif;
+                font-size: 1.5rem;
+                font-weight: 800;
+                color: #181c1e;
+                line-height: 1;
+            }
+
+            /* === Tables === */
+            .sonic-table-container {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 24px rgba(0, 64, 224, 0.04);
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                overflow: hidden;
+            }
+
+            .sonic-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .sonic-table thead {
+                background: #f1f4f7;
+            }
+
+            .sonic-table th {
+                padding: 1rem 1.5rem;
+                font-size: 0.625rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: #434655;
+                text-align: left;
+            }
+
+            .sonic-table th.text-center {
+                text-align: center;
+            }
+
+            .sonic-table th.text-right {
+                text-align: right;
+            }
+
+            .sonic-table tbody tr {
+                border-top: 1px solid rgba(196, 197, 216, 0.05);
+                transition: background-color 200ms ease-out;
+            }
+
+            .sonic-table tbody tr:hover {
+                background: #e5e8eb;
+            }
+
+            .sonic-table td {
+                padding: 0.75rem 1.5rem;
+                color: #181c1e;
+                font-size: 0.875rem;
+            }
+
+            .sonic-table-img {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 0.5rem;
+                object-fit: cover;
+                background: #ebeef1;
+            }
+
+            .sonic-table-title {
+                font-weight: 700;
+                color: #181c1e;
+                margin-bottom: 0.125rem;
+            }
+
+            .sonic-table-subtitle {
+                font-size: 0.75rem;
+                color: #434655;
+            }
+
+            /* === Badges === */
+            .sonic-badge {
+                display: inline-block;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.375rem;
+                font-size: 0.625rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .sonic-badge-primary {
+                background: rgba(0, 64, 224, 0.1);
+                color: #0040e0;
+            }
+
+            .sonic-badge-tertiary {
+                background: rgba(94, 36, 225, 0.1);
+                color: #5e24e1;
+            }
+
+            .sonic-badge-cyan {
+                background: rgba(0, 227, 253, 0.1);
+                color: #00a3b8;
+            }
+
+            .sonic-badge-success {
+                background: rgba(28, 200, 138, 0.1);
+                color: #1cc88a;
+            }
+
+            .sonic-badge-warning {
+                background: rgba(246, 194, 62, 0.1);
+                color: #f6c23e;
+            }
+
+            .sonic-badge-error {
+                background: rgba(186, 26, 26, 0.1);
+                color: #ba1a1a;
+            }
+
+            /* === Buttons === */
+            .sonic-btn {
+                padding: 0.625rem 1.25rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                font-weight: 700;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                border: none;
+                cursor: pointer;
+                transition: all 200ms ease-out;
+                text-decoration: none;
+                display: inline-block;
+                text-align: center;
+            }
+
+            .sonic-btn-primary {
+                background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+                color: #ffffff;
+            }
+
+            .sonic-btn-primary:hover {
+                opacity: 0.9;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0, 64, 224, 0.3);
+                color: #ffffff;
+                text-decoration: none;
+            }
+
+            .sonic-btn-secondary {
+                background: #e0e3e6;
+                color: #181c1e;
+            }
+
+            .sonic-btn-secondary:hover {
+                background: #e5e8eb;
+                color: #181c1e;
+                text-decoration: none;
+            }
+
+            .sonic-btn-tertiary {
+                background: #5e24e1;
+                color: #ffffff;
+            }
+
+            .sonic-btn-tertiary:hover {
+                background: #4500b9;
+                color: #ffffff;
+                text-decoration: none;
+            }
+
+            .sonic-btn-sm {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.625rem;
+            }
+
+            .sonic-btn-lg {
+                padding: 0.875rem 1.75rem;
+                font-size: 1rem;
+            }
+
+            .sonic-btn-ghost {
+                background: transparent;
+                color: #0040e0;
+                border: 1px solid rgba(0, 64, 224, 0.2);
+            }
+
+            .sonic-btn-ghost:hover {
+                background: rgba(0, 64, 224, 0.05);
+                border-color: #0040e0;
+                color: #0040e0;
+                text-decoration: none;
+            }
+
+            /* === Inputs === */
+            .sonic-input {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                border: 1px solid rgba(196, 197, 216, 0.2);
+                background: #e0e3e6;
+                font-size: 0.875rem;
+                color: #181c1e;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                transition: all 200ms ease-out;
+            }
+
+            .sonic-input:focus {
+                outline: none;
+                border-color: #0040e0;
+                background: #ffffff;
+                box-shadow: 0 0 0 3px rgba(0, 64, 224, 0.1);
+            }
+
+            .sonic-input::placeholder {
+                color: #747687;
+            }
+
+            .sonic-search {
+                background: #e0e3e6;
+                border: none;
+                border-radius: 9999px;
+                padding: 0.625rem 1rem 0.625rem 2.5rem;
+                width: 100%;
+                font-size: 0.875rem;
+                transition: all 200ms ease-out;
+            }
+
+            .sonic-search:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(0, 64, 224, 0.2);
+            }
+
+            .sonic-search-wrapper {
+                position: relative;
+            }
+
+            .sonic-search-icon {
+                position: absolute;
+                left: 0.875rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #747687;
+                pointer-events: none;
+            }
+
+            /* === Request Cards === */
+            .sonic-request-card {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                padding: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                transition: all 200ms ease-out;
+            }
+
+            .sonic-request-card:hover {
+                border-color: rgba(94, 36, 225, 0.3);
+                box-shadow: 0 4px 12px rgba(94, 36, 225, 0.1);
+            }
+
+            .sonic-request-img {
+                width: 3rem;
+                height: 3rem;
+                border-radius: 0.5rem;
+                object-fit: cover;
+                background: #ebeef1;
+                flex-shrink: 0;
+            }
+
+            .sonic-request-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .sonic-request-title {
+                font-weight: 700;
+                font-size: 0.875rem;
+                color: #181c1e;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sonic-request-subtitle {
+                font-size: 0.75rem;
+                color: #434655;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sonic-request-coins {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+                font-size: 0.625rem;
+                font-weight: 700;
+                color: #5e24e1;
+                margin-top: 0.25rem;
+            }
+
+            /* === Recommendation Cards === */
+            .sonic-reco-card {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                border: 1px solid rgba(196, 197, 216, 0.1);
+                padding: 0.625rem;
+                transition: all 300ms ease-out;
+            }
+
+            .sonic-reco-card:hover {
+                box-shadow: 0 10px 40px rgba(0, 64, 224, 0.08);
+                transform: translateY(-2px);
+            }
+
+            .sonic-reco-img-wrapper {
+                position: relative;
+                overflow: hidden;
+                border-radius: 0.5rem;
+                aspect-ratio: 1;
+                margin-bottom: 0.5rem;
+            }
+
+            .sonic-reco-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 500ms ease-out;
+            }
+
+            .sonic-reco-card:hover .sonic-reco-img {
+                transform: scale(1.1);
+            }
+
+            .sonic-reco-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 300ms ease-out;
+            }
+
+            .sonic-reco-card:hover .sonic-reco-overlay {
+                opacity: 1;
+            }
+
+            .sonic-reco-play-btn {
+                background: #ffffff;
+                color: #0040e0;
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 9999px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                transform: translateY(1rem);
+                transition: transform 300ms ease-out;
+            }
+
+            .sonic-reco-card:hover .sonic-reco-play-btn {
+                transform: translateY(0);
+            }
+
+            .sonic-reco-title {
+                font-weight: 700;
+                font-size: 0.8125rem;
+                color: #181c1e;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 0.125rem;
+            }
+
+            .sonic-reco-artist {
+                font-size: 0.6875rem;
+                color: #434655;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sonic-reco-meta {
+                display: flex;
+                gap: 0.375rem;
+                margin-top: 0.5rem;
+            }
+
+            /* === Info Card (Session) === */
+            .sonic-info-card {
+                background: linear-gradient(135deg, #5e24e1 0%, #4500b9 100%);
+                border-radius: 1rem;
+                padding: 1.5rem;
+                color: #ffffff;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .sonic-info-card-label {
+                font-size: 0.625rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: rgba(255, 255, 255, 0.7);
+                margin-bottom: 0.5rem;
+            }
+
+            .sonic-info-card-title {
+                font-family: 'Epilogue', sans-serif;
+                font-size: 1.25rem;
+                font-weight: 700;
+                line-height: 1.2;
+                margin-bottom: 1rem;
+            }
+
+            .sonic-info-card-stats {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+
+            .sonic-info-card-stat {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            .sonic-info-card-bg {
+                position: absolute;
+                right: -2.5rem;
+                bottom: -2.5rem;
+                width: 10rem;
+                height: 10rem;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 9999px;
+                filter: blur(3rem);
+                transition: transform 700ms ease-out;
+            }
+
+            .sonic-info-card:hover .sonic-info-card-bg {
+                transform: scale(1.5);
+            }
+
+            /* === History List === */
+            .sonic-history-container {
+                background: #f1f4f7;
+                border-radius: 0.75rem;
+                padding: 1rem;
+            }
+
+            .sonic-history-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                opacity: 0.6;
+                margin-bottom: 1rem;
+            }
+
+            .sonic-history-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .sonic-history-img {
+                width: 2rem;
+                height: 2rem;
+                border-radius: 0.5rem;
+                object-fit: cover;
+                background: #ebeef1;
+                flex-shrink: 0;
+            }
+
+            .sonic-history-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .sonic-history-title {
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: #181c1e;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sonic-history-subtitle {
+                font-size: 0.625rem;
+                color: #434655;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sonic-history-time {
+                font-size: 0.625rem;
+                font-weight: 700;
+                color: #747687;
+                white-space: nowrap;
+            }
+
+            /* === Utilities === */
+            .sonic-text-primary {
+                color: #0040e0;
+            }
+
+            .sonic-text-tertiary {
+                color: #5e24e1;
+            }
+
+            .sonic-text-muted {
+                color: #747687;
+            }
+
+            .sonic-mb-4 {
+                margin-bottom: 1rem;
+            }
+
+            .sonic-mb-6 {
+                margin-bottom: 1.5rem;
+            }
+
+            .sonic-mb-8 {
+                margin-bottom: 2rem;
+            }
+
+            .sonic-gap-4 {
+                gap: 1rem;
+            }
+
+            .sonic-gap-6 {
+                gap: 1.5rem;
+            }
+
+            .sonic-space-y-3 > * + * {
+                margin-top: 0.75rem;
+            }
+
+            .sonic-space-y-4 > * + * {
+                margin-top: 1rem;
+            }
+
+            .sonic-space-y-6 > * + * {
+                margin-top: 1.5rem;
+            }
+        }
     </style>
 
 </head>
@@ -733,12 +1512,14 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'dj_dashboard' %}">
                     <i class="fas fa-sliders-h"></i>
+                    <span class="material-symbols-outlined">dashboard</span>
                     <span>Dashboard DJ</span>
                 </a>
             </li>
             <li class="nav-item {% if request.resolver_match.url_name == 'manage_song_requests' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'manage_song_requests' %}">
                     <i class="fas fa-inbox"></i>
+                    <span class="material-symbols-outlined">queue_music</span>
                     <span>Gestionar peticions</span>
                 </a>
             </li>
@@ -746,6 +1527,7 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'party_settings' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
                     <i class="fas fa-cog"></i>
+                    <span class="material-symbols-outlined">settings</span>
                     <span>Settings festa</span>
                 </a>
             </li>
@@ -753,6 +1535,7 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'dj_backoffice' %}">
                     <i class="fas fa-user-cog"></i>
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
                     <span>Backoffice</span>
                 </a>
             </li>
@@ -762,6 +1545,7 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'song_list' %}">
                     <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
+                    <span class="material-symbols-outlined">celebration</span>
                     <span>
                       {% if selected_party %}
                         {{ selected_party.name }}
@@ -774,12 +1558,14 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'song_swipe' %}">
                     <i class="fas fa-heart"></i>
+                    <span class="material-symbols-outlined">person_search</span>
                     <span>Busca Match</span>
                 </a>
             </li>
             <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'request_song' %}">
                     <i class="fas fa-microphone-alt"></i>
+                    <span class="material-symbols-outlined">add_to_photos</span>
                     <span>Demanar cançó</span>
                 </a>
             </li>
@@ -787,18 +1573,21 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'buy_votes' %}">
                     <i class="fas fa-coins"></i>
+                    <span class="material-symbols-outlined">payments</span>
                     <span>Compra Coins</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'select_party' %}">
                     <i class="fas fa-random"></i>
+                    <span class="material-symbols-outlined">event_repeat</span>
                     <span>Tria una altra festa</span>
                 </a>
             </li>
             <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'profile' %}">
                     <i class="fas fa-user"></i>
+                    <span class="material-symbols-outlined">person</span>
                     <span>Perfil</span>
                 </a>
             </li>
@@ -808,6 +1597,7 @@
                         {% csrf_token %}
                         <button type="submit" class="nav-link btn btn-link">
                             <i class="fas fa-sign-out-alt"></i>
+                            <span class="material-symbols-outlined">logout</span>
                             <span>Tancar sessió</span>
                         </button>
                     </form>
@@ -867,6 +1657,7 @@
                         <li class="nav-item no-arrow mx-1">
                             <a class="nav-link" href="{% url 'notifications' %}">
                                 <i class="fas fa-bell fa-fw"></i>
+                                <span class="material-symbols-outlined">notifications</span>
                                 {% if unread_notifications_count > 0 %}
                                 <span class="badge badge-danger badge-counter">{{ unread_notifications_count }}{% if unread_notifications_count > 9 %}+{% endif %}</span>
                                 {% endif %}

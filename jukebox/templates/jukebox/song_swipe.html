@@ -94,143 +94,596 @@
   }
 </style>
 
-<!-- Vista Desktop (ORIGINAL) -->
-<div class="container-fluid d-none d-md-block">
-  <!-- Indicadors de Coins i Vots -->
-  <div class="row g-2 mb-3">
-    <div class="col-6 col-md-4">
-      <div class="card shadow-sm" style="border-left: 4px solid {% if credits == 0 %}#dc3545{% else %}#f6c23e{% endif %}; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="{% if credits == 0 %}text-danger{% else %}text-warning{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-            COINS
-          </div>
-          <div class="fs-2 fw-bold" style="line-height: 1;" id="credits-count-desktop">{{ credits }}</div>
+<style>
+  /* Sonic Architect Desktop Styles */
+  @media (min-width: 768px) {
+    .swipe-page-wrapper {
+      min-height: calc(100vh - 100px);
+      padding: 1rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Stats Cards */
+    .swipe-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .swipe-stat-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 0.875rem 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 200ms;
+    }
+
+    .swipe-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .swipe-stat-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .swipe-stat-icon .material-symbols-outlined {
+      font-size: 1.5rem;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .swipe-stat-content {
+      flex: 1;
+    }
+
+    .swipe-stat-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #747687;
+      margin-bottom: 0.125rem;
+    }
+
+    .swipe-stat-value {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #181c1e;
+    }
+
+    /* Back Link */
+    .swipe-back-link {
+      background: #f1f4f7;
+      color: #181c1e;
+      text-decoration: none;
+      border-radius: 1rem;
+      padding: 0.875rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      transition: all 200ms;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    .swipe-back-link:hover {
+      background: #e5e8eb;
+      color: #0040e0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .swipe-back-link .material-symbols-outlined {
+      font-size: 1.125rem;
+    }
+
+    /* Progress Card */
+    .swipe-progress-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 0.875rem 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      max-width: 42rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .swipe-progress-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      background: rgba(0,64,224,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .swipe-progress-icon .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1.25rem;
+    }
+
+    .swipe-progress-text {
+      font-weight: 700;
+      color: #181c1e;
+      white-space: nowrap;
+      font-size: 0.875rem;
+    }
+
+    .swipe-progress-bar-container {
+      flex: 1;
+      height: 0.375rem;
+      background: #f1f4f7;
+      border-radius: 0.25rem;
+      overflow: hidden;
+    }
+
+    .swipe-progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      border-radius: 0.25rem;
+      transition: width 300ms ease;
+    }
+
+    .swipe-progress-badge {
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      color: white;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    /* Card Stack */
+    .swipe-main-container {
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+
+    .swipe-card-stack {
+      position: relative;
+      height: calc(100vh - 280px);
+      max-height: 32rem;
+      margin-bottom: 1rem;
+    }
+
+    .swipe-card {
+      position: absolute;
+      width: 100%;
+      transition: all 0.3s;
+      top: 0;
+    }
+
+    .swipe-card-inner {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    .swipe-card-image-container {
+      position: relative;
+      height: calc(100vh - 400px);
+      max-height: 20rem;
+      overflow: hidden;
+    }
+
+    .swipe-card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .swipe-card-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f1f4f7 0%, #e5e8eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swipe-card-placeholder .material-symbols-outlined {
+      font-size: 5rem;
+      color: #c4c5d8;
+    }
+
+    /* Action Buttons on Image */
+    .swipe-card-actions {
+      position: absolute;
+      bottom: 1rem;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      z-index: 10;
+    }
+
+    .swipe-action-btn {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 200ms;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .swipe-action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .swipe-action-btn:active {
+      transform: scale(0.95);
+    }
+
+    .swipe-btn-skip {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .swipe-btn-skip .material-symbols-outlined {
+      color: #ba1a1a;
+      font-size: 1.5rem;
+    }
+
+    .swipe-btn-play {
+      width: 3rem;
+      height: 3rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .swipe-btn-play .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1.25rem;
+    }
+
+    .swipe-btn-like {
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+    }
+
+    .swipe-btn-like .material-symbols-outlined {
+      color: white;
+      font-size: 1.5rem;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    /* Card Content */
+    .swipe-card-content {
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+
+    .swipe-card-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.375rem;
+      font-weight: 800;
+      color: #181c1e;
+      margin-bottom: 0.375rem;
+      letter-spacing: -0.02em;
+    }
+
+    .swipe-card-artist {
+      font-size: 0.875rem;
+      color: #747687;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .swipe-card-meta {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .swipe-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      color: #434655;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .swipe-meta-item .material-symbols-outlined {
+      color: #0040e0;
+      font-size: 1rem;
+    }
+
+    /* Undo Button */
+    .swipe-undo-btn {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: #f6c23e;
+      color: #181c1e;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(246,194,62,0.4);
+      display: none;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      transition: all 200ms;
+    }
+
+    .swipe-undo-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 32px rgba(246,194,62,0.5);
+    }
+
+    .swipe-undo-btn .material-symbols-outlined {
+      font-size: 1.5rem;
+    }
+
+    /* Alert Styles */
+    .swipe-alert {
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .swipe-alert-warning {
+      border-left: 4px solid #f6c23e;
+    }
+
+    .swipe-alert-info {
+      border-left: 4px solid #0040e0;
+    }
+
+    .swipe-alert-icon {
+      font-size: 1.25rem;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .swipe-alert-link {
+      color: #0040e0;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .swipe-alert-link:hover {
+      color: #002ea8;
+      text-decoration: underline;
+    }
+
+    /* Complete State */
+    .swipe-complete-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 4rem 2rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+
+    .swipe-complete-icon {
+      width: 5rem;
+      height: 5rem;
+      background: rgba(40,167,69,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+    }
+
+    .swipe-complete-icon .material-symbols-outlined {
+      font-size: 3rem;
+      color: #28a745;
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .swipe-complete-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #181c1e;
+      margin-bottom: 1rem;
+    }
+
+    .swipe-complete-text {
+      color: #747687;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .swipe-complete-btn {
+      background: linear-gradient(135deg, #0040e0 0%, #5e24e1 100%);
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.875rem 2rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 200ms;
+      box-shadow: 0 4px 16px rgba(0,64,224,0.25);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .swipe-complete-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,64,224,0.35);
+      color: white;
+    }
+
+    .swipe-complete-btn .material-symbols-outlined {
+      font-size: 1.125rem;
+    }
+  }
+</style>
+
+<!-- Vista Desktop (SONIC ARCHITECT) -->
+<div class="d-none d-md-block">
+  <div class="swipe-page-wrapper">
+    <!-- Stats Row -->
+    <div class="swipe-stats-row">
+      <!-- Coins Card -->
+      <div class="swipe-stat-card">
+        <div class="swipe-stat-icon" style="background: {% if credits == 0 %}rgba(186,26,26,0.1){% else %}rgba(246,194,62,0.1){% endif %};">
+          <span class="material-symbols-outlined" style="color: {% if credits == 0 %}#ba1a1a{% else %}#f6c23e{% endif %};">monetization_on</span>
+        </div>
+        <div class="swipe-stat-content">
+          <div class="swipe-stat-label">Coins</div>
+          <div class="swipe-stat-value" id="credits-count-desktop">{{ credits }}</div>
         </div>
       </div>
-    </div>
-    <div class="col-6 col-md-4">
-      <div class="card shadow-sm" style="border-left: 4px solid {% if votes_left == 0 %}#dc3545{% else %}#4e73df{% endif %}; border-top: none; border-right: none; border-bottom: none;">
-        <div class="card-body p-2">
-          <div class="{% if votes_left == 0 %}text-danger{% else %}text-primary{% endif %} fw-bold text-uppercase mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">
-            VOTS DISPONIBLES
-          </div>
-          <div class="fs-2 fw-bold" style="line-height: 1;" id="votes-count-desktop">{{ votes_left }}</div>
+
+      <!-- Votes Card -->
+      <div class="swipe-stat-card">
+        <div class="swipe-stat-icon" style="background: {% if votes_left == 0 %}rgba(186,26,26,0.1){% else %}rgba(0,64,224,0.1){% endif %};">
+          <span class="material-symbols-outlined" style="color: {% if votes_left == 0 %}#ba1a1a{% else %}#0040e0{% endif %};">thumb_up</span>
+        </div>
+        <div class="swipe-stat-content">
+          <div class="swipe-stat-label">Vots disponibles</div>
+          <div class="swipe-stat-value" id="votes-count-desktop">{{ votes_left }}</div>
         </div>
       </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <a href="{% url 'song_list' %}" class="btn btn-outline-secondary w-100 h-100 d-flex align-items-center justify-content-center py-2">
-        <i class="fas fa-list me-2"></i>Torna a la llista
+
+      <!-- Back Link -->
+      <a href="{% url 'song_list' %}" class="swipe-back-link">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Torna a la llista
       </a>
     </div>
-  </div>
 
-  <!-- Indicador de progrés -->
-  <div class="row justify-content-center mb-3">
-    <div class="col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-body p-2 d-flex align-items-center justify-content-between">
-          <div class="d-flex align-items-center gap-2">
-            <i class="fas fa-layer-group text-primary"></i>
-            <span class="fw-bold" id="progress-text-desktop">{{ swiped_count }} de {{ total_songs }}</span>
-          </div>
-          <div class="flex-grow-1 mx-3">
-            <div class="progress" style="height: 8px;">
-              <div id="progress-bar-desktop" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-            </div>
-          </div>
-          <span class="badge bg-primary" id="remaining-count-desktop">{{ songs|length }}</span>
-        </div>
+    <!-- Progress Card -->
+    <div class="swipe-progress-card">
+      <div class="swipe-progress-icon">
+        <span class="material-symbols-outlined">layers</span>
       </div>
+      <span class="swipe-progress-text" id="progress-text-desktop">{{ swiped_count }} de {{ total_songs }}</span>
+      <div class="swipe-progress-bar-container">
+        <div id="progress-bar-desktop" class="swipe-progress-bar" style="width: 0%"></div>
+      </div>
+      <span class="swipe-progress-badge" id="remaining-count-desktop">{{ songs|length }}</span>
     </div>
-  </div>
 
-  <!-- Carta de cançó Busca Match -->
-  <div class="row justify-content-center">
-    <div class="col-lg-6">
+    <!-- Main Content -->
+    <div class="swipe-main-container">
       {% if songs %}
-        <!-- Contenidor de cartes -->
-        <div id="card-stack-desktop" class="position-relative mb-4" style="height: 600px;">
+        <!-- Card Stack -->
+        <div id="card-stack-desktop" class="swipe-card-stack">
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
                  data-spotify-id="{{ song.spotify_id }}"
-                 data-preview-url="{{ song.preview_url|default:'' }}"
-                 style="position: absolute; width: 100%; transition: all 0.3s; top: 0;">
-              <div class="card shadow-lg" style="border-radius: 1.5rem; overflow: hidden;">
-                <div class="card-body text-center p-4 position-relative">
-                  <!-- Imatge de fons amb overlay -->
-                  <div class="position-relative" style="margin: -1rem -1rem 1rem -1rem;">
-                    {% if song.album_image_url %}
-                      <img src="{{ song.album_image_url }}" alt="{{ song.title }}"
-                           class="w-100" style="height: 400px; object-fit: cover;">
-                    {% else %}
-                      <div class="bg-secondary d-flex align-items-center justify-content-center"
-                           style="height: 400px;">
-                        <i class="fas fa-music fa-5x text-white"></i>
-                      </div>
-                    {% endif %}
-
-                    <!-- Botons superposats sobre la imatge -->
-                    <div class="position-absolute w-100 d-flex justify-content-center gap-3" style="bottom: 20px; left: 0; z-index: 10;">
-                      <button class="btn-skip-card btn btn-lg shadow-lg"
-                              style="width: 70px; height: 70px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 3px solid #dc3545; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-times fa-2x text-danger"></i>
-                      </button>
-                      <button id="play-preview-btn-desktop" class="btn btn-lg shadow-lg"
-                              style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, 0.95); border: 3px solid #0040e0; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-play fa-lg" style="color: #0040e0;"></i>
-                      </button>
-                      <button class="btn-like-card btn btn-lg shadow-lg"
-                              style="width: 70px; height: 70px; border-radius: 50%; background: rgba(40, 167, 69, 0.95); border: 3px solid #28a745; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-heart fa-2x text-white"></i>
-                      </button>
+                 data-preview-url="{{ song.preview_url|default:'' }}">
+              <div class="swipe-card-inner">
+                <!-- Image with Actions -->
+                <div class="swipe-card-image-container">
+                  {% if song.album_image_url %}
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="swipe-card-image">
+                  {% else %}
+                    <div class="swipe-card-placeholder">
+                      <span class="material-symbols-outlined">music_note</span>
                     </div>
-                  </div>
+                  {% endif %}
 
-                  <h4 class="mb-2 fw-bold">{{ song.title }}</h4>
-                  <h6 class="text-muted mb-3">{{ song.artist }}</h6>
-                  <div class="d-flex justify-content-center gap-3 text-muted">
-                    {% if song.bpm %}
-                      <small><i class="fas fa-drum me-1"></i>{{ song.bpm|floatformat:0 }} BPM</small>
-                    {% endif %}
-                    {% if song.key %}
-                      <small><i class="fas fa-music me-1"></i>{{ song.key }}</small>
-                    {% endif %}
+                  <!-- Action Buttons -->
+                  <div class="swipe-card-actions">
+                    <button class="btn-skip-card swipe-action-btn swipe-btn-skip">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <button id="play-preview-btn-desktop" class="swipe-action-btn swipe-btn-play">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                    </button>
+                    <button class="btn-like-card swipe-action-btn swipe-btn-like">
+                      <span class="material-symbols-outlined">favorite</span>
+                    </button>
                   </div>
+                </div>
+
+                <!-- Card Content -->
+                <div class="swipe-card-content">
+                  <h2 class="swipe-card-title">{{ song.title }}</h2>
+                  <p class="swipe-card-artist">{{ song.artist }}</p>
+                  {% if song.bpm or song.key %}
+                    <div class="swipe-card-meta">
+                      {% if song.bpm %}
+                        <div class="swipe-meta-item">
+                          <span class="material-symbols-outlined">graphic_eq</span>
+                          <span>{{ song.bpm|floatformat:0 }} BPM</span>
+                        </div>
+                      {% endif %}
+                      {% if song.key %}
+                        <div class="swipe-meta-item">
+                          <span class="material-symbols-outlined">music_note</span>
+                          <span>{{ song.key }}</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             </div>
           {% endfor %}
         </div>
 
-        <div id="message-area-desktop" class="text-center mt-3"></div>
+        <div id="message-area-desktop" class="text-center"></div>
 
-        <!-- Botó flotant Undo -->
-        <button id="undo-btn" class="btn btn-warning shadow-lg" style="position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%; display: none; z-index: 1000; padding: 0;">
-          <i class="fas fa-undo fa-lg"></i>
+        <!-- Undo Button -->
+        <button id="undo-btn" class="swipe-undo-btn">
+          <span class="material-symbols-outlined">undo</span>
         </button>
 
         {% if votes_left == 0 %}
-        <div class="alert alert-warning mt-3 text-center">
-          {% if credits == 0 %}
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Sense Coins!</strong> Compra Coins i converteix-los a Vots per fer like.
-            <a href="{% url 'buy_votes' %}" class="alert-link">Compra Coins</a>
-          {% else %}
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Sense vots!</strong> Converteix els teus {{ credits }} Coins a Vots per continuar.
-            <a href="{% url 'song_list' %}" class="alert-link">Convertir Coins</a>
-          {% endif %}
-        </div>
+          <div class="swipe-alert swipe-alert-warning">
+            <span class="material-symbols-outlined swipe-alert-icon" style="color: #f6c23e;">warning</span>
+            {% if credits == 0 %}
+              <strong>Sense Coins!</strong> Compra Coins i converteix-los a Vots per fer like.
+              <a href="{% url 'buy_votes' %}" class="swipe-alert-link">Compra Coins</a>
+            {% else %}
+              <strong>Sense vots!</strong> Converteix els teus {{ credits }} Coins a Vots per continuar.
+              <a href="{% url 'song_list' %}" class="swipe-alert-link">Convertir Coins</a>
+            {% endif %}
+          </div>
         {% endif %}
       {% else %}
-        <div class="alert alert-info text-center">
-          <i class="fas fa-check-circle fa-3x mb-3"></i>
-          <h4>Has fet match amb totes les cançons disponibles!</h4>
-          <p>Torna a la llista per veure els resultats</p>
-          <a href="{% url 'song_list' %}" class="btn btn-primary mt-3">
-            <i class="fas fa-list me-2"></i>Veure llista
+        <div class="swipe-complete-card">
+          <div class="swipe-complete-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <h2 class="swipe-complete-title">Has fet match amb totes les cançons disponibles!</h2>
+          <p class="swipe-complete-text">Torna a la llista per veure els resultats</p>
+          <a href="{% url 'song_list' %}" class="swipe-complete-btn">
+            <span class="material-symbols-outlined">list</span>
+            Veure llista
           </a>
         </div>
       {% endif %}

@@ -1,6 +1,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load static %}
-{% block page_title %}Selecciona una festa{% endblock %}
+{% load i18n %}
+{% block page_title %}{% trans "Selecciona una festa" %}{% endblock %}
 {% block content %}
 
 <style>
@@ -441,7 +442,7 @@
             {% if selected_party and party.id == selected_party.id %}
               <div class="select-party-badge">
                 <span class="select-party-badge-dot"></span>
-                EN DIRECTE
+                {% trans "EN DIRECTE" %}
               </div>
             {% endif %}
           </div>
@@ -450,16 +451,16 @@
             <div class="select-party-meta">
               <div class="select-party-meta-item">
                 <span class="material-symbols-outlined">calendar_today</span>
-                <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}Data per confirmar{% endif %}</span>
+                <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}{% trans "Data per confirmar" %}{% endif %}</span>
               </div>
               <div class="select-party-meta-item">
                 <span class="material-symbols-outlined">queue_music</span>
-                <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}Sense playlist assignada{% endif %}</span>
+                <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
               </div>
             </div>
             {% if selected_party and party.id == selected_party.id %}
               <button class="select-party-button">
-                Entrar a la sessió
+                {% trans "Entrar a la sessió" %}
                 <span class="material-symbols-outlined">arrow_forward</span>
               </button>
             {% endif %}
@@ -471,11 +472,11 @@
         <div class="select-add-icon">
           <span class="material-symbols-outlined">celebration</span>
         </div>
-        <span class="select-add-kicker">Nou a DJ Jukebox</span>
-        <h3 class="select-add-title">Afegeix la teva festa</h3>
-        <p class="select-add-text">Publica-la a DJ Jukebox i activa l'experiència per als teus convidats.</p>
+        <span class="select-add-kicker">{% trans "Nou a DJ Jukebox" %}</span>
+        <h3 class="select-add-title">{% trans "Afegeix la teva festa" %}</h3>
+        <p class="select-add-text">{% trans "Publica-la a DJ Jukebox i activa l'experiència per als teus convidats." %}</p>
         <div class="select-add-cta">
-          Crear festa
+          {% trans "Crear festa" %}
           <span class="material-symbols-outlined">arrow_forward</span>
         </div>
       </a>
@@ -485,15 +486,15 @@
       <div class="select-promo-bg-1"></div>
       <div class="select-promo-bg-2"></div>
       <div class="select-promo-content">
-        <h2 class="select-promo-title">Ets l'amo de la pista?</h2>
-        <p class="select-promo-text">Demana cançons al moment, mira què sona i recupera tota la sessió.</p>
+        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
+        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
         <div class="select-promo-stats">
           <div class="select-promo-stat">
-            <p class="select-promo-stat-label">Sessions Totals</p>
+            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
             <p class="select-promo-stat-value">{{ parties.count }}</p>
           </div>
           <div class="select-promo-stat">
-            <p class="select-promo-stat-label">Festes Actives</p>
+            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
             <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
           </div>
         </div>
@@ -504,8 +505,8 @@
             <span class="material-symbols-outlined">favorite</span>
           </div>
           <div>
-            <p class="select-promo-card-label">Sistema</p>
-            <p class="select-promo-card-value">100% Operatiu</p>
+            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
+            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
           </div>
         </div>
         <div class="select-promo-card">
@@ -513,8 +514,8 @@
             <span class="material-symbols-outlined">bolt</span>
           </div>
           <div>
-            <p class="select-promo-card-label">Estat</p>
-            <p class="select-promo-card-value">En línia</p>
+            <p class="select-promo-card-label">{% trans "Estat" %}</p>
+            <p class="select-promo-card-value">{% trans "En línia" %}</p>
           </div>
         </div>
       </div>
@@ -522,8 +523,8 @@
   {% else %}
     <div class="select-empty">
       <span class="material-symbols-outlined">event_busy</span>
-      <div class="select-empty-title">No hi ha festes disponibles</div>
-      <p class="select-empty-text">Crea una nova festa al backoffice per començar</p>
+      <div class="select-empty-title">{% trans "No hi ha festes disponibles" %}</div>
+      <p class="select-empty-text">{% trans "Crea una nova festa al backoffice per començar" %}</p>
     </div>
   {% endif %}
 </div>
@@ -536,28 +537,28 @@
       <div class="d-inline-block p-3 shadow-lg" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
         <img src="{% static 'jukebox/img/DJJukebox_logo.png' %}" alt="DJ Jukebox" style="height: 48px; width: auto; display: block;">
       </div>
-      <p class="font-medium" style="color: #434656; opacity: 0.8;">Escull la teva festa i fes sentir les teves preferències.</p>
+      <p class="font-medium" style="color: #434656; opacity: 0.8;">{% trans "Escull la teva festa i fes sentir les teves preferències." %}</p>
     </section>
 
     {% if parties %}
       <!-- Featured Section (First Party - Bento Style) -->
       {% with parties.0 as featured %}
         <div class="mobile-section-header">
-          <span class="d-block font-headline font-bold text-uppercase mb-0" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">En Directe Ara</span>
+          <span class="d-block font-headline font-bold text-uppercase mb-0" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">{% trans "En Directe Ara" %}</span>
           <a href="{% url 'set_party' featured.id %}" class="text-decoration-none">
             <div class="position-relative overflow-hidden rounded-xl p-4 text-white shadow-xl cursor-pointer" style="background: #2e5bff; box-shadow: 0 10px 40px rgba(0, 64, 224, 0.1);">
               <div class="position-absolute" style="top: 0; right: 0; margin-top: -4rem; margin-right: -4rem; width: 16rem; height: 16rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
               <div class="position-relative" style="z-index: 10;">
                 <div class="d-flex justify-content-between align-items-start mb-4">
-                  <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Alta Energia</div>
+                  <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">{% trans "Alta Energia" %}</div>
                   <i class="fas fa-signal" style="color: rgba(255, 255, 255, 0.5);"></i>
                 </div>
                 <h2 class="font-headline font-bold mb-2" style="font-size: 1.875rem; letter-spacing: -0.01em;">{{ featured.name }}</h2>
                 <p class="mb-4" style="color: #efefff; opacity: 0.8; font-size: 0.875rem;">
-                  {% if featured.playlist %}Playlist: {{ featured.playlist.name }}{% else %}Sense playlist assignada{% endif %}
+                  {% if featured.playlist %}Playlist: {{ featured.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}
                 </p>
                 <div class="w-100 text-center fw-bold py-3 rounded-pill d-flex align-items-center justify-content-center gap-2 shadow-lg" style="background: white; color: #0040e0; transition: transform 0.2s;">
-                  Unir-se a la Festa
+                  {% trans "Unir-se a la Festa" %}
                   <i class="fas fa-arrow-right" style="font-size: 0.875rem;"></i>
                 </div>
               </div>
@@ -569,7 +570,7 @@
       <!-- Party Selection List (Rest of parties) -->
       {% if parties|length > 1 %}
         <section class="mobile-group-stack">
-          <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem;">Properes Festes</h3>
+          <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem;">{% trans "Properes Festes" %}</h3>
 
           <div class="mobile-group-stack">
           {% for party in parties %}
@@ -586,7 +587,7 @@
                       <div class="d-flex align-items-center gap-2 mt-1">
                         <i class="fas fa-calendar-alt" style="color: #0040e0; font-size: 0.75rem;"></i>
                         <span style="font-size: 0.75rem; color: #434656;">
-                          {% if party.date %}{{ party.date|date:"M d • h:i A" }}{% else %}Data per confirmar{% endif %}
+                          {% if party.date %}{{ party.date|date:"M d • h:i A" }}{% else %}{% trans "Data per confirmar" %}{% endif %}
                         </span>
                       </div>
                     </div>
@@ -595,12 +596,12 @@
                     <div class="d-flex align-items-center gap-2">
                       <i class="fas fa-list-ul" style="color: #006875; font-size: 0.875rem;"></i>
                       <span class="fw-semibold" style="font-size: 0.75rem; color: #434656;">
-                        {% if party.playlist %}{{ party.playlist.name }}{% else %}Sense playlist{% endif %}
+                        {% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist" %}{% endif %}
                       </span>
                     </div>
                   </div>
                   <div class="w-100 text-center fw-bold py-3 rounded-pill transition-colors" style="background: #e7e8ed; color: #191c1f; font-size: 0.875rem;">
-                    Unir-se
+                    {% trans "Unir-se" %}
                   </div>
                 </div>
               </a>
@@ -613,8 +614,8 @@
     {% else %}
       <div class="text-center py-5">
         <i class="fas fa-calendar-times mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>
-        <h4 class="fw-bold mb-2" style="color: #191c1f;">No hi ha festes disponibles</h4>
-        <p class="mb-0" style="color: #434656;">Torna aviat per veure propers esdeveniments!</p>
+        <h4 class="fw-bold mb-2" style="color: #191c1f;">{% trans "No hi ha festes disponibles" %}</h4>
+        <p class="mb-0" style="color: #434656;">{% trans "Torna aviat per veure propers esdeveniments!" %}</p>
       </div>
     {% endif %}
   </main>

@@ -114,6 +114,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # i18n: detecta i aplica idioma
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -131,7 +132,9 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',  # i18n: idioma actual disponible als templates
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'jukebox.context_processors.selected_party',
@@ -179,12 +182,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-
+LANGUAGE_CODE = 'ca'  # Idioma per defecte: català
+TIME_ZONE = 'Europe/Madrid'  # Zona horària per Catalunya/Espanya
+USE_I18N = True  # Activar internacionalització
+USE_L10N = True  # Activar localització (formats de data/número)
+USE_TZ = True    # Activar zones horàries
 
 LANGUAGES = [
     ('ca', 'Català'),
     ('en', 'English'),
-    # ... altres idiomes
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+    BASE_DIR / 'jukebox' / 'locale',
 ]
 
 

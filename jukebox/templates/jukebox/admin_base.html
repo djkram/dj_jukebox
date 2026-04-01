@@ -84,15 +84,15 @@
                         "brand-blue-light": "#2e5bff",
                         "brand-cyan": "#00daf3",
                         "brand-purple": "#5e24e1",
-                        "surface": "#f8f9fe",
+                        "surface": "#f4f7fa",
                         "surface-container": "#eceef3",
                         "on-surface": "#191c1f",
                         "outline": "#747688",
-                        "primary": "#002ea8",
-                        "secondary": "#0040e0",
-                        "tertiary": "#4500b9",
-                        "background": "#f7fafd",
-                        "surface-bright": "#f7fafd",
+                        "primary": "#0040e0",
+                        "secondary": "#2e5bff",
+                        "tertiary": "#5e24e1",
+                        "background": "#f4f7fa",
+                        "surface-bright": "#f4f7fa",
                         "surface-container-high": "#e5e8eb",
                         "surface-container-low": "#f1f4f7",
                         "surface-container-highest": "#e0e3e6",
@@ -126,11 +126,24 @@
     </script>
 
     <style>
+        :root {
+            --color-primary: #0040e0;
+            --color-secondary: #2e5bff;
+            --color-tertiary: #5e24e1;
+            --color-neutral: #f4f7fa;
+            --color-surface-low: #f1f4f7;
+            --color-surface-mid: #e5e8eb;
+            --color-surface-high: #e0e3e6;
+            --color-outline: #c4c5d8;
+            --color-text: #191c1f;
+            --color-text-muted: #434655;
+        }
+
         /* Base typography */
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8f9fe;
-            color: #191c1f;
+            background-color: var(--color-neutral);
+            color: var(--color-text);
             -webkit-font-smoothing: antialiased;
         }
 
@@ -139,13 +152,13 @@
         }
 
         .glass-nav {
-            background: rgba(248, 249, 254, 0.7);
+            background: rgba(244, 247, 250, 0.78);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
         }
 
         .text-gradient {
-            background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -186,7 +199,7 @@
         }
 
         html.app-shell-mobile .mobile-page-shell {
-            background: #f8f9fe;
+            background: var(--color-neutral);
             min-height: 100vh;
         }
 
@@ -492,7 +505,7 @@
         html.app-shell-desktop #accordionSidebar {
             background:
                 radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
-                linear-gradient(180deg, #0038d1 0%, #0040e0 38%, #2e5bff 100%) !important;
+                linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%) !important;
             box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
         }
 
@@ -554,7 +567,7 @@
 
             /* Glassmorphism Topbar */
             .sonic-topbar-glass {
-                background: rgba(247, 250, 253, 0.8);
+                background: rgba(244, 247, 250, 0.8);
                 backdrop-filter: blur(20px);
                 -webkit-backdrop-filter: blur(20px);
             }
@@ -563,7 +576,7 @@
             #accordionSidebar {
                 background:
                     radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 28%),
-                    linear-gradient(180deg, #0038d1 0%, #0040e0 38%, #2e5bff 100%);
+                    linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
                 box-shadow: 10px 0 28px rgba(0, 64, 224, 0.14);
             }
 
@@ -627,7 +640,7 @@
             }
 
             .mobile-page-shell {
-                background: #f8f9fe;
+                background: var(--color-neutral);
                 min-height: 100vh;
             }
 
@@ -879,14 +892,14 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #4e73df, #2e59d9);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
             color: #fff;
             font-weight: 700;
             font-size: 0.875rem;
             text-transform: uppercase;
         }
         #accordionSidebar {
-            background: linear-gradient(180deg, #4d74e6 0%, #355fd6 100%);
+            background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
             box-shadow: inset -1px 0 0 rgba(255,255,255,.08);
         }
         #accordionSidebar .sidebar-brand {
@@ -1162,7 +1175,7 @@
         }
         .ptr-element .ptr-icon {
             font-size: 1.5rem;
-            color: #4e73df;
+            color: var(--color-primary);
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
@@ -1239,7 +1252,7 @@
             /* === Layout Containers === */
             .sonic-page-container {
                 padding: 2rem;
-                background: #f7fafd;
+                background: var(--color-neutral);
                 min-height: calc(100vh - 5rem);
             }
 
@@ -1487,7 +1500,7 @@
             }
 
             .sonic-btn-primary {
-                background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);
+                background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
                 color: #ffffff;
             }
 
@@ -1500,23 +1513,23 @@
             }
 
             .sonic-btn-secondary {
-                background: #e0e3e6;
+                background: var(--color-surface-high);
                 color: #181c1e;
             }
 
             .sonic-btn-secondary:hover {
-                background: #e5e8eb;
+                background: var(--color-surface-mid);
                 color: #181c1e;
                 text-decoration: none;
             }
 
             .sonic-btn-tertiary {
-                background: #5e24e1;
+                background: var(--color-tertiary);
                 color: #ffffff;
             }
 
             .sonic-btn-tertiary:hover {
-                background: #4500b9;
+                background: #4a1dc0;
                 color: #ffffff;
                 text-decoration: none;
             }
@@ -1747,7 +1760,7 @@
 
             /* === Info Card (Session) === */
             .sonic-info-card {
-                background: linear-gradient(135deg, #5e24e1 0%, #4500b9 100%);
+                background: linear-gradient(135deg, var(--color-tertiary) 0%, var(--color-primary) 100%);
                 border-radius: 1rem;
                 padding: 1.5rem;
                 color: #ffffff;
@@ -2131,14 +2144,14 @@
                                  aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="{% url 'profile' %}">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
+                                    Perfil
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
                                         <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Logout
+                                        Sortir
                                     </button>
                                 </form>
                             </div>
@@ -2159,7 +2172,7 @@
                     <div class="flex items-center justify-between">
                         <!-- Logo + Title -->
                         <div class="flex items-center gap-3">
-                            <div style="background: linear-gradient(135deg, #4e73df, #355fd6); padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(78, 115, 223, 0.3);">
+                            <div style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); padding: 8px; border-radius: 12px; box-shadow: 0 6px 16px rgba(0, 64, 224, 0.24);">
                                 <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 32px; width: auto; display: block;">
                             </div>
                             <h1 class="headline-font font-bold text-lg text-on-surface mb-0">

@@ -81,13 +81,13 @@ Tens {{ votes }} vots disponibles
 
 ---
 
-## ⏳ Fase 3: Marcar textos en codi Python (PENDENT)
+## ✅ Fase 3: Marcar textos en codi Python (COMPLETADA)
 
-**Fitxers a actualitzar:**
-- [ ] models.py (verbose_name, help_text)
-- [ ] forms.py (labels, help_text, error_messages)
-- [ ] views.py (missatges amb messages.success/error)
-- [ ] notifications.py (títols i missatges)
+**Fitxers actualitzats:**
+- [x] models.py (verbose_name, help_text, choices) ✅
+- [x] forms.py (labels, help_text, error_messages) ✅
+- [x] views.py (missatges JsonResponse) ✅
+- [x] notifications.py (títols i missatges) ✅
 
 **Exemples:**
 ```python
@@ -201,11 +201,11 @@ urlpatterns += i18n_patterns(
 ```
 Fase 1: ████████████████████████████████ 100% ✅
 Fase 2: ████████████████████████████████ 100% ✅
-Fase 3: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
+Fase 3: ████████████████████████████████ 100% ✅
 Fase 4: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 5: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 6: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 Fase 7: ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-Total:  ██████████░░░░░░░░░░░░░░░░░░░░░░  32%
+Total:  ██████████████░░░░░░░░░░░░░░░░░░  46%
 ```

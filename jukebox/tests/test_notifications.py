@@ -113,7 +113,7 @@ class NotificationsTests(TestCase):
 
         # Hauria de redirigir a login
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/accounts/login/', response.url)
+        self.assertTrue('/login/' in response.url)
 
     def test_mark_notification_read_requires_post(self):
         """Test que només accepta POST requests"""

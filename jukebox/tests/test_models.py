@@ -285,7 +285,7 @@ class SongRequestModelTests(TestCase):
         request = SongRequest.objects.create(
             user=self.user,
             party=self.party,
-            spotify_track_id='track123',
+            spotify_id='track123',
             title='Requested Song',
             artist='Artist',
             status='pending',
@@ -300,10 +300,11 @@ class SongRequestModelTests(TestCase):
         request = SongRequest.objects.create(
             user=self.user,
             party=self.party,
-            spotify_track_id='track123',
+            spotify_id='track123',
             title='Song',
             artist='Artist',
-            status='pending'
+            status='pending',
+            coins_cost=10
         )
 
         # Acceptar

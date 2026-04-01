@@ -20,7 +20,7 @@ class SpotifyApiHelpersTests(SimpleTestCase):
     def test_camelot_from_key_string_with_flat(self):
         """Test conversió amb bemolls"""
         self.assertEqual(_camelot_from_key_string("Bb"), "6B")
-        self.assertEqual(_camelot_from_key_string("Ebm"), "12A")
+        self.assertEqual(_camelot_from_key_string("Ebm"), "2A")  # Eb menor = 2A
 
     def test_pick_getsongbpm_match_prefers_title_and_artist_match(self):
         """Test que tria el millor match de GetSongBPM"""

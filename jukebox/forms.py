@@ -1,6 +1,7 @@
 # forms.py
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks
 
@@ -25,7 +26,7 @@ class PartyForm(forms.ModelForm):
 
 class PartySettingsForm(forms.ModelForm):
     spotify_playlist = forms.ChoiceField(
-        label="Playlist de Spotify",
+        label=_("Playlist de Spotify"),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -50,11 +51,11 @@ class PartySettingsForm(forms.ModelForm):
             ),
         }
         labels = {
-            'name': 'Nom de la festa',
-            'date': 'Data i hora',
-            'max_votes_per_user': 'Vots gratuïts per usuari',
-            'free_coins_per_user': 'Coins gratuïts per usuari',
-            'song_request_cost': 'Cost per demanar cançó (Coins)',
+            'name': _('Nom de la festa'),
+            'date': _('Data i hora'),
+            'max_votes_per_user': _('Vots gratuïts per usuari'),
+            'free_coins_per_user': _('Coins gratuïts per usuari'),
+            'song_request_cost': _('Cost per demanar cançó (Coins)'),
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):
@@ -62,12 +63,12 @@ class PartySettingsForm(forms.ModelForm):
         super().__init__(*args, instance=instance, **kwargs)
 
         # 1) Si no hi ha playlist assignada, carreguem opcions de Spotify
-        choices = [('', '--- Selecciona una playlist ---')]
+        choices = [('', _('--- Selecciona una playlist ---'))]
         if request and (instance is None or instance.playlist is None):
             playlists = get_user_playlists(request)
             if not playlists and request.user.is_authenticated:
                 # Si no hi ha playlists, potser el token ha expirat
-                choices.append(('', '⚠️ Reconnecta Spotify per veure playlists'))
+                choices.append(('', _('⚠️ Reconnecta Spotify per veure playlists')))
             else:
                 for pl in playlists:
                     choices.append((pl['id'], f"{pl['name']} ({pl['owner']})"))

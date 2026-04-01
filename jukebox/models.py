@@ -4,6 +4,7 @@ import uuid
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
@@ -19,17 +20,18 @@ class Playlist(models.Model):
 
 class Party(models.Model):
     name = models.CharField(max_length=200)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, help_text="Creador de la festa (necessari per Spotify sync)")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=False, default='')
     max_votes_per_user = models.PositiveIntegerField(default=5)  # Vots gratuïts per usuari
     free_coins_per_user = models.PositiveIntegerField(default=0)  # Coins gratuïts per usuari (per festa)
     song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó
-    auto_sync_playlist = models.BooleanField(default=False, help_text="Sincronitzar automàticament amb Spotify cada 5 minuts")
-    last_sync_at = models.DateTimeField(null=True, blank=True, help_text="Última sincronització exitosa")
-    auto_analyze_audio = models.BooleanField(default=False, help_text="Analitzar automàticament àudio cada 5 minuts")
-    last_analyze_at = models.DateTimeField(null=True, blank=True, help_text="Última anàlisi automàtica")
+    is_jukebox_active = models.BooleanField(default=True, help_text=_("Indica si el jukebox està actiu per aquesta festa"))
+    auto_sync_playlist = models.BooleanField(default=False, help_text=_("Sincronitzar automàticament amb Spotify cada 5 minuts"))
+    last_sync_at = models.DateTimeField(null=True, blank=True, help_text=_("Última sincronització exitosa"))
+    auto_analyze_audio = models.BooleanField(default=False, help_text=_("Analitzar automàticament àudio cada 5 minuts"))
+    last_analyze_at = models.DateTimeField(null=True, blank=True, help_text=_("Última anàlisi automàtica"))
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -57,9 +59,9 @@ class Song(models.Model):
 
 class Vote(models.Model):
     VOTE_TYPES = [
-        ('like', 'M\'agrada'),
-        ('dislike', 'No m\'agrada'),
-        ('skip', 'Passar'),
+        ('like', _('M\'agrada')),
+        ('dislike', _('No m\'agrada')),
+        ('skip', _('Passar')),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -97,9 +99,9 @@ class PartyCoinsGrant(models.Model):
 
 class SongRequest(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pendent'),
-        ('accepted', 'Acceptada'),
-        ('rejected', 'Rebutjada'),
+        ('pending', _('Pendent')),
+        ('accepted', _('Acceptada')),
+        ('rejected', _('Rebutjada')),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -120,10 +122,10 @@ class SongRequest(models.Model):
 
 class Notification(models.Model):
     TYPE_CHOICES = [
-        ('song_accepted', 'Cançó acceptada'),
-        ('song_played', 'Cançó reproduïda'),
-        ('coins_purchased', 'Coins comprats'),
-        ('coins_received', 'Coins rebuts'),
+        ('song_accepted', _('Cançó acceptada')),
+        ('song_played', _('Cançó reproduïda')),
+        ('coins_purchased', _('Coins comprats')),
+        ('coins_received', _('Coins rebuts')),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')

@@ -1,6 +1,7 @@
 """
 Utilitats per crear notificacions als usuaris
 """
+from django.utils.translation import gettext as _
 from .models import Notification, Song, SongRequest, User
 
 
@@ -9,8 +10,11 @@ def create_song_accepted_notification(song_request, charged_amount=None):
     Notification.objects.create(
         user=song_request.user,
         type='song_accepted',
-        title='Cançó acceptada! 🎉',
-        message=f'La teva petició "{song_request.title}" de {song_request.artist} ha estat acceptada pel DJ!',
+        title=_('Cançó acceptada! 🎉'),
+        message=_('La teva petició "%(title)s" de %(artist)s ha estat acceptada pel DJ!') % {
+            'title': song_request.title,
+            'artist': song_request.artist
+        },
         song_request=song_request,
         amount=charged_amount
     )
@@ -30,8 +34,11 @@ def create_song_played_notification(song):
         Notification.objects.create(
             user=voter,
             type='song_played',
-            title='Match! La teva cançó ha sonat 🎵',
-            message=f'"{song.title}" de {song.artist} s\'ha reproduït! Has fet match!',
+            title=_('Match! La teva cançó ha sonat 🎵'),
+            message=_('\"%(title)s\" de %(artist)s s\'ha reproduït! Has fet match!') % {
+                'title': song.title,
+                'artist': song.artist
+            },
             song=song
         )
 
@@ -41,22 +48,23 @@ def create_coins_purchased_notification(user, amount):
     Notification.objects.create(
         user=user,
         type='coins_purchased',
-        title='Coins comprats! 💰',
-        message=f'Has comprat {amount} Coins. Ja pots convertir-los a Vots!',
+        title=_('Coins comprats! 💰'),
+        message=_('Has comprat %(amount)s Coins. Ja pots convertir-los a Vots!') % {'amount': amount},
         amount=amount
     )
 
 
 def create_coins_received_notification(user, amount, reason=''):
     """Notifica quan reps Coins (regal, promoció, etc)"""
-    message = f'Has rebut {amount} Coins'
     if reason:
-        message += f': {reason}'
+        message = _('Has rebut %(amount)s Coins: %(reason)s') % {'amount': amount, 'reason': reason}
+    else:
+        message = _('Has rebut %(amount)s Coins') % {'amount': amount}
 
     Notification.objects.create(
         user=user,
         type='coins_received',
-        title='Has rebut Coins! 🎁',
+        title=_('Has rebut Coins! 🎁'),
         message=message,
         amount=amount
     )

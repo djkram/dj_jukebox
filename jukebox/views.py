@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.utils.translation import gettext as _
 from allauth.account.forms import SignupForm
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from django.http import JsonResponse, HttpResponse
@@ -221,19 +222,19 @@ def assign_party_playlist(request, party_id):
     spotify_playlist_id = request.POST.get('spotify_playlist_id', '').strip()
 
     if not spotify_playlist_id:
-        return JsonResponse({'error': 'No s\'ha seleccionat cap playlist.'}, status=400)
+        return JsonResponse({'error': _('No s\'ha seleccionat cap playlist.')}, status=400)
 
     try:
         playlists = get_user_playlists(request)
     except SpotifyAuthError:
         return JsonResponse({
-            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
+            'error': _('La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.'),
             'reconnect_url': _spotify_reconnect_url(request),
         }, status=401)
 
     playlist_data = next((pl for pl in playlists if pl['id'] == spotify_playlist_id), None)
     if not playlist_data:
-        return JsonResponse({'error': 'No s\'ha trobat aquesta playlist a Spotify.'}, status=404)
+        return JsonResponse({'error': _('No s\'ha trobat aquesta playlist a Spotify.')}, status=404)
 
     playlist_obj, _ = Playlist.objects.get_or_create(
         spotify_id=spotify_playlist_id,
@@ -273,7 +274,7 @@ def process_playlist_songs(request, party_id):
     spotify_playlist_id = request.POST.get('spotify_playlist_id')
 
     if not spotify_playlist_id:
-        return JsonResponse({'error': 'No playlist ID provided'}, status=400)
+        return JsonResponse({'error': _('No playlist ID provided')}, status=400)
 
     try:
         # Obtenir les cançons de Spotify (ràpid, només metadata)
@@ -375,7 +376,7 @@ def add_track_to_party_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
 
     if not party.playlist:
-        return JsonResponse({'error': 'La festa encara no té una playlist assignada.'}, status=400)
+        return JsonResponse({'error': _('La festa encara no té una playlist assignada.')}, status=400)
 
     spotify_id = request.POST.get('spotify_id', '').strip()
     title = request.POST.get('title', '').strip()
@@ -383,10 +384,10 @@ def add_track_to_party_playlist(request, party_id):
     album_image_url = request.POST.get('album_image_url', '').strip()
 
     if not spotify_id or not title or not artist:
-        return JsonResponse({'error': 'Falten dades de la cançó.'}, status=400)
+        return JsonResponse({'error': _('Falten dades de la cançó.')}, status=400)
 
     if party.songs.filter(spotify_id=spotify_id).exists():
-        return JsonResponse({'error': 'Aquesta cançó ja és a la playlist de la festa.'}, status=400)
+        return JsonResponse({'error': _('Aquesta cançó ja és a la playlist de la festa.')}, status=400)
 
     try:
         add_track_to_playlist(request, party.playlist.spotify_id, spotify_id)
@@ -654,6 +655,12 @@ def song_list(request):
                 user.save()
                 return redirect('song_list')
 
+        # Desfer vot d'una cançó
+        elif 'unvote_song_id' in request.POST:
+            song = get_object_or_404(Song, pk=request.POST['unvote_song_id'], party=party)
+            Vote.objects.filter(user=user, song=song, party=party).delete()
+            return redirect('song_list')
+
         # Votar una cançó
         elif 'vote_song_id' in request.POST:
             song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
@@ -750,7 +757,7 @@ def song_list(request):
     # Comptar només els likes per ordenar
     songs = annotated_songs.order_by('-num_likes', 'title')
     pending_songs = annotated_songs.filter(has_played=False).order_by('-num_likes', 'title')
-    played_songs = annotated_songs.filter(has_played=True).order_by('id')
+    played_songs = list(annotated_songs.filter(has_played=True).order_by('-id'))
 
     # Obtenir els vots de l'usuari per mostrar els cors/creus marcats
     user_votes = Vote.objects.filter(user=user, party=party).select_related('song')
@@ -858,7 +865,8 @@ def song_list(request):
         song.badge_bg = badge_bg
         song.badge_text = badge_text
 
-    for song in played_songs:
+    for index, song in enumerate(played_songs):
+        song.display_order = songs_played - index
         badge_label, badge_bg, badge_text = get_badge_for_song(song.num_likes, song.num_dislikes)
         song.badge_label = badge_label
         song.badge_bg = badge_bg
@@ -932,14 +940,16 @@ def dj_dashboard(request):
         num_likes=Count('vote', filter=Q(vote__vote_type='like')),
         num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
     ).order_by('-num_likes')
-    played_songs_list = party.songs.filter(has_played=True).annotate(
+    played_songs_list = list(party.songs.filter(has_played=True).annotate(
         num_likes=Count('vote', filter=Q(vote__vote_type='like')),
         num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
-    ).order_by('-id')
+    ).order_by('-id'))
 
     total_songs = party.songs.count()
     total_votes = Vote.objects.filter(party=party).count()
-    played_songs_count = played_songs_list.count()
+    played_songs_count = len(played_songs_list)
+    for index, song in enumerate(played_songs_list):
+        song.display_order = played_songs_count - index
 
     # ==========================================
     # Nous KPIs per Dashboard Compacte
@@ -1009,6 +1019,20 @@ def dj_dashboard(request):
         'total_coins_spent': total_coins_spent,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def toggle_jukebox_active(request, party_id):
+    """Activa o desactiva el jukebox de la festa."""
+    party = get_object_or_404(Party, id=party_id)
+    party.is_jukebox_active = not party.is_jukebox_active
+    party.save(update_fields=['is_jukebox_active'])
+
+    logger.info(f"[JUKEBOX_ACTIVE] Party {party_id} jukebox {'enabled' if party.is_jukebox_active else 'disabled'}")
+    return redirect('dj_dashboard')
+
 
 @require_POST
 def mark_song_played(request, song_id):
@@ -1407,9 +1431,9 @@ def song_swipe(request):
             else:
                 # No té vots disponibles
                 if credits > 0:
-                    return JsonResponse({'success': False, 'error': 'No tens vots! Converteix Coins a Vots per fer like.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per fer like.')}, status=400)
                 else:
-                    return JsonResponse({'success': False, 'error': 'No tens Coins! Compra Coins i converteix-los a Vots.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
 
         elif action == 'dislike' and song_id:
             song = get_object_or_404(Song, pk=song_id, party=party)
@@ -1427,9 +1451,9 @@ def song_swipe(request):
             else:
                 # No té vots disponibles
                 if credits > 0:
-                    return JsonResponse({'success': False, 'error': 'No tens vots! Converteix Coins a Vots per continuar.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per continuar.')}, status=400)
                 else:
-                    return JsonResponse({'success': False, 'error': 'No tens Coins! Compra Coins i converteix-los a Vots.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
 
         elif action == 'skip' and song_id:
             song = get_object_or_404(Song, pk=song_id, party=party)
@@ -1447,9 +1471,9 @@ def song_swipe(request):
             else:
                 # No té vots disponibles
                 if credits > 0:
-                    return JsonResponse({'success': False, 'error': 'No tens vots! Converteix Coins a Vots per continuar.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per continuar.')}, status=400)
                 else:
-                    return JsonResponse({'success': False, 'error': 'No tens Coins! Compra Coins i converteix-los a Vots.'}, status=400)
+                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
 
     # Obtenir cançons que l'usuari encara no ha votat
     voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)
@@ -1595,15 +1619,15 @@ def request_song(request):
         album_image_url = request.POST.get('album_image_url', '')
 
         if not spotify_id or not title or not artist:
-            return JsonResponse({'success': False, 'error': 'Dades incompletes'}, status=400)
+            return JsonResponse({'success': False, 'error': _('Dades incompletes')}, status=400)
 
         # Comprovar si la cançó ja està a la llista
         if party.songs.filter(spotify_id=spotify_id).exists():
-            return JsonResponse({'success': False, 'error': 'Aquesta cançó ja està a la llista!'}, status=400)
+            return JsonResponse({'success': False, 'error': _('Aquesta cançó ja està a la llista!')}, status=400)
 
         # Comprovar si ja s'ha demanat
         if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status='pending').exists():
-            return JsonResponse({'success': False, 'error': 'Aquesta cançó ja ha estat demanada i està pendent'}, status=400)
+            return JsonResponse({'success': False, 'error': _('Aquesta cançó ja ha estat demanada i està pendent')}, status=400)
 
         # Crear petició
         SongRequest.objects.create(
@@ -1617,7 +1641,7 @@ def request_song(request):
             status='pending'
         )
 
-        return JsonResponse({'success': True, 'message': f'Petició enviada! Cost: {party.song_request_cost} Coins (només si s\'accepta)'})
+        return JsonResponse({'success': True, 'message': _('Petició enviada! Cost: %(cost)s Coins (només si s\'accepta)') % {'cost': party.song_request_cost}})
 
     # Llistar peticions de l'usuari per aquesta festa
     user_requests = SongRequest.objects.filter(user=user, party=party).order_by('-created_at')
@@ -1768,12 +1792,15 @@ def manage_song_requests(request):
                 )
                 return JsonResponse({
                     'success': True,
-                    'message': 'Cançó acceptada i afegida sense càrrec',
+                    'message': _('Cançó acceptada i afegida sense càrrec'),
                 })
 
             return JsonResponse({
                 'success': False,
-                'error': f'L\'usuari no té prou Coins ({song_request.user.credits}/{song_request.coins_cost})',
+                'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
+                    'current': song_request.user.credits,
+                    'required': song_request.coins_cost
+                },
             }, status=400)
 
         elif action == 'reject':
@@ -1782,7 +1809,7 @@ def manage_song_requests(request):
             song_request.processed_by = request.user
             song_request.save()
 
-            return JsonResponse({'success': True, 'message': 'Cançó rebutjada (sense càrrec)'})
+            return JsonResponse({'success': True, 'message': _('Cançó rebutjada (sense càrrec)')})
 
     # Llistar totes les peticions pendents
     pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')

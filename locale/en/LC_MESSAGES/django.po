@@ -1,0 +1,555 @@
+# DJ Jukebox - English Translations
+# Copyright (C) 2025
+# This file is distributed under the same license as the DJ Jukebox package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DJ Jukebox 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-01 00:00+0000\n"
+"PO-Revision-Date: 2025-01-01 00:00+0000\n"
+"Last-Translator: DJ Jukebox Team\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ==================== AUTHENTICATION ====================
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Sign up"
+msgstr "Sign up"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Sign out"
+msgstr "Sign out"
+
+msgid "Profile"
+msgstr "Profile"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Username"
+msgstr "Username"
+
+msgid "Remember Me"
+msgstr "Remember Me"
+
+msgid "Forgot your password?"
+msgstr "Forgot your password?"
+
+msgid "Reset password"
+msgstr "Reset password"
+
+msgid "Change password"
+msgstr "Change password"
+
+msgid "Set password"
+msgstr "Set password"
+
+msgid "Current password"
+msgstr "Current password"
+
+msgid "New password"
+msgstr "New password"
+
+msgid "Confirm password"
+msgstr "Confirm password"
+
+msgid "Enter"
+msgstr "Enter"
+
+msgid "Register"
+msgstr "Register"
+
+msgid "Welcome back"
+msgstr "Welcome back"
+
+msgid "Create your account"
+msgstr "Create your account"
+
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
+msgid "Don't have an account?"
+msgstr "Don't have an account?"
+
+msgid "Connect with Spotify"
+msgstr "Connect with Spotify"
+
+msgid "Connect with Google"
+msgstr "Connect with Google"
+
+msgid "or connect with"
+msgstr "or connect with"
+
+msgid "or register with"
+msgstr "or register with"
+
+# ==================== NAVIGATION ====================
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "DJ Dashboard"
+msgstr "DJ Dashboard"
+
+msgid "Settings"
+msgstr "Settings"
+
+msgid "Party Settings"
+msgstr "Party Settings"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "About"
+msgstr "About"
+
+# ==================== PARTIES ====================
+
+msgid "Party"
+msgstr "Party"
+
+msgid "Parties"
+msgstr "Parties"
+
+msgid "Select a party"
+msgstr "Select a party"
+
+msgid "Select party"
+msgstr "Select party"
+
+msgid "Active party"
+msgstr "Active party"
+
+msgid "Create party"
+msgstr "Create party"
+
+msgid "Party name"
+msgstr "Party name"
+
+msgid "Party code"
+msgstr "Party code"
+
+msgid "Join party"
+msgstr "Join party"
+
+msgid "Leave party"
+msgstr "Leave party"
+
+msgid "No active party"
+msgstr "No active party"
+
+# ==================== SONGS ====================
+
+msgid "Song"
+msgstr "Song"
+
+msgid "Songs"
+msgstr "Songs"
+
+msgid "Song list"
+msgstr "Song list"
+
+msgid "DJ Bag"
+msgstr "DJ Bag"
+
+msgid "Session"
+msgstr "Session"
+
+msgid "Played"
+msgstr "Played"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Search songs"
+msgstr "Search songs"
+
+msgid "Request song"
+msgstr "Request song"
+
+msgid "Song request"
+msgstr "Song request"
+
+msgid "Song requests"
+msgstr "Song requests"
+
+msgid "Manage requests"
+msgstr "Manage requests"
+
+msgid "Title"
+msgstr "Title"
+
+msgid "Artist"
+msgstr "Artist"
+
+msgid "Album"
+msgstr "Album"
+
+msgid "Duration"
+msgstr "Duration"
+
+msgid "BPM"
+msgstr "BPM"
+
+msgid "Key"
+msgstr "Key"
+
+msgid "Play"
+msgstr "Play"
+
+msgid "Playing"
+msgstr "Playing"
+
+msgid "Add to queue"
+msgstr "Add to queue"
+
+# ==================== VOTES ====================
+
+msgid "Vote"
+msgstr "Vote"
+
+msgid "Votes"
+msgstr "Votes"
+
+msgid "Vote for this song"
+msgstr "Vote for this song"
+
+msgid "Available"
+msgstr "Available"
+
+msgid "Available votes"
+msgstr "Available votes"
+
+msgid "Votes left"
+msgstr "Votes left"
+
+msgid "You have voted"
+msgstr "You have voted"
+
+msgid "Buy votes"
+msgstr "Buy votes"
+
+msgid "Convert coins to votes"
+msgstr "Convert coins to votes"
+
+msgid "Vote count"
+msgstr "Vote count"
+
+# ==================== COINS ====================
+
+msgid "Coin"
+msgstr "Coin"
+
+msgid "Coins"
+msgstr "Coins"
+
+msgid "Your coins"
+msgstr "Your coins"
+
+msgid "Buy coins"
+msgstr "Buy coins"
+
+msgid "Purchase coins"
+msgstr "Purchase coins"
+
+msgid "Coin packages"
+msgstr "Coin packages"
+
+msgid "Credits"
+msgstr "Credits"
+
+msgid "Balance"
+msgstr "Balance"
+
+# ==================== NOTIFICATIONS ====================
+
+msgid "New"
+msgstr "New"
+
+msgid "Unread"
+msgstr "Unread"
+
+msgid "Mark as read"
+msgstr "Mark as read"
+
+msgid "Mark all as read"
+msgstr "Mark all as read"
+
+msgid "Song accepted"
+msgstr "Song accepted"
+
+msgid "Song played"
+msgstr "Song played"
+
+msgid "Coins purchased"
+msgstr "Coins purchased"
+
+msgid "Coins received"
+msgstr "Coins received"
+
+msgid "Your request was accepted"
+msgstr "Your request was accepted"
+
+msgid "Your song is playing"
+msgstr "Your song is playing"
+
+msgid "How it works"
+msgstr "How it works"
+
+# ==================== ACTIONS ====================
+
+msgid "Accept"
+msgstr "Accept"
+
+msgid "Reject"
+msgstr "Reject"
+
+msgid "Approve"
+msgstr "Approve"
+
+msgid "Decline"
+msgstr "Decline"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Update"
+msgstr "Update"
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Confirm"
+msgstr "Confirm"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "View"
+msgstr "View"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "More"
+msgstr "More"
+
+msgid "Less"
+msgstr "Less"
+
+# ==================== STATUS ====================
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "Connected"
+msgstr "Connected"
+
+msgid "Disconnected"
+msgstr "Disconnected"
+
+msgid "Success"
+msgstr "Success"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Warning"
+msgstr "Warning"
+
+msgid "Info"
+msgstr "Info"
+
+msgid "Loading"
+msgstr "Loading"
+
+msgid "Please wait"
+msgstr "Please wait"
+
+msgid "No results"
+msgstr "No results"
+
+msgid "Empty"
+msgstr "Empty"
+
+msgid "All"
+msgstr "All"
+
+msgid "None"
+msgstr "None"
+
+# ==================== MESSAGES ====================
+
+msgid "Operation completed successfully"
+msgstr "Operation completed successfully"
+
+msgid "An error occurred"
+msgstr "An error occurred"
+
+msgid "Are you sure?"
+msgstr "Are you sure?"
+
+msgid "This action cannot be undone"
+msgstr "This action cannot be undone"
+
+msgid "Please fill in all required fields"
+msgstr "Please fill in all required fields"
+
+msgid "Invalid input"
+msgstr "Invalid input"
+
+msgid "Not found"
+msgstr "Not found"
+
+msgid "Access denied"
+msgstr "Access denied"
+
+msgid "Session expired"
+msgstr "Session expired"
+
+msgid "Please log in to continue"
+msgstr "Please log in to continue"
+
+# ==================== PROFILE ====================
+
+msgid "Edit profile"
+msgstr "Edit profile"
+
+msgid "Edit email"
+msgstr "Edit email"
+
+msgid "Social connections"
+msgstr "Social connections"
+
+msgid "Account settings"
+msgstr "Account settings"
+
+msgid "Personal information"
+msgstr "Personal information"
+
+msgid "Security"
+msgstr "Security"
+
+msgid "Preferences"
+msgstr "Preferences"
+
+msgid "Member"
+msgstr "Member"
+
+msgid "Premium Member"
+msgstr "Premium Member"
+
+msgid "Your status"
+msgstr "Your status"
+
+# ==================== SPOTIFY ====================
+
+msgid "Spotify Integration"
+msgstr "Spotify Integration"
+
+msgid "Connect Spotify"
+msgstr "Connect Spotify"
+
+msgid "Disconnect Spotify"
+msgstr "Disconnect Spotify"
+
+msgid "Spotify connected"
+msgstr "Spotify connected"
+
+msgid "Spotify disconnected"
+msgstr "Spotify disconnected"
+
+msgid "Sync playlist"
+msgstr "Sync playlist"
+
+msgid "Auto-sync"
+msgstr "Auto-sync"
+
+# ==================== TEMPORAL ====================
+
+msgid "ago"
+msgstr "ago"
+
+msgid "just now"
+msgstr "just now"
+
+msgid "Today"
+msgstr "Today"
+
+msgid "Yesterday"
+msgstr "Yesterday"
+
+msgid "Tomorrow"
+msgstr "Tomorrow"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Time"
+msgstr "Time"
+
+# ==================== PLURALS ====================
+
+#, python-format
+msgid "%(count)d vote"
+msgid_plural "%(count)d votes"
+msgstr[0] "%(count)d vote"
+msgstr[1] "%(count)d votes"
+
+#, python-format
+msgid "%(count)d coin"
+msgid_plural "%(count)d coins"
+msgstr[0] "%(count)d coin"
+msgstr[1] "%(count)d coins"
+
+#, python-format
+msgid "%(count)d song"
+msgid_plural "%(count)d songs"
+msgstr[0] "%(count)d song"
+msgstr[1] "%(count)d songs"
+
+#, python-format
+msgid "%(count)d notification"
+msgid_plural "%(count)d notifications"
+msgstr[0] "%(count)d notification"
+msgstr[1] "%(count)d notifications"

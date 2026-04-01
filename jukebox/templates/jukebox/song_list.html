@@ -1,7 +1,8 @@
 {% extends "jukebox/admin_base.html" %}
 {% load dict_filters %}
+{% load i18n %}
 {% block page_title %}
-  {% if party %}{{ party.name }}{% else %}Festa activa{% endif %}
+  {% if party %}{{ party.name }}{% else %}{% trans "Festa activa" %}{% endif %}
 {% endblock %}
 {% block content %}
 <style>
@@ -287,10 +288,15 @@
       font-size: 0.875rem;
     }
 
+    .songs-vote-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
     .songs-vote-btn {
       width: 2rem;
       height: 2rem;
-      border-radius: 50%;
+      border-radius: 999px;
       border: none;
       background: transparent;
       color: #747687;
@@ -301,18 +307,31 @@
       justify-content: center;
     }
     .songs-vote-btn:hover {
-      background: rgba(231,76,60,0.1);
-      color: #e74c3c;
+      background: rgba(0, 64, 224, 0.08);
+      color: #0040e0;
     }
     .songs-vote-btn .material-symbols-outlined {
       font-size: 1.25rem;
     }
+    .songs-vote-btn-positive:hover {
+      background: rgba(28, 200, 138, 0.12);
+      color: #1cc88a;
+    }
+    .songs-vote-btn-negative:hover {
+      background: rgba(186, 26, 26, 0.1);
+      color: #ba1a1a;
+    }
     .songs-vote-btn-active {
-      color: #e74c3c;
-      cursor: default;
+      cursor: pointer;
     }
     .songs-vote-btn-active:hover {
-      background: transparent;
+      background: rgba(24, 28, 30, 0.06);
+    }
+    .songs-vote-btn-active-positive {
+      color: #1cc88a;
+    }
+    .songs-vote-btn-active-negative {
+      color: #ba1a1a;
     }
     .songs-vote-btn-locked {
       color: #c4c5d8;
@@ -430,6 +449,44 @@
       color: #0040e0;
       box-shadow: inset 0 0 0 1px rgba(0, 64, 224, 0.08);
     }
+    .mobile-vote-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .mobile-vote-btn {
+      width: 2rem;
+      height: 2rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #858796;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 200ms ease;
+    }
+    .mobile-vote-btn i {
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+    .mobile-vote-btn-positive {
+      color: #1cc88a;
+    }
+    .mobile-vote-btn-negative {
+      color: #ba1a1a;
+    }
+    .mobile-vote-btn-active {
+      background: rgba(0, 64, 224, 0.08);
+      opacity: 1;
+    }
+    .mobile-vote-btn-active:hover {
+      background: rgba(24, 28, 30, 0.08);
+    }
+    .mobile-vote-btn-locked {
+      color: #c4c5d8;
+      opacity: 0.75;
+    }
   }
 </style>
 <div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
@@ -439,27 +496,27 @@
       <div class="songs-page-stat">
         <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">play_circle</span>
         <div>
-          <p class="songs-page-stat-label">Sonades</p>
+          <p class="songs-page-stat-label">{% trans "Sonades" %}</p>
           <p class="songs-page-stat-value">{{ songs_played }}</p>
         </div>
       </div>
       <div class="songs-page-stat">
         <span class="material-symbols-outlined" style="color: #e74c3c; font-variation-settings: 'FILL' 1;">favorite</span>
         <div>
-          <p class="songs-page-stat-label">Vots totals</p>
+          <p class="songs-page-stat-label">{% trans "Vots totals" %}</p>
           <p class="songs-page-stat-value">{{ total_votes }}</p>
         </div>
       </div>
       <div class="songs-page-stat">
         <span class="material-symbols-outlined" style="color: #0040e0; font-variation-settings: 'FILL' 1;">how_to_vote</span>
         <div>
-          <p class="songs-page-stat-label">Disponibles</p>
+          <p class="songs-page-stat-label">{% trans "Disponibles" %}</p>
           <p class="songs-page-stat-value">{{ votes_left }}</p>
         </div>
       </div>
       <a href="{% url 'select_party' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">event_repeat</span>
-        Canviar Festa
+        {% trans "Canviar Festa" %}
       </a>
     </div>
   </div>
@@ -475,22 +532,22 @@
               <div style="background: rgba(246, 194, 62, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
                 <span class="material-symbols-outlined" style="color: #f6c23e;">work</span>
               </div>
-              <h3 class="songs-column-title">Maleta del DJ</h3>
+              <h3 class="songs-column-title">{% trans "Maleta del DJ" %}</h3>
             </div>
             <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
               <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
-              <input id="search-pending" type="search" class="songs-column-search" placeholder="Cerca...">
+              <input id="search-pending" type="search" class="songs-column-search" placeholder="{% trans 'Cerca...' %}">
             </div>
           </div>
           <div class="songs-column-body">
             <table class="songs-table">
               <thead>
                 <tr>
-                  <th>Títol i Artista</th>
+                  <th>{% trans "Títol i Artista" %}</th>
                   <th>BPM</th>
                   <th>Key</th>
-                  <th class="text-center">Vots</th>
-                  <th class="text-center">Acció</th>
+                  <th class="text-center">{% trans "Vots" %}</th>
+                  <th class="text-center">{% trans "Acció" %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -544,29 +601,63 @@
                     </td>
                     <td class="songs-table-cell-last text-center">
                       {% if user_votes_dict|get_item:song.id %}
-                        <button class="songs-vote-btn songs-vote-btn-active" disabled>
-                          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
-                        </button>
+                        <div class="songs-vote-controls">
+                          {% if user_votes_dict|get_item:song.id == 'like' %}
+                            <form method="post" class="d-inline m-0">{% csrf_token %}
+                              <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+                              <button type="submit" class="songs-vote-btn songs-vote-btn-active songs-vote-btn-active-positive" aria-label="{% trans 'Desfer vot positiu' %}" title="{% trans 'Desfer vot' %}">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">keyboard_arrow_up</span>
+                              </button>
+                            </form>
+                            <button class="songs-vote-btn songs-vote-btn-locked" disabled aria-label="{% trans 'Vot negatiu no seleccionat' %}">
+                              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                            </button>
+                          {% elif user_votes_dict|get_item:song.id == 'dislike' %}
+                            <button class="songs-vote-btn songs-vote-btn-locked" disabled aria-label="{% trans 'Vot positiu no seleccionat' %}">
+                              <span class="material-symbols-outlined">keyboard_arrow_up</span>
+                            </button>
+                            <form method="post" class="d-inline m-0">{% csrf_token %}
+                              <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+                              <button type="submit" class="songs-vote-btn songs-vote-btn-active songs-vote-btn-active-negative" aria-label="{% trans 'Desfer vot negatiu' %}" title="{% trans 'Desfer vot' %}">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">keyboard_arrow_down</span>
+                              </button>
+                            </form>
+                          {% endif %}
+                        </div>
                       {% else %}
                         {% if votes_left > 0 or credits > 0 %}
-                          <form method="post" class="d-inline">{% csrf_token %}
-                            <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                            <input type="hidden" name="vote_type" value="like">
-                            <button type="submit" class="songs-vote-btn">
-                              <span class="material-symbols-outlined">favorite</span>
-                            </button>
-                          </form>
+                          <div class="songs-vote-controls">
+                            <form method="post" class="d-inline m-0">{% csrf_token %}
+                              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                              <input type="hidden" name="vote_type" value="like">
+                              <button type="submit" class="songs-vote-btn songs-vote-btn-positive" aria-label="{% trans 'Vot positiu' %}">
+                                <span class="material-symbols-outlined">keyboard_arrow_up</span>
+                              </button>
+                            </form>
+                            <form method="post" class="d-inline m-0">{% csrf_token %}
+                              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                              <input type="hidden" name="vote_type" value="dislike">
+                              <button type="submit" class="songs-vote-btn songs-vote-btn-negative" aria-label="{% trans 'Vot negatiu' %}">
+                                <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                              </button>
+                            </form>
+                          </div>
                         {% else %}
-                          <button class="songs-vote-btn songs-vote-btn-locked" data-bs-toggle="tooltip" title="Necessites Coins per votar">
-                            <span class="material-symbols-outlined">lock</span>
-                          </button>
+                          <div class="songs-vote-controls">
+                            <button class="songs-vote-btn songs-vote-btn-locked" data-bs-toggle="tooltip" title="{% trans 'Necessites Coins per votar' %}" disabled>
+                              <span class="material-symbols-outlined">keyboard_arrow_up</span>
+                            </button>
+                            <button class="songs-vote-btn songs-vote-btn-locked" data-bs-toggle="tooltip" title="{% trans 'Necessites Coins per votar' %}" disabled>
+                              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+                            </button>
+                          </div>
                         {% endif %}
                       {% endif %}
                     </td>
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="5" class="songs-table-empty">No queden temes pendents.</td>
+                    <td colspan="5" class="songs-table-empty">{% trans "No queden temes pendents." %}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -583,22 +674,22 @@
               <div style="background: rgba(28, 200, 138, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
                 <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">check_circle</span>
               </div>
-              <h3 class="songs-column-title">Ja posades</h3>
+              <h3 class="songs-column-title">{% trans "Ja posades" %}</h3>
             </div>
             <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
               <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
-              <input id="search-played" type="search" class="songs-column-search" placeholder="Cerca...">
+              <input id="search-played" type="search" class="songs-column-search" placeholder="{% trans 'Cerca...' %}">
             </div>
           </div>
           <div class="songs-column-body">
             <table class="songs-table">
               <thead>
                 <tr>
-                  <th>Títol i Artista</th>
+                  <th>{% trans "Títol i Artista" %}</th>
                   <th>BPM</th>
                   <th>Key</th>
-                  <th class="text-center">Vots</th>
-                  <th class="text-center">Estat</th>
+                  <th class="text-center">{% trans "Vots" %}</th>
+                  <th class="text-center">{% trans "Estat" %}</th>
                 </tr>
               </thead>
               <tbody>
@@ -651,7 +742,7 @@
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="5" class="songs-table-empty">Encara no ha començat la festa.</td>
+                    <td colspan="5" class="songs-table-empty">{% trans "Encara no ha començat la festa." %}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -664,8 +755,8 @@
     <!-- Vista desktop - No songs -->
     <div class="songs-column-card" style="padding: 3rem; text-align: center;">
       <span class="material-symbols-outlined" style="font-size: 4rem; color: #c4c5d8;">music_off</span>
-      <h3 style="font-family: 'Epilogue', sans-serif; font-weight: 700; color: #181c1e; margin: 1rem 0 0.5rem 0;">No hi ha cançons</h3>
-      <p style="color: #747687;">Aquesta festa encara no té cançons disponibles</p>
+      <h3 style="font-family: 'Epilogue', sans-serif; font-weight: 700; color: #181c1e; margin: 1rem 0 0.5rem 0;">{% trans "No hi ha cançons" %}</h3>
+      <p style="color: #747687;">{% trans "Aquesta festa encara no té cançons disponibles" %}</p>
     </div>
   {% endif %}
 </div>
@@ -677,7 +768,7 @@
         <div class="mobile-group-stack" style="gap: 0.5rem;">
         <!-- Party Info Card -->
         <section class="mobile-section-header">
-          <span class="mobile-kicker">LA TEVA FESTA</span>
+          <span class="mobile-kicker">{% trans "LA TEVA FESTA" %}</span>
           <div class="mobile-surface-card overflow-hidden d-flex flex-column">
             <div class="d-flex p-3 gap-3 align-items-center">
               <span style="font-size: 2rem;">🎉</span>
@@ -687,7 +778,7 @@
                   <p class="mb-0 mt-1" style="color: #747688; font-size: 0.75rem;">{{ party.date|date:"d/m/Y H:i" }}</p>
                 {% endif %}
               </div>
-              <a href="{% url 'select_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="Canvia de festa" title="Canvia de festa" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #eef2ff; color: #0040e0;">
+              <a href="{% url 'select_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="{% trans 'Canvia de festa' %}" title="{% trans 'Canvia de festa' %}" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #eef2ff; color: #0040e0;">
                 <i class="fas fa-exchange-alt"></i>
               </a>
             </div>
@@ -703,7 +794,7 @@
               </div>
               <p class="mobile-stat-value mb-0">{{ songs_played }}</p>
             </div>
-            <span class="mobile-stat-label">Sonades</span>
+            <span class="mobile-stat-label">{% trans "Sonades" %}</span>
           </div>
           <div class="mobile-stat-card">
             <div class="mobile-stat-top">
@@ -712,7 +803,7 @@
               </div>
               <p class="mobile-stat-value mb-0">{{ total_votes }}</p>
             </div>
-            <span class="mobile-stat-label">Vots totals</span>
+            <span class="mobile-stat-label">{% trans "Vots totals" %}</span>
           </div>
           <a href="{% url 'buy_votes' %}" class="mobile-stat-card d-block text-decoration-none">
             <div class="mobile-stat-top">
@@ -721,7 +812,7 @@
               </div>
               <p class="mobile-stat-value mb-0">{{ votes_left }}</p>
             </div>
-            <span class="mobile-stat-label">Disponibles</span>
+            <span class="mobile-stat-label">{% trans "Disponibles" %}</span>
           </a>
         </section>
         </div>
@@ -729,8 +820,8 @@
         <!-- Song Tabs Header -->
         <section>
           <div class="mobile-segmented">
-            <button type="button" class="mobile-song-tab mobile-segmented-item is-active" data-mobile-tab="bag">Maleta del DJ</button>
-            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="played">El que ha sonat</button>
+            <button type="button" class="mobile-song-tab mobile-segmented-item is-active" data-mobile-tab="bag">{% trans "Maleta del DJ" %}</button>
+            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="played">{% trans "El que ha sonat" %}</button>
           </div>
         </section>
 
@@ -739,7 +830,7 @@
           <div>
             <div class="mobile-search-shell mobile-search-shell--aligned">
               <i class="fas fa-filter" style="color: #747688; font-size: 0.9rem;"></i>
-              <input id="mobile-song-search" type="search" placeholder="Busca una cançó o artista" class="w-100">
+              <input id="mobile-song-search" type="search" placeholder="{% trans 'Busca una cançó o artista' %}" class="w-100">
             </div>
           </div>
 
@@ -780,40 +871,55 @@
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
                   {% if user_votes_dict|get_item:song.id %}
-                    <!-- L'usuari ja ha votat aquesta cançó -->
-                    {% if user_votes_dict|get_item:song.id == 'like' %}
-                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #e74c3c; opacity: 1;">
-                        <i class="fas fa-heart"></i>
-                      </button>
-                    {% elif user_votes_dict|get_item:song.id == 'dislike' %}
-                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #858796; opacity: 1;">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    {% elif user_votes_dict|get_item:song.id == 'skip' %}
-                      <button class="border-0 bg-transparent pe-0" disabled style="font-size: 1.5rem; color: #858796; opacity: 1;">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    {% endif %}
+                    <div class="mobile-vote-controls">
+                      {% if user_votes_dict|get_item:song.id == 'like' %}
+                        <form method="post" class="m-0">{% csrf_token %}
+                          <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+                          <button type="submit" class="mobile-vote-btn mobile-vote-btn-positive mobile-vote-btn-active" aria-label="{% trans 'Desfer vot positiu' %}" title="{% trans 'Desfer vot' %}">
+                            <i class="fas fa-caret-up"></i>
+                          </button>
+                        </form>
+                        <button class="mobile-vote-btn mobile-vote-btn-locked" disabled aria-label="{% trans 'Vot negatiu no seleccionat' %}">
+                          <i class="fas fa-caret-down"></i>
+                        </button>
+                      {% elif user_votes_dict|get_item:song.id == 'dislike' or user_votes_dict|get_item:song.id == 'skip' %}
+                        <button class="mobile-vote-btn mobile-vote-btn-locked" disabled aria-label="{% trans 'Vot positiu no seleccionat' %}">
+                          <i class="fas fa-caret-up"></i>
+                        </button>
+                        <form method="post" class="m-0">{% csrf_token %}
+                          <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+                          <button type="submit" class="mobile-vote-btn mobile-vote-btn-negative mobile-vote-btn-active" aria-label="{% trans 'Desfer vot negatiu' %}" title="{% trans 'Desfer vot' %}">
+                            <i class="fas fa-caret-down"></i>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
                   {% else %}
-                    <!-- L'usuari no ha votat aquesta cançó -->
                     {% if votes_left > 0 or credits > 0 %}
-                      <form method="post" class="m-0">{% csrf_token %}
-                        <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                        <input type="hidden" name="vote_type" value="like">
-                        <button type="submit" class="border-0 bg-transparent p-1" style="font-size: 1.5rem; color: #e74c3c;">
-                          <i class="far fa-heart"></i>
-                        </button>
-                      </form>
-                      <form method="post" class="m-0">{% csrf_token %}
-                        <input type="hidden" name="vote_song_id" value="{{ song.id }}">
-                        <input type="hidden" name="vote_type" value="dislike">
-                        <button type="submit" class="border-0 bg-transparent p-1 pe-0" style="font-size: 1.3rem; color: #858796;">
-                          <i class="fas fa-times"></i>
-                        </button>
-                      </form>
+                      <div class="mobile-vote-controls">
+                        <form method="post" class="m-0">{% csrf_token %}
+                          <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                          <input type="hidden" name="vote_type" value="like">
+                          <button type="submit" class="mobile-vote-btn mobile-vote-btn-positive" aria-label="{% trans 'Vot positiu' %}">
+                            <i class="fas fa-caret-up"></i>
+                          </button>
+                        </form>
+                        <form method="post" class="m-0">{% csrf_token %}
+                          <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+                          <input type="hidden" name="vote_type" value="dislike">
+                          <button type="submit" class="mobile-vote-btn mobile-vote-btn-negative" aria-label="{% trans 'Vot negatiu' %}">
+                            <i class="fas fa-caret-down"></i>
+                          </button>
+                        </form>
+                      </div>
                     {% else %}
-                      <a href="{% url 'buy_votes' %}" class="text-decoration-none pe-0" style="font-size: 1.2rem; color: #747688; opacity: 0.5;">
-                        <i class="fas fa-lock"></i>
+                      <a href="{% url 'buy_votes' %}" class="text-decoration-none pe-0 mobile-vote-controls" aria-label="{% trans 'Necessites vots per votar' %}">
+                        <span class="mobile-vote-btn mobile-vote-btn-locked">
+                          <i class="fas fa-caret-up"></i>
+                        </span>
+                        <span class="mobile-vote-btn mobile-vote-btn-locked">
+                          <i class="fas fa-caret-down"></i>
+                        </span>
                       </a>
                     {% endif %}
                   {% endif %}
@@ -821,7 +927,7 @@
               </div>
             </div>
           {% empty %}
-            <div class="mobile-empty-state">No queden temes pendents.</div>
+            <div class="mobile-empty-state">{% trans "No queden temes pendents." %}</div>
           {% endfor %}
           </div>
         </section>
@@ -868,7 +974,7 @@
               </div>
             </div>
           {% empty %}
-            <div class="mobile-empty-state">Encara no ha començat la festa.</div>
+            <div class="mobile-empty-state">{% trans "Encara no ha començat la festa." %}</div>
           {% endfor %}
         </section>
 
@@ -887,8 +993,8 @@
 <div class="mobile-page-shell d-md-none">
   <div class="mobile-page-content text-center py-4">
     <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
-    <h4 class="fw-bold mb-1" style="color: #191c1f;">No hi ha cançons</h4>
-    <p class="mb-0" style="color: #434656; font-size: 0.875rem;">Aquesta festa encara no té cançons disponibles</p>
+    <h4 class="fw-bold mb-1" style="color: #191c1f;">{% trans "No hi ha cançons" %}</h4>
+    <p class="mb-0" style="color: #434656; font-size: 0.875rem;">{% trans "Aquesta festa encara no té cançons disponibles" %}</p>
   </div>
 </div>
 {% endif %}
@@ -1022,7 +1128,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 function playSpotifyTrack(spotifyId) {
   if (!spotifyPlayer || !spotifyDeviceId) {
     console.error('[SPOTIFY] Player not ready');
-    showSpotifyAlert('El reproductor de Spotify no està llest. Espera uns segons...', 'info');
+    showSpotifyAlert('{% trans "El reproductor de Spotify no està llest. Espera uns segons..." %}', 'info');
     return;
   }
 
@@ -1038,13 +1144,13 @@ function playSpotifyTrack(spotifyId) {
       console.log('[SPOTIFY] Playing track:', spotifyId);
     } else if (response.status === 403) {
       console.error('[SPOTIFY] Premium required');
-      showSpotifyAlert('Necessites Spotify Premium per reproduir cançons completes', 'warning');
+      showSpotifyAlert('{% trans "Necessites Spotify Premium per reproduir cançons completes" %}', 'warning');
     } else if (response.status === 401) {
       console.error('[SPOTIFY] Unauthorized');
-      showSpotifyAlert('Sessió de Spotify caducada. Reconnecta el teu compte des del perfil.', 'danger');
+      showSpotifyAlert('{% trans "Sessió de Spotify caducada. Reconnecta el teu compte des del perfil." %}', 'danger');
     } else {
       console.error('[SPOTIFY] Error playing track:', response.status);
-      showSpotifyAlert('Error reproduint la cançó. Torna-ho a provar.', 'danger');
+      showSpotifyAlert('{% trans "Error reproduint la cançó. Torna-ho a provar." %}', 'danger');
     }
   });
 }

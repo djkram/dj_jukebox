@@ -8,6 +8,56 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <script>
+        (function() {
+            var root = document.documentElement;
+            var ua = navigator.userAgent || '';
+
+            function applyAppShellMode() {
+                var width = window.innerWidth || document.documentElement.clientWidth || 0;
+                var height = window.innerHeight || document.documentElement.clientHeight || 0;
+                var smallestSide = Math.min(width, height);
+                var largestSide = Math.max(width, height);
+                var isPortrait = height >= width;
+                var hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+                var hasFineHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+                var hasTouch = (navigator.maxTouchPoints || 0) > 0 || hasCoarsePointer;
+                var isPhoneUA = /Mobi|iPhone|iPod|Android.*Mobile|Windows Phone|Opera Mini|IEMobile/i.test(ua);
+                var isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua));
+                var isPhone = isPhoneUA || (hasTouch && smallestSide < 600);
+                var isTablet = !isPhone && (isTabletUA || (hasTouch && !hasFineHover && smallestSide >= 600 && largestSide <= 1400));
+                var shellMode = 'desktop';
+                var deviceMode = 'desktop';
+
+                if (isPhone) {
+                    shellMode = 'mobile';
+                    deviceMode = 'phone';
+                } else if (isTablet) {
+                    shellMode = isPortrait ? 'mobile' : 'desktop';
+                    deviceMode = 'tablet';
+                }
+
+                root.classList.remove(
+                    'app-shell-mobile',
+                    'app-shell-desktop',
+                    'app-device-phone',
+                    'app-device-tablet',
+                    'app-device-desktop'
+                );
+
+                root.classList.add(shellMode === 'mobile' ? 'app-shell-mobile' : 'app-shell-desktop');
+                root.classList.add('app-device-' + deviceMode);
+                root.setAttribute('data-app-shell', shellMode);
+                root.setAttribute('data-app-device', deviceMode);
+            }
+
+            applyAppShellMode();
+            window.addEventListener('resize', applyAppShellMode);
+            window.addEventListener('orientationchange', applyAppShellMode);
+            window.applyAppShellMode = applyAppShellMode;
+        })();
+    </script>
+
     <title>DJukebox</title>
 
     <!-- Tailwind CSS -->
@@ -104,6 +154,340 @@
         /* Hide scrollbar but keep functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        html.app-shell-mobile {
+            --mobile-page-gutter-x: 1.25rem;
+            --mobile-page-gutter-top: 0.25rem;
+            --mobile-section-gap: 0.85rem;
+            --mobile-group-gap: 0.55rem;
+            --mobile-list-gap: 0.22rem;
+            --mobile-kicker-gap: 0.2rem;
+        }
+
+        html.app-shell-mobile .material-symbols-outlined {
+            display: none !important;
+        }
+
+        html.app-shell-mobile .fas,
+        html.app-shell-mobile .fab,
+        html.app-shell-mobile .sidebar-emoji-icon {
+            display: inline-block !important;
+        }
+
+        html.app-shell-mobile .d-none.d-md-block,
+        html.app-shell-mobile .d-none.d-md-flex,
+        html.app-shell-mobile .d-none.d-md-inline-block,
+        html.app-shell-mobile .d-none.d-md-inline {
+            display: none !important;
+        }
+
+        html.app-shell-mobile .d-md-none {
+            display: block !important;
+        }
+
+        html.app-shell-mobile .mobile-page-shell {
+            background: #f8f9fe;
+            min-height: 100vh;
+        }
+
+        html.app-shell-mobile .mobile-page-content {
+            width: 100%;
+            max-width: 28rem;
+            margin: 0 auto;
+            padding: var(--mobile-page-gutter-top) var(--mobile-page-gutter-x) 8rem;
+        }
+
+        html.app-shell-mobile .mobile-page-content.mobile-page-content--wide {
+            max-width: 40rem;
+        }
+
+        html.app-shell-mobile .mobile-page-content.mobile-page-content--tight {
+            padding-top: var(--mobile-page-gutter-top);
+        }
+
+        html.app-shell-mobile .mobile-page-stack {
+            display: flex;
+            flex-direction: column;
+            gap: var(--mobile-section-gap);
+        }
+
+        html.app-shell-mobile .mobile-page-stack > :where(section, header, div) {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        html.app-shell-mobile .mobile-section-header,
+        html.app-shell-mobile .mobile-group-stack {
+            display: flex;
+            flex-direction: column;
+            gap: var(--mobile-group-gap);
+        }
+
+        html.app-shell-mobile .mobile-group-stack.mobile-group-stack--tight {
+            gap: 0.38rem;
+        }
+
+        html.app-shell-mobile .mobile-section-header > .mobile-kicker,
+        html.app-shell-mobile .mobile-group-stack > .mobile-kicker,
+        html.app-shell-mobile .mobile-section-header > :where(h1, h2, h3, h4, p),
+        html.app-shell-mobile .mobile-group-stack > :where(h1, h2, h3, h4, p) {
+            margin-bottom: 0 !important;
+        }
+
+        html.app-shell-mobile .mobile-list-stack {
+            display: flex;
+            flex-direction: column;
+            gap: var(--mobile-list-gap);
+        }
+
+        html.app-shell-mobile .mobile-list-stack > * {
+            margin-bottom: 0 !important;
+        }
+
+        html.app-shell-mobile .mobile-card-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        html.app-shell-mobile .mobile-card-grid.mobile-card-grid--3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        html.app-shell-mobile .mobile-kicker {
+            display: block;
+            color: #5e24e1;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: var(--mobile-kicker-gap);
+        }
+
+        html.app-shell-mobile .mobile-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        html.app-shell-mobile .mobile-stat-grid.mobile-stat-grid--2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        html.app-shell-mobile .mobile-stat-grid.mobile-stat-grid--4 {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        html.app-shell-mobile .mobile-stat-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);
+            padding: 0.55rem 0.5rem;
+            text-align: center;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        html.app-shell-mobile .mobile-stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        html.app-shell-mobile .mobile-stat-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        html.app-shell-mobile .mobile-stat-value {
+            color: #191c1f;
+            font-family: 'Epilogue', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        html.app-shell-mobile .mobile-stat-label {
+            display: block;
+            color: #747688;
+            font-size: 0.66rem;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        html.app-shell-mobile .mobile-segmented {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px rgba(0, 64, 224, 0.06);
+        }
+
+        html.app-shell-mobile .mobile-segmented-item {
+            flex: 1 1 0;
+            border: none;
+            background: transparent;
+            color: #747688;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px;
+        }
+
+        html.app-shell-mobile .mobile-segmented-item.is-active {
+            background: #eef2ff;
+            color: #0040e0;
+            box-shadow: inset 0 0 0 1px rgba(0, 64, 224, 0.08);
+        }
+
+        html.app-shell-mobile .mobile-search-shell {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 0.85rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 64, 224, 0.05);
+        }
+
+        html.app-shell-mobile .mobile-search-shell.mobile-search-shell--aligned {
+            min-height: 3.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        html.app-shell-mobile .mobile-search-shell input {
+            width: 100%;
+            border: 0;
+            outline: none;
+            background: transparent;
+            color: #191c1f;
+            font-size: 0.92rem;
+            box-shadow: none !important;
+        }
+
+        html.app-shell-mobile .mobile-list-card {
+            background: #f2f3f8;
+            border-radius: 10px;
+            box-shadow: none;
+        }
+
+        html.app-shell-mobile .mobile-list-card.mobile-list-card--positive {
+            background: rgba(28, 200, 138, 0.05);
+        }
+
+        html.app-shell-mobile .mobile-page-content [id*="message-area"]:empty {
+            display: none;
+        }
+
+        html.app-shell-mobile .mobile-empty-state {
+            padding: 0.9rem;
+            text-align: center;
+            background: #f2f3f8;
+            border-radius: 10px;
+            color: #747688;
+            font-size: 0.9rem;
+        }
+
+        html.app-shell-mobile #accordionSidebar {
+            display: none !important;
+        }
+
+        html.app-shell-mobile #wrapper {
+            display: block !important;
+        }
+
+        html.app-shell-mobile #content-wrapper {
+            width: 100% !important;
+            margin-left: 0 !important;
+            padding-bottom: 70px;
+        }
+
+        html.app-shell-mobile .glass-nav {
+            padding: 0.75rem var(--mobile-page-gutter-x) !important;
+            margin-bottom: 0 !important;
+        }
+
+        html.app-shell-mobile .glass-nav h1 {
+            font-size: 1.25rem;
+        }
+
+        html.app-shell-mobile .sticky-footer {
+            display: none !important;
+        }
+
+        html.app-shell-mobile .mobile-bottom-nav {
+            display: block !important;
+        }
+
+        html.app-shell-mobile .container-fluid {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        html.app-shell-desktop .d-none.d-md-block {
+            display: block !important;
+        }
+
+        html.app-shell-desktop .d-none.d-md-flex {
+            display: flex !important;
+        }
+
+        html.app-shell-desktop .d-none.d-md-inline-block {
+            display: inline-block !important;
+        }
+
+        html.app-shell-desktop .d-none.d-md-inline {
+            display: inline !important;
+        }
+
+        html.app-shell-desktop .d-md-none {
+            display: none !important;
+        }
+
+        html.app-shell-desktop .d-md-flex {
+            display: flex !important;
+        }
+
+        html.app-shell-desktop .sidebar .material-symbols-outlined {
+            display: inline-block !important;
+            font-size: 1.25rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        html.app-shell-desktop .sidebar .fas,
+        html.app-shell-desktop .sidebar .fab,
+        html.app-shell-desktop .sidebar .sidebar-emoji-icon {
+            display: none !important;
+        }
+
+        html.app-shell-desktop .topbar .material-symbols-outlined {
+            display: inline-block !important;
+            font-size: 1.25rem;
+        }
+
+        html.app-shell-desktop .topbar .fas {
+            display: none !important;
+        }
+
+        html.app-shell-desktop .topbar.d-none.d-md-flex {
+            background: rgba(247, 250, 253, 0.8) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 1px 0 rgba(116, 118, 136, 0.1) !important;
+        }
 
         /* ===== SONIC ARCHITECT STYLES (DESKTOP ONLY) ===== */
         @media (min-width: 768px) {

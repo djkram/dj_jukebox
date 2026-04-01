@@ -1,5 +1,8 @@
 # DJ Jukebox
 
+![CI Tests](https://github.com/djkram/dj_jukebox/actions/workflows/ci.yml/badge.svg)
+![CD Deploy](https://github.com/djkram/dj_jukebox/actions/workflows/cd.yml/badge.svg)
+
 Una aplicació web interactiva que permet als DJs crear festes on els assistents poden votar les cançons que volen escoltar, utilitzant playlists de Spotify amb sistema de moneda virtual i notificacions en temps real.
 
 ## Característiques principals
@@ -253,8 +256,29 @@ dj_jukebox/
 ### Executar tests
 
 ```bash
+# Executar tots els tests
 python manage.py test jukebox
+
+# Amb cobertura
+coverage run --source='jukebox' manage.py test jukebox
+coverage report
+coverage html  # Genera report HTML
 ```
+
+📚 **Guia completa de testing**: Consulta [.github/TESTING.md](.github/TESTING.md)
+
+### CI/CD
+
+El projecte utilitza **GitHub Actions** per CI/CD automàtic:
+
+- **CI (Continuous Integration)**: Executa tests automàticament en cada push/PR
+- **CD (Continuous Deployment)**: Desplega a Render només si els tests passen
+
+**Workflows configurats:**
+- `.github/workflows/ci.yml` - Tests automàtics
+- `.github/workflows/cd.yml` - Deploy automàtic a Render
+
+Per configurar CI/CD al teu repositori, consulta la [guia de testing](.github/TESTING.md#cicd-amb-github-actions).
 
 ### Crear migracions
 

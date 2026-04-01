@@ -1,0 +1,63 @@
+name: CD - Deploy to Render
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_run:
+    workflows: ["CI - Tests"]
+    types:
+      - completed
+    branches: [ develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Només desplegem si els tests han passat
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Wait for CI to complete
+      if: github.event_name == 'push'
+      uses: lewagon/wait-on-check-action@v1.3.4
+      with:
+        ref: ${{ github.ref }}
+        check-name: 'test'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        wait-interval: 10
+
+    - name: Trigger Render Deploy
+      env:
+        RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      run: |
+        if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+          echo "⚠️  RENDER_DEPLOY_HOOK_URL no està configurat."
+          echo "👉 Configura'l a GitHub Settings > Secrets and variables > Actions"
+          echo "👉 Obté la URL de deploy hook des de Render Dashboard > Settings > Deploy Hook"
+          exit 1
+        fi
+
+        echo "🚀 Triggering Render deploy..."
+        response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK_URL")
+
+        if [ "$response" -eq 200 ] || [ "$response" -eq 201 ]; then
+          echo "✅ Deploy triggerejat correctament!"
+          echo "📊 Pots seguir el progrés a: https://dashboard.render.com"
+        else
+          echo "❌ Error triggering deploy. HTTP status: $response"
+          exit 1
+        fi
+
+    - name: Deploy summary
+      run: |
+        echo "### 🚀 Deploy Status" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Tests passed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Deploy triggered to Render" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🔗 [View on Render](https://dashboard.render.com)" >> $GITHUB_STEP_SUMMARY

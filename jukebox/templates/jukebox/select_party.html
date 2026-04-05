@@ -524,33 +524,36 @@
       <div class="select-promo-bg-1"></div>
       <div class="select-promo-bg-2"></div>
       <div class="select-promo-content">
-        <div style="display: inline-block; padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 9999px; margin-bottom: 1rem;">
-          <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">{% trans "Ets DJ?" %}</span>
+        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
+        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
+        <div class="select-promo-stats">
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
+            <p class="select-promo-stat-value">{{ parties.count }}</p>
+          </div>
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
+            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
+          </div>
         </div>
-        <h2 class="select-promo-title">{% trans "Porta la teva festa al següent nivell" %}</h2>
-        <p class="select-promo-text">{% trans "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR, deixa que votin les cançons i fes que la música sigui de tots." %}</p>
-        <a href="{% url 'dj_backoffice' %}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: white; color: #0040e0; font-weight: 700; border-radius: 1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: transform 200ms;">
-          <span class="material-symbols-outlined">celebration</span>
-          {% trans "Comença ara" %}
-        </a>
       </div>
       <div class="select-promo-cards">
         <div class="select-promo-card">
           <div class="select-promo-card-icon purple">
-            <span class="material-symbols-outlined">qr_code_2</span>
+            <span class="material-symbols-outlined">favorite</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Codis QR" %}</p>
-            <p class="select-promo-card-value">{% trans "Comparteix fàcilment" %}</p>
+            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
+            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
           </div>
         </div>
         <div class="select-promo-card">
           <div class="select-promo-card-icon blue">
-            <span class="material-symbols-outlined">how_to_vote</span>
+            <span class="material-symbols-outlined">bolt</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Votacions" %}</p>
-            <p class="select-promo-card-value">{% trans "Públic participa" %}</p>
+            <p class="select-promo-card-label">{% trans "Estat" %}</p>
+            <p class="select-promo-card-value">{% trans "En línia" %}</p>
           </div>
         </div>
       </div>

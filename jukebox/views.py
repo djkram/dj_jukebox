@@ -785,15 +785,9 @@ def dj_dashboard(request):
 
     party = get_object_or_404(Party, pk=party_id)
 
-    # Separar cançons pendents i ja posades
-    pending_songs = party.songs.filter(has_played=False).annotate(
-        num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
-    ).order_by('-num_likes')
-    played_songs_list = list(party.songs.filter(has_played=True).annotate(
-        num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
-    ).order_by('-id'))
+    # Separar cançons pendents i ja posades amb annotations
+    pending_songs = get_pending_songs_ordered(party)
+    played_songs_list = get_played_songs_ordered(party)
 
     total_songs = party.songs.count()
     total_votes = Vote.objects.filter(party=party).count()

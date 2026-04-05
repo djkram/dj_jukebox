@@ -20,6 +20,12 @@ from .votes_conversion import (
     convert_coins_to_votes,
     get_conversion_preview,
 )
+from .spotify_helpers import (
+    get_spotify_reconnect_url,
+    create_spotify_auth_error_response,
+    get_user_spotify_token,
+    get_spotify_context_for_view,
+)
 
 __all__ = [
     # Query helpers
@@ -31,4 +37,9 @@ __all__ = [
     'calculate_votes_from_coins',
     'convert_coins_to_votes',
     'get_conversion_preview',
+    # Spotify helpers
+    'get_spotify_reconnect_url',
+    'create_spotify_auth_error_response',
+    'get_user_spotify_token',
+    'get_spotify_context_for_view',
 ]

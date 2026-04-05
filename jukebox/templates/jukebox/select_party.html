@@ -603,87 +603,33 @@
     </section>
 
     {% if parties %}
-      <!-- Featured Section (First Party - Bento Style) -->
-      {% with parties.0 as featured %}
-        <div class="mobile-section-header">
-          <span class="d-block font-headline font-bold text-uppercase mb-0" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">{% trans "En Directe Ara" %}</span>
-          <a href="{% url 'set_party' featured.id %}" class="text-decoration-none mobile-party-card" {% if featured.require_join_code %}data-requires-code="true" data-party-id="{{ featured.id }}"{% endif %}>
-            <div class="position-relative overflow-hidden rounded-xl p-4 text-white shadow-xl cursor-pointer" style="background: #2e5bff; box-shadow: 0 10px 40px rgba(0, 64, 224, 0.1);">
-              <div class="position-absolute" style="top: 0; right: 0; margin-top: -4rem; margin-right: -4rem; width: 16rem; height: 16rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
-              <div class="position-relative" style="z-index: 10;">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                  {% if featured.require_join_code %}
-                    <div class="px-3 py-1 rounded-pill" style="background: #e74c3c; color: white; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
-                      <i class="fas fa-lock me-1"></i>{% trans "Requereix codi" %}
+      <!-- Party Grid -->
+      <section>
+        <h3 class="font-headline font-bold mb-3" style="font-size: 1.25rem;">{% trans "Festes Disponibles" %}</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          {% for party in parties %}
+            <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
+              <div class="position-relative overflow-hidden text-white shadow-xl" style="aspect-ratio: 1; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
+                {% if party.cover_image %}
+                  <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+                {% endif %}
+                <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));"></div>
+                <div class="position-relative d-flex flex-column justify-content-end h-100 p-3" style="z-index: 10;">
+                  {% if party.require_join_code %}
+                    <div class="px-2 py-1 rounded-pill mb-2 d-inline-flex align-items-center" style="background: #e74c3c; color: white; font-size: 0.5rem; font-weight: 700; width: fit-content;">
+                      <i class="fas fa-lock" style="font-size: 0.5rem;"></i>
                     </div>
-                  {% else %}
-                    <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">{% trans "Alta Energia" %}</div>
                   {% endif %}
-                  <i class="fas fa-signal" style="color: rgba(255, 255, 255, 0.5);"></i>
-                </div>
-                <h2 class="font-headline font-bold mb-2" style="font-size: 1.875rem; letter-spacing: -0.01em;">{{ featured.name }}</h2>
-                <p class="mb-4" style="color: #efefff; opacity: 0.8; font-size: 0.875rem;">
-                  {% if featured.playlist %}Playlist: {{ featured.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}
-                </p>
-                <div class="w-100 text-center fw-bold py-3 rounded-pill d-flex align-items-center justify-content-center gap-2 shadow-lg" style="background: white; color: #0040e0; transition: transform 0.2s;">
-                  {% trans "Unir-se a la Festa" %}
-                  <i class="fas fa-arrow-right" style="font-size: 0.875rem;"></i>
+                  <h4 class="font-bold mb-1" style="font-size: 0.95rem; line-height: 1.1;">{{ party.name }}</h4>
+                  <p class="mb-0" style="font-size: 0.65rem; opacity: 0.9;">
+                    {% if party.date %}{{ party.date|date:"M d • H:i" }}{% else %}{% trans "Pròximament" %}{% endif %}
+                  </p>
                 </div>
               </div>
-            </div>
-          </a>
-        </div>
-      {% endwith %}
-
-      <!-- Party Selection List (Rest of parties) -->
-      {% if parties|length > 1 %}
-        <section class="mobile-group-stack">
-          <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem;">{% trans "Properes Festes" %}</h3>
-
-          <div class="mobile-group-stack">
-          {% for party in parties %}
-            {% if not forloop.first %}
-              <!-- Party Card -->
-              <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
-                <div class="bg-white rounded-lg p-4 d-flex flex-column gap-3 shadow-sm transition-all" style="border: 1px solid rgba(196, 197, 217, 0.1);">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div class="rounded-circle overflow-hidden flex-shrink-0" style="width: 3.5rem; height: 3.5rem; background: #eceef3;">
-                      <i class="fas fa-music d-flex align-items-center justify-center w-100 h-100" style="color: #0040e0; font-size: 1.5rem;"></i>
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                      <h4 class="font-headline font-bold mb-0" style="font-size: 1.125rem; line-height: 1.2;">
-                        {{ party.name }}
-                        {% if party.require_join_code %}
-                          <i class="fas fa-lock ms-1" style="font-size: 0.75rem; color: #e74c3c;"></i>
-                        {% endif %}
-                      </h4>
-                      <div class="d-flex align-items-center gap-2 mt-1">
-                        <i class="fas fa-calendar-alt" style="color: #0040e0; font-size: 0.75rem;"></i>
-                        <span style="font-size: 0.75rem; color: #434656;">
-                          {% if party.date %}{{ party.date|date:"M d • h:i A" }}{% else %}{% trans "Data per confirmar" %}{% endif %}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center justify-content-between py-2 px-3 rounded-md" style="background: #f2f3f8;">
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="fas fa-list-ul" style="color: #006875; font-size: 0.875rem;"></i>
-                      <span class="fw-semibold" style="font-size: 0.75rem; color: #434656;">
-                        {% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist" %}{% endif %}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="w-100 text-center fw-bold py-3 rounded-pill transition-colors" style="background: #e7e8ed; color: #191c1f; font-size: 0.875rem;">
-                    {% trans "Unir-se" %}
-                  </div>
-                </div>
-              </a>
-            {% endif %}
+            </a>
           {% endfor %}
-          </div>
-        </section>
-      {% endif %}
-
+        </div>
+      </section>
     {% else %}
       <div class="text-center py-5">
         <i class="fas fa-calendar-times mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>

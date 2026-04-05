@@ -64,13 +64,6 @@ def is_dj_admin(user):
     return user.is_authenticated and user.is_superuser
 
 
-def _spotify_reconnect_url(request):
-    query = urlencode({
-        "process": "connect",
-        "next": request.get_full_path(),
-    })
-    return f"{reverse('spotify_login')}?{query}"
-
 # def song_list(request):
 #     songs = Song.objects.filter(played=False).order_by('-votes')
 #     return render(request, 'jukebox/song_list.html', {'songs': songs})
@@ -197,7 +190,7 @@ def party_settings(request, party_id):
         try:
             playlists = get_user_playlists(request, only_owned=only_owned)
         except SpotifyAuthError:
-            return redirect(_spotify_reconnect_url(request))
+            return redirect(getget_spotify_reconnect_url(request))
 
     # Obtenir token de Spotify per Web Playback SDK
     spotify_token = None
@@ -250,10 +243,7 @@ def assign_party_playlist(request, party_id):
     try:
         playlists = get_user_playlists(request)
     except SpotifyAuthError:
-        return JsonResponse({
-            'error': _('La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.'),
-            'reconnect_url': _spotify_reconnect_url(request),
-        }, status=401)
+        return create_spotify_auth_error_response(request)
 
     playlist_data = next((pl for pl in playlists if pl['id'] == spotify_playlist_id), None)
     if not playlist_data:
@@ -356,10 +346,7 @@ def process_playlist_songs(request, party_id):
             'message': message
         })
     except SpotifyAuthError:
-        return JsonResponse({
-            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
-            'reconnect_url': _spotify_reconnect_url(request),
-        }, status=401)
+        return create_spotify_auth_error_response(request)
 
     except Exception as e:
         return JsonResponse({
@@ -381,7 +368,7 @@ def party_settings_search_tracks(request, party_id):
     except SpotifyAuthError:
         return JsonResponse({
             'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per buscar cançons.',
-            'reconnect_url': _spotify_reconnect_url(request),
+            'reconnect_url': get_spotify_reconnect_url(request),
         }, status=401)
 
     existing_ids = set(party.songs.values_list('spotify_id', flat=True))
@@ -455,10 +442,7 @@ def add_track_to_party_playlist(request, party_id):
             'message': 'Cançó afegida a la playlist de Spotify i a la llista de la festa.',
         })
     except SpotifyAuthError:
-        return JsonResponse({
-            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
-            'reconnect_url': _spotify_reconnect_url(request),
-        }, status=401)
+        return create_spotify_auth_error_response(request)
     except Exception:
         logger.exception("[PLAYLIST_ADD] Error afegint cançó a party_id=%s", party_id)
         return JsonResponse({'error': _('No s\'ha pogut afegir la cançó ara mateix.')}, status=500)
@@ -487,10 +471,7 @@ def delete_song_from_party_playlist(request, party_id, song_id):
             'message': 'Cançó eliminada de la playlist i de la festa.',
         })
     except SpotifyAuthError:
-        return JsonResponse({
-            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
-            'reconnect_url': _spotify_reconnect_url(request),
-        }, status=401)
+        return create_spotify_auth_error_response(request)
     except Exception:
         logger.exception(
             "[PLAYLIST_DELETE] Error eliminant song_id=%s de party_id=%s",
@@ -557,10 +538,7 @@ def process_song_features(request, party_id):
         })
 
     except SpotifyAuthError:
-        return JsonResponse({
-            'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
-            'reconnect_url': _spotify_reconnect_url(request),
-        }, status=401)
+        return create_spotify_auth_error_response(request)
 
     except Exception:
         logger.exception("[FEATURES] Error processant metadades per party_id=%s", party_id)
@@ -1187,7 +1165,7 @@ def get_spotify_playlists(request):
         return JsonResponse(
             {
                 'error': 'La sessió de Spotify ha caducat.',
-                'reconnect_url': _spotify_reconnect_url(request),
+                'reconnect_url': get_spotify_reconnect_url(request),
             },
             status=401
         )
@@ -1379,7 +1357,7 @@ def request_song(request):
             except SpotifyAuthError:
                 return JsonResponse({
                     'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per buscar cançons.',
-                    'reconnect_url': _spotify_reconnect_url(request),
+                    'reconnect_url': get_spotify_reconnect_url(request),
                 }, status=401)
             return JsonResponse({'tracks': tracks})
         return JsonResponse({'tracks': []})

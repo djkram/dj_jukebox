@@ -571,19 +571,6 @@
 </style>
 
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
-  <!-- Page Actions -->
-  <div class="settings-page-header">
-    <div class="settings-actions" style="margin-left: auto;">
-      <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary">
-        Torna
-      </a>
-      <button type="submit" form="partySettingsForm" class="btn btn-primary" id="saveButton">
-        <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">save</span>
-        Desa canvis
-      </button>
-    </div>
-  </div>
-
   <div class="settings-grid">
     {# ── COL. ESQUERRA: FORMULARI ──────────────────────────────────────── #}
     <div>
@@ -627,6 +614,14 @@
             <p class="settings-help">
               Cost en Coins que un usuari ha de pagar per demanar una cançó nova.
             </p>
+          </div>
+
+          <!-- Botó guardar dins la caixa -->
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary" id="saveButton" style="width: 100%;">
+              <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">save</span>
+              Desa canvis
+            </button>
           </div>
         </form>
       </div>
@@ -985,7 +980,6 @@
 
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-primary" id="saveButtonMobile">Desa canvis</button>
-          <a href="{% url 'dj_dashboard' %}" class="btn btn-outline-secondary">Torna</a>
         </div>
       </form>
     </section>

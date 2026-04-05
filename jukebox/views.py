@@ -37,6 +37,17 @@ from django.utils import timezone
 from datetime import datetime
 from .audio_analysis import analyze_song_from_temporary_mp3
 
+# Import utils for refactoring
+from .utils import (
+    get_annotated_party_songs,
+    get_pending_songs_ordered,
+    get_played_songs_ordered,
+    convert_coins_to_votes,
+    get_spotify_context_for_view,
+    calculate_and_apply_badges,
+    create_spotify_auth_error_response,
+)
+
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -635,38 +646,19 @@ def song_list(request):
     credits = user.credits  # Coins globals de l'usuari
     party_coins = get_user_party_coins(user, party)  # Coins gratuïts de festa
 
-    annotated_songs = party.songs.annotate(
-        num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
-    )
+    # Obtenir cançons amb annotations de vots
+    annotated_songs = get_annotated_party_songs(party)
 
     if request.method == 'POST':
         # Conversió de Coins a Vots amb bonificació per volum
         if 'action' in request.POST and request.POST['action'] == 'convert_coins':
             coins_to_convert = int(request.POST.get('coins_to_convert', 0))
-            if coins_to_convert > 0 and coins_to_convert <= user.credits:
-                # Calcular vots amb bonificació
-                if coins_to_convert >= 20:
-                    votes_to_add = int(coins_to_convert * 3.0)   # 20 Coins -> 60 Vots
-                elif coins_to_convert >= 10:
-                    votes_to_add = int(coins_to_convert * 2.5)   # 10 Coins -> 25 Vots
-                elif coins_to_convert >= 5:
-                    votes_to_add = int(coins_to_convert * 2.2)   # 5 Coins -> 11 Vots
-                elif coins_to_convert >= 3:
-                    votes_to_add = int(coins_to_convert * 2.0)   # 3 Coins -> 6 Vots
-                else:
-                    votes_to_add = coins_to_convert * 2          # 1-2 Coins -> 2x
-
-                # Crear un VotePackage per registrar la conversió
-                VotePackage.objects.create(
-                    user=user,
-                    party=party,
-                    votes_purchased=votes_to_add
-                )
-                # Restar els Coins utilitzats
-                user.credits -= coins_to_convert
-                user.save()
+            success, error_msg, votes_added = convert_coins_to_votes(
+                user, party, coins_to_convert
+            )
+            if success:
                 return redirect('song_list')
+            # Si falla, continua per mostrar error (es gestiona més avall)
 
         # Desfer vot d'una cançó
         elif 'unvote_song_id' in request.POST:
@@ -701,60 +693,9 @@ def song_list(request):
                 error_pending = annotated_songs.filter(has_played=False).order_by('-num_likes', 'title')
                 error_played = annotated_songs.filter(has_played=True).order_by('id')
 
-                # Calcular badges (codi duplicat, però necessari per error case)
-                all_vote_counts = list(
-                    party.songs
-                    .annotate(
-                        total_interactions=Count('vote', filter=Q(vote__vote_type='like')) +
-                                          Count('vote', filter=Q(vote__vote_type='dislike'))
-                    )
-                    .values_list('total_interactions', flat=True)
-                )
-                sorted_vote_counts_err = sorted(all_vote_counts)
-                total_ranked_songs_err = len(sorted_vote_counts_err)
-
-                def get_badge_err(likes, dislikes):
-                    total_interactions = likes + dislikes
-                    if total_interactions == 0:
-                        return ("INTACTA", "#cbd5e1", "#475569")
-                    like_ratio = (likes / total_interactions * 100)
-                    percentile = 0
-                    if total_ranked_songs_err > 0:
-                        songs_below = sum(1 for count in sorted_vote_counts_err if count <= total_interactions)
-                        percentile = (songs_below / total_ranked_songs_err) * 100
-
-                    if total_interactions >= 3 and like_ratio >= 90:
-                        return ("UNÀNIME", "#e63946", "#ffffff")
-                    if percentile >= 90 and like_ratio >= 85:
-                        return ("HIMNE", "#ff006e", "#ffffff")
-                    if percentile >= 70:
-                        if 40 <= like_ratio <= 60:
-                            return ("DIVISIVA", "#f77f00", "#000000")
-                        elif like_ratio >= 75:
-                            return ("PETANT-HO", "#fcbf49", "#000000")
-                        else:
-                            return ("EXPLOSIVA", "#ef476f", "#ffffff")
-                    if percentile >= 60 and like_ratio >= 65:
-                        return ("TRENDING", "#06ffa5", "#000000")
-                    if percentile >= 40 and like_ratio >= 50:
-                        return ("CALENTA", "#ff9e00", "#000000")
-                    if total_interactions >= 2 and like_ratio >= 80:
-                        return ("JOIA", "#4cc9f0", "#000000")
-                    if total_interactions >= 3 and like_ratio < 30:
-                        return ("GÈLIDA", "#8338ec", "#ffffff")
-                    return ("FRESCA", "#90e0ef", "#000000")
-
-                for song in error_pending:
-                    badge_label, badge_bg, badge_text = get_badge_err(song.num_likes, song.num_dislikes)
-                    song.badge_label = badge_label
-                    song.badge_bg = badge_bg
-                    song.badge_text = badge_text
-
-                for song in error_played:
-                    badge_label, badge_bg, badge_text = get_badge_err(song.num_likes, song.num_dislikes)
-                    song.badge_label = badge_label
-                    song.badge_bg = badge_bg
-                    song.badge_text = badge_text
+                # Aplicar badges utilitzant utils
+                calculate_and_apply_badges(party, error_pending)
+                calculate_and_apply_badges(party, error_played)
 
                 return render(request, "jukebox/song_list.html", {
                     "party": party,
@@ -803,98 +744,16 @@ def song_list(request):
         num_likes=Count('vote', filter=Q(vote__vote_type='like'))
     ).order_by('-num_likes').first()
 
-    # Etiquetes segons percentil d'interaccions dins la festa
-    all_vote_counts = list(
-        party.songs
-        .annotate(
-            total_interactions=Count('vote', filter=Q(vote__vote_type='like')) +
-                              Count('vote', filter=Q(vote__vote_type='dislike'))
-        )
-        .values_list('total_interactions', flat=True)
-    )
-    sorted_vote_counts = sorted(all_vote_counts)
-    total_ranked_songs = len(sorted_vote_counts)
+    # Aplicar badges dinàmics a les cançons
+    calculate_and_apply_badges(party, pending_songs)
+    calculate_and_apply_badges(party, played_songs)
 
-    def get_badge_for_song(likes, dislikes):
-        """Calcula etiqueta segons likes, dislikes i percentil"""
-        total_interactions = likes + dislikes
-
-        # Cas especial: cap interacció
-        if total_interactions == 0:
-            return ("INTACTA", "#cbd5e1", "#475569")
-
-        # Calcular ratio de likes
-        like_ratio = (likes / total_interactions * 100)
-
-        # Calcular percentil segons total d'interaccions
-        if total_ranked_songs == 0:
-            percentile = 0
-        else:
-            songs_below_or_equal = sum(1 for count in sorted_vote_counts if count <= total_interactions)
-            percentile = (songs_below_or_equal / total_ranked_songs) * 100
-
-        # Classificació amb ganxo per engagement
-
-        # Cas especial: Unànime (quasi tots likes)
-        if total_interactions >= 3 and like_ratio >= 90:
-            return ("UNÀNIME", "#e63946", "#ffffff")
-
-        # Top tier amb bon ratio
-        if percentile >= 90 and like_ratio >= 85:
-            return ("HIMNE", "#ff006e", "#ffffff")
-
-        # Moltes interaccions (polèmica o trending)
-        if percentile >= 70:
-            if 40 <= like_ratio <= 60:
-                return ("DIVISIVA", "#f77f00", "#000000")
-            elif like_ratio >= 75:
-                return ("PETANT-HO", "#fcbf49", "#000000")
-            else:
-                return ("EXPLOSIVA", "#ef476f", "#ffffff")
-
-        # Trending amb bon ratio
-        if percentile >= 60 and like_ratio >= 65:
-            return ("TRENDING", "#06ffa5", "#000000")
-
-        # Mitjana amb ratio decent
-        if percentile >= 40 and like_ratio >= 50:
-            return ("CALENTA", "#ff9e00", "#000000")
-
-        # Baixa interacció però bon ratio (joia amagada)
-        if total_interactions >= 2 and like_ratio >= 80:
-            return ("JOIA", "#4cc9f0", "#000000")
-
-        # Molts dislikes
-        if total_interactions >= 3 and like_ratio < 30:
-            return ("GÈLIDA", "#8338ec", "#ffffff")
-
-        # Poc engagement (fresca)
-        return ("FRESCA", "#90e0ef", "#000000")
-
-    # Afegir badges a totes les cançons
-    for song in pending_songs:
-        badge_label, badge_bg, badge_text = get_badge_for_song(song.num_likes, song.num_dislikes)
-        song.badge_label = badge_label
-        song.badge_bg = badge_bg
-        song.badge_text = badge_text
-
+    # Afegir display_order per cançons jugades
     for index, song in enumerate(played_songs):
         song.display_order = songs_played - index
-        badge_label, badge_bg, badge_text = get_badge_for_song(song.num_likes, song.num_dislikes)
-        song.badge_label = badge_label
-        song.badge_bg = badge_bg
-        song.badge_text = badge_text
 
-    # Comprovar si l'usuari té Spotify connectat
-    has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
-    spotify_token = None
-    if has_spotify:
-        from .spotify_api import _ensure_valid_user_token
-        try:
-            spotify_token = _ensure_valid_user_token(user)
-        except Exception as e:
-            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
-            has_spotify = False
+    # Obtenir context Spotify (token i has_spotify)
+    spotify_context = get_spotify_context_for_view(user)
 
     return render(request, "jukebox/song_list.html", {
         "party": party,
@@ -910,8 +769,7 @@ def song_list(request):
         "total_votes": total_votes,
         "now_playing": now_playing,
         "user_votes_dict": user_votes_dict,
-        "has_spotify": has_spotify,
-        "spotify_token": spotify_token,
+        **spotify_context,  # Desempaqueta has_spotify i spotify_token
         "active_users": active_users,
         "recent_votes": recent_votes,
         "pending_requests_count": pending_requests_count,

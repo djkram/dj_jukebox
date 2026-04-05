@@ -85,8 +85,12 @@ GMAIL_USER=el_teu_email@gmail.com
 GMAIL_APP_PASSWORD=la_teva_app_password
 
 # Django (opcional)
+APP_ENV=development
 DEBUG=True
+LOG_LEVEL=DEBUG
 SECRET_KEY=genera_una_clau_secreta_aleatoria
+ALLOWED_HOSTS=127.0.0.1,localhost
+CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 ```
 
 ### Pas 4: Configurar Spotify OAuth

@@ -1,7 +1,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load static %}
 {% load i18n %}
-{% block page_title %}{% trans "Selecciona una festa" %}{% endblock %}
+{% block page_title %}{% trans "Llista de festes DJJukebox" %}{% endblock %}
 {% block content %}
 
 <style>
@@ -431,123 +431,93 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
-  {% if parties %}
-    <!-- Grid de 3 columnes: Codi + Primera Festa + Afegeix Festa -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 2rem;">
-      <!-- Columna 1: Secció entrada de codi -->
-      <div style="background: white; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-          <span class="material-symbols-outlined" style="font-size: 2rem; color: #0040e0;">key</span>
-          <div>
-            <h3 style="font-family: 'Epilogue', sans-serif; font-size: 1.25rem; font-weight: 700; color: #181c1e; margin: 0;">{% trans "Tens un codi?" %}</h3>
-            <p style="color: #747687; font-size: 0.875rem; margin: 0;">{% trans "Introdueix el codi de la festa per accedir directament" %}</p>
+  <!-- Grid de 2 columnes: Dues caixes promo -->
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-bottom: 2rem;">
+    <!-- Caixa 1: Promo -->
+    <section class="select-promo-section" style="margin: 0;">
+      <div class="select-promo-bg-1"></div>
+      <div class="select-promo-bg-2"></div>
+      <div class="select-promo-content">
+        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
+        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
+        <div class="select-promo-stats">
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
+            <p class="select-promo-stat-value">{{ parties.count|default:0 }}</p>
+          </div>
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
+            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
           </div>
         </div>
-        <form method="post" style="display: flex; flex-direction: column; gap: 0.75rem; flex-grow: 1;">
-          {% csrf_token %}
-          <input type="text" name="party_code" placeholder="{% trans 'Escriu el codi aquí...' %}"
-                 style="padding: 0.875rem 1.25rem; border: 1px solid #e0e3e6; border-radius: 0.75rem; font-size: 0.875rem; text-transform: uppercase;"
-                 maxlength="12" required>
-          <button type="submit" style="padding: 0.875rem 1.5rem; background: #0040e0; color: white; font-weight: 700; border-radius: 0.75rem; border: none; cursor: pointer; transition: background 200ms; margin-top: auto;">
-            <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">login</span>
-            {% trans "Unir-se" %}
-          </button>
-          {% if code_error %}
-            <div style="padding: 0.75rem 1rem; background: #fff5f5; border-left: 3px solid #e74c3c; border-radius: 0.5rem; color: #c0392b; font-size: 0.875rem;">
-              <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle; margin-right: 0.5rem;">error</span>
-              {{ code_error }}
-            </div>
-          {% endif %}
-        </form>
       </div>
-
-      <!-- Columna 2: Primera festa -->
-      {% with parties.0 as first_party %}
-        <div class="select-party-card" style="cursor: default;">
-          <div class="select-party-image">
-            {% if first_party.cover_image %}
-              <img src="{{ first_party.cover_image.url }}" alt="{{ first_party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-            {% else %}
-              <div class="select-party-image-placeholder">
-                <span class="material-symbols-outlined">music_note</span>
-              </div>
-            {% endif %}
-            {% if selected_party and first_party.id == selected_party.id %}
-              <div class="select-party-badge">
-                <span class="select-party-badge-dot"></span>
-                {% trans "EN DIRECTE" %}
-              </div>
-            {% elif first_party.require_join_code %}
-              <div class="select-party-badge" style="background: rgba(231,76,60,0.95);">
-                <span class="material-symbols-outlined" style="font-size: 0.75rem;">lock</span>
-                {% trans "REQUEREIX CODI" %}
-              </div>
-            {% endif %}
+      <div class="select-promo-cards">
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon purple">
+            <span class="material-symbols-outlined">favorite</span>
           </div>
-          <div class="select-party-content">
-            <h3 class="select-party-name">{{ first_party.name }}</h3>
-            <div class="select-party-meta">
-              <div class="select-party-meta-item">
-                <span class="material-symbols-outlined">calendar_today</span>
-                <span>{% if first_party.date %}{{ first_party.date|date:"d/m/Y H:i" }}{% else %}{% trans "Data per confirmar" %}{% endif %}</span>
-              </div>
-              <div class="select-party-meta-item">
-                <span class="material-symbols-outlined">queue_music</span>
-                <span>{% if first_party.playlist %}{{ first_party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
-              </div>
-            </div>
-
-            {% if first_party.require_join_code %}
-              <!-- Formulari amb codi -->
-              <form method="get" action="{% url 'set_party' first_party.id %}" style="margin-top: 1rem;">
-                <div style="display: flex; gap: 0.5rem;">
-                  <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
-                         style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
-                  <button type="submit" class="select-party-button" style="flex-shrink: 0; margin: 0;">
-                    {% trans "Entrar" %}
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                  </button>
-                </div>
-              </form>
-            {% elif selected_party and first_party.id == selected_party.id %}
-              <a href="{% url 'set_party' first_party.id %}" style="text-decoration: none;">
-                <button class="select-party-button">
-                  {% trans "Entrar a la sessió" %}
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </a>
-            {% else %}
-              <a href="{% url 'set_party' first_party.id %}" style="text-decoration: none;">
-                <button class="select-party-button">
-                  {% trans "Entrar" %}
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </a>
-            {% endif %}
+          <div>
+            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
+            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
           </div>
         </div>
-      {% endwith %}
-
-      <!-- Columna 3: Afegeix festa -->
-      <a href="{% url 'dj_backoffice' %}" class="select-add-card">
-        <div class="select-add-icon">
-          <span class="material-symbols-outlined">celebration</span>
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon blue">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <div>
+            <p class="select-promo-card-label">{% trans "Estat" %}</p>
+            <p class="select-promo-card-value">{% trans "En línia" %}</p>
+          </div>
         </div>
-        <span class="select-add-kicker">{% trans "Nou a DJ Jukebox" %}</span>
-        <h3 class="select-add-title">{% trans "Afegeix la teva festa" %}</h3>
-        <p class="select-add-text">{% trans "Publica-la a DJ Jukebox i activa l'experiència per als teus convidats." %}</p>
-        <div class="select-add-cta">
-          {% trans "Crear festa" %}
-          <span class="material-symbols-outlined">arrow_forward</span>
-        </div>
-      </a>
-    </div>
+      </div>
+    </section>
 
-    <!-- Grid de resta de festes -->
-    {% if parties|length > 1 %}
+    <!-- Caixa 2: Promo duplicada -->
+    <section class="select-promo-section" style="margin: 0;">
+      <div class="select-promo-bg-1"></div>
+      <div class="select-promo-bg-2"></div>
+      <div class="select-promo-content">
+        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
+        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
+        <div class="select-promo-stats">
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
+            <p class="select-promo-stat-value">{{ parties.count|default:0 }}</p>
+          </div>
+          <div class="select-promo-stat">
+            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
+            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
+          </div>
+        </div>
+      </div>
+      <div class="select-promo-cards">
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon purple">
+            <span class="material-symbols-outlined">favorite</span>
+          </div>
+          <div>
+            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
+            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
+          </div>
+        </div>
+        <div class="select-promo-card">
+          <div class="select-promo-card-icon blue">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <div>
+            <p class="select-promo-card-label">{% trans "Estat" %}</p>
+            <p class="select-promo-card-value">{% trans "En línia" %}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  {% if parties %}
+    <!-- Grid de festes públiques -->
     <div class="select-parties-grid">
       {% for party in parties %}
-        {% if not forloop.first %}
         <div class="select-party-card" style="cursor: default;">
           <div class="select-party-image">
             {% if party.cover_image %}
@@ -611,49 +581,8 @@
             {% endif %}
           </div>
         </div>
-        {% endif %}
       {% endfor %}
     </div>
-    {% endif %}
-
-    <section class="select-promo-section">
-      <div class="select-promo-bg-1"></div>
-      <div class="select-promo-bg-2"></div>
-      <div class="select-promo-content">
-        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
-        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
-        <div class="select-promo-stats">
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
-            <p class="select-promo-stat-value">{{ parties.count }}</p>
-          </div>
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
-            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
-          </div>
-        </div>
-      </div>
-      <div class="select-promo-cards">
-        <div class="select-promo-card">
-          <div class="select-promo-card-icon purple">
-            <span class="material-symbols-outlined">favorite</span>
-          </div>
-          <div>
-            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
-            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
-          </div>
-        </div>
-        <div class="select-promo-card">
-          <div class="select-promo-card-icon blue">
-            <span class="material-symbols-outlined">bolt</span>
-          </div>
-          <div>
-            <p class="select-promo-card-label">{% trans "Estat" %}</p>
-            <p class="select-promo-card-value">{% trans "En línia" %}</p>
-          </div>
-        </div>
-      </div>
-    </section>
   {% else %}
     <div class="select-empty">
       <span class="material-symbols-outlined">event_busy</span>

@@ -15,10 +15,20 @@ from .query_helpers import (
     get_pending_songs_ordered,
     get_played_songs_ordered,
 )
+from .votes_conversion import (
+    calculate_votes_from_coins,
+    convert_coins_to_votes,
+    get_conversion_preview,
+)
 
 __all__ = [
+    # Query helpers
     'annotate_songs_with_votes',
     'get_annotated_party_songs',
     'get_pending_songs_ordered',
     'get_played_songs_ordered',
+    # Votes conversion
+    'calculate_votes_from_coins',
+    'convert_coins_to_votes',
+    'get_conversion_preview',
 ]

@@ -205,8 +205,12 @@ def party_settings(request, party_id):
         from .spotify_api import _ensure_valid_user_token
         try:
             spotify_token = _ensure_valid_user_token(request.user)
-        except Exception as e:
-            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
+        except Exception:
+            logger.warning(
+                "[SPOTIFY] No s'ha pogut preparar el Web Playback SDK per user_id=%s",
+                request.user.id,
+                exc_info=logger.isEnabledFor(logging.DEBUG),
+            )
             has_spotify = False
 
     return render(request, 'jukebox/party_settings.html', {
@@ -455,9 +459,9 @@ def add_track_to_party_playlist(request, party_id):
             'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
             'reconnect_url': _spotify_reconnect_url(request),
         }, status=401)
-    except Exception as e:
-        logger.error(f"[PLAYLIST_ADD] Error afegint cançó a la festa {party_id}: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+    except Exception:
+        logger.exception("[PLAYLIST_ADD] Error afegint cançó a party_id=%s", party_id)
+        return JsonResponse({'error': _('No s\'ha pogut afegir la cançó ara mateix.')}, status=500)
 
 
 @login_required
@@ -487,9 +491,13 @@ def delete_song_from_party_playlist(request, party_id, song_id):
             'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar.',
             'reconnect_url': _spotify_reconnect_url(request),
         }, status=401)
-    except Exception as e:
-        logger.error(f"[PLAYLIST_DELETE] Error eliminant cançó {song_id} de la festa {party_id}: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+    except Exception:
+        logger.exception(
+            "[PLAYLIST_DELETE] Error eliminant song_id=%s de party_id=%s",
+            song_id,
+            party_id,
+        )
+        return JsonResponse({'error': _('No s\'ha pogut eliminar la cançó ara mateix.')}, status=500)
 
 
 @login_required
@@ -554,11 +562,10 @@ def process_song_features(request, party_id):
             'reconnect_url': _spotify_reconnect_url(request),
         }, status=401)
 
-    except Exception as e:
-        import traceback
+    except Exception:
+        logger.exception("[FEATURES] Error processant metadades per party_id=%s", party_id)
         return JsonResponse({
-            'error': str(e),
-            'traceback': traceback.format_exc()
+            'error': _('No s\'han pogut processar les metadades de les cançons.')
         }, status=500)
 
 
@@ -574,15 +581,12 @@ def analyze_song_audio(request, party_id, song_id):
     song = get_object_or_404(Song, pk=song_id, party=party)
 
     try:
-        logger.info(f"[ANALYZE_AUDIO] Analitzant cançó: {song.title} - {song.artist}")
+        logger.info("[ANALYZE_AUDIO] Analitzant song_id=%s", song.id)
         source = "getsongbpm"
         result = _get_getsongbpm_features(song.title, song.artist)
 
         if not result or not result.get('bpm') or not result.get('key'):
-            logger.info(
-                f"[ANALYZE_AUDIO] GetSongBPM incomplet per '{song.title}' - '{song.artist}', "
-                "provant MP3 temporal"
-            )
+            logger.info("[ANALYZE_AUDIO] Fallback a MP3 temporal per song_id=%s", song.id)
             temp_result = analyze_song_from_temporary_mp3(song.title, song.artist)
             if temp_result:
                 merged_result = {
@@ -605,10 +609,7 @@ def analyze_song_audio(request, party_id, song_id):
         song.key = result['key']
         song.save()
 
-        logger.info(
-            f"[ANALYZE_AUDIO] Cançó analitzada via {source}: "
-            f"BPM={result['bpm']}, Key={result['key']}"
-        )
+        logger.info("[ANALYZE_AUDIO] Cançó analitzada via %s per song_id=%s", source, song.id)
 
         return JsonResponse({
             'success': True,
@@ -619,14 +620,12 @@ def analyze_song_audio(request, party_id, song_id):
             'source': source,
         })
 
-    except Exception as e:
-        logger.error(f"[ANALYZE_AUDIO] Error analitzant cançó {song_id}: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
+    except Exception:
+        logger.exception("[ANALYZE_AUDIO] Error analitzant song_id=%s", song_id)
 
         return JsonResponse({
             'success': False,
-            'error': f'Error analitzant àudio: {str(e)}'
+            'error': _('Error analitzant l\'àudio de la cançó.')
         }, status=500)
 
 
@@ -955,7 +954,7 @@ def update_party_status(request, party_id):
     party.jukebox_starts_at = jukebox_starts_at
     party.save(update_fields=['party_status', 'jukebox_starts_at', 'is_jukebox_active'])
 
-    logger.info(f"[PARTY_STATUS] Party {party_id} status updated to {party.party_status}")
+    logger.info("[PARTY_STATUS] party_id=%s status=%s", party_id, party.party_status)
     return redirect('dj_dashboard')
 
 
@@ -984,8 +983,6 @@ def buy_votes(request):
     user = request.user
 
     stripe.api_key = settings.STRIPE_SECRET_KEY  # ← AQUI SEMPRE!
-    logger.info(f"[BUY_VOTES] Stripe API key length: {len(stripe.api_key)}")
-    logger.info(f"[BUY_VOTES] Stripe API key starts with: {stripe.api_key[:7]}")
 
     if request.method == 'POST':
         # Conversió de Coins a Vots
@@ -1057,16 +1054,16 @@ def buy_votes(request):
                     }
                 )
                 return redirect(session.url, code=303)
-            except stripe.error.AuthenticationError as e:
-                logger.error(f"[STRIPE] Error d'autenticació: {e}")
+            except stripe.error.AuthenticationError:
+                logger.exception("[STRIPE] Error d'autenticació creant checkout per user_id=%s", user.id)
                 return render(request, "jukebox/buy_votes.html", {
                     "party": party,
                     "credits": user.credits,
                     "votes_left": votes_left,
                     "error": "Error de configuració de pagament. Contacta amb l'administrador."
                 })
-            except stripe.error.StripeError as e:
-                logger.error(f"[STRIPE] Error de Stripe: {e}")
+            except stripe.error.StripeError:
+                logger.exception("[STRIPE] Error de Stripe creant checkout per user_id=%s", user.id)
                 return render(request, "jukebox/buy_votes.html", {
                     "party": party,
                     "credits": user.credits,
@@ -1107,7 +1104,7 @@ def buy_votes_success(request):
                     if user_id == request.user.id:
                         # Afegir Coins
                         user = request.user
-                        logger.info(f"[DEV_WEBHOOK] Simulant webhook per session {session_id}: +{coins} Coins")
+                        logger.info("[DEV_WEBHOOK] Simulant webhook en debug per session_id=%s", session_id)
                         user.credits += coins
                         user.save()
 
@@ -1123,11 +1120,11 @@ def buy_votes_success(request):
                         # Crear notificació
                         create_coins_purchased_notification(user, coins)
 
-                        logger.info(f"[DEV_WEBHOOK] ✓ {coins} Coins afegits a {user.username} (total: {user.credits})")
+                        logger.info("[DEV_WEBHOOK] Pagament aplicat a user_id=%s", user.id)
                 elif already_processed:
-                    logger.info(f"[DEV_WEBHOOK] Pagament {session_id} ja processat anteriorment")
-            except Exception as e:
-                logger.error(f"[DEV_WEBHOOK] Error: {e}")
+                    logger.info("[DEV_WEBHOOK] Pagament duplicat ignorat per session_id=%s", session_id)
+            except Exception:
+                logger.exception("[DEV_WEBHOOK] Error processant session_id=%s", session_id)
 
     return render(request, "jukebox/buy_votes_success.html")
 
@@ -1141,15 +1138,15 @@ def stripe_webhook(request):
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     event = None
 
-    logger.info(f"[STRIPE_WEBHOOK] Rebut webhook de Stripe")
+    logger.info("[STRIPE_WEBHOOK] Webhook rebut")
 
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-        logger.info(f"[STRIPE_WEBHOOK] Event verificat: {event['type']}")
-    except (ValueError, stripe.error.SignatureVerificationError) as e:
-        logger.error(f"[STRIPE_WEBHOOK] Error de verificació: {e}")
+        logger.info("[STRIPE_WEBHOOK] Event verificat type=%s", event['type'])
+    except (ValueError, stripe.error.SignatureVerificationError):
+        logger.warning("[STRIPE_WEBHOOK] Error de verificació de signatura")
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
@@ -1159,12 +1156,12 @@ def stripe_webhook(request):
         coins = int(session['metadata']['votes_purchased'])  # Comprem Coins!
         party_id = session['metadata']['party_id']
 
-        logger.info(f"[STRIPE_WEBHOOK] Processant pagament: session={session_id}, user_id={user_id}, coins={coins}")
+        logger.info("[STRIPE_WEBHOOK] Processant checkout.session.completed session_id=%s", session_id)
 
         # Comprovar si ja s'ha processat
         already_processed = VotePackage.objects.filter(payment_id=session_id).exists()
         if already_processed:
-            logger.warning(f"[STRIPE_WEBHOOK] Pagament {session_id} ja processat anteriorment")
+            logger.warning("[STRIPE_WEBHOOK] Pagament duplicat ignorat per session_id=%s", session_id)
             return HttpResponse(status=200)
 
         try:
@@ -1186,11 +1183,11 @@ def stripe_webhook(request):
             # Crear notificació
             create_coins_purchased_notification(user, coins)
 
-            logger.info(f"[STRIPE_WEBHOOK] ✓ {coins} Coins afegits a l'usuari {user.username} (total: {user.credits})")
+            logger.info("[STRIPE_WEBHOOK] Pagament aplicat a user_id=%s", user.id)
         except User.DoesNotExist:
-            logger.error(f"[STRIPE_WEBHOOK] ✗ Usuari {user_id} no trobat")
+            logger.error("[STRIPE_WEBHOOK] Usuari inexistent per session_id=%s", session_id)
         except Party.DoesNotExist:
-            logger.error(f"[STRIPE_WEBHOOK] ✗ Party {party_id} no trobada")
+            logger.error("[STRIPE_WEBHOOK] Party inexistent per session_id=%s", session_id)
 
     return HttpResponse(status=200)
 
@@ -1343,163 +1340,29 @@ def song_swipe(request):
         action = request.POST.get('action')
         song_id = request.POST.get('song_id')
 
-        if action == 'like' and song_id:
+        # Gestió unificada de vots (like/dislike/skip)
+        if action in ['like', 'dislike', 'skip'] and song_id:
+            from .utils import handle_vote_action
             song = get_object_or_404(Song, pk=song_id, party=party)
+            return handle_vote_action(
+                user, song, party, action,
+                response_type='json'
+            )
 
-            # Només necessita vots disponibles per aquesta festa
-            if votes_left > 0:
-                # Crear el vot (consumeix 1 Vot)
-                Vote.objects.create(user=user, song=song, party=party, vote_type='like')
-
-                return JsonResponse({
-                    'success': True,
-                    'votes_left': get_user_votes_left(user, party),
-                    'credits': user.credits
-                })
-            else:
-                # No té vots disponibles
-                if credits > 0:
-                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per fer like.')}, status=400)
-                else:
-                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
-
-        elif action == 'dislike' and song_id:
-            song = get_object_or_404(Song, pk=song_id, party=party)
-
-            # Dislike també consumeix 1 vot
-            if votes_left > 0:
-                # Crear el vot de tipus dislike (consumeix 1 Vot)
-                Vote.objects.create(user=user, song=song, party=party, vote_type='dislike')
-
-                return JsonResponse({
-                    'success': True,
-                    'votes_left': get_user_votes_left(user, party),
-                    'credits': user.credits
-                })
-            else:
-                # No té vots disponibles
-                if credits > 0:
-                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per continuar.')}, status=400)
-                else:
-                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
-
-        elif action == 'skip' and song_id:
-            song = get_object_or_404(Song, pk=song_id, party=party)
-
-            # Skip també consumeix 1 vot
-            if votes_left > 0:
-                # Crear el vot de tipus skip (consumeix 1 Vot)
-                Vote.objects.create(user=user, song=song, party=party, vote_type='skip')
-
-                return JsonResponse({
-                    'success': True,
-                    'votes_left': get_user_votes_left(user, party),
-                    'credits': user.credits
-                })
-            else:
-                # No té vots disponibles
-                if credits > 0:
-                    return JsonResponse({'success': False, 'error': _('No tens vots! Converteix Coins a Vots per continuar.')}, status=400)
-                else:
-                    return JsonResponse({'success': False, 'error': _('No tens Coins! Compra Coins i converteix-los a Vots.')}, status=400)
-
-    # Obtenir cançons que l'usuari encara no ha votat
+    # Obtenir cançons que l'usuari encara no ha votat amb annotations
     voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)
     songs = list(
-        party.songs
-        .annotate(
-            num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-            num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
-        )
+        get_annotated_party_songs(party)
         .exclude(id__in=voted_song_ids)
         .order_by('?')
     )
     swiped_count = total_songs - len(songs)
 
-    # Etiquetes tipus DJ segons percentil d'interaccions dins la festa
-    all_vote_counts = list(
-        party.songs
-        .annotate(
-            total_interactions=Count('vote', filter=Q(vote__vote_type='like')) +
-                              Count('vote', filter=Q(vote__vote_type='dislike'))
-        )
-        .values_list('total_interactions', flat=True)
-    )
-    sorted_vote_counts = sorted(all_vote_counts)
-    total_ranked_songs = len(sorted_vote_counts)
+    # Aplicar badges dinàmics
+    calculate_and_apply_badges(party, songs)
 
-    def get_badge_for_song(likes, dislikes):
-        """Calcula etiqueta segons likes, dislikes i percentil"""
-        total_interactions = likes + dislikes
-
-        # Cas especial: cap interacció
-        if total_interactions == 0:
-            return ("INTACTA", "#cbd5e1", "#475569")
-
-        # Calcular ratio de likes
-        like_ratio = (likes / total_interactions * 100)
-
-        # Calcular percentil segons total d'interaccions
-        if total_ranked_songs == 0:
-            percentile = 0
-        else:
-            songs_below_or_equal = sum(1 for count in sorted_vote_counts if count <= total_interactions)
-            percentile = (songs_below_or_equal / total_ranked_songs) * 100
-
-        # Classificació amb ganxo per engagement
-
-        # Cas especial: Unànime (quasi tots likes)
-        if total_interactions >= 3 and like_ratio >= 90:
-            return ("UNÀNIME", "#e63946", "#ffffff")
-
-        # Top tier amb bon ratio
-        if percentile >= 90 and like_ratio >= 85:
-            return ("HIMNE", "#ff006e", "#ffffff")
-
-        # Moltes interaccions (polèmica o trending)
-        if percentile >= 70:
-            if 40 <= like_ratio <= 60:
-                return ("DIVISIVA", "#f77f00", "#000000")
-            elif like_ratio >= 75:
-                return ("PETANT-HO", "#fcbf49", "#000000")
-            else:
-                return ("EXPLOSIVA", "#ef476f", "#ffffff")
-
-        # Trending amb bon ratio
-        if percentile >= 60 and like_ratio >= 65:
-            return ("TRENDING", "#06ffa5", "#000000")
-
-        # Mitjana amb ratio decent
-        if percentile >= 40 and like_ratio >= 50:
-            return ("CALENTA", "#ff9e00", "#000000")
-
-        # Baixa interacció però bon ratio (joia amagada)
-        if total_interactions >= 2 and like_ratio >= 80:
-            return ("JOIA", "#4cc9f0", "#000000")
-
-        # Molts dislikes
-        if total_interactions >= 3 and like_ratio < 30:
-            return ("GÈLIDA", "#8338ec", "#ffffff")
-
-        # Poc engagement (fresca)
-        return ("FRESCA", "#90e0ef", "#000000")
-
-    for song in songs:
-        badge_label, badge_bg, badge_text = get_badge_for_song(song.num_likes, song.num_dislikes)
-        song.badge_label = badge_label
-        song.badge_bg = badge_bg
-        song.badge_text = badge_text
-
-    # Comprovar si l'usuari té Spotify connectat
-    has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
-    spotify_token = None
-    if has_spotify:
-        from .spotify_api import _ensure_valid_user_token
-        try:
-            spotify_token = _ensure_valid_user_token(user)
-        except Exception as e:
-            logger.warning(f"[SPOTIFY] Error obtenint token per Web Playback: {e}")
-            has_spotify = False
+    # Obtenir context Spotify
+    spotify_context = get_spotify_context_for_view(user)
 
     return render(request, 'jukebox/song_swipe.html', {
         'party': party,
@@ -1510,8 +1373,7 @@ def song_swipe(request):
         'swiped_count': swiped_count,
         'credits': credits,
         'party_coins': party_coins,
-        'has_spotify': has_spotify,
-        'spotify_token': spotify_token,
+        **spotify_context,  # Desempaqueta has_spotify i spotify_token
     })
 
 
@@ -1594,7 +1456,11 @@ def toggle_auto_sync(request, party_id):
     party.auto_sync_playlist = not party.auto_sync_playlist
     party.save(update_fields=['auto_sync_playlist'])
 
-    logger.info(f"[AUTO_SYNC] Party {party_id} auto-sync {'enabled' if party.auto_sync_playlist else 'disabled'}")
+    logger.info(
+        "[AUTO_SYNC] party_id=%s enabled=%s",
+        party_id,
+        party.auto_sync_playlist,
+    )
 
     return JsonResponse({
         'success': True,
@@ -1618,7 +1484,12 @@ def toggle_auto_analyze(request, party_id):
     # Comptar cançons pendents d'anàlisi
     pending_count = Song.objects.filter(party=party, bpm__isnull=True).count()
 
-    logger.info(f"[AUTO_ANALYZE] Party {party_id} auto-analyze {'enabled' if party.auto_analyze_audio else 'disabled'} - {pending_count} pending songs")
+    logger.info(
+        "[AUTO_ANALYZE] party_id=%s enabled=%s pending=%s",
+        party_id,
+        party.auto_analyze_audio,
+        pending_count,
+    )
 
     return JsonResponse({
         'success': True,
@@ -1670,8 +1541,8 @@ def force_sync_playlist(request, party_id):
 
             return JsonResponse(result, status=400 if result.get('error') else 200)
 
-    except Exception as e:
-        logger.error(f"[FORCE_SYNC] Error for party {party_id}: {e}")
+    except Exception:
+        logger.exception("[FORCE_SYNC] Error for party_id=%s", party_id)
         # Restaurar valors originals en cas d'error
         party.auto_sync_playlist = original_auto_sync
         party.last_sync_at = original_last_sync

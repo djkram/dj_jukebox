@@ -31,6 +31,10 @@ from .vote_validation import (
     create_vote_response,
     handle_vote_action,
 )
+from .badges import (
+    BadgeCalculator,
+    calculate_and_apply_badges,
+)
 
 __all__ = [
     # Query helpers
@@ -51,4 +55,7 @@ __all__ = [
     'validate_and_create_vote',
     'create_vote_response',
     'handle_vote_action',
+    # Badges
+    'BadgeCalculator',
+    'calculate_and_apply_badges',
 ]

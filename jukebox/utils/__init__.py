@@ -26,6 +26,11 @@ from .spotify_helpers import (
     get_user_spotify_token,
     get_spotify_context_for_view,
 )
+from .vote_validation import (
+    validate_and_create_vote,
+    create_vote_response,
+    handle_vote_action,
+)
 
 __all__ = [
     # Query helpers
@@ -42,4 +47,8 @@ __all__ = [
     'create_spotify_auth_error_response',
     'get_user_spotify_token',
     'get_spotify_context_for_view',
+    # Vote validation
+    'validate_and_create_vote',
+    'create_vote_response',
+    'handle_vote_action',
 ]

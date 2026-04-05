@@ -431,18 +431,56 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
+  <!-- Secció entrada de codi -->
+  <div class="mb-4" style="max-width: 600px;">
+    <div style="background: white; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 2rem; color: #0040e0;">key</span>
+        <div>
+          <h3 style="font-family: 'Epilogue', sans-serif; font-size: 1.25rem; font-weight: 700; color: #181c1e; margin: 0;">{% trans "Tens un codi?" %}</h3>
+          <p style="color: #747687; font-size: 0.875rem; margin: 0;">{% trans "Introdueix el codi de la festa per accedir directament" %}</p>
+        </div>
+      </div>
+      <form method="post" style="display: flex; gap: 0.75rem;">
+        {% csrf_token %}
+        <input type="text" name="party_code" placeholder="{% trans 'Escriu el codi aquí...' %}"
+               style="flex: 1; padding: 0.875rem 1.25rem; border: 1px solid #e0e3e6; border-radius: 0.75rem; font-size: 0.875rem; text-transform: uppercase;"
+               maxlength="12" required>
+        <button type="submit" style="padding: 0.875rem 1.5rem; background: #0040e0; color: white; font-weight: 700; border-radius: 0.75rem; border: none; cursor: pointer; transition: background 200ms;">
+          <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">login</span>
+          {% trans "Unir-se" %}
+        </button>
+      </form>
+      {% if code_error %}
+        <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fff5f5; border-left: 3px solid #e74c3c; border-radius: 0.5rem; color: #c0392b; font-size: 0.875rem;">
+          <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle; margin-right: 0.5rem;">error</span>
+          {{ code_error }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
   {% if parties %}
     <div class="select-parties-grid">
       {% for party in parties %}
-        <a href="{% url 'set_party' party.id %}" class="select-party-card">
+        <a href="{% url 'set_party' party.id %}" class="select-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
           <div class="select-party-image">
-            <div class="select-party-image-placeholder">
-              <span class="material-symbols-outlined">music_note</span>
-            </div>
+            {% if party.cover_image %}
+              <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              <div class="select-party-image-placeholder">
+                <span class="material-symbols-outlined">music_note</span>
+              </div>
+            {% endif %}
             {% if selected_party and party.id == selected_party.id %}
               <div class="select-party-badge">
                 <span class="select-party-badge-dot"></span>
                 {% trans "EN DIRECTE" %}
+              </div>
+            {% elif party.require_join_code %}
+              <div class="select-party-badge" style="background: rgba(231,76,60,0.95);">
+                <span class="material-symbols-outlined" style="font-size: 0.75rem;">lock</span>
+                {% trans "REQUEREIX CODI" %}
               </div>
             {% endif %}
           </div>
@@ -486,36 +524,33 @@
       <div class="select-promo-bg-1"></div>
       <div class="select-promo-bg-2"></div>
       <div class="select-promo-content">
-        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
-        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
-        <div class="select-promo-stats">
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
-            <p class="select-promo-stat-value">{{ parties.count }}</p>
-          </div>
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
-            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
-          </div>
+        <div style="display: inline-block; padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 9999px; margin-bottom: 1rem;">
+          <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">{% trans "Ets DJ?" %}</span>
         </div>
+        <h2 class="select-promo-title">{% trans "Porta la teva festa al següent nivell" %}</h2>
+        <p class="select-promo-text">{% trans "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR, deixa que votin les cançons i fes que la música sigui de tots." %}</p>
+        <a href="{% url 'dj_backoffice' %}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; background: white; color: #0040e0; font-weight: 700; border-radius: 1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: transform 200ms;">
+          <span class="material-symbols-outlined">celebration</span>
+          {% trans "Comença ara" %}
+        </a>
       </div>
       <div class="select-promo-cards">
         <div class="select-promo-card">
           <div class="select-promo-card-icon purple">
-            <span class="material-symbols-outlined">favorite</span>
+            <span class="material-symbols-outlined">qr_code_2</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
-            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
+            <p class="select-promo-card-label">{% trans "Codis QR" %}</p>
+            <p class="select-promo-card-value">{% trans "Comparteix fàcilment" %}</p>
           </div>
         </div>
         <div class="select-promo-card">
           <div class="select-promo-card-icon blue">
-            <span class="material-symbols-outlined">bolt</span>
+            <span class="material-symbols-outlined">how_to_vote</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Estat" %}</p>
-            <p class="select-promo-card-value">{% trans "En línia" %}</p>
+            <p class="select-promo-card-label">{% trans "Votacions" %}</p>
+            <p class="select-promo-card-value">{% trans "Públic participa" %}</p>
           </div>
         </div>
       </div>
@@ -540,17 +575,50 @@
       <p class="font-medium" style="color: #434656; opacity: 0.8;">{% trans "Escull la teva festa i fes sentir les teves preferències." %}</p>
     </section>
 
+    <!-- Secció entrada de codi mòbil -->
+    <section class="mobile-card p-3">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="fas fa-key" style="font-size: 1.5rem; color: #0040e0;"></i>
+        <div>
+          <h3 class="fw-bold mb-0" style="font-size: 1rem; color: #191c1f;">{% trans "Tens un codi?" %}</h3>
+          <p class="mb-0" style="font-size: 0.75rem; color: #747688;">{% trans "Accedeix directament" %}</p>
+        </div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="input-group mb-2">
+          <input type="text" name="party_code" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
+                 style="text-transform: uppercase; font-weight: 600;" maxlength="12" required>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i>
+          </button>
+        </div>
+        {% if code_error %}
+          <div class="alert alert-danger py-2 mb-0" style="font-size: 0.75rem;">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            {{ code_error }}
+          </div>
+        {% endif %}
+      </form>
+    </section>
+
     {% if parties %}
       <!-- Featured Section (First Party - Bento Style) -->
       {% with parties.0 as featured %}
         <div class="mobile-section-header">
           <span class="d-block font-headline font-bold text-uppercase mb-0" style="color: #5e24e1; font-size: 0.625rem; letter-spacing: 0.2em;">{% trans "En Directe Ara" %}</span>
-          <a href="{% url 'set_party' featured.id %}" class="text-decoration-none">
+          <a href="{% url 'set_party' featured.id %}" class="text-decoration-none mobile-party-card" {% if featured.require_join_code %}data-requires-code="true" data-party-id="{{ featured.id }}"{% endif %}>
             <div class="position-relative overflow-hidden rounded-xl p-4 text-white shadow-xl cursor-pointer" style="background: #2e5bff; box-shadow: 0 10px 40px rgba(0, 64, 224, 0.1);">
               <div class="position-absolute" style="top: 0; right: 0; margin-top: -4rem; margin-right: -4rem; width: 16rem; height: 16rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(3rem);"></div>
               <div class="position-relative" style="z-index: 10;">
                 <div class="d-flex justify-content-between align-items-start mb-4">
-                  <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">{% trans "Alta Energia" %}</div>
+                  {% if featured.require_join_code %}
+                    <div class="px-3 py-1 rounded-pill" style="background: #e74c3c; color: white; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                      <i class="fas fa-lock me-1"></i>{% trans "Requereix codi" %}
+                    </div>
+                  {% else %}
+                    <div class="px-3 py-1 rounded-pill" style="background: #00e3fd; color: #00616d; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">{% trans "Alta Energia" %}</div>
+                  {% endif %}
                   <i class="fas fa-signal" style="color: rgba(255, 255, 255, 0.5);"></i>
                 </div>
                 <h2 class="font-headline font-bold mb-2" style="font-size: 1.875rem; letter-spacing: -0.01em;">{{ featured.name }}</h2>
@@ -576,14 +644,19 @@
           {% for party in parties %}
             {% if not forloop.first %}
               <!-- Party Card -->
-              <a href="{% url 'set_party' party.id %}" class="text-decoration-none">
+              <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
                 <div class="bg-white rounded-lg p-4 d-flex flex-column gap-3 shadow-sm transition-all" style="border: 1px solid rgba(196, 197, 217, 0.1);">
                   <div class="d-flex align-items-center justify-content-between">
                     <div class="rounded-circle overflow-hidden flex-shrink-0" style="width: 3.5rem; height: 3.5rem; background: #eceef3;">
                       <i class="fas fa-music d-flex align-items-center justify-center w-100 h-100" style="color: #0040e0; font-size: 1.5rem;"></i>
                     </div>
                     <div class="flex-grow-1 ms-3">
-                      <h4 class="font-headline font-bold mb-0" style="font-size: 1.125rem; line-height: 1.2;">{{ party.name }}</h4>
+                      <h4 class="font-headline font-bold mb-0" style="font-size: 1.125rem; line-height: 1.2;">
+                        {{ party.name }}
+                        {% if party.require_join_code %}
+                          <i class="fas fa-lock ms-1" style="font-size: 0.75rem; color: #e74c3c;"></i>
+                        {% endif %}
+                      </h4>
                       <div class="d-flex align-items-center gap-2 mt-1">
                         <i class="fas fa-calendar-alt" style="color: #0040e0; font-size: 0.75rem;"></i>
                         <span style="font-size: 0.75rem; color: #434656;">
@@ -618,6 +691,33 @@
         <p class="mb-0" style="color: #434656;">{% trans "Torna aviat per veure propers esdeveniments!" %}</p>
       </div>
     {% endif %}
+
+    <!-- Secció màrqueting mòbil -->
+    <section class="mobile-card p-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white;">
+      <div class="text-center mb-3">
+        <div class="d-inline-block px-3 py-1 rounded-pill mb-2" style="background: rgba(255,255,255,0.2); font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
+          {% trans "Ets DJ?" %}
+        </div>
+        <h3 class="fw-bold mb-2" style="font-size: 1.5rem; line-height: 1.2;">{% trans "Porta la teva festa al següent nivell" %}</h3>
+        <p style="color: rgba(255,255,255,0.9); font-size: 0.875rem;">
+          {% trans "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR i deixa que votin." %}
+        </p>
+      </div>
+      <div class="d-flex gap-2 mb-3">
+        <div class="flex-fill p-3 rounded-3" style="background: rgba(255,255,255,0.15);">
+          <i class="fas fa-qrcode mb-2" style="font-size: 1.5rem;"></i>
+          <p class="mb-0 fw-bold" style="font-size: 0.75rem;">{% trans "Codis QR" %}</p>
+        </div>
+        <div class="flex-fill p-3 rounded-3" style="background: rgba(255,255,255,0.15);">
+          <i class="fas fa-vote-yea mb-2" style="font-size: 1.5rem;"></i>
+          <p class="mb-0 fw-bold" style="font-size: 0.75rem;">{% trans "Votacions" %}</p>
+        </div>
+      </div>
+      <a href="{% url 'dj_backoffice' %}" class="btn btn-light w-100 fw-bold d-flex align-items-center justify-content-center gap-2">
+        <i class="fas fa-rocket"></i>
+        {% trans "Comença ara" %}
+      </a>
+    </section>
   </main>
 </div>
 
@@ -628,4 +728,23 @@
     transition: box-shadow 0.2s, background 0.2s;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Gestionar clics en festes que requereixen codi (desktop i mobile)
+  const partyCards = document.querySelectorAll('.select-party-card[data-requires-code="true"], .mobile-party-card[data-requires-code="true"]');
+
+  partyCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      e.preventDefault();
+      const partyId = this.dataset.partyId;
+      const code = prompt('{% trans "Aquesta festa requereix un codi d\'entrada. Si us plau, introdueix el codi:" %}');
+
+      if (code) {
+        window.location.href = `{% url 'set_party' 0 %}`.replace('0', partyId) + `?code=${code.trim().toUpperCase()}`;
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

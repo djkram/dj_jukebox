@@ -3,6 +3,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext as _
@@ -132,12 +133,38 @@ def profile(request):
     })
 
 def select_party(request):
-    parties = Party.objects.order_by('-date')
-    return render(request, "jukebox/select_party.html", {"parties": parties})
+    # Només mostrem festes públiques
+    parties = Party.objects.filter(is_public=True).order_by('-date')
+
+    # Processar entrada de codi
+    code_error = None
+    if request.method == 'POST':
+        code = request.POST.get('party_code', '').strip().upper()
+        if code:
+            try:
+                party = Party.objects.get(code=code)
+                # Redirigir a set_party amb el codi
+                return redirect(f"{reverse('set_party', args=[party.id])}?code={code}")
+            except Party.DoesNotExist:
+                code_error = _("Codi invàlid. Comprova que l'has escrit correctament.")
+
+    return render(request, "jukebox/select_party.html", {
+        "parties": parties,
+        "code_error": code_error,
+    })
 
 def set_party(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
+
+    # Si la festa requereix codi, validar-lo
+    if party.require_join_code:
+        provided_code = request.GET.get('code', '').strip().upper()
+        if provided_code != party.code:
+            messages.error(request, _("Codi incorrecte. Aquesta festa requereix un codi d'entrada."))
+            return redirect('select_party')
+
     request.session['selected_party_id'] = party.id
+    messages.success(request, _(f"T'has unit a la festa: {party.name}"))
     return redirect("main")
 
 def unset_party(request):

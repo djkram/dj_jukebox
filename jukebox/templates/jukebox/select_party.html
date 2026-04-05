@@ -463,7 +463,7 @@
 
       <!-- Columna 2: Primera festa -->
       {% with parties.0 as first_party %}
-        <a href="{% url 'set_party' first_party.id %}" class="select-party-card" {% if first_party.require_join_code %}data-requires-code="true" data-party-id="{{ first_party.id }}"{% endif %}>
+        <div class="select-party-card" style="cursor: default;">
           <div class="select-party-image">
             {% if first_party.cover_image %}
               <img src="{{ first_party.cover_image.url }}" alt="{{ first_party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
@@ -496,14 +496,36 @@
                 <span>{% if first_party.playlist %}{{ first_party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
               </div>
             </div>
-            {% if selected_party and first_party.id == selected_party.id %}
-              <button class="select-party-button">
-                {% trans "Entrar a la sessió" %}
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
+
+            {% if first_party.require_join_code %}
+              <!-- Formulari amb codi -->
+              <form method="get" action="{% url 'set_party' first_party.id %}" style="margin-top: 1rem;">
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
+                         style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
+                  <button type="submit" class="select-party-button" style="flex-shrink: 0; margin: 0;">
+                    {% trans "Entrar" %}
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </form>
+            {% elif selected_party and first_party.id == selected_party.id %}
+              <a href="{% url 'set_party' first_party.id %}" style="text-decoration: none;">
+                <button class="select-party-button">
+                  {% trans "Entrar a la sessió" %}
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </a>
+            {% else %}
+              <a href="{% url 'set_party' first_party.id %}" style="text-decoration: none;">
+                <button class="select-party-button">
+                  {% trans "Entrar" %}
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </a>
             {% endif %}
           </div>
-        </a>
+        </div>
       {% endwith %}
 
       <!-- Columna 3: Afegeix festa -->
@@ -526,7 +548,7 @@
     <div class="select-parties-grid">
       {% for party in parties %}
         {% if not forloop.first %}
-        <a href="{% url 'set_party' party.id %}" class="select-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
+        <div class="select-party-card" style="cursor: default;">
           <div class="select-party-image">
             {% if party.cover_image %}
               <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
@@ -559,14 +581,36 @@
                 <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
               </div>
             </div>
-            {% if selected_party and party.id == selected_party.id %}
-              <button class="select-party-button">
-                {% trans "Entrar a la sessió" %}
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
+
+            {% if party.require_join_code %}
+              <!-- Formulari amb codi -->
+              <form method="get" action="{% url 'set_party' party.id %}" style="margin-top: 1rem;">
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
+                         style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
+                  <button type="submit" class="select-party-button" style="flex-shrink: 0; margin: 0;">
+                    {% trans "Entrar" %}
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+              </form>
+            {% elif selected_party and party.id == selected_party.id %}
+              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;">
+                <button class="select-party-button">
+                  {% trans "Entrar a la sessió" %}
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </a>
+            {% else %}
+              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;">
+                <button class="select-party-button">
+                  {% trans "Entrar" %}
+                  <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </a>
             {% endif %}
           </div>
-        </a>
+        </div>
         {% endif %}
       {% endfor %}
     </div>
@@ -732,10 +776,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Gestionar clics en festes que requereixen codi (desktop i mobile)
-  const partyCards = document.querySelectorAll('.select-party-card[data-requires-code="true"], .mobile-party-card[data-requires-code="true"]');
+  // Gestionar clics en festes mobile que requereixen codi (les caixes són massa petites per formulari)
+  const mobilePartyCards = document.querySelectorAll('.mobile-party-card[data-requires-code="true"]');
 
-  partyCards.forEach(card => {
+  mobilePartyCards.forEach(card => {
     card.addEventListener('click', function(e) {
       e.preventDefault();
       const partyId = this.dataset.partyId;

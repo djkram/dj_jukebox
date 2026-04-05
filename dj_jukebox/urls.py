@@ -21,12 +21,12 @@ from django.conf.urls.i18n import i18n_patterns
 # URLs sense prefix d'idioma (necessàries per al canvi d'idioma)
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    path('accounts/', include('allauth.urls')),
 ]
 
 # URLs amb prefix d'idioma (ca/, en/, etc.)
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
     path('', include('jukebox.urls')),
     prefix_default_language=True,  # Afegir prefix fins i tot per l'idioma per defecte
 )

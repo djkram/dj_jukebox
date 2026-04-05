@@ -49,6 +49,10 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 
+def is_dj_admin(user):
+    return user.is_authenticated and user.is_superuser
+
+
 def _spotify_reconnect_url(request):
     query = urlencode({
         "process": "connect",
@@ -140,6 +144,7 @@ def unset_party(request):
     return redirect('dj_backoffice')  # O on vulguis redirigir!
 
 @login_required
+@user_passes_test(is_dj_admin)
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     has_spotify = SocialAccount.objects.filter(user=request.user, provider="spotify").exists()
@@ -206,6 +211,7 @@ def party_settings(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 def remove_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     # només serveix si la festa ja té playlist
@@ -217,6 +223,7 @@ def remove_playlist(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def assign_party_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
@@ -262,6 +269,7 @@ def assign_party_playlist(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def process_playlist_songs(request, party_id):
     """
@@ -345,6 +353,7 @@ def process_playlist_songs(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 def party_settings_search_tracks(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     query = request.GET.get('search', '').strip()
@@ -372,6 +381,7 @@ def party_settings_search_tracks(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def add_track_to_party_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
@@ -440,6 +450,7 @@ def add_track_to_party_playlist(request, party_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def delete_song_from_party_playlist(request, party_id, song_id):
     party = get_object_or_404(Party, pk=party_id)
@@ -471,6 +482,7 @@ def delete_song_from_party_playlist(request, party_id, song_id):
 
 
 @login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def process_song_features(request, party_id):
     """
@@ -927,6 +939,8 @@ def dj_backoffice(request):
         'party_form': party_form,
     })
 
+@login_required
+@user_passes_test(is_dj_admin)
 def dj_dashboard(request):
     from .recommendation import get_recommended_songs
 
@@ -1087,6 +1101,8 @@ def update_party_status(request, party_id):
     return redirect('dj_dashboard')
 
 
+@login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def mark_song_played(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
@@ -1321,6 +1337,7 @@ def stripe_webhook(request):
     return HttpResponse(status=200)
 
 @login_required
+@user_passes_test(is_dj_admin)
 def get_spotify_playlists(request):
     """
     Retorna JSON amb la llista de playlists de l'usuari logat a Spotify.
@@ -1708,7 +1725,7 @@ def request_song(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(is_dj_admin)
 @require_POST
 def toggle_auto_sync(request, party_id):
     """
@@ -1728,7 +1745,8 @@ def toggle_auto_sync(request, party_id):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
+@user_passes_test(is_dj_admin)
 @require_POST
 def toggle_auto_analyze(request, party_id):
     """
@@ -1753,7 +1771,7 @@ def toggle_auto_analyze(request, party_id):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(is_dj_admin)
 @require_POST
 def force_sync_playlist(request, party_id):
     """
@@ -1804,7 +1822,8 @@ def force_sync_playlist(request, party_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
+@user_passes_test(is_dj_admin)
 def manage_song_requests(request):
     """Vista per DJs per gestionar peticions de cançons"""
     party_id = request.session.get('selected_party_id')

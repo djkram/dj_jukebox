@@ -358,6 +358,9 @@ class DJDashboardViewTests(TestCase):
     def test_dashboard_accessible_to_superuser(self):
         """Test que superusuaris poden accedir"""
         self.client.login(username='admin', password='admin')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
         response = self.client.get(reverse('dj_dashboard'))
 
         self.assertEqual(response.status_code, 200)
@@ -404,3 +407,81 @@ class DJBackofficeViewTests(TestCase):
     #     # Verificar que s'ha creat la festa
     #     party_exists = Party.objects.filter(name='New Party').exists()
     #     self.assertTrue(party_exists)
+
+
+class DJManagementAccessTests(TestCase):
+    """Tests d'accés per les rutes de gestió DJ"""
+
+    def setUp(self):
+        self.client = Client()
+        self.superuser = User.objects.create_superuser(
+            username='admin',
+            password='admin'
+        )
+        self.regular_user = User.objects.create_user(
+            username='user',
+            password='test'
+        )
+        self.party = Party.objects.create(
+            name='Managed Party',
+            owner=self.superuser,
+            date=timezone.now()
+        )
+        self.song = Song.objects.create(
+            party=self.party,
+            title='Managed Song',
+            artist='Artist',
+            spotify_id='managed-song'
+        )
+
+    def test_party_settings_requires_superuser(self):
+        self.client.login(username='user', password='test')
+
+        response = self.client.get(reverse('party_settings', args=[self.party.id]))
+
+        self.assertIn(response.status_code, [302, 403])
+
+    def test_party_settings_accessible_to_superuser(self):
+        self.client.login(username='admin', password='admin')
+        playlist = Playlist.objects.create(
+            spotify_id='playlist-1',
+            name='Playlist test',
+            owner='admin'
+        )
+        self.party.playlist = playlist
+        self.party.save(update_fields=['playlist'])
+
+        response = self.client.get(reverse('party_settings', args=[self.party.id]))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_manage_song_requests_requires_superuser(self):
+        self.client.login(username='user', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+        response = self.client.get(reverse('manage_song_requests'))
+
+        self.assertIn(response.status_code, [302, 403])
+
+    def test_mark_song_played_requires_superuser(self):
+        self.client.login(username='user', password='test')
+
+        response = self.client.post(reverse('mark_song_played', args=[self.song.id]))
+
+        self.assertIn(response.status_code, [302, 403])
+        self.song.refresh_from_db()
+        self.assertFalse(self.song.has_played)
+
+    def test_mark_song_played_allows_superuser(self):
+        self.client.login(username='admin', password='admin')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+        response = self.client.post(reverse('mark_song_played', args=[self.song.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.song.refresh_from_db()
+        self.assertTrue(self.song.has_played)

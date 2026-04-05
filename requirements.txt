@@ -25,3 +25,5 @@ soundfile==0.12.1
 numpy==1.26.4
 audioread==3.0.1
 yt-dlp==2026.3.13
+Pillow==11.1.0
+qrcode==8.0

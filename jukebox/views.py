@@ -155,7 +155,7 @@ def party_settings(request, party_id):
 
     # Processament del formulari
     if request.method == 'POST':
-        form = PartySettingsForm(request.POST, instance=party, request=request)
+        form = PartySettingsForm(request.POST, request.FILES, instance=party, request=request)
         if form.is_valid():
             # Si es crida via AJAX i hi ha playlist, no carregar cançons
             # (es carregaran després via process_playlist_songs)
@@ -216,6 +216,39 @@ def party_settings(request, party_id):
         'spotify_token': spotify_token,
         'only_owned': only_owned,
     })
+
+
+@login_required
+@user_passes_test(is_dj_admin)
+def party_qr_code(request, party_id):
+    """Genera un codi QR per compartir la festa."""
+    import qrcode
+    from io import BytesIO
+    from django.http import HttpResponse
+
+    party = get_object_or_404(Party, pk=party_id)
+
+    # URL completa de la festa amb el codi
+    party_url = request.build_absolute_uri(f'/set-party/{party.id}/?code={party.code}')
+
+    # Generar QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(party_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Retornar com a imatge PNG
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+
+    return HttpResponse(buffer, content_type='image/png')
 
 
 @login_required

@@ -37,6 +37,9 @@ class Party(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=False, default='')
+    cover_image = models.ImageField(upload_to='party_covers/', null=True, blank=True, help_text=_("Imatge de portada de la festa"))
+    require_join_code = models.BooleanField(default=False, help_text=_("Requerir codi per unir-se a la festa"))
+    is_public = models.BooleanField(default=True, help_text=_("Festa pública (llistada) o privada (no llistada)"))
     max_votes_per_user = models.PositiveIntegerField(default=5)  # Vots gratuïts per usuari
     free_coins_per_user = models.PositiveIntegerField(default=0)  # Coins gratuïts per usuari (per festa)
     song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó

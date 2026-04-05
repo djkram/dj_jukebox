@@ -26,6 +26,7 @@ urlpatterns = [
     path('party/<int:party_id>/settings/remove_playlist/', views.remove_playlist, name='remove_playlist'),
     path('party/<int:party_id>/settings/assign_playlist/', views.assign_party_playlist, name='assign_party_playlist'),
     path('party/<int:party_id>/settings/', views.party_settings, name='party_settings'),
+    path('party/<int:party_id>/qr-code/', views.party_qr_code, name='party_qr_code'),
     path('party/<int:party_id>/process-playlist/', views.process_playlist_songs, name='process_playlist_songs'),
     path('party/<int:party_id>/process-features/', views.process_song_features, name='process_song_features'),
     path('party/<int:party_id>/analyze-song/<int:song_id>/', views.analyze_song_audio, name='analyze_song_audio'),

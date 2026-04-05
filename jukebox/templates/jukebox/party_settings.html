@@ -579,7 +579,7 @@
           <span class="material-symbols-outlined">tune</span>
           <h3 class="settings-form-title">Detalls de la festa</h3>
         </div>
-        <form method="post" id="partySettingsForm">
+        <form method="post" enctype="multipart/form-data" id="partySettingsForm">
           {% csrf_token %}
 
           <div class="settings-field">
@@ -613,6 +613,43 @@
             {{ form.song_request_cost }}
             <p class="settings-help">
               Cost en Coins que un usuari ha de pagar per demanar una cançó nova.
+            </p>
+          </div>
+
+          <div class="settings-field">
+            <label class="settings-label" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
+            {{ form.cover_image }}
+            {% if party.cover_image %}
+              <p class="settings-help">
+                Imatge actual: <a href="{{ party.cover_image.url }}" target="_blank">Veure imatge</a>
+              </p>
+            {% endif %}
+            <p class="settings-help">
+              Imatge de portada per a la festa (JPEG, PNG).
+            </p>
+          </div>
+
+          <div class="settings-field">
+            <div class="form-check">
+              {{ form.is_public }}
+              <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                {{ form.is_public.label }}
+              </label>
+            </div>
+            <p class="settings-help">
+              Si està activat, la festa apareix a la llista pública. Si no, només és accessible amb el codi.
+            </p>
+          </div>
+
+          <div class="settings-field">
+            <div class="form-check">
+              {{ form.require_join_code }}
+              <label class="form-check-label" for="{{ form.require_join_code.id_for_label }}">
+                {{ form.require_join_code.label }}
+              </label>
+            </div>
+            <p class="settings-help">
+              Si està activat, els usuaris necessiten introduir el codi per unir-se a la festa.
             </p>
           </div>
 
@@ -753,6 +790,38 @@
             {% endif %}
           </div>
         {% endif %}
+      </div>
+
+      {# ── CODI DE LA FESTA I QR ──────────────────────────────────────────── #}
+      <div class="settings-form-card mt-3">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">qr_code_2</span>
+          <h3 class="settings-form-title">Codi de la festa</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <div class="mb-3">
+            <label class="settings-label">Codi d'entrada</label>
+            <div class="input-group">
+              <input type="text" class="form-control" value="{{ party.code }}" readonly>
+              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ party.code }}')">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+              </button>
+            </div>
+            <p class="settings-help">
+              Comparteix aquest codi perquè els assistents puguin unir-se a la festa.
+            </p>
+          </div>
+          <div class="text-center">
+            <img src="{% url 'party_qr_code' party.id %}" alt="Codi QR de la festa" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
+            <p class="settings-help mt-2">
+              Escaneja amb el mòbil per unir-te directament.
+            </p>
+            <a href="{% url 'party_qr_code' party.id %}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
+              <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">download</span>
+              Descarrega QR
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -947,7 +1016,7 @@
     </div>
 
     <section class="mobile-card p-3">
-      <form method="post" id="partySettingsFormMobile">
+      <form method="post" enctype="multipart/form-data" id="partySettingsFormMobile">
         {% csrf_token %}
 
         <div class="mb-3">
@@ -976,6 +1045,37 @@
           <label class="mobile-label" for="{{ form.song_request_cost.id_for_label }}">{{ form.song_request_cost.label }}</label>
           {{ form.song_request_cost }}
           <p class="help-text">Cost en Coins que un usuari ha de pagar per demanar una cançó nova.</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="mobile-label" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
+          {{ form.cover_image }}
+          {% if party.cover_image %}
+            <p class="help-text">
+              Imatge actual: <a href="{{ party.cover_image.url }}" target="_blank">Veure imatge</a>
+            </p>
+          {% endif %}
+          <p class="help-text">Imatge de portada per a la festa (JPEG, PNG).</p>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            {{ form.is_public }}
+            <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+              {{ form.is_public.label }}
+            </label>
+          </div>
+          <p class="help-text">Si està activat, la festa apareix a la llista pública.</p>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            {{ form.require_join_code }}
+            <label class="form-check-label" for="{{ form.require_join_code.id_for_label }}">
+              {{ form.require_join_code.label }}
+            </label>
+          </div>
+          <p class="help-text">Si està activat, els usuaris necessiten introduir el codi.</p>
         </div>
 
         <div class="d-grid gap-2">
@@ -1168,6 +1268,26 @@
       {% else %}
         <p class="mb-0 text-muted">No hi ha cançons per mostrar.</p>
       {% endif %}
+    </section>
+
+    <section class="mobile-card p-3">
+      <span class="mobile-label">Codi de la festa</span>
+      <div class="mb-3">
+        <div class="input-group">
+          <input type="text" class="form-control" value="{{ party.code }}" readonly>
+          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ party.code }}')">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <p class="help-text">Comparteix aquest codi perquè els assistents puguin unir-se.</p>
+      </div>
+      <div class="text-center">
+        <img src="{% url 'party_qr_code' party.id %}" alt="Codi QR" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
+        <p class="help-text mt-2">Escaneja amb el mòbil per unir-te directament.</p>
+        <a href="{% url 'party_qr_code' party.id %}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-download me-1"></i>Descarrega QR
+        </a>
+      </div>
     </section>
   </main>
 </div>

@@ -33,13 +33,16 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost']
+        fields = ['name', 'date', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local', 'class': 'form-control'},
             ),
+            'cover_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'require_join_code': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'max_votes_per_user': forms.NumberInput(
                 attrs={'class': 'form-control', 'min': 0}
             ),
@@ -53,6 +56,9 @@ class PartySettingsForm(forms.ModelForm):
         labels = {
             'name': _('Nom de la festa'),
             'date': _('Data i hora'),
+            'cover_image': _('Imatge de portada'),
+            'is_public': _('Festa pública (llistada)'),
+            'require_join_code': _('Requerir codi per unir-se'),
             'max_votes_per_user': _('Vots gratuïts per usuari'),
             'free_coins_per_user': _('Coins gratuïts per usuari'),
             'song_request_cost': _('Cost per demanar cançó (Coins)'),

@@ -988,29 +988,12 @@ def buy_votes(request):
         # Conversió de Coins a Vots
         if 'action' in request.POST and request.POST['action'] == 'convert_coins':
             coins_to_convert = int(request.POST.get('coins_to_convert', 0))
-            if coins_to_convert > 0 and coins_to_convert <= user.credits:
-                # Calcular vots amb bonificació
-                if coins_to_convert >= 20:
-                    votes_to_add = int(coins_to_convert * 3.0)   # 20 Coins -> 60 Vots
-                elif coins_to_convert >= 10:
-                    votes_to_add = int(coins_to_convert * 2.5)   # 10 Coins -> 25 Vots
-                elif coins_to_convert >= 5:
-                    votes_to_add = int(coins_to_convert * 2.2)   # 5 Coins -> 11 Vots
-                elif coins_to_convert >= 3:
-                    votes_to_add = int(coins_to_convert * 2.0)   # 3 Coins -> 6 Vots
-                else:
-                    votes_to_add = coins_to_convert * 2          # 1-2 Coins -> 2x
-
-                # Crear un VotePackage per registrar la conversió
-                VotePackage.objects.create(
-                    user=user,
-                    party=party,
-                    votes_purchased=votes_to_add
-                )
-                # Restar els Coins utilitzats
-                user.credits -= coins_to_convert
-                user.save()
+            success, error_msg, votes_added = convert_coins_to_votes(
+                user, party, coins_to_convert
+            )
+            if success:
                 return redirect('buy_votes')
+            # Si falla, continua amb render (gestiona error més avall)
 
         # Compra de Coins amb Stripe
         else:

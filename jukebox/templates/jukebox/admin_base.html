@@ -588,6 +588,28 @@
                 transform: translateX(2px);
             }
 
+            .sidebar-lang-btn {
+                background: none;
+                border: none;
+                color: rgba(255,255,255,0.55);
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                padding: 0.1rem 0.25rem;
+                cursor: pointer;
+                border-radius: 0.25rem;
+                transition: color 150ms, background 150ms;
+            }
+            .sidebar-lang-btn:hover {
+                color: white;
+                background: rgba(255,255,255,0.12);
+            }
+            .sidebar-lang-btn.active {
+                color: white;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+
             /* Show Material Icons on desktop, hide Font Awesome */
             .sidebar .material-symbols-outlined {
                 display: inline-block !important;
@@ -2072,6 +2094,25 @@
                         <span class="material-symbols-outlined">person_add</span>
                         <span>Register</span>
                     </a>
+                </li>
+                <li class="nav-item">
+                    {% get_current_language as CURRENT_LANG %}
+                    <div class="nav-link d-flex align-items-center gap-1" style="padding-top:0.6rem;padding-bottom:0.6rem;">
+                        <span class="material-symbols-outlined" style="font-size:1rem;opacity:0.7;">language</span>
+                        <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                            <input name="language" type="hidden" value="ca">
+                            <button type="submit" class="sidebar-lang-btn{% if CURRENT_LANG == 'ca' %} active{% endif %}">CA</button>
+                        </form>
+                        <span style="color:rgba(255,255,255,0.3);font-size:0.75rem;">|</span>
+                        <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                            <input name="language" type="hidden" value="en">
+                            <button type="submit" class="sidebar-lang-btn{% if CURRENT_LANG == 'en' %} active{% endif %}">EN</button>
+                        </form>
+                    </div>
                 </li>
             {% endif %}
 

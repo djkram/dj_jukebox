@@ -128,6 +128,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'jukebox.middleware.DefaultLanguageMiddleware',  # força català per defecte
     'django.middleware.locale.LocaleMiddleware',  # i18n: detecta i aplica idioma
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

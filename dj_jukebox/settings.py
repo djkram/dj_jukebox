@@ -154,6 +154,7 @@ TEMPLATES = [
                 'jukebox.context_processors.selected_party',
                 'jukebox.context_processors.user_avatar',
                 'jukebox.context_processors.unread_notifications_count',
+                'jukebox.context_processors.social_login_providers',
             ],
         },
     },
@@ -225,7 +226,11 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 STATICFILES_DIRS = [
     BASE_DIR / 'jukebox' / 'static',
@@ -301,7 +306,6 @@ ACCOUNT_LOGIN_METHODS = {"email", "username"}   # Pots posar només "email" si v
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Registres amb email han de verificar obligatòriament

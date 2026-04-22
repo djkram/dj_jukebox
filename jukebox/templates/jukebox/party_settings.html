@@ -617,6 +617,18 @@
           </div>
 
           <div class="settings-field">
+            <div class="form-check">
+              {{ form.allow_song_requests }}
+              <label class="form-check-label" for="{{ form.allow_song_requests.id_for_label }}">
+                {{ form.allow_song_requests.label }}
+              </label>
+            </div>
+            <p class="settings-help">
+              Si està desactivat, els usuaris no veuran l'opció de demanar cançons i la secció estarà oculta.
+            </p>
+          </div>
+
+          <div class="settings-field">
             <label class="settings-label" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
             {{ form.cover_image }}
             {% if party.cover_image %}
@@ -802,11 +814,24 @@
           <div class="mb-3">
             <label class="settings-label">Codi d'entrada</label>
             <div class="input-group">
-              <input type="text" class="form-control" value="{{ party.code }}" readonly>
-              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ party.code }}')">
+              <input type="text"
+                     id="partyCodeDesktop"
+                     name="code"
+                     class="form-control"
+                     value="{{ form.code.value|default:party.code }}"
+                     maxlength="12"
+                     required
+                     form="partySettingsForm"
+                     style="text-transform: uppercase;">
+              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeDesktop').value)">
                 <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
               </button>
             </div>
+            {% if form.code.errors %}
+              <div class="text-danger mt-1" style="font-size: 0.8rem;">
+                {{ form.code.errors|striptags }}
+              </div>
+            {% endif %}
             <p class="settings-help">
               Comparteix aquest codi perquè els assistents puguin unir-se a la festa.
             </p>
@@ -1048,6 +1073,16 @@
         </div>
 
         <div class="mb-3">
+          <div class="form-check">
+            {{ form.allow_song_requests }}
+            <label class="form-check-label" for="{{ form.allow_song_requests.id_for_label }}">
+              {{ form.allow_song_requests.label }}
+            </label>
+          </div>
+          <p class="help-text">Si està desactivat, els usuaris no veuran l'opció de demanar cançons.</p>
+        </div>
+
+        <div class="mb-3">
           <label class="mobile-label" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
           {{ form.cover_image }}
           {% if party.cover_image %}
@@ -1274,11 +1309,24 @@
       <span class="mobile-label">Codi de la festa</span>
       <div class="mb-3">
         <div class="input-group">
-          <input type="text" class="form-control" value="{{ party.code }}" readonly>
-          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ party.code }}')">
+          <input type="text"
+                 id="partyCodeMobile"
+                 name="code"
+                 class="form-control"
+                 value="{{ form.code.value|default:party.code }}"
+                 maxlength="12"
+                 required
+                 form="partySettingsFormMobile"
+                 style="text-transform: uppercase;">
+          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeMobile').value)">
             <i class="fas fa-copy"></i>
           </button>
         </div>
+        {% if form.code.errors %}
+          <div class="text-danger mt-1" style="font-size: 0.8rem;">
+            {{ form.code.errors|striptags }}
+          </div>
+        {% endif %}
         <p class="help-text">Comparteix aquest codi perquè els assistents puguin unir-se.</p>
       </div>
       <div class="text-center">

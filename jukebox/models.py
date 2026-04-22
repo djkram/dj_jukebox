@@ -1,6 +1,8 @@
 # models.py
 
+import re
 import uuid
+import unicodedata
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -36,13 +38,14 @@ class Party(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
-    code = models.CharField(max_length=12, unique=True, editable=False, default='')
+    code = models.CharField(max_length=12, unique=True, editable=True, default='')
     cover_image = models.ImageField(upload_to='party_covers/', null=True, blank=True, help_text=_("Imatge de portada de la festa"))
     require_join_code = models.BooleanField(default=False, help_text=_("Requerir codi per unir-se a la festa"))
     is_public = models.BooleanField(default=True, help_text=_("Festa pública (llistada) o privada (no llistada)"))
     max_votes_per_user = models.PositiveIntegerField(default=5)  # Vots gratuïts per usuari
     free_coins_per_user = models.PositiveIntegerField(default=0)  # Coins gratuïts per usuari (per festa)
     song_request_cost = models.PositiveIntegerField(default=10)  # Cost en Coins per demanar una cançó
+    allow_song_requests = models.BooleanField(default=True, help_text=_("Permetre als usuaris demanar cançons noves (es paguen amb Coins)"))
     party_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_HIDDEN)
     jukebox_starts_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista d'activació del DJJukebox"))
     is_jukebox_active = models.BooleanField(default=True, help_text=_("Indica si el jukebox està actiu per aquesta festa"))
@@ -51,9 +54,52 @@ class Party(models.Model):
     auto_analyze_audio = models.BooleanField(default=False, help_text=_("Analitzar automàticament àudio cada 5 minuts"))
     last_analyze_at = models.DateTimeField(null=True, blank=True, help_text=_("Última anàlisi automàtica"))
 
+    @staticmethod
+    def normalize_code(raw_code):
+        normalized = unicodedata.normalize('NFKD', raw_code or '')
+        ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
+        cleaned = re.sub(r'[^A-Za-z0-9]', '', ascii_only).upper()
+        return cleaned[:12]
+
+    @staticmethod
+    def _build_acronym_code(name):
+        normalized = unicodedata.normalize('NFKD', name or '')
+        ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
+        tokens = re.findall(r'[A-Za-z0-9]+', ascii_only)
+
+        acronym = ''.join(token[0] for token in tokens if token).upper()
+        digits = ''.join(ch for ch in ascii_only if ch.isdigit())
+        year_hint = digits[-2:] if digits else ''
+
+        compact = ''.join(tokens).upper()
+        base = f"{acronym}{year_hint}" if acronym else compact
+        if len(base) < 4:
+            base = f"{base}{compact}"
+        if len(base) < 4:
+            base = f"{base}DJBX"
+        return base[:12]
+
+    def _generate_unique_code(self):
+        base = self._build_acronym_code(self.name)
+        if not base:
+            base = uuid.uuid4().hex[:8].upper()
+
+        if not Party.objects.exclude(pk=self.pk).filter(code=base).exists():
+            return base
+
+        for i in range(1, 1000):
+            suffix = f"{i:02d}"
+            prefix_len = 12 - len(suffix)
+            candidate = f"{base[:prefix_len]}{suffix}"
+            if not Party.objects.exclude(pk=self.pk).filter(code=candidate).exists():
+                return candidate
+
+        return uuid.uuid4().hex[:8].upper()
+
     def save(self, *args, **kwargs):
+        self.code = self.normalize_code(self.code)
         if not self.code:
-            self.code = uuid.uuid4().hex[:8]
+            self.code = self._generate_unique_code()
         self.is_jukebox_active = self.party_status == self.STATUS_DJJUKEBOX_ACTIVE
         super().save(*args, **kwargs)
 

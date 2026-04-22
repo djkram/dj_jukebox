@@ -2,7 +2,11 @@
 from dj_jukebox.settings import *
 
 # Disable staticfiles manifest storage in tests
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Use simpler password hashers for faster tests
 PASSWORD_HASHERS = [

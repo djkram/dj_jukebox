@@ -172,7 +172,7 @@ def unset_party(request):
         del request.session['selected_party_id']
     except KeyError:
         pass
-    return redirect('dj_backoffice')  # O on vulguis redirigir!
+    return redirect('select_party')
 
 @login_required
 @user_passes_test(is_dj_admin)
@@ -1159,17 +1159,17 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-        logger.info("[STRIPE_WEBHOOK] Event verificat type=%s", event['type'])
+        logger.info("[STRIPE_WEBHOOK] Event verificat type=%s", event.type)
     except (ValueError, stripe.error.SignatureVerificationError):
         logger.warning("[STRIPE_WEBHOOK] Error de verificació de signatura")
         return HttpResponse(status=400)
 
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        session_id = session['id']
-        user_id = session['metadata']['user_id']
-        coins = int(session['metadata']['votes_purchased'])  # Comprem Coins!
-        party_id = session['metadata']['party_id']
+    if event.type == 'checkout.session.completed':
+        session = event.data.object
+        session_id = session.id
+        user_id = session.metadata['user_id']
+        coins = int(session.metadata['votes_purchased'])  # Comprem Coins!
+        party_id = session.metadata['party_id']
 
         logger.info("[STRIPE_WEBHOOK] Processant checkout.session.completed session_id=%s", session_id)
 
@@ -1400,6 +1400,11 @@ def request_song(request):
         return redirect('select_party')
 
     party = get_object_or_404(Party, pk=party_id)
+
+    if not party.allow_song_requests:
+        messages.error(request, _("Les peticions de cançons no estan activades per a aquesta festa."))
+        return redirect('song_list')
+
     user = request.user
 
     # Cerca de cançons

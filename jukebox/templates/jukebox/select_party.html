@@ -43,9 +43,18 @@
       transform: scale(1.02);
     }
 
+    .select-parties-wrap {
+      max-width: 1240px;
+      margin: 0;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+      margin-top: 2.25rem;
+      margin-bottom: 2.25rem;
+    }
     .select-parties-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 380px));
+      justify-content: start;
       gap: 2rem;
     }
 
@@ -278,6 +287,12 @@
     }
 
     /* Promo section */
+    .select-promo-top {
+      margin-bottom: 2rem;
+    }
+    .select-promo-bottom {
+      margin-top: 2rem;
+    }
     .select-promo-section {
       margin-top: 1.5rem;
       background: #0040e0;
@@ -402,6 +417,205 @@
       font-weight: 700;
       color: #181c1e;
     }
+    .select-promo-section--slim {
+      margin: 0;
+      padding: 0.85rem 1.35rem;
+      min-height: 122px;
+      border-radius: 1.35rem;
+      gap: 1rem;
+    }
+    .select-promo-section--slim .select-promo-title {
+      font-size: 1.35rem;
+      margin-bottom: 0.3rem;
+      line-height: 1.05;
+    }
+    .select-promo-section--slim .select-promo-text {
+      font-size: 0.86rem;
+      margin-bottom: 0.5rem;
+      max-width: 40rem;
+    }
+    .select-promo-code-form {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      max-width: 23rem;
+    }
+    .select-promo-code-input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.12);
+      color: #ffffff;
+      border-radius: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      outline: none;
+      text-transform: uppercase;
+    }
+    .select-promo-code-input::placeholder {
+      color: rgba(255,255,255,0.8);
+      text-transform: none;
+    }
+    .select-promo-code-btn {
+      border: 0;
+      background: #ffffff;
+      color: #0040e0;
+      border-radius: 0.6rem;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .select-promo-code-error {
+      margin-top: 0.35rem;
+      color: #ffd6d6;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .select-promo-section--slim .select-promo-stats {
+      gap: 0.65rem;
+    }
+    .select-promo-section--slim .select-promo-stat {
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      backdrop-filter: none;
+    }
+    .select-promo-section--slim .select-promo-stat-label {
+      font-size: 0.54rem;
+      letter-spacing: 0.12em;
+    }
+    .select-promo-section--slim .select-promo-stat-value {
+      font-size: 1.15rem;
+      line-height: 1.1;
+    }
+    .select-promo-section--slim .select-promo-cards {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+    .select-promo-section--slim .select-promo-card {
+      width: 12rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 0.75rem;
+      gap: 0.7rem;
+    }
+    .select-promo-section--slim .select-promo-card:first-child,
+    .select-promo-section--slim .select-promo-card:last-child {
+      transform: none;
+    }
+    .select-promo-section--slim.select-promo-section--tilted .select-promo-card:first-child {
+      transform: rotate(-2deg);
+    }
+    .select-promo-section--slim.select-promo-section--tilted .select-promo-card:last-child {
+      transform: rotate(3deg);
+    }
+    .select-promo-section--slim .select-promo-card-icon {
+      width: 2rem;
+      height: 2rem;
+    }
+    .select-promo-section--slim .select-promo-card-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.04em;
+    }
+    .select-promo-section--slim .select-promo-card-value {
+      font-size: 0.7rem;
+      line-height: 1.2;
+    }
+    .select-promo-marketing {
+      justify-content: flex-start;
+      text-align: left;
+    }
+    .select-promo-marketing-inner {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+    }
+    .select-promo-marketing-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .select-promo-marketing-copy {
+      padding-left: 0.95rem;
+    }
+    .select-promo-marketing-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.95rem;
+      line-height: 1.02;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 0.8rem;
+    }
+    .select-promo-marketing-text {
+      color: #dce4ff;
+      font-size: 1rem;
+      line-height: 1.45;
+      margin: 0;
+      max-width: 33rem;
+    }
+    .select-promo-marketing-actions {
+      max-width: 28rem;
+      width: 100%;
+      justify-self: end;
+    }
+    .select-promo-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin: 0 0 0.9rem;
+      max-width: 100%;
+    }
+    .select-promo-feature {
+      background: rgba(255,255,255,0.16);
+      border-radius: 0.75rem;
+      padding: 0.95rem 1rem;
+      text-align: left;
+    }
+    .select-promo-feature:first-child {
+      transform: rotate(-2deg);
+    }
+    .select-promo-feature:last-child {
+      transform: rotate(3deg);
+    }
+    .select-promo-feature .material-symbols-outlined {
+      color: #ffffff;
+      font-size: 1.45rem;
+      margin-bottom: 0.3rem;
+      font-variation-settings: 'FILL' 1;
+      display: block;
+    }
+    .select-promo-feature-label {
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .select-promo-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      width: 100%;
+      max-width: 100%;
+      padding: 0.75rem 1.15rem;
+      background: #f4f5fa;
+      color: #2f3347;
+      border-radius: 0.55rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+    }
+    .select-promo-cta .material-symbols-outlined {
+      font-size: 1.05rem;
+      font-variation-settings: 'FILL' 1;
+    }
 
     .select-empty {
       background: #ffffff;
@@ -431,25 +645,21 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
-  <!-- Grid de 2 columnes: Dues caixes promo -->
-  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-bottom: 2rem;">
-    <!-- Caixa 1: Promo -->
-    <section class="select-promo-section" style="margin: 0;">
+  <!-- Caixa superior -->
+  <section class="select-promo-section select-promo-section--slim select-promo-section--tilted select-promo-top">
       <div class="select-promo-bg-1"></div>
       <div class="select-promo-bg-2"></div>
       <div class="select-promo-content">
         <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
-        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
-        <div class="select-promo-stats">
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
-            <p class="select-promo-stat-value">{{ parties.count|default:0 }}</p>
-          </div>
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
-            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
-          </div>
-        </div>
+        <p class="select-promo-text">{% trans "Fes sentir la teva veu i vota els temes que vols que sonin." %}</p>
+        <form method="post" class="select-promo-code-form">
+          {% csrf_token %}
+          <input type="text" name="party_code" class="select-promo-code-input" placeholder="{% trans 'Introdueix el codi de la festa' %}" maxlength="12" required>
+          <button type="submit" class="select-promo-code-btn">{% trans "Entrar" %}</button>
+        </form>
+        {% if code_error %}
+          <div class="select-promo-code-error">{{ code_error }}</div>
+        {% endif %}
       </div>
       <div class="select-promo-cards">
         <div class="select-promo-card">
@@ -457,65 +667,25 @@
             <span class="material-symbols-outlined">favorite</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
+            <p class="select-promo-card-label">{% trans "Sistema de vots" %}</p>
             <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
           </div>
         </div>
         <div class="select-promo-card">
           <div class="select-promo-card-icon blue">
-            <span class="material-symbols-outlined">bolt</span>
+            <span class="material-symbols-outlined">calendar_month</span>
           </div>
           <div>
-            <p class="select-promo-card-label">{% trans "Estat" %}</p>
-            <p class="select-promo-card-value">{% trans "En línia" %}</p>
+            <p class="select-promo-card-label">{% trans "Pròximes festes" %}</p>
+            <p class="select-promo-card-value">{{ parties.count|default:0 }}</p>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Caixa 2: Promo duplicada -->
-    <section class="select-promo-section" style="margin: 0;">
-      <div class="select-promo-bg-1"></div>
-      <div class="select-promo-bg-2"></div>
-      <div class="select-promo-content">
-        <h2 class="select-promo-title">{% trans "Ets l'amo de la pista?" %}</h2>
-        <p class="select-promo-text">{% trans "Demana cançons al moment, mira què sona i recupera tota la sessió." %}</p>
-        <div class="select-promo-stats">
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Sessions Totals" %}</p>
-            <p class="select-promo-stat-value">{{ parties.count|default:0 }}</p>
-          </div>
-          <div class="select-promo-stat">
-            <p class="select-promo-stat-label">{% trans "Festes Actives" %}</p>
-            <p class="select-promo-stat-value">{% if selected_party %}1{% else %}0{% endif %}</p>
-          </div>
-        </div>
-      </div>
-      <div class="select-promo-cards">
-        <div class="select-promo-card">
-          <div class="select-promo-card-icon purple">
-            <span class="material-symbols-outlined">favorite</span>
-          </div>
-          <div>
-            <p class="select-promo-card-label">{% trans "Sistema" %}</p>
-            <p class="select-promo-card-value">{% trans "100% Operatiu" %}</p>
-          </div>
-        </div>
-        <div class="select-promo-card">
-          <div class="select-promo-card-icon blue">
-            <span class="material-symbols-outlined">bolt</span>
-          </div>
-          <div>
-            <p class="select-promo-card-label">{% trans "Estat" %}</p>
-            <p class="select-promo-card-value">{% trans "En línia" %}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+  </section>
 
   {% if parties %}
     <!-- Grid de festes públiques -->
+    <div class="select-parties-wrap">
     <div class="select-parties-grid">
       {% for party in parties %}
         <div class="select-party-card" style="cursor: default;">
@@ -583,6 +753,7 @@
         </div>
       {% endfor %}
     </div>
+    </div>
   {% else %}
     <div class="select-empty">
       <span class="material-symbols-outlined">event_busy</span>
@@ -590,6 +761,36 @@
       <p class="select-empty-text">{% trans "Crea una nova festa al backoffice per començar" %}</p>
     </div>
   {% endif %}
+
+  <!-- Caixa inferior -->
+  <section class="select-promo-section select-promo-section--slim select-promo-bottom select-promo-marketing">
+    <div class="select-promo-bg-1"></div>
+    <div class="select-promo-bg-2"></div>
+    <div class="select-promo-marketing-inner">
+      <div class="select-promo-marketing-layout">
+        <div class="select-promo-marketing-copy">
+          <h2 class="select-promo-marketing-title">{% trans "Porta la teva festa al següent nivell" %}</h2>
+          <p class="select-promo-marketing-text">{% trans "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR i deixa que votin." %}</p>
+        </div>
+        <div class="select-promo-marketing-actions">
+          <div class="select-promo-feature-grid">
+            <div class="select-promo-feature">
+              <span class="material-symbols-outlined">qr_code_2</span>
+              <p class="select-promo-feature-label mb-0">{% trans "Codis QR" %}</p>
+            </div>
+            <div class="select-promo-feature">
+              <span class="material-symbols-outlined">how_to_vote</span>
+              <p class="select-promo-feature-label mb-0">{% trans "Votacions" %}</p>
+            </div>
+          </div>
+          <a href="{% url 'dj_backoffice' %}" class="select-promo-cta">
+            <span class="material-symbols-outlined">rocket_launch</span>
+            {% trans "Comença ara" %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
@@ -669,9 +870,6 @@
     <!-- Secció màrqueting mòbil -->
     <section class="mobile-card p-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white;">
       <div class="text-center mb-3">
-        <div class="d-inline-block px-3 py-1 rounded-pill mb-2" style="background: rgba(255,255,255,0.2); font-size: 0.625rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-          {% trans "Ets DJ?" %}
-        </div>
         <h3 class="fw-bold mb-2" style="font-size: 1.5rem; line-height: 1.2;">{% trans "Porta la teva festa al següent nivell" %}</h3>
         <p style="color: rgba(255,255,255,0.9); font-size: 0.875rem;">
           {% trans "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR i deixa que votin." %}

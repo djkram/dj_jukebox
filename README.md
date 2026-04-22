@@ -46,7 +46,7 @@ Una aplicació web interactiva que permet als DJs crear festes on els assistents
 
 ### Requisits previs
 
-- Python 3.8 o superior
+- Python 3.12.x (recomanat)
 - Compte de desenvolupador de Spotify
 - Compte de Stripe (mode test per desenvolupament)
 - Compte de Gmail per enviar correus de verificació
@@ -61,7 +61,7 @@ cd dj_jukebox
 ### Pas 2: Crear entorn virtual i instal·lar dependències
 
 ```bash
-python -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```

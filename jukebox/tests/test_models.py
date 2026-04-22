@@ -53,7 +53,9 @@ class PartyModelTests(TestCase):
             date=timezone.now()
         )
         self.assertIsNotNone(party.code)
-        self.assertEqual(len(party.code), 8)
+        self.assertGreaterEqual(len(party.code), 4)
+        self.assertLessEqual(len(party.code), 12)
+        self.assertTrue(party.code.isalnum())
 
     def test_party_code_is_unique(self):
         """Test que cada party té un codi únic"""

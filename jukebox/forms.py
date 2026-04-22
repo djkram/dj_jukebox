@@ -33,16 +33,25 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost']
+        fields = ['name', 'date', 'code', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost', 'allow_song_requests']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local', 'class': 'form-control'},
             ),
+            'code': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'maxlength': 12,
+                    'style': 'text-transform: uppercase;',
+                    'placeholder': _('Ex: G30A'),
+                }
+            ),
             'cover_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'require_join_code': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'allow_song_requests': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'max_votes_per_user': forms.NumberInput(
                 attrs={'class': 'form-control', 'min': 0}
             ),
@@ -56,12 +65,14 @@ class PartySettingsForm(forms.ModelForm):
         labels = {
             'name': _('Nom de la festa'),
             'date': _('Data i hora'),
+            'code': _('Codi d\'entrada'),
             'cover_image': _('Imatge de portada'),
             'is_public': _('Festa pública (llistada)'),
             'require_join_code': _('Requerir codi per unir-se'),
             'max_votes_per_user': _('Vots gratuïts per usuari'),
             'free_coins_per_user': _('Coins gratuïts per usuari'),
             'song_request_cost': _('Cost per demanar cançó (Coins)'),
+            'allow_song_requests': _('Permetre peticions de cançons'),
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):
@@ -83,6 +94,18 @@ class PartySettingsForm(forms.ModelForm):
         # 2) Si ja existeix playlist, inicialitzem perquè el select la mostri
         if instance and instance.playlist:
             self.fields['spotify_playlist'].initial = instance.playlist.spotify_id
+
+    def clean_code(self):
+        code = Party.normalize_code(self.cleaned_data.get('code'))
+        if len(code) < 4:
+            raise forms.ValidationError(_("El codi ha de tenir almenys 4 caràcters alfanumèrics."))
+
+        qs = Party.objects.filter(code=code)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(_("Aquest codi ja està en ús. Tria'n un altre."))
+        return code
 
     def save(self, commit=True, load_songs=True):
         # ➍ Guardem els camps del Party (name, date, max_votes_per_user)

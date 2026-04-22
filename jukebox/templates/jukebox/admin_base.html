@@ -1087,6 +1087,9 @@
             line-height: 1.1;
             white-space: nowrap;
         }
+        .topbar .navbar-search {
+            display: none !important;
+        }
         @media (max-width: 991.98px) {
             .topbar-page-title {
                 font-size: 1.55rem;
@@ -1950,6 +1953,17 @@
 
             {% if user.is_authenticated %}
                 {% if user.is_superuser %}
+                <div class="sidebar-heading">{% trans "Admin" %}</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'dj_backoffice' %}">
+                        <i class="fas fa-user-cog"></i>
+                        <span class="material-symbols-outlined">admin_panel_settings</span>
+                        <span>{% trans "Backoffice" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if user.is_staff or user.is_superuser %}
                 <div class="sidebar-heading">{% trans "DJ Tools" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'dj_dashboard' %}">
@@ -1974,27 +1988,15 @@
                     </a>
                 </li>
                 {% endif %}
-                <li class="nav-item {% if request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'dj_backoffice' %}">
-                        <i class="fas fa-user-cog"></i>
-                        <span class="material-symbols-outlined">admin_panel_settings</span>
-                        <span>{% trans "Backoffice" %}</span>
-                    </a>
-                </li>
                 {% endif %}
 
+                {% if selected_party %}
                 <div class="sidebar-heading">{% trans "Festa" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'song_list' %}">
                         <span class="sidebar-emoji-icon" aria-hidden="true">🎉</span>
                         <span class="material-symbols-outlined">celebration</span>
-                        <span>
-                          {% if selected_party %}
-                            {{ selected_party.name }}
-                          {% else %}
-                            {% trans "Festa activa" %}
-                          {% endif %}
-                        </span>
+                        <span>{{ selected_party.name }}</span>
                     </a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
@@ -2004,6 +2006,7 @@
                         <span>{% trans "Busca Match" %}</span>
                     </a>
                 </li>
+                {% if selected_party.allow_song_requests %}
                 <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'request_song' %}">
                         <i class="fas fa-microphone-alt"></i>
@@ -2011,19 +2014,21 @@
                         <span>{% trans "Demanar cançó" %}</span>
                     </a>
                 </li>
+                {% endif %}
+                {% endif %}
                 <div class="sidebar-heading">{% trans "General" %}</div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'select_party' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'select_party' %}">
+                        <i class="fas fa-random"></i>
+                        <span class="material-symbols-outlined">event_repeat</span>
+                        <span>{% trans "Tria una altra festa" %}</span>
+                    </a>
+                </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'buy_votes' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'buy_votes' %}">
                         <i class="fas fa-coins"></i>
                         <span class="material-symbols-outlined">payments</span>
                         <span>{% trans "Compra Coins" %}</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'select_party' %}">
-                        <i class="fas fa-random"></i>
-                        <span class="material-symbols-outlined">event_repeat</span>
-                        <span>{% trans "Tria una altra festa" %}</span>
                     </a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
@@ -2094,28 +2099,6 @@
                     </div>
                     {% endblock %}
 
-                    <!-- Topbar Search -->
-                    {% if request.resolver_match.url_name == 'song_list' %}
-                    <form method="get" action="" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                      <div class="input-group">
-                        <input
-                          id="song-search"
-                          type="text"
-                          name="q"
-                          value="{{ q|default:'' }}"
-                          class="form-control bg-light border-0 small"
-                          placeholder="Search for..."
-                          aria-label="Search"
-                          aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                          <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search fa-sm"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                    {% endif %}
-
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - Notificacions -->
@@ -2133,9 +2116,8 @@
 
                         <!-- Nav Item - User Information -->
                         {% if user.is_authenticated %}
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <li class="nav-item no-arrow">
+                            <a class="nav-link" href="{% url 'profile' %}" style="text-decoration: none;">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user_display_name|default:user.username }}</span>
                                 {% if user_avatar_url %}
                                 <img class="img-profile rounded-circle"
@@ -2145,21 +2127,6 @@
                                 <span class="user-avatar-fallback">{{ user_avatar_initial|default:"U" }}</span>
                                 {% endif %}
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    {% trans "Perfil" %}
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="post" action="{% url 'account_logout' %}" style="margin:0; padding:0;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item" style="width: 100%; text-align: left;">
-                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        {% trans "Sortir" %}
-                                    </button>
-                                </form>
-                            </div>
                         </li>
                         {% else %}
                         <li class="nav-item">
@@ -2224,24 +2191,28 @@
         <nav class="mobile-bottom-nav">
             <div class="nav-items">
                 {% if user.is_authenticated %}
-                    <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}">
-                        <a href="{% url 'song_list' %}">
+                    <div class="nav-item-bottom {% if selected_party and request.resolver_match.url_name == 'song_list' or not selected_party and request.resolver_match.url_name == 'select_party' %}active{% endif %}">
+                        <a href="{% if selected_party %}{% url 'song_list' %}{% else %}{% url 'select_party' %}{% endif %}">
                             <i class="fas fa-music"></i>
                             <span>Festa</span>
                         </a>
                     </div>
+                    {% if selected_party %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                         <a href="{% url 'song_swipe' %}">
                             <i class="fas fa-random"></i>
                             <span>Match</span>
                         </a>
                     </div>
+                    {% if selected_party.allow_song_requests %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                         <a href="{% url 'request_song' %}">
                             <i class="fas fa-plus-circle"></i>
                             <span>Petició</span>
                         </a>
                     </div>
+                    {% endif %}
+                    {% endif %}
                     {% if user.is_superuser %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'dj_dashboard' or request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
                         <a href="{% url 'dj_dashboard' %}">

@@ -1,5 +1,7 @@
+from django.conf import settings
+
 from .models import Party, Notification
-from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.models import SocialAccount, SocialApp
 
 
 def selected_party(request):
@@ -47,3 +49,16 @@ def unread_notifications_count(request):
     if request.user.is_authenticated:
         count = Notification.objects.filter(user=request.user, is_read=False).count()
     return {'unread_notifications_count': count}
+
+
+def social_login_providers(request):
+    configured_providers = set(
+        SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list(
+            "provider",
+            flat=True,
+        )
+    )
+    return {
+        "spotify_social_login_enabled": "spotify" in configured_providers,
+        "google_social_login_enabled": "google" in configured_providers,
+    }

@@ -6,9 +6,6 @@ import os
 import shutil
 import tempfile
 import logging
-import librosa
-import numpy as np
-from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +45,14 @@ CAMELOT_MAP = {
 }
 
 
+def _load_audio_libraries():
+    """Load optional audio-analysis dependencies only when the fallback runs."""
+    import librosa
+    import numpy as np
+
+    return librosa, np
+
+
 def download_temporary_song_audio(title, artist, timeout=60):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
@@ -55,6 +60,8 @@ def download_temporary_song_audio(title, artist, timeout=60):
     Es fa servir com a últim recurs per obtenir un MP3 temporal analitzable
     amb librosa quan no tenim BPM/Key per via metadata.
     """
+    from yt_dlp import YoutubeDL
+
     search_query = f"ytsearch1:{title} {artist} audio"
     temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
     output_template = os.path.join(temp_dir, "audio.%(ext)s")
@@ -103,6 +110,8 @@ def detect_bpm(audio_path):
         BPM detectat (float)
     """
     try:
+        librosa, np = _load_audio_libraries()
+
         # Carregar àudio (només els primers 45s per estalviar memòria)
         y, sr = librosa.load(audio_path, duration=45, sr=22050)
 
@@ -135,6 +144,8 @@ def detect_key(audio_path):
         Tuple (note, mode) ex: ('C', 'major') o None si falla
     """
     try:
+        librosa, np = _load_audio_libraries()
+
         # Carregar àudio
         y, sr = librosa.load(audio_path, duration=45, sr=22050)
 

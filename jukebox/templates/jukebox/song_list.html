@@ -533,6 +533,10 @@
         <span class="material-symbols-outlined" style="font-size: 1.25rem;">event_repeat</span>
         {% trans "Canviar Festa" %}
       </a>
+      <a href="{% url 'unset_party' %}" class="btn btn-outline-secondary" style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined" style="font-size: 1.25rem;">logout</span>
+        {% trans "Sortir de la festa" %}
+      </a>
     </div>
   </div>
 
@@ -796,6 +800,9 @@
               </div>
               <a href="{% url 'select_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="{% trans 'Canvia de festa' %}" title="{% trans 'Canvia de festa' %}" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #eef2ff; color: #0040e0;">
                 <i class="fas fa-exchange-alt"></i>
+              </a>
+              <a href="{% url 'unset_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="{% trans 'Sortir de la festa' %}" title="{% trans 'Sortir de la festa' %}" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #fff5f5; color: #e74c3c;">
+                <i class="fas fa-sign-out-alt"></i>
               </a>
             </div>
           </div>

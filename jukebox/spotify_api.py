@@ -3,9 +3,11 @@ import logging
 from datetime import timedelta
 
 from allauth.socialaccount.models import SocialToken
+from django.conf import settings
 from django.utils import timezone
 from spotipy import Spotify
 from spotipy.exceptions import SpotifyException
+from spotipy.oauth2 import SpotifyClientCredentials
 import requests
 import musicbrainzngs
 
@@ -856,6 +858,33 @@ def search_spotify_tracks(request_or_user, query, limit=10):
         raise
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al cercar '{query}': {e}")
+        return []
+
+
+def search_spotify_tracks_public(query, limit=20):
+    """Search Spotify using app client credentials — no user OAuth required."""
+    try:
+        sp = Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=settings.SPOTIFY_CLIENT_ID,
+            client_secret=settings.SPOTIFY_CLIENT_SECRET,
+        ))
+        results = sp.search(q=query, type='track', limit=limit)
+        tracks = []
+        for item in results['tracks']['items']:
+            album_image_url = None
+            if item.get('album') and item['album'].get('images'):
+                images = item['album']['images']
+                album_image_url = images[1]['url'] if len(images) > 1 else images[0]['url']
+            tracks.append({
+                'id': item['id'],
+                'title': item['name'],
+                'artist': ', '.join(a['name'] for a in item['artists']),
+                'album_image_url': album_image_url,
+            })
+        logger.info(f"[SPOTIFY] Cerca pública '{query}': {len(tracks)} resultats")
+        return tracks
+    except Exception as e:
+        logger.error(f"[SPOTIFY] Error a cerca pública '{query}': {e}")
         return []
 
 

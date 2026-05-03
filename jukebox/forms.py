@@ -1,6 +1,7 @@
 # forms.py
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks
@@ -33,7 +34,7 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'code', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost', 'allow_song_requests']
+        fields = ['name', 'date', 'code', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost', 'allow_song_requests', 'djs']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
@@ -52,6 +53,7 @@ class PartySettingsForm(forms.ModelForm):
             'is_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'require_join_code': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'allow_song_requests': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'djs': forms.CheckboxSelectMultiple(),
             'max_votes_per_user': forms.NumberInput(
                 attrs={'class': 'form-control', 'min': 0}
             ),
@@ -73,6 +75,7 @@ class PartySettingsForm(forms.ModelForm):
             'free_coins_per_user': _('Coins gratuïts per usuari'),
             'song_request_cost': _('Cost per demanar cançó (Coins)'),
             'allow_song_requests': _('Permetre peticions de cançons'),
+            'djs': _('DJs de la festa'),
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):
@@ -90,6 +93,10 @@ class PartySettingsForm(forms.ModelForm):
                 for pl in playlists:
                     choices.append((pl['id'], f"{pl['name']} ({pl['owner']})"))
         self.fields['spotify_playlist'].choices = choices
+
+        # 2) Queryset de DJs: tots els usuaris registrats
+        User = get_user_model()
+        self.fields['djs'].queryset = User.objects.order_by('username')
 
         # 2) Si ja existeix playlist, inicialitzem perquè el select la mostri
         if instance and instance.playlist:
@@ -130,6 +137,7 @@ class PartySettingsForm(forms.ModelForm):
 
         if commit:
             party.save()
+            self.save_m2m()
 
             # ➐ Si hem seleccionat una nova playlist i load_songs=True, carregar cançons
             if sp_id and load_songs:

@@ -639,6 +639,30 @@
             }
         }
 
+        /* Language switcher buttons (mobile topbar) */
+        .mobile-lang-btn {
+            background: none;
+            border: none;
+            color: rgba(0,0,0,0.45);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.2rem;
+            cursor: pointer;
+            border-radius: 0.2rem;
+            transition: color 150ms, background 150ms;
+        }
+        .mobile-lang-btn:hover {
+            color: #0040e0;
+            background: rgba(0,64,224,0.07);
+        }
+        .mobile-lang-btn.active {
+            color: #0040e0;
+            font-weight: 800;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
         /* Hide Material Icons on mobile, show Font Awesome */
         @media (max-width: 767.98px) {
             .material-symbols-outlined {
@@ -1856,8 +1880,7 @@
                 display: flex;
                 align-items: center;
                 gap: 0.75rem;
-                opacity: 0.6;
-                margin-bottom: 1rem;
+                margin-bottom: 0.6rem;
             }
 
             .sonic-history-item:last-child {
@@ -1985,7 +2008,7 @@
                 </li>
                 {% endif %}
 
-                {% if user.is_staff or user.is_superuser %}
+                {% if user.is_staff or user.is_superuser or is_party_dj %}
                 <div class="sidebar-heading">{% trans "DJ Tools" %}</div>
                 <li class="nav-item {% if request.resolver_match.url_name == 'dj_dashboard' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'dj_dashboard' %}">
@@ -2021,6 +2044,7 @@
                         <span>{{ selected_party.name }}</span>
                     </a>
                 </li>
+                {% if selected_party.party_status == 'requests_open' or selected_party.party_status == 'djjukebox_active' %}
                 <li class="nav-item {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'song_swipe' %}">
                         <i class="fas fa-heart"></i>
@@ -2028,6 +2052,7 @@
                         <span>{% trans "Busca Match" %}</span>
                     </a>
                 </li>
+                {% endif %}
                 {% if selected_party.allow_song_requests %}
                 <li class="nav-item {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'request_song' %}">
@@ -2097,16 +2122,16 @@
                 </li>
                 <li class="nav-item">
                     {% get_current_language as CURRENT_LANG %}
-                    <div class="nav-link d-flex align-items-center gap-1" style="padding-top:0.6rem;padding-bottom:0.6rem;">
-                        <span class="material-symbols-outlined" style="font-size:1rem;opacity:0.7;">language</span>
-                        <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">
+                    <div class="nav-link" style="display:flex !important; align-items:center; gap:0.25rem; padding-top:0.6rem; padding-bottom:0.6rem;">
+                        <span class="material-symbols-outlined" style="font-size:1rem;opacity:0.7;display:inline-block !important;">language</span>
+                        <form action="{% url 'set_language' %}" method="post" style="display:inline;margin:0;">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.get_full_path }}">
                             <input name="language" type="hidden" value="ca">
                             <button type="submit" class="sidebar-lang-btn{% if CURRENT_LANG == 'ca' %} active{% endif %}">CA</button>
                         </form>
                         <span style="color:rgba(255,255,255,0.3);font-size:0.75rem;">|</span>
-                        <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">
+                        <form action="{% url 'set_language' %}" method="post" style="display:inline;margin:0;">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.get_full_path }}">
                             <input name="language" type="hidden" value="en">
@@ -2193,7 +2218,7 @@
                             </h1>
                         </div>
 
-                        <!-- Notifications -->
+                        <!-- Notifications / Language -->
                         {% if user.is_authenticated %}
                         <a href="{% url 'notifications' %}" class="relative p-2 hover:bg-surface-container rounded-xl transition-colors">
                             <i class="fas fa-bell text-xl text-brand-blue"></i>
@@ -2201,6 +2226,23 @@
                             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                             {% endif %}
                         </a>
+                        {% else %}
+                        {% get_current_language as CURRENT_LANG %}
+                        <div style="display:flex;align-items:center;gap:0.15rem;">
+                            <form action="{% url 'set_language' %}" method="post" style="display:inline;margin:0;">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                                <input name="language" type="hidden" value="ca">
+                                <button type="submit" class="mobile-lang-btn{% if CURRENT_LANG == 'ca' %} active{% endif %}">CA</button>
+                            </form>
+                            <span style="color:rgba(0,0,0,0.25);font-size:0.7rem;line-height:1;">|</span>
+                            <form action="{% url 'set_language' %}" method="post" style="display:inline;margin:0;">
+                                {% csrf_token %}
+                                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                                <input name="language" type="hidden" value="en">
+                                <button type="submit" class="mobile-lang-btn{% if CURRENT_LANG == 'en' %} active{% endif %}">EN</button>
+                            </form>
+                        </div>
                         {% endif %}
                     </div>
                 </nav>
@@ -2239,12 +2281,14 @@
                         </a>
                     </div>
                     {% if selected_party %}
+                    {% if selected_party.party_status == 'requests_open' or selected_party.party_status == 'djjukebox_active' %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'song_swipe' %}active{% endif %}">
                         <a href="{% url 'song_swipe' %}">
                             <i class="fas fa-random"></i>
                             <span>Match</span>
                         </a>
                     </div>
+                    {% endif %}
                     {% if selected_party.allow_song_requests %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'request_song' %}active{% endif %}">
                         <a href="{% url 'request_song' %}">
@@ -2254,7 +2298,7 @@
                     </div>
                     {% endif %}
                     {% endif %}
-                    {% if user.is_superuser %}
+                    {% if user.is_superuser or is_party_dj %}
                     <div class="nav-item-bottom {% if request.resolver_match.url_name == 'dj_dashboard' or request.resolver_match.url_name == 'dj_backoffice' %}active{% endif %}">
                         <a href="{% url 'dj_dashboard' %}">
                             <i class="fas fa-sliders-h"></i>

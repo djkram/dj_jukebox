@@ -7,12 +7,15 @@ from allauth.socialaccount.models import SocialAccount, SocialApp
 def selected_party(request):
     party_id = request.session.get('selected_party_id')
     party = None
+    is_party_dj = False
     if party_id:
         try:
             party = Party.objects.get(id=party_id)
+            if request.user.is_authenticated and not request.user.is_superuser:
+                is_party_dj = party.djs.filter(pk=request.user.pk).exists()
         except Party.DoesNotExist:
             party = None
-    return {'selected_party': party}
+    return {'selected_party': party, 'is_party_dj': is_party_dj}
 
 
 def user_avatar(request):
@@ -52,12 +55,14 @@ def unread_notifications_count(request):
 
 
 def social_login_providers(request):
+    # Providers configurats via base de dades (SocialApp)
     configured_providers = set(
-        SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list(
-            "provider",
-            flat=True,
-        )
+        SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list("provider", flat=True)
     )
+    # Providers configurats via settings (APPS dins SOCIALACCOUNT_PROVIDERS)
+    for provider_id, config in getattr(settings, "SOCIALACCOUNT_PROVIDERS", {}).items():
+        if any(a.get("client_id") for a in config.get("APPS", [])):
+            configured_providers.add(provider_id)
     return {
         "spotify_social_login_enabled": "spotify" in configured_providers,
         "google_social_login_enabled": "google" in configured_providers,

@@ -605,7 +605,7 @@
                     </td>
                     <td class="songs-table-cell">
                       {% if song.key %}
-                        <span class="songs-table-badge songs-table-badge-key">{{ song.key }}</span>
+                        <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
                       {% else %}
                         <span style="color: #747687;">-</span>
                       {% endif %}
@@ -619,7 +619,9 @@
                       </div>
                     </td>
                     <td class="songs-table-cell-last text-center">
-                      {% if user_votes_dict|get_item:song.id %}
+                      {% if not voting_enabled %}
+                        {# CUE no actiu — vots no disponibles #}
+                      {% elif user_votes_dict|get_item:song.id %}
                         <div class="songs-vote-controls">
                           {% if user_votes_dict|get_item:song.id == 'like' %}
                             <form method="post" class="d-inline m-0">{% csrf_token %}
@@ -671,7 +673,7 @@
                             </button>
                           </div>
                         {% endif %}
-                      {% endif %}
+                      {% endif %}{# /voting_enabled #}
                     </td>
                   </tr>
                 {% empty %}
@@ -748,7 +750,7 @@
                     </td>
                     <td class="songs-table-cell">
                       {% if song.key %}
-                        <span class="songs-table-badge songs-table-badge-key">{{ song.key }}</span>
+                        <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
                       {% else %}
                         <span style="color: #747687;">-</span>
                       {% endif %}
@@ -893,6 +895,7 @@
                   </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
+                  {% if voting_enabled %}
                   {% if user_votes_dict|get_item:song.id %}
                     <div class="mobile-vote-controls">
                       {% if user_votes_dict|get_item:song.id == 'like' %}
@@ -946,6 +949,7 @@
                       </a>
                     {% endif %}
                   {% endif %}
+                  {% endif %}{# /voting_enabled #}
                 </div>
               </div>
             </div>

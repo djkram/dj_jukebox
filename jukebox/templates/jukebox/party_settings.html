@@ -1,8 +1,12 @@
 {# templates/jukebox/party_settings.html #}
 {% extends "jukebox/admin_base.html" %}
-{% load socialaccount %}
+{% load socialaccount static l10n %}
 
 {% block page_title %}Settings festa{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'jukebox/vendor/leaflet/leaflet.css' %}">
+{% endblock %}
 
 {% block content %}
 <style>
@@ -568,6 +572,44 @@
       transform: translateX(2.15rem);
     }
   }
+
+  /* Custom toggle switch — Bootstrap 4 has no form-switch */
+  .form-switch .form-check-input,
+  .form-switch input[type=checkbox] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2.5rem;
+    height: 1.25rem;
+    background-color: #ccc;
+    border-radius: 1rem;
+    border: none;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    outline: none;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .form-switch .form-check-input::before,
+  .form-switch input[type=checkbox]::before {
+    content: '';
+    position: absolute;
+    top: 0.15rem;
+    left: 0.15rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+  }
+  .form-switch .form-check-input:checked,
+  .form-switch input[type=checkbox]:checked {
+    background-color: #002ea8;
+  }
+  .form-switch .form-check-input:checked::before,
+  .form-switch input[type=checkbox]:checked::before {
+    transform: translateX(1.25rem);
+  }
 </style>
 
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
@@ -617,15 +659,19 @@
           </div>
 
           <div class="settings-field">
-            <div class="form-check">
-              {{ form.allow_song_requests }}
-              <label class="form-check-label" for="{{ form.allow_song_requests.id_for_label }}">
-                {{ form.allow_song_requests.label }}
-              </label>
+            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:#191c1f;">{{ form.allow_song_requests.label }}</div>
+                <div style="font-size:0.78rem;color:#747688;">Si està desactivat, els usuaris no veuran l'opció de demanar cançons.</div>
+              </div>
+              <div class="form-check form-switch mb-0 ms-2">
+                <input class="form-check-input" type="checkbox"
+                       id="{{ form.allow_song_requests.id_for_label }}"
+                       name="allow_song_requests"
+                       {% if party.allow_song_requests %}checked{% endif %}
+                       style="width:2.5rem;height:1.25rem;cursor:pointer;">
+              </div>
             </div>
-            <p class="settings-help">
-              Si està desactivat, els usuaris no veuran l'opció de demanar cançons i la secció estarà oculta.
-            </p>
           </div>
 
           <div class="settings-field">
@@ -642,27 +688,19 @@
           </div>
 
           <div class="settings-field">
-            <div class="form-check">
-              {{ form.is_public }}
-              <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
-                {{ form.is_public.label }}
-              </label>
+            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:#191c1f;">{{ form.is_public.label }}</div>
+                <div style="font-size:0.78rem;color:#747688;">Si està activat, la festa apareix a la llista pública.</div>
+              </div>
+              <div class="form-check form-switch mb-0 ms-2">
+                <input class="form-check-input" type="checkbox"
+                       id="{{ form.is_public.id_for_label }}"
+                       name="is_public"
+                       {% if party.is_public %}checked{% endif %}
+                       style="width:2.5rem;height:1.25rem;cursor:pointer;">
+              </div>
             </div>
-            <p class="settings-help">
-              Si està activat, la festa apareix a la llista pública. Si no, només és accessible amb el codi.
-            </p>
-          </div>
-
-          <div class="settings-field">
-            <div class="form-check">
-              {{ form.require_join_code }}
-              <label class="form-check-label" for="{{ form.require_join_code.id_for_label }}">
-                {{ form.require_join_code.label }}
-              </label>
-            </div>
-            <p class="settings-help">
-              Si està activat, els usuaris necessiten introduir el codi per unir-se a la festa.
-            </p>
           </div>
 
           <!-- Botó guardar dins la caixa -->
@@ -675,7 +713,155 @@
         </form>
       </div>
 
-      <div class="settings-spotify-card">
+      {# ── LOCALITZACIÓ ────────────────────────────────────────────────────── #}
+      <div class="settings-form-card mt-3">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">location_on</span>
+          <h3 class="settings-form-title">Localització</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <input type="hidden" id="loc-lat-desktop" value="{% localize off %}{{ party.latitude|default:'' }}{% endlocalize %}">
+          <input type="hidden" id="loc-lng-desktop" value="{% localize off %}{{ party.longitude|default:'' }}{% endlocalize %}">
+
+          {# Toggle activar/desactivar restricció #}
+          <div class="d-flex align-items-center justify-content-between mb-3 p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:#191c1f;">Restricció de proximitat</div>
+              <div style="font-size:0.78rem;color:#747688;">Els usuaris han d'estar físicament al lloc per entrar.</div>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="loc-enabled-desktop" role="switch"
+                {% if party.latitude and party.location_radius_km and party.location_radius_km > 0 %}checked{% endif %}
+                style="width:2.5rem;height:1.25rem;cursor:pointer;">
+            </div>
+          </div>
+
+          <div id="loc-fields-desktop" {% if not party.latitude or not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
+            <div class="mb-3">
+              <label class="settings-label">Adreça o nom del lloc</label>
+              <div class="input-group">
+                <input type="text" id="loc-name-desktop" class="form-control" value="{{ party.location_name|default:'' }}" placeholder="Ex: Sala Razzmatazz, Barcelona">
+                <button class="btn btn-outline-secondary" type="button" id="geocodeDesktopBtn">
+                  <span class="material-symbols-outlined" style="font-size:1rem;">search</span>
+                </button>
+              </div>
+              <p class="settings-help">Escriu l'adreça i fes clic a la lupa, o clica directament al mapa.</p>
+            </div>
+            <div id="partyMapDesktop" style="height:280px;border-radius:8px;border:1px solid #e0e3e6;position:relative;" class="mb-3"></div>
+            <div class="mb-3">
+              <label class="settings-label">Radi de restricció d'accés (km)</label>
+              <div class="input-group">
+                <input type="number" id="loc-radius-desktop" class="form-control" min="1" max="500" value="{{ party.location_radius_km|default:2 }}" placeholder="2">
+                <span class="input-group-text">km</span>
+              </div>
+              <p class="settings-help">Els usuaris hauran d'estar dins d'aquest radi per unir-se a la festa.</p>
+            </div>
+          </div>
+
+          <div id="loc-save-msg-desktop" class="alert alert-success d-none mb-2" role="alert" style="font-size:0.875rem;"></div>
+          <button type="button" id="saveLocationDesktopBtn" class="btn btn-primary w-100">
+            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
+            Guardar localització
+          </button>
+        </div>
+      </div>
+
+      {# ── CODI DE LA FESTA I QR ──────────────────────────────────────────── #}
+      <div class="settings-form-card mt-3">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">qr_code_2</span>
+          <h3 class="settings-form-title">Codi de la festa</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <div class="mb-3">
+            <label class="settings-label">Codi d'entrada</label>
+            <div class="input-group">
+              <input type="text"
+                     id="partyCodeDesktop"
+                     name="code"
+                     class="form-control"
+                     value="{{ form.code.value|default:party.code }}"
+                     maxlength="12"
+                     required
+                     form="partySettingsForm"
+                     style="text-transform: uppercase;">
+              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeDesktop').value)">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+              </button>
+            </div>
+            {% if form.code.errors %}
+              <div class="text-danger mt-1" style="font-size: 0.8rem;">
+                {{ form.code.errors|striptags }}
+              </div>
+            {% endif %}
+            <p class="settings-help">
+              Comparteix aquest codi perquè els assistents puguin unir-se a la festa.
+            </p>
+          </div>
+          <div class="d-flex align-items-center justify-content-between p-3 mb-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;color:#191c1f;">{{ form.require_join_code.label }}</div>
+              <div style="font-size:0.78rem;color:#747688;">Si està activat, els usuaris necessiten introduir el codi per unir-se.</div>
+            </div>
+            <div class="form-check form-switch mb-0 ms-2">
+              <input class="form-check-input" type="checkbox"
+                     id="{{ form.require_join_code.id_for_label }}"
+                     name="require_join_code"
+                     {% if party.require_join_code %}checked{% endif %}
+                     style="width:2.5rem;height:1.25rem;cursor:pointer;"
+                     form="partySettingsForm">
+            </div>
+          </div>
+
+          <div class="text-center">
+            <img id="qrCodeImg" src="{% url 'party_qr_code' party.id %}?v={{ party.code }}" alt="Codi QR de la festa" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
+            <p class="settings-help mt-2">
+              Escaneja amb el mòbil per unir-te directament.
+            </p>
+            <a id="qrDownloadLink" href="{% url 'party_qr_code' party.id %}?v={{ party.code }}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
+              <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">download</span>
+              Descarrega QR
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {# ── DJs DE LA FESTA (només admin) ──────────────────────────────────── #}
+      {% if request.user.is_superuser %}
+      <div class="settings-form-card mt-3">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <h3 class="settings-form-title">DJs de la festa</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <p class="settings-help mb-2">Selecciona els usuaris que tindran rol de DJ per a aquesta festa.</p>
+          <div style="max-height:200px;overflow-y:auto;border:1px solid #e0e3e6;border-radius:6px;padding:0.5rem;">
+            {% for checkbox in form.djs %}
+            <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
+              <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+              <div class="form-check form-switch mb-0 ms-2">
+                {{ checkbox.tag }}
+              </div>
+            </div>
+            {% empty %}
+            <span class="text-muted" style="font-size:0.85rem;">No hi ha usuaris registrats.</span>
+            {% endfor %}
+          </div>
+          <div class="mt-3">
+            <button type="submit" form="partySettingsForm" class="btn btn-primary w-100">
+              <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
+              Desa DJs
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
+    <div>
+      {# ── SPOTIFY CARD ───────────────────────────────────────────────────── #}
+      <div class="settings-spotify-card mb-3">
         <div class="settings-spotify-header">
           <div class="settings-spotify-logo">
             <span class="material-symbols-outlined" style="color: white;">queue_music</span>
@@ -761,11 +947,11 @@
                 <i class="fas fa-sync-alt"></i>
               </button>
             </div>
-            <div class="form-check mb-2" style="color: rgba(255,255,255,0.8);">
-              <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded" {% if only_owned %}checked{% endif %}>
-              <label class="form-check-label" for="onlyOwnedCheckboxLoaded">
-                Només les meves playlists
-              </label>
+            <div class="d-flex align-items-center gap-2 mb-2" style="color: rgba(255,255,255,0.8);">
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoaded" {% if only_owned %}checked{% endif %}>
+              </div>
+              <label for="onlyOwnedCheckboxLoaded" style="cursor:pointer;font-size:0.88rem;">Només les meves playlists</label>
             </div>
             <select id="id_spotify_playlist" class="form-control mb-3">
               <option value="">-- Selecciona una playlist --</option>
@@ -781,11 +967,11 @@
         {% else %}
           <div style="position: relative; z-index: 1;">
             {% if has_spotify %}
-              <div class="form-check mb-2" style="color: rgba(255,255,255,0.8);">
-                <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox" {% if only_owned %}checked{% endif %}>
-                <label class="form-check-label" for="onlyOwnedCheckbox">
-                  Només les meves playlists
-                </label>
+              <div class="d-flex align-items-center gap-2 mb-2" style="color: rgba(255,255,255,0.8);">
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="onlyOwnedCheckbox" {% if only_owned %}checked{% endif %}>
+                </div>
+                <label for="onlyOwnedCheckbox" style="cursor:pointer;font-size:0.88rem;">Només les meves playlists</label>
               </div>
               <div class="d-grid gap-2">
                 <a href="?load_spotify=1" class="btn btn-light" id="loadPlaylistsBtn">
@@ -804,54 +990,6 @@
         {% endif %}
       </div>
 
-      {# ── CODI DE LA FESTA I QR ──────────────────────────────────────────── #}
-      <div class="settings-form-card mt-3">
-        <div class="settings-form-header">
-          <span class="material-symbols-outlined">qr_code_2</span>
-          <h3 class="settings-form-title">Codi de la festa</h3>
-        </div>
-        <div style="padding: 1.5rem;">
-          <div class="mb-3">
-            <label class="settings-label">Codi d'entrada</label>
-            <div class="input-group">
-              <input type="text"
-                     id="partyCodeDesktop"
-                     name="code"
-                     class="form-control"
-                     value="{{ form.code.value|default:party.code }}"
-                     maxlength="12"
-                     required
-                     form="partySettingsForm"
-                     style="text-transform: uppercase;">
-              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeDesktop').value)">
-                <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
-              </button>
-            </div>
-            {% if form.code.errors %}
-              <div class="text-danger mt-1" style="font-size: 0.8rem;">
-                {{ form.code.errors|striptags }}
-              </div>
-            {% endif %}
-            <p class="settings-help">
-              Comparteix aquest codi perquè els assistents puguin unir-se a la festa.
-            </p>
-          </div>
-          <div class="text-center">
-            <img src="{% url 'party_qr_code' party.id %}" alt="Codi QR de la festa" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
-            <p class="settings-help mt-2">
-              Escaneja amb el mòbil per unir-te directament.
-            </p>
-            <a href="{% url 'party_qr_code' party.id %}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
-              <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">download</span>
-              Descarrega QR
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
-    <div>
       {# Barra de progrés #}
       <div id="loadingProgress" class="mb-3" style="display: none;">
         <div class="alert alert-info">
@@ -969,7 +1107,7 @@
                   </td>
                   <td class="key-cell">
                     {% if song.key %}
-                      <span class="settings-key-badge">{{ song.key }}</span>
+                      <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
                     {% else %}
                       <span class="text-muted">-</span>
                     {% endif %}
@@ -1073,13 +1211,19 @@
         </div>
 
         <div class="mb-3">
-          <div class="form-check">
-            {{ form.allow_song_requests }}
-            <label class="form-check-label" for="{{ form.allow_song_requests.id_for_label }}">
-              {{ form.allow_song_requests.label }}
-            </label>
+          <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+            <div>
+              <div style="font-weight:600;font-size:0.88rem;color:#191c1f;">{{ form.allow_song_requests.label }}</div>
+              <div style="font-size:0.75rem;color:#747688;">Si està desactivat, els usuaris no veuran l'opció de demanar cançons.</div>
+            </div>
+            <div class="form-check form-switch mb-0 ms-2">
+              <input class="form-check-input" type="checkbox"
+                     id="{{ form.allow_song_requests.id_for_label }}_mobile"
+                     name="allow_song_requests"
+                     {% if party.allow_song_requests %}checked{% endif %}
+                     style="width:2.5rem;height:1.25rem;cursor:pointer;">
+            </div>
           </div>
-          <p class="help-text">Si està desactivat, els usuaris no veuran l'opció de demanar cançons.</p>
         </div>
 
         <div class="mb-3">
@@ -1094,23 +1238,19 @@
         </div>
 
         <div class="mb-3">
-          <div class="form-check">
-            {{ form.is_public }}
-            <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
-              {{ form.is_public.label }}
-            </label>
+          <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+            <div>
+              <div style="font-weight:600;font-size:0.88rem;color:#191c1f;">{{ form.is_public.label }}</div>
+              <div style="font-size:0.75rem;color:#747688;">Si està activat, la festa apareix a la llista pública.</div>
+            </div>
+            <div class="form-check form-switch mb-0 ms-2">
+              <input class="form-check-input" type="checkbox"
+                     id="{{ form.is_public.id_for_label }}_mobile"
+                     name="is_public"
+                     {% if party.is_public %}checked{% endif %}
+                     style="width:2.5rem;height:1.25rem;cursor:pointer;">
+            </div>
           </div>
-          <p class="help-text">Si està activat, la festa apareix a la llista pública.</p>
-        </div>
-
-        <div class="mb-3">
-          <div class="form-check">
-            {{ form.require_join_code }}
-            <label class="form-check-label" for="{{ form.require_join_code.id_for_label }}">
-              {{ form.require_join_code.label }}
-            </label>
-          </div>
-          <p class="help-text">Si està activat, els usuaris necessiten introduir el codi.</p>
         </div>
 
         <div class="d-grid gap-2">
@@ -1181,9 +1321,11 @@
           <label for="id_spotify_playlist_mobile" class="mobile-label mb-0">Selecciona playlist</label>
           <button type="button" id="reloadPlaylistsBtnMobile" class="btn btn-outline-primary btn-sm">Recarrega</button>
         </div>
-        <div class="form-check mb-2">
-          <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoadedMobile" {% if only_owned %}checked{% endif %}>
-          <label class="form-check-label" for="onlyOwnedCheckboxLoadedMobile">Només les meves playlists</label>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxLoadedMobile" {% if only_owned %}checked{% endif %}>
+          </div>
+          <label for="onlyOwnedCheckboxLoadedMobile" style="cursor:pointer;font-size:0.88rem;">Només les meves playlists</label>
         </div>
         <select id="id_spotify_playlist_mobile" class="form-control mb-3">
           <option value="">-- Selecciona una playlist --</option>
@@ -1197,9 +1339,11 @@
 
       {% else %}
         {% if has_spotify %}
-          <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxMobile" {% if only_owned %}checked{% endif %}>
-            <label class="form-check-label" for="onlyOwnedCheckboxMobile">Només les meves playlists</label>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="onlyOwnedCheckboxMobile" {% if only_owned %}checked{% endif %}>
+            </div>
+            <label for="onlyOwnedCheckboxMobile" style="cursor:pointer;font-size:0.88rem;">Només les meves playlists</label>
           </div>
           <div class="d-grid gap-2">
             <a href="?load_spotify=1" class="btn btn-success" id="loadPlaylistsBtnMobile">
@@ -1329,19 +1473,105 @@
         {% endif %}
         <p class="help-text">Comparteix aquest codi perquè els assistents puguin unir-se.</p>
       </div>
+      <div class="d-flex align-items-center justify-content-between p-3 mb-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+        <div>
+          <div style="font-weight:600;font-size:0.88rem;color:#191c1f;">{{ form.require_join_code.label }}</div>
+          <div style="font-size:0.75rem;color:#747688;">Si està activat, els usuaris necessiten introduir el codi per unir-se.</div>
+        </div>
+        <div class="form-check form-switch mb-0 ms-2">
+          <input class="form-check-input" type="checkbox"
+                 id="{{ form.require_join_code.id_for_label }}_mobile"
+                 name="require_join_code"
+                 {% if party.require_join_code %}checked{% endif %}
+                 style="width:2.5rem;height:1.25rem;cursor:pointer;"
+                 form="partySettingsFormMobile">
+        </div>
+      </div>
       <div class="text-center">
-        <img src="{% url 'party_qr_code' party.id %}" alt="Codi QR" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
+        <img id="qrCodeImgMobile" src="{% url 'party_qr_code' party.id %}?v={{ party.code }}" alt="Codi QR" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
         <p class="help-text mt-2">Escaneja amb el mòbil per unir-te directament.</p>
-        <a href="{% url 'party_qr_code' party.id %}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
+        <a href="{% url 'party_qr_code' party.id %}?v={{ party.code }}" download="festa-{{ party.code }}-qr.png" class="btn btn-sm btn-outline-primary">
           <i class="fas fa-download me-1"></i>Descarrega QR
         </a>
       </div>
     </section>
+
+    <section class="mobile-card p-3">
+      <span class="mobile-label">Localització</span>
+
+      <div class="d-flex align-items-center justify-content-between mb-3 mt-1 p-2" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
+        <div>
+          <div style="font-weight:600;font-size:0.85rem;color:#191c1f;">Restricció de proximitat</div>
+          <div style="font-size:0.73rem;color:#747688;">Han de ser al lloc per entrar.</div>
+        </div>
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="loc-enabled-mobile" role="switch"
+            {% if party.latitude and party.location_radius_km and party.location_radius_km > 0 %}checked{% endif %}
+            style="width:2.5rem;height:1.25rem;cursor:pointer;">
+        </div>
+      </div>
+
+      <div id="loc-fields-mobile" {% if not party.latitude or not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
+        <div class="mb-3">
+          <div class="input-group">
+            <input type="text" id="loc-name-mobile" class="form-control" value="{{ party.location_name|default:'' }}" placeholder="Ex: Sala Razzmatazz, Barcelona">
+            <button class="btn btn-outline-secondary" type="button" id="geocodeMobileBtn"><i class="fas fa-search"></i></button>
+          </div>
+          <input type="hidden" id="loc-lat-mobile" value="{% localize off %}{{ party.latitude|default:'' }}{% endlocalize %}">
+          <input type="hidden" id="loc-lng-mobile" value="{% localize off %}{{ party.longitude|default:'' }}{% endlocalize %}">
+          <p class="help-text mt-1">Escriu l'adreça i cerca, o clica al mapa.</p>
+        </div>
+        <div id="partyMapMobile" style="height:220px;border-radius:8px;border:1px solid #e0e3e6;position:relative;" class="mb-3"></div>
+        <div class="mb-3">
+          <label class="mobile-label">Radi de restricció (km)</label>
+          <div class="input-group">
+            <input type="number" id="loc-radius-mobile" class="form-control" min="1" max="500" value="{{ party.location_radius_km|default:2 }}" placeholder="2">
+            <span class="input-group-text">km</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="loc-save-msg-mobile" class="alert alert-success d-none mb-2" role="alert" style="font-size:0.875rem;"></div>
+      <button type="button" id="saveLocationMobileBtn" class="btn btn-primary w-100">
+        <i class="fas fa-save me-1"></i> Guardar localització
+      </button>
+    </section>
+
+    {% if request.user.is_superuser %}
+    <section class="mobile-card p-3">
+      <span class="mobile-label">DJs de la festa</span>
+      <p class="help-text mb-2">Selecciona els usuaris amb rol de DJ.</p>
+      <div style="max-height:180px;overflow-y:auto;border:1px solid #e0e3e6;border-radius:6px;padding:0.5rem;">
+        {% for checkbox in form.djs %}
+        <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
+          <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+          <div class="form-check form-switch mb-0 ms-2">
+            {{ checkbox.tag }}
+          </div>
+        </div>
+        {% empty %}
+        <span class="text-muted" style="font-size:0.85rem;">No hi ha usuaris registrats.</span>
+        {% endfor %}
+      </div>
+      <button type="submit" form="partySettingsForm" class="btn btn-primary w-100 mt-3">
+        <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
+        Desa DJs
+      </button>
+    </section>
+    {% endif %}
   </main>
 </div>
 
 <!-- Alert area for notifications -->
-<div id="party-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
+<div id="party-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;">
+{% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show shadow" role="alert" style="margin-bottom:0.5rem;">
+    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endfor %}
+</div>
 
 <!-- Bootstrap Confirmation Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
@@ -1365,6 +1595,18 @@
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Auto-hide and scroll for server-rendered Django messages
+  var djangoAlerts = document.querySelectorAll('#party-alert-area .alert');
+  if (djangoAlerts.length) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    djangoAlerts.forEach(function(el) {
+      setTimeout(function() {
+        el.classList.remove('show');
+        setTimeout(function() { el.remove(); }, 150);
+      }, 5000);
+    });
+  }
+
   // Function to show dismissible alerts
   function showAlert(message, type = 'info') {
     const alertArea = document.getElementById('party-alert-area');
@@ -2724,4 +2966,207 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
+
+<script src="{% static 'jukebox/vendor/leaflet/leaflet.js' %}"></script>
+<script>
+// ── Guardar localització (independent de Leaflet) ──────────────────────────
+(function() {
+  var saveLocationUrl = "{% url 'save_party_location' party.id %}";
+  var csrfToken = '{{ csrf_token }}';
+
+  function doSaveLocation(latId, lngId, nameId, radiusId, msgId, btnEl, enabledToggleId) {
+    var toggleEl = enabledToggleId ? document.getElementById(enabledToggleId) : null;
+    var enabled  = toggleEl ? toggleEl.checked : true;
+    var lat    = (document.getElementById(latId)    || {}).value || '';
+    var lng    = (document.getElementById(lngId)    || {}).value || '';
+    var name   = (document.getElementById(nameId)   || {}).value || '';
+    var radius = enabled ? ((document.getElementById(radiusId) || {}).value || 0) : 0;
+    var msgEl  = document.getElementById(msgId);
+
+    if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = 'Guardant...'; }
+
+    fetch(saveLocationUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
+      body: new URLSearchParams({ latitude: lat, longitude: lng, location_name: name, location_radius_km: radius })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!msgEl) return;
+      if (data.success) {
+        msgEl.textContent = 'Localització guardada correctament.';
+        msgEl.className = 'alert alert-success mb-2';
+      } else {
+        msgEl.textContent = 'Error: ' + (data.error || 'Torna-ho a intentar.');
+        msgEl.className = 'alert alert-danger mb-2';
+      }
+      setTimeout(function() { msgEl.className = 'alert alert-success d-none mb-2'; }, 3000);
+    })
+    .catch(function() {
+      if (msgEl) { msgEl.textContent = 'Error de xarxa.'; msgEl.className = 'alert alert-danger mb-2'; }
+    })
+    .finally(function() {
+      if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span> Guardar localització'; }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var btnD = document.getElementById('saveLocationDesktopBtn');
+    if (btnD) btnD.addEventListener('click', function() {
+      doSaveLocation('loc-lat-desktop','loc-lng-desktop','loc-name-desktop','loc-radius-desktop','loc-save-msg-desktop', btnD, 'loc-enabled-desktop');
+    });
+    var btnM = document.getElementById('saveLocationMobileBtn');
+    if (btnM) btnM.addEventListener('click', function() {
+      doSaveLocation('loc-lat-mobile','loc-lng-mobile','loc-name-mobile','loc-radius-mobile','loc-save-msg-mobile', btnM, 'loc-enabled-mobile');
+    });
+
+    // Toggle show/hide location fields
+    ['desktop','mobile'].forEach(function(side) {
+      var toggle = document.getElementById('loc-enabled-' + side);
+      var fields = document.getElementById('loc-fields-' + side);
+      if (!toggle || !fields) return;
+      toggle.addEventListener('change', function() {
+        fields.style.display = toggle.checked ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ── MAP INIT ────────────────────────────────────────────────────────────
+  try {
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconUrl:       "{% static 'jukebox/vendor/leaflet/marker-icon.png' %}",
+      iconRetinaUrl: "{% static 'jukebox/vendor/leaflet/marker-icon-2x.png' %}",
+      shadowUrl:     "{% static 'jukebox/vendor/leaflet/marker-shadow.png' %}",
+    });
+  } catch(e) {}
+
+  var savedLat = {% localize off %}{{ party.latitude|default:"null" }}{% endlocalize %};
+  var savedLng = {% localize off %}{{ party.longitude|default:"null" }}{% endlocalize %};
+  var hasLocation = savedLat !== null && savedLng !== null;
+
+  function makeMarkerDraggable(marker, latId, lngId) {
+    marker.on('dragend', function(e) {
+      var pos = e.target.getLatLng();
+      document.getElementById(latId).value = pos.lat.toFixed(6);
+      document.getElementById(lngId).value = pos.lng.toFixed(6);
+    });
+  }
+
+  function initMap(containerId, latInputId, lngInputId, locationNameInputId, geocodeBtnId) {
+    var container = document.getElementById(containerId);
+    if (!container) return null;
+
+    var lat = hasLocation ? savedLat : 41.3851;
+    var lng = hasLocation ? savedLng : 2.1734;
+    var zoom = hasLocation ? 14 : 6;
+
+    var map = L.map(containerId).setView([lat, lng], zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+    if (hasLocation) {
+      marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+      makeMarkerDraggable(marker, latInputId, lngInputId);
+    }
+
+    map.on('click', function(e) {
+      var pos = e.latlng;
+      document.getElementById(latInputId).value = pos.lat.toFixed(6);
+      document.getElementById(lngInputId).value = pos.lng.toFixed(6);
+      if (marker) {
+        marker.setLatLng(pos);
+      } else {
+        marker = L.marker(pos, {draggable: true}).addTo(map);
+        makeMarkerDraggable(marker, latInputId, lngInputId);
+      }
+    });
+
+    var geocodeBtn = document.getElementById(geocodeBtnId);
+    if (geocodeBtn) {
+      geocodeBtn.addEventListener('click', function() {
+        var query = document.getElementById(locationNameInputId).value.trim();
+        if (!query) return;
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query) + '&limit=1', {
+          headers: {'Accept-Language': 'ca,es,en'}
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.length) { alert('No s\'ha trobat la localització.'); return; }
+          var r = data[0];
+          var nlat = parseFloat(r.lat), nlng = parseFloat(r.lon);
+          document.getElementById(latInputId).value = nlat.toFixed(6);
+          document.getElementById(lngInputId).value = nlng.toFixed(6);
+          map.setView([nlat, nlng], 15);
+          if (marker) {
+            marker.setLatLng([nlat, nlng]);
+          } else {
+            marker = L.marker([nlat, nlng], {draggable: true}).addTo(map);
+            makeMarkerDraggable(marker, latInputId, lngInputId);
+          }
+        })
+        .catch(function() { alert('Error en la cerca de la localització.'); });
+      });
+    }
+
+    return map;
+  }
+
+  // DJs checkboxes: associate with desktop form
+  document.querySelectorAll('[id^="id_djs_"]').forEach(function(cb) {
+    if (!cb.getAttribute('form')) cb.setAttribute('form', 'partySettingsForm');
+  });
+
+  // ── Toggle restricció de proximitat ────────────────────────────────────
+  function setupLocationToggle(toggleId, fieldsId, map) {
+    var toggle = document.getElementById(toggleId);
+    var fields = document.getElementById(fieldsId);
+    if (!toggle || !fields) return;
+    toggle.addEventListener('change', function() {
+      if (toggle.checked) {
+        fields.style.display = '';
+        if (map) setTimeout(function() { map.invalidateSize(); }, 100);
+      } else {
+        fields.style.display = 'none';
+      }
+    });
+  }
+
+  // Init maps — try-catch handles hidden containers gracefully
+  var mapDesktop = null, mapMobile = null;
+  try {
+    mapDesktop = initMap('partyMapDesktop', 'loc-lat-desktop', 'loc-lng-desktop', 'loc-name-desktop', 'geocodeDesktopBtn');
+  } catch(e) {}
+  try {
+    mapMobile = initMap('partyMapMobile', 'loc-lat-mobile', 'loc-lng-mobile', 'loc-name-mobile', 'geocodeMobileBtn');
+  } catch(e) {}
+  if (mapDesktop) setTimeout(function() { mapDesktop.invalidateSize(); }, 500);
+  if (mapMobile)  setTimeout(function() { mapMobile.invalidateSize(); }, 500);
+
+  setupLocationToggle('loc-enabled-desktop', 'loc-fields-desktop', mapDesktop);
+  setupLocationToggle('loc-enabled-mobile',  'loc-fields-mobile',  mapMobile);
+
+  // ── QR preview refresh on code change ───────────────────────────────────
+  var qrBase = "{% url 'party_qr_code' party.id %}";
+  ['partyCodeDesktop', 'partyCodeMobile'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', function() {
+        var src = qrBase + '?v=' + encodeURIComponent(this.value) + '&t=' + Date.now();
+        var imgD = document.getElementById('qrCodeImg');
+        var imgM = document.getElementById('qrCodeImgMobile');
+        if (imgD) imgD.src = src;
+        if (imgM) imgM.src = src;
+      });
+    }
+  });
+});
+</script>
 {% endblock %}

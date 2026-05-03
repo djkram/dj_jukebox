@@ -57,46 +57,69 @@ def download_temporary_song_audio(title, artist, timeout=60):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
-    Es fa servir com a últim recurs per obtenir un MP3 temporal analitzable
-    amb librosa quan no tenim BPM/Key per via metadata.
+    Prova múltiples variants de cerca; si un vídeo no és disponible en la
+    regió, passa automàticament a la variant següent.
     """
     from yt_dlp import YoutubeDL
+    from yt_dlp.utils import DownloadError
 
-    search_query = f"ytsearch1:{title} {artist} audio"
-    temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
-    output_template = os.path.join(temp_dir, "audio.%(ext)s")
+    search_variants = [
+        f"{title} {artist} audio",
+        f"{title} {artist} official audio",
+        f"{title} {artist}",
+        f"{title} {artist} lyrics",
+        f"{title} {artist} official video",
+        f"{artist} {title} audio",
+        f"{title} audio",
+    ]
 
-    ydl_opts = {
-        "format": "bestaudio/best",
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
-        "outtmpl": output_template,
-        "default_search": "ytsearch1",
-        "socket_timeout": timeout,
-        "nopart": True,
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
-    }
+    logger.info(f"[AUDIO_ANALYSIS] Buscant àudio temporal per '{title}' - '{artist}'")
 
-    try:
-        logger.info(f"[AUDIO_ANALYSIS] Buscant àudio temporal per '{title}' - '{artist}'")
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.extract_info(search_query, download=True)
+    last_error = None
+    for i, query in enumerate(search_variants):
+        search_query = f"ytsearch1:{query}"
+        temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
+        output_template = os.path.join(temp_dir, "audio.%(ext)s")
 
-        for filename in os.listdir(temp_dir):
-            if filename.endswith(".mp3"):
-                temp_path = os.path.join(temp_dir, filename)
-                logger.info(f"[AUDIO_ANALYSIS] MP3 temporal descarregat: {temp_path}")
-                return temp_path, temp_dir
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "noplaylist": True,
+            "quiet": True,
+            "no_warnings": True,
+            "outtmpl": output_template,
+            "default_search": "ytsearch1",
+            "socket_timeout": timeout,
+            "nopart": True,
+            "postprocessors": [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }],
+        }
 
-        raise RuntimeError("No s'ha generat cap MP3 temporal")
-    except Exception:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        raise
+        try:
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.extract_info(search_query, download=True)
+
+            for filename in os.listdir(temp_dir):
+                if filename.endswith(".mp3"):
+                    temp_path = os.path.join(temp_dir, filename)
+                    logger.info(f"[AUDIO_ANALYSIS] MP3 descarregat (intent {i+1}): {temp_path}")
+                    return temp_path, temp_dir
+
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            last_error = RuntimeError("No s'ha generat cap MP3 temporal")
+
+        except DownloadError as e:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            logger.warning(f"[AUDIO_ANALYSIS] Intent {i+1} fallat ('{query}'): {e}")
+            last_error = e
+            continue
+        except Exception as e:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            raise
+
+    raise last_error or RuntimeError("Cap variant de cerca ha funcionat")
 
 
 def detect_bpm(audio_path):

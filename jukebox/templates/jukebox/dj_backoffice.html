@@ -318,12 +318,6 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
-  <div class="backoffice-page-header">
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPartyModal" style="padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 10px 30px rgba(0,64,224,0.15); margin-left: auto;">
-      <span class="material-symbols-outlined">add</span>
-      + Nova Festa
-    </button>
-  </div>
 
   <div class="backoffice-grid">
     <!-- Stats Row -->
@@ -430,6 +424,10 @@
       <div class="backoffice-actions-card">
         <h2 class="backoffice-actions-title">Accions Ràpides</h2>
         <div>
+          <a href="{% url 'create_party' %}" class="backoffice-action-btn">
+            <span class="material-symbols-outlined" style="color:#0040e0;">add_circle</span>
+            <span>+ Nova Festa</span>
+          </a>
           <a href="{% url 'dj_dashboard' %}" class="backoffice-action-btn">
             <span class="material-symbols-outlined">dashboard</span>
             <span>Dashboard Principal</span>
@@ -446,9 +444,9 @@
 
 <!-- Mobile Layout -->
 <div class="container mt-4 d-md-none">
-    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createPartyModal">
+    <a href="{% url 'create_party' %}" class="btn btn-primary mb-3">
         + Nova Festa
-    </button>
+    </a>
 
     <div class="row mb-4">
         {% for party in parties %}
@@ -474,25 +472,4 @@
         {% endfor %}
     </div>
 
-<!-- Modal per crear festa -->
-<div class="modal fade" id="createPartyModal" tabindex="-1" aria-labelledby="createPartyModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="post">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="createPartyModalLabel">Crea una nova festa</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tanca"></button>
-        </div>
-        <div class="modal-body">
-          {{ party_form.as_p }}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·la</button>
-          <button type="submit" class="btn btn-success">Crea festa</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 {% endblock %}

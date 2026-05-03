@@ -1,0 +1,133 @@
+{% extends "jukebox/admin_base.html" %}
+{% load i18n %}
+
+{% block page_title %}Nova Festa{% endblock %}
+
+{% block content %}
+<style>
+  @media (min-width: 768px) {
+    .create-party-wrapper {
+      max-width: 560px;
+      margin: 3rem auto;
+    }
+    .create-party-card {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 2.5rem;
+      box-shadow: 0 24px 40px rgba(0,64,224,0.06);
+    }
+    .create-party-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #181c1e;
+      margin-bottom: 0.25rem;
+    }
+    .create-party-subtitle {
+      font-size: 0.875rem;
+      color: #747687;
+      margin-bottom: 2rem;
+    }
+    .create-party-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #434655;
+      margin-bottom: 0.4rem;
+    }
+    .create-party-field {
+      margin-bottom: 1.5rem;
+    }
+    .create-party-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    .btn-create {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      background: #0040e0;
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      transition: background 200ms;
+    }
+    .btn-create:hover { background: #002ea8; }
+    .btn-cancel {
+      padding: 0.75rem 1.5rem;
+      background: #e0e3e6;
+      color: #181c1e;
+      font-weight: 700;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      transition: background 200ms;
+    }
+    .btn-cancel:hover { background: #d7dadd; color: #181c1e; }
+  }
+</style>
+
+<!-- Desktop -->
+<div class="container-fluid d-none d-md-block">
+  <div class="create-party-wrapper">
+    <div class="create-party-card">
+      <h1 class="create-party-title">Nova Festa</h1>
+      <p class="create-party-subtitle">Introdueix el nom i la data per crear la festa. Podràs configurar la playlist i les opcions avançades després.</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="create-party-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+          <div style="color:#e53e3e;font-size:0.8rem;margin-top:0.25rem;">{{ field.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <div class="create-party-actions">
+          <a href="{% url 'dj_backoffice' %}" class="btn-cancel">Cancel·lar</a>
+          <button type="submit" class="btn-create">Crear festa i configurar →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile -->
+<div class="container mt-4 d-md-none">
+  <div class="mobile-page-shell">
+    <div class="mobile-page-content">
+      <div class="mobile-page-stack">
+        <h1 style="font-size:1.25rem;font-weight:800;margin-bottom:0.25rem;">Nova Festa</h1>
+        <p style="font-size:0.85rem;color:#747687;margin-bottom:1rem;">Nom i data de la festa.</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+          <div style="margin-bottom:1.25rem;">
+            <label for="{{ field.id_for_label }}" style="display:block;font-size:0.75rem;font-weight:700;color:#434655;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div style="color:#e53e3e;font-size:0.8rem;margin-top:0.2rem;">{{ field.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div style="display:flex;gap:0.75rem;margin-top:1.5rem;">
+            <a href="{% url 'dj_backoffice' %}" class="btn btn-secondary" style="flex:0 0 auto;">Cancel·lar</a>
+            <button type="submit" class="btn btn-primary" style="flex:1;">Crear festa →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

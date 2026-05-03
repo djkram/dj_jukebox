@@ -32,7 +32,9 @@ from .spotify_api import (
     get_playlist_tracks_basic,
     get_audio_features_for_songs,
     search_spotify_tracks,
+    search_spotify_tracks_public,
 )
+from .utils.spotify_helpers import get_spotify_reconnect_url
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
 from datetime import datetime
@@ -62,7 +64,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_dj_admin(user):
-    return user.is_authenticated and user.is_superuser
+    return user.is_authenticated and (user.is_superuser or user.dj_parties.exists())
 
 
 # def song_list(request):
@@ -153,6 +155,15 @@ def select_party(request):
         "code_error": code_error,
     })
 
+def _haversine_km(lat1, lon1, lat2, lon2):
+    R = 6371
+    import math
+    d_lat = math.radians(float(lat2) - float(lat1))
+    d_lon = math.radians(float(lon2) - float(lon1))
+    a = math.sin(d_lat / 2) ** 2 + math.cos(math.radians(float(lat1))) * math.cos(math.radians(float(lat2))) * math.sin(d_lon / 2) ** 2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
 def set_party(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
 
@@ -161,6 +172,25 @@ def set_party(request, party_id):
         provided_code = request.GET.get('code', '').strip().upper()
         if provided_code != party.code:
             messages.error(request, _("Codi incorrecte. Aquesta festa requereix un codi d'entrada."))
+            return redirect('select_party')
+
+    # Si la festa té restricció de radi, validar ubicació (admins i DJs de la festa estan exempts)
+    is_exempt = request.user.is_authenticated and (
+        request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()
+    )
+    if not is_exempt and party.location_radius_km and party.location_radius_km > 0 and party.latitude and party.longitude:
+        user_lat = request.GET.get('ulat', '').strip()
+        user_lng = request.GET.get('ulng', '').strip()
+        if not user_lat or not user_lng:
+            messages.warning(request, _("Aquesta festa requereix verificar la teva ubicació per unir-te."))
+            return redirect(f"{reverse('select_party')}?verify_location={party_id}&code={request.GET.get('code', '')}")
+        try:
+            distance = _haversine_km(party.latitude, party.longitude, float(user_lat), float(user_lng))
+            if distance > party.location_radius_km:
+                messages.error(request, _("Per entrar a aquesta festa has de ser-hi físicament present."))
+                return redirect('select_party')
+        except (ValueError, TypeError):
+            messages.error(request, _("No s'ha pogut verificar la teva ubicació."))
             return redirect('select_party')
 
     request.session['selected_party_id'] = party.id
@@ -175,9 +205,26 @@ def unset_party(request):
     return redirect('select_party')
 
 @login_required
+@user_passes_test(lambda u: u.is_superuser)
+def create_party(request):
+    if request.method == 'POST':
+        form = PartyForm(request.POST)
+        if form.is_valid():
+            party = form.save()
+            return redirect('party_settings', party_id=party.id)
+    else:
+        form = PartyForm()
+    return render(request, 'jukebox/create_party.html', {'form': form})
+
+
+@login_required
 @user_passes_test(is_dj_admin)
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
+
+    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
+        return redirect('song_list')
+
     has_spotify = SocialAccount.objects.filter(user=request.user, provider="spotify").exists()
 
     # Processament del formulari
@@ -197,6 +244,7 @@ def party_settings(request, party_id):
 
             if is_ajax:
                 return JsonResponse({'success': True})
+            messages.success(request, _("Configuració guardada correctament."))
             return redirect('party_settings', party_id=party.id)
     else:
         form = PartySettingsForm(instance=party, request=request)
@@ -217,7 +265,7 @@ def party_settings(request, party_id):
         try:
             playlists = get_user_playlists(request, only_owned=only_owned)
         except SpotifyAuthError:
-            return redirect(getget_spotify_reconnect_url(request))
+            return redirect(get_spotify_reconnect_url(request))
 
     # Obtenir token de Spotify per Web Playback SDK
     spotify_token = None
@@ -416,6 +464,39 @@ def process_playlist_songs(request, party_id):
 
 @login_required
 @user_passes_test(is_dj_admin)
+@require_POST
+def toggle_allow_requests(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+    party.allow_song_requests = not party.allow_song_requests
+    party.save(update_fields=['allow_song_requests'])
+    return JsonResponse({'allow_song_requests': party.allow_song_requests})
+
+
+@login_required
+@user_passes_test(is_dj_admin)
+@require_POST
+def save_party_location(request, party_id):
+    import math
+    party = get_object_or_404(Party, pk=party_id)
+    try:
+        lat = request.POST.get('latitude', '').strip()
+        lng = request.POST.get('longitude', '').strip()
+        location_name = request.POST.get('location_name', '').strip()
+        radius_km = int(request.POST.get('location_radius_km', 0) or 0)
+
+        party.location_name = location_name
+        party.latitude = float(lat) if lat else None
+        party.longitude = float(lng) if lng else None
+        party.location_radius_km = max(0, min(radius_km, 500))
+        party.save(update_fields=['location_name', 'latitude', 'longitude', 'location_radius_km'])
+
+        return JsonResponse({'success': True, 'location_name': party.location_name})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(is_dj_admin)
 def party_settings_search_tracks(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     query = request.GET.get('search', '').strip()
@@ -608,7 +689,7 @@ def process_song_features(request, party_id):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(is_dj_admin)
 @require_POST
 def analyze_song_audio(request, party_id, song_id):
     """
@@ -675,6 +756,14 @@ def song_list(request):
     party = get_object_or_404(Party, pk=party_id)
     user = request.user
 
+    # Si la festa és visible però la llista no s'ha carregat encara, mostrar espera
+    if party.party_status == Party.STATUS_PARTY_VISIBLE:
+        return render(request, 'jukebox/song_list.html', {
+            'party': party,
+            'songs': [],
+            'playlist_not_ready': True,
+        })
+
     # Assegurar que l'usuari tingui els coins gratuïts de festa (si han canviat)
     ensure_user_has_free_coins(user, party)
 
@@ -685,6 +774,11 @@ def song_list(request):
 
     # Obtenir cançons amb annotations de vots
     annotated_songs = get_annotated_party_songs(party)
+
+    voting_enabled = party.party_status in (
+        Party.STATUS_REQUESTS_OPEN,
+        Party.STATUS_DJJUKEBOX_ACTIVE,
+    )
 
     if request.method == 'POST':
         # Conversió de Coins a Vots amb bonificació per volum
@@ -698,13 +792,13 @@ def song_list(request):
             # Si falla, continua per mostrar error (es gestiona més avall)
 
         # Desfer vot d'una cançó
-        elif 'unvote_song_id' in request.POST:
+        elif 'unvote_song_id' in request.POST and voting_enabled:
             song = get_object_or_404(Song, pk=request.POST['unvote_song_id'], party=party)
             Vote.objects.filter(user=user, song=song, party=party).delete()
             return redirect('song_list')
 
         # Votar una cançó
-        elif 'vote_song_id' in request.POST:
+        elif 'vote_song_id' in request.POST and voting_enabled:
             song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
             vote_type = request.POST.get('vote_type', 'like')  # like o dislike
 
@@ -813,25 +907,17 @@ def song_list(request):
         "songs_with_votes": songs_with_votes,
         "songs_with_votes_percentage": songs_with_votes_percentage,
         "total_coins_spent": total_coins_spent,
+        "voting_enabled": voting_enabled,
     })
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def dj_backoffice(request):
     songs = Song.objects.all().order_by('-votes')
-    parties = Party.objects.order_by('-date')  # Mostra les més recents primer
-    party_form = PartyForm()
-
-    if request.method == 'POST':
-        party_form = PartyForm(request.POST)
-        if party_form.is_valid():
-            party_form.save()
-            return redirect('dj_backoffice')  # refresca la pàgina
-
+    parties = Party.objects.order_by('-date')
     return render(request, 'jukebox/dj_backoffice.html', {
         'songs': songs,
         'parties': parties,
-        'party_form': party_form,
     })
 
 @login_required
@@ -844,6 +930,9 @@ def dj_dashboard(request):
         return redirect('select_party')
 
     party = get_object_or_404(Party, pk=party_id)
+
+    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
+        return redirect('song_list')
 
     # Separar cançons pendents i ja posades amb annotations
     pending_songs = get_pending_songs_ordered(party)
@@ -868,9 +957,12 @@ def dj_dashboard(request):
     if party.party_status == Party.STATUS_HIDDEN:
         party_status_label = 'Festa Pausada'
         party_status_help = "La festa està pausada i encara no és visible pels usuaris."
+    elif party.party_status == Party.STATUS_PARTY_VISIBLE:
+        party_status_label = 'Festa Visible'
+        party_status_help = "La festa és visible però la llista de cançons no s'ha carregat."
     elif party.party_status == Party.STATUS_SHOW_PARTY:
-        party_status_label = 'Mostrar festa'
-        party_status_help = "La festa està visible, però encara no s'han obert les peticions."
+        party_status_label = 'Llista Carregada'
+        party_status_help = "La llista de cançons és visible. Ja es pot votar."
     elif party.party_status == Party.STATUS_REQUESTS_OPEN:
         party_status_label = 'Obrir peticions'
         party_status_help = "Ja es pot votar i demanar cançons, però el DJ encara no les està puntant."
@@ -957,14 +1049,16 @@ def dj_dashboard(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
 @require_POST
 def update_party_status(request, party_id):
     """Actualitza l'estat operatiu de la festa i l'hora prevista del DJJukebox."""
     party = get_object_or_404(Party, id=party_id)
+    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
+        return redirect('song_list')
     requested_status = request.POST.get('party_status', party.party_status)
     allowed_statuses = {
         Party.STATUS_HIDDEN,
+        Party.STATUS_PARTY_VISIBLE,
         Party.STATUS_SHOW_PARTY,
         Party.STATUS_REQUESTS_OPEN,
         Party.STATUS_DJJUKEBOX_ACTIVE,
@@ -1001,6 +1095,15 @@ def mark_song_played(request, song_id):
     # Notificar a tots els que van votar aquesta cançó
     create_song_played_notification(song)
 
+    return redirect('dj_dashboard')
+
+@login_required
+@user_passes_test(is_dj_admin)
+@require_POST
+def unmark_song_played(request, song_id):
+    song = get_object_or_404(Song, pk=song_id)
+    song.has_played = False
+    song.save(update_fields=['has_played'])
     return redirect('dj_dashboard')
 
 @login_required
@@ -1342,6 +1445,10 @@ def song_swipe(request):
     party = get_object_or_404(Party, pk=party_id)
     user = request.user
 
+    if party.party_status not in (Party.STATUS_REQUESTS_OPEN, Party.STATUS_DJJUKEBOX_ACTIVE):
+        messages.warning(request, _("Els vots encara no estan disponibles per a aquesta festa."))
+        return redirect('song_list')
+
     # Assegurar que l'usuari tingui els coins gratuïts de festa
     ensure_user_has_free_coins(user, party)
 
@@ -1407,17 +1514,11 @@ def request_song(request):
 
     user = request.user
 
-    # Cerca de cançons
+    # Cerca de cançons — usa client credentials, no cal que l'usuari tingui Spotify connectat
     if request.method == 'GET' and 'search' in request.GET:
         query = request.GET.get('search', '').strip()
         if query:
-            try:
-                tracks = search_spotify_tracks(request, query, limit=20)
-            except SpotifyAuthError:
-                return JsonResponse({
-                    'error': 'La sessió de Spotify ha caducat. Torna a connectar Spotify per buscar cançons.',
-                    'reconnect_url': get_spotify_reconnect_url(request),
-                }, status=401)
+            tracks = search_spotify_tracks_public(query, limit=20)
             return JsonResponse({'tracks': tracks})
         return JsonResponse({'tracks': []})
 
@@ -1580,6 +1681,9 @@ def manage_song_requests(request):
         return redirect('select_party')
 
     party = get_object_or_404(Party, pk=party_id)
+
+    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
+        return redirect('song_list')
 
     if request.method == 'POST':
         request_id = request.POST.get('request_id')

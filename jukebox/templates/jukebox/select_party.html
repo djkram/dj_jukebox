@@ -1,7 +1,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load static %}
 {% load i18n %}
-{% block page_title %}{% trans "Llista de festes DJJukebox" %}{% endblock %}
+{% block page_title %}{% trans "Festes DJ Jukebox" %}{% endblock %}
 {% block content %}
 
 <style>
@@ -645,6 +645,13 @@
 
 <!-- Desktop Layout -->
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show mb-3" role="alert" style="border-radius: 0.75rem;">
+    <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:0.4rem;">{% if message.tags == 'error' %}location_off{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}</span>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
   <!-- Caixa superior -->
   <section class="select-promo-section select-promo-section--slim select-promo-section--tilted select-promo-top">
       <div class="select-promo-bg-1"></div>
@@ -724,7 +731,8 @@
 
             {% if party.require_join_code %}
               <!-- Formulari amb codi -->
-              <form method="get" action="{% url 'set_party' party.id %}" style="margin-top: 1rem;">
+              <form method="get" action="{% url 'set_party' party.id %}" style="margin-top: 1rem;"
+                    {% if party.location_radius_km %}data-geocheck-form="true" data-party-id="{{ party.id }}"{% endif %}>
                 <div style="display: flex; gap: 0.5rem;">
                   <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
                          style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
@@ -735,14 +743,16 @@
                 </div>
               </form>
             {% elif selected_party and party.id == selected_party.id %}
-              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;">
+              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
+                 {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
                 <button class="select-party-button">
                   {% trans "Entrar a la sessió" %}
                   <span class="material-symbols-outlined">arrow_forward</span>
                 </button>
               </a>
             {% else %}
-              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;">
+              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
+                 {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
                 <button class="select-party-button">
                   {% trans "Entrar" %}
                   <span class="material-symbols-outlined">arrow_forward</span>
@@ -796,6 +806,13 @@
 <!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
 <div class="mobile-page-shell d-md-none" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #191c1f;">
   <main class="mobile-page-content mobile-page-content--tight mobile-page-stack" style="max-width: 32rem;">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert" style="border-radius: 0.75rem; font-size: 0.875rem;">
+      <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;margin-right:0.4rem;">{% if message.tags == 'error' %}location_off{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}</span>
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
     <!-- Brand Logo Area -->
     <section class="text-center mobile-section-header">
       <div class="d-inline-block p-3 shadow-lg" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 10px 20px rgba(0, 64, 224, 0.2); border-radius: 20px;">
@@ -837,7 +854,11 @@
         <h3 class="font-headline font-bold mb-3" style="font-size: 1.25rem;">{% trans "Festes Disponibles" %}</h3>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
           {% for party in parties %}
-            <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card" {% if party.require_join_code %}data-requires-code="true" data-party-id="{{ party.id }}"{% endif %}>
+            <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card"
+               {% if party.require_join_code %}data-requires-code="true"{% endif %}
+               {% if party.location_radius_km %}data-requires-location="true"{% endif %}
+               data-party-id="{{ party.id }}"
+               data-set-url="{% url 'set_party' party.id %}">
               <div class="position-relative overflow-hidden text-white shadow-xl" style="aspect-ratio: 1; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
                 {% if party.cover_image %}
                   <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
@@ -903,20 +924,82 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Gestionar clics en festes mobile que requereixen codi (les caixes són massa petites per formulari)
-  const mobilePartyCards = document.querySelectorAll('.mobile-party-card[data-requires-code="true"]');
+  var setPartyBase = "{% url 'set_party' 0 %}".replace('/0/', '/');
 
-  mobilePartyCards.forEach(card => {
+  function buildSetUrl(partyId, code, ulat, ulng) {
+    var url = setPartyBase + partyId + '/';
+    var params = [];
+    if (code)  params.push('code=' + encodeURIComponent(code));
+    if (ulat)  params.push('ulat=' + ulat);
+    if (ulng)  params.push('ulng=' + ulng);
+    return params.length ? url + '?' + params.join('&') : url;
+  }
+
+  function getLocationThenGo(partyId, code) {
+    if (!navigator.geolocation) {
+      window.location.href = buildSetUrl(partyId, code, null, null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        window.location.href = buildSetUrl(partyId, code, pos.coords.latitude.toFixed(6), pos.coords.longitude.toFixed(6));
+      },
+      function() {
+        // Permission denied or error — let the server reject if needed
+        window.location.href = buildSetUrl(partyId, code, null, null);
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }
+
+  // ── Desktop: intercept links with data-geocheck ─────────────────────────
+  document.querySelectorAll('a[data-geocheck="true"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      getLocationThenGo(this.dataset.partyId, '');
+    });
+  });
+
+  // ── Desktop: intercept code forms with data-geocheck-form ───────────────
+  document.querySelectorAll('form[data-geocheck-form="true"]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var code = (form.querySelector('input[name="code"]') || {}).value || '';
+      var partyId = this.dataset.partyId;
+      getLocationThenGo(partyId, code);
+    });
+  });
+
+  // ── Mobile cards: require code and/or location ──────────────────────────
+  document.querySelectorAll('.mobile-party-card').forEach(function(card) {
+    var requiresCode = card.dataset.requiresCode === 'true';
+    var requiresLocation = card.dataset.requiresLocation === 'true';
+    if (!requiresCode && !requiresLocation) return;
+
     card.addEventListener('click', function(e) {
       e.preventDefault();
-      const partyId = this.dataset.partyId;
-      const code = prompt('{% trans "Aquesta festa requereix un codi d\'entrada. Si us plau, introdueix el codi:" %}');
-
-      if (code) {
-        window.location.href = `{% url 'set_party' 0 %}`.replace('0', partyId) + `?code=${code.trim().toUpperCase()}`;
+      var partyId = this.dataset.partyId;
+      var code = '';
+      if (requiresCode) {
+        code = prompt('{% trans "Aquesta festa requereix un codi d\'entrada. Si us plau, introdueix el codi:" %}');
+        if (!code) return;
+        code = code.trim().toUpperCase();
+      }
+      if (requiresLocation) {
+        getLocationThenGo(partyId, code);
+      } else {
+        window.location.href = buildSetUrl(partyId, code, null, null);
       }
     });
   });
+
+  // ── Handle verify_location redirect back from server ────────────────────
+  var urlParams = new URLSearchParams(window.location.search);
+  var verifyPartyId = urlParams.get('verify_location');
+  if (verifyPartyId) {
+    var code = urlParams.get('code') || '';
+    getLocationThenGo(verifyPartyId, code);
+  }
 });
 </script>
 {% endblock %}

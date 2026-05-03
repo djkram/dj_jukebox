@@ -22,13 +22,15 @@ class Playlist(models.Model):
 
 class Party(models.Model):
     STATUS_HIDDEN = 'hidden'
+    STATUS_PARTY_VISIBLE = 'party_visible'
     STATUS_SHOW_PARTY = 'show_party'
     STATUS_REQUESTS_OPEN = 'requests_open'
     STATUS_DJJUKEBOX_ACTIVE = 'djjukebox_active'
     STATUS_FINISHED = 'finished'
     STATUS_CHOICES = [
         (STATUS_HIDDEN, _('Festa oculta')),
-        (STATUS_SHOW_PARTY, _('Mostrar festa')),
+        (STATUS_PARTY_VISIBLE, _('Festa visible (sense llista)')),
+        (STATUS_SHOW_PARTY, _('Mostrar festa i llista')),
         (STATUS_REQUESTS_OPEN, _('Obrir peticions')),
         (STATUS_DJJUKEBOX_ACTIVE, _('Iniciar Jukebox')),
         (STATUS_FINISHED, _('Acabar festa')),
@@ -53,6 +55,11 @@ class Party(models.Model):
     last_sync_at = models.DateTimeField(null=True, blank=True, help_text=_("Última sincronització exitosa"))
     auto_analyze_audio = models.BooleanField(default=False, help_text=_("Analitzar automàticament àudio cada 5 minuts"))
     last_analyze_at = models.DateTimeField(null=True, blank=True, help_text=_("Última anàlisi automàtica"))
+    location_name = models.CharField(max_length=255, blank=True, default='', help_text=_("Nom o adreça de la localització"))
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    location_radius_km = models.PositiveIntegerField(default=0, help_text=_("Radi en km per restringir accés per ubicació (0 = sense restricció)"))
+    djs = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='dj_parties', blank=True, help_text=_("Usuaris amb rol de DJ per a aquesta festa"))
 
     @staticmethod
     def normalize_code(raw_code):

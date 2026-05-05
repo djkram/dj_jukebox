@@ -1461,7 +1461,8 @@
                 </h3>
             </div>
             <div style="margin-bottom: 1rem;">
-                <div class="position-relative" style="max-width: 26rem;">
+                <div style="max-width: 38rem; display: flex; align-items: center; gap: 0.55rem;">
+                  <div class="position-relative" style="max-width: 26rem; flex: 1;">
                     <span class="material-symbols-outlined position-absolute" style="left: 0.9rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
                     <input
                         id="song-search"
@@ -1470,6 +1471,14 @@
                         placeholder="Cerca a la maleta del DJ..."
                         style="height: 3rem; padding-left: 2.6rem; border: 1px solid rgba(116, 118, 136, 0.18); border-radius: 0.8rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.03);"
                     >
+                  </div>
+                  <a id="dashboard-bag-search-spotify-btn"
+                     href="#"
+                     class="sonic-btn sonic-btn-tertiary sonic-btn-sm d-none"
+                     style="height: 3rem; display:flex; align-items:center; gap:0.35rem; white-space: nowrap;">
+                      <i class="fab fa-spotify"></i>
+                      Buscar a Spotify
+                  </a>
                 </div>
             </div>
             <div class="sonic-table-container">
@@ -1488,9 +1497,9 @@
                             <th class="text-right"></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="dashboard-bag-tbody">
                     {% for song in pending_songs %}
-                        <tr>
+                        <tr data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id|default:'' }}">
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
                                     {% if song.album_image_url %}
@@ -1548,6 +1557,13 @@
                     </tbody>
                 </table>
             </div>
+            <div id="dashboard-bag-no-results" class="sonic-card d-none" style="margin-top: 0.75rem; text-align: center; padding: 1rem; color: #747687;">
+                <div style="margin-bottom: 0.65rem; font-size: 0.9rem;">No s'ha trobat cap tema a la maleta.</div>
+            </div>
+            <div id="dashboard-spotify-results" class="sonic-card d-none" style="margin-top: 0.75rem; padding: 0.9rem;">
+                <div id="dashboard-spotify-results-title" style="font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #3f4259; margin-bottom: 0.55rem;"></div>
+                <div id="dashboard-spotify-results-list" class="sonic-space-y-2"></div>
+            </div>
         </section>
 
     </div>
@@ -1572,9 +1588,6 @@
                     <span class="req-toggle-slider"></span>
                   </label>
                 </div>
-                {% if pending_requests_count > 0 %}
-                <span class="sonic-badge-tertiary">{{ pending_requests_count }}</span>
-                {% endif %}
             </div>
             {% if not party.allow_song_requests %}
             <div class="requests-disabled-state">
@@ -1766,12 +1779,190 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   var input = document.getElementById('song-search');
-  if (input) {
+  var bagTbody = document.getElementById('dashboard-bag-tbody');
+  var bagNoResults = document.getElementById('dashboard-bag-no-results');
+  var bagSpotifyBtn = document.getElementById('dashboard-bag-search-spotify-btn');
+  var spotifyResultsPanel = document.getElementById('dashboard-spotify-results');
+  var spotifyResultsTitle = document.getElementById('dashboard-spotify-results-title');
+  var spotifyResultsList = document.getElementById('dashboard-spotify-results-list');
+  var csrfToken = '{{ csrf_token }}';
+
+  function submitLoadSong(songId) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/dj/mark_played/' + songId + '/';
+    var tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'csrfmiddlewaretoken';
+    tokenInput.value = csrfToken;
+    form.appendChild(tokenInput);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function findExistingSongIdBySpotify(spotifyId) {
+    var row = bagTbody ? bagTbody.querySelector('tr[data-spotify-id="' + spotifyId + '"]') : null;
+    return row ? row.getAttribute('data-song-id') : null;
+  }
+
+  function renderSpotifyResults(query, tracks) {
+    if (!spotifyResultsPanel || !spotifyResultsList || !spotifyResultsTitle) return;
+    spotifyResultsTitle.textContent = 'Resultats Spotify: "' + query + '"';
+    spotifyResultsList.innerHTML = '';
+
+    if (!tracks.length) {
+      spotifyResultsList.innerHTML = '<div style="font-size:0.85rem;color:#747687;">No s\'han trobat resultats a Spotify.</div>';
+      spotifyResultsPanel.classList.remove('d-none');
+      return;
+    }
+
+    tracks.forEach(function(track) {
+      var existingSongId = track.already_in_party ? findExistingSongIdBySpotify(track.id) : null;
+      var card = document.createElement('div');
+      card.className = 'sonic-request-card';
+      card.style.border = '1px solid rgba(116,118,136,0.18)';
+      card.style.borderRadius = '0.65rem';
+      card.style.padding = '0.55rem';
+      card.style.display = 'flex';
+      card.style.alignItems = 'center';
+      card.style.gap = '0.6rem';
+
+      var imgHtml = track.album_image_url
+        ? '<img src="' + track.album_image_url + '" alt="" style="width:2.5rem;height:2.5rem;border-radius:0.45rem;object-fit:cover;">'
+        : '<div style="width:2.5rem;height:2.5rem;border-radius:0.45rem;background:#ebeef1;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:1rem;color:#747687;">music_note</span></div>';
+
+      var buttonHtml = '';
+      if (track.already_in_party) {
+        buttonHtml = existingSongId
+          ? '<button type="button" class="sonic-btn-posada btn-load-existing" data-song-id="' + existingSongId + '">LOAD</button>'
+          : '<span class="sonic-badge-success" style="padding:0.35rem 0.5rem;">Ja a la maleta</span>';
+      } else {
+        buttonHtml = ''
+          + '<button type="button" class="sonic-btn sonic-btn-tertiary sonic-btn-sm btn-add-track">Afegir a la maleta</button>'
+          + '<button type="button" class="sonic-btn-posada btn-add-and-load">LOAD</button>';
+      }
+
+      card.innerHTML = ''
+        + imgHtml
+        + '<div style="flex:1;min-width:0;">'
+        + '  <div style="font-weight:700;font-size:0.9rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + track.title + '</div>'
+        + '  <div style="font-size:0.78rem;color:#5c5f73;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + track.artist + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:0.45rem;align-items:center;flex-shrink:0;">' + buttonHtml + '</div>';
+
+      function addTrackAndMaybeLoad(shouldLoad) {
+        var body = new URLSearchParams({
+          spotify_id: track.id,
+          title: track.title,
+          artist: track.artist,
+          album_image_url: track.album_image_url || ''
+        });
+        fetch('{% url "add_track_to_party_playlist" party.id %}', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        })
+        .then(function(r) { return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+        .then(function(res) {
+          if (!res.ok || !res.data.success) {
+            alert(res.data.error || 'No s\'ha pogut afegir la cançó.');
+            return;
+          }
+          if (shouldLoad && res.data.song && res.data.song.id) {
+            submitLoadSong(res.data.song.id);
+            return;
+          }
+          window.location.reload();
+        })
+        .catch(function() {
+          alert('No s\'ha pogut afegir la cançó.');
+        });
+      }
+
+      var btnAdd = card.querySelector('.btn-add-track');
+      if (btnAdd) btnAdd.addEventListener('click', function() { addTrackAndMaybeLoad(false); });
+
+      var btnAddLoad = card.querySelector('.btn-add-and-load');
+      if (btnAddLoad) btnAddLoad.addEventListener('click', function() { addTrackAndMaybeLoad(true); });
+
+      var btnLoadExisting = card.querySelector('.btn-load-existing');
+      if (btnLoadExisting) {
+        btnLoadExisting.addEventListener('click', function() {
+          var existingId = btnLoadExisting.getAttribute('data-song-id');
+          if (existingId) submitLoadSong(existingId);
+        });
+      }
+
+      spotifyResultsList.appendChild(card);
+    });
+    spotifyResultsPanel.classList.remove('d-none');
+  }
+
+  if (input && bagTbody) {
     input.addEventListener('input', function() {
       var q = input.value.trim().toLowerCase();
-      document.querySelectorAll('table tbody tr').forEach(function(row) {
-        var title = row.cells[0].textContent.toLowerCase();
-        row.style.display = title.includes(q) ? '' : 'none';
+      var rawQuery = input.value.trim();
+      var visibleCount = 0;
+
+      bagTbody.querySelectorAll('tr').forEach(function(row) {
+        var titleCell = row.cells && row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+        var isMatch = titleCell.includes(q);
+        row.style.display = isMatch ? '' : 'none';
+        if (isMatch) visibleCount += 1;
+      });
+
+      if (bagNoResults) {
+        if (rawQuery && visibleCount === 0) {
+          bagNoResults.classList.remove('d-none');
+          if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
+        } else {
+          bagNoResults.classList.add('d-none');
+          if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
+        }
+      }
+
+      if (bagSpotifyBtn) {
+        if (rawQuery.length > 0) bagSpotifyBtn.classList.remove('d-none');
+        else bagSpotifyBtn.classList.add('d-none');
+      }
+    });
+  }
+
+  if (bagSpotifyBtn && input) {
+    bagSpotifyBtn.addEventListener('click', function(event) {
+      event.preventDefault();
+      var query = input.value.trim();
+      if (!query) return;
+
+      if (spotifyResultsPanel && spotifyResultsTitle && spotifyResultsList) {
+        spotifyResultsTitle.textContent = 'Buscant a Spotify...';
+        spotifyResultsList.innerHTML = '';
+        spotifyResultsPanel.classList.remove('d-none');
+      }
+
+      fetch('{% url "party_settings_search_tracks" party.id %}?search=' + encodeURIComponent(query), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+      })
+      .then(function(r) { return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res) {
+        if (!res.ok) {
+          var error = res.data && res.data.error ? res.data.error : 'No s\'ha pogut cercar a Spotify.';
+          var reconnectUrl = res.data && res.data.reconnect_url ? res.data.reconnect_url : null;
+          if (spotifyResultsPanel && spotifyResultsList && spotifyResultsTitle) {
+            spotifyResultsTitle.textContent = 'Spotify';
+            spotifyResultsList.innerHTML = reconnectUrl
+              ? '<a href="' + reconnectUrl + '" class="sonic-btn sonic-btn-tertiary sonic-btn-sm">Reconnectar Spotify</a>'
+              : '<div style="font-size:0.85rem;color:#ba1a1a;">' + error + '</div>';
+          }
+          return;
+        }
+        renderSpotifyResults(query, res.data.tracks || []);
+      })
+      .catch(function() {
+        if (spotifyResultsPanel && spotifyResultsList && spotifyResultsTitle) {
+          spotifyResultsTitle.textContent = 'Spotify';
+          spotifyResultsList.innerHTML = '<div style="font-size:0.85rem;color:#ba1a1a;">No s\'ha pogut cercar a Spotify.</div>';
+        }
       });
     });
   }
@@ -1880,7 +2071,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <section>
       {# ── CASSETTE DECK (mobile) ─────────────────────────────────────────── #}
-      <div class="cassette-panel" style="padding: 0.85rem 0.75rem 1rem; position: relative;">
+      <div class="cassette-panel" style="padding: 0.85rem 0.75rem 1rem; position: relative; margin-top: 0.55rem;">
 
         {# Botó OFF — sobresurt del capdemunt (mobile) #}
         <form method="post" action="{% url 'update_party_status' party.id %}"
@@ -1989,14 +2180,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         </div>
-        {# LEDs #}
-        <div class="cassette-led-row">
-          <div class="cassette-led {% if party.party_status == 'show_party' %}led-on-blue{% elif party.party_status == 'requests_open' %}led-on-purple{% elif party.party_status == 'djjukebox_active' %}led-on-green{% elif party.party_status == 'finished' %}led-on-red{% endif %}"></div>
-          <div class="cassette-led {% if party.party_status != 'hidden' and party.party_status != 'finished' %}led-on-orange{% endif %}"></div>
-          <div class="cassette-led {% if not party.allow_song_requests %}led-on-red{% endif %}"></div>
-          <div class="cassette-led {% if party.party_status != 'hidden' and party.party_status != 'finished' %}led-on-orange{% endif %}"></div>
-          <div class="cassette-led {% if party.party_status == 'show_party' %}led-on-blue{% elif party.party_status == 'requests_open' %}led-on-purple{% elif party.party_status == 'djjukebox_active' %}led-on-green{% elif party.party_status == 'finished' %}led-on-red{% endif %}"></div>
-        </div>
       </div>
     </section>
 
@@ -2009,8 +2192,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="mobile-card-grid mobile-card-grid--3">
         {% for song in recommended_songs|slice:":6" %}
           <div>
-            <div class="bg-white p-2 h-100 d-flex flex-column" style="border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
-              <div class="rounded-lg overflow-hidden mb-2 position-relative" style="aspect-ratio: 1 / 0.82; background: #eceef3;">
+            <div class="bg-white p-1 h-100 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+              <div class="rounded-lg overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
                 {% if song.album_image_url %}
                   <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
                 {% else %}
@@ -2018,15 +2201,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="fas fa-music" style="color: #747688; font-size: 1rem;"></i>
                   </div>
                 {% endif %}
+                <div class="position-absolute d-flex flex-column" style="left: 0.22rem; right: 0.22rem; bottom: 0.22rem; gap: 0.16rem;">
+                  <div style="font-size: 0.67rem; font-weight: 700; color: #191c1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.02; display: inline-block; max-width: 100%; background: #fff; padding: 0.07rem 0.26rem; border-radius: 3px;">
+                    {{ song.title }}
+                  </div>
+                  <div style="font-size: 0.58rem; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1; display: inline-block; max-width: 100%; background: #fff; padding: 0.01rem 0.26rem; border-radius: 3px;">
+                    {{ song.artist }}
+                  </div>
+                </div>
                 {% if is_djjukebox_active %}
-                <form method="post" action="{% url 'mark_song_played' song.id %}" class="position-absolute mb-0" style="right: 0.35rem; bottom: 0.35rem;">
+                <form method="post" action="{% url 'mark_song_played' song.id %}" class="position-absolute mb-0" style="right: 0.22rem; top: 0.18rem;">
                   {% csrf_token %}
-                  <button type="submit" class="sonic-btn-posada">LOAD</button>
+                  <button type="submit" class="sonic-btn-posada" style="font-size: 0.54rem; padding: 0.16rem 0.42rem; min-width: 2.2rem;">LOAD</button>
                 </form>
                 {% endif %}
               </div>
-              <div class="fw-bold mb-1" style="font-size: 0.66rem; line-height: 1.05; color: #191c1f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.35rem;" title="{{ song.title }}">{{ song.title }}</div>
-              <div class="text-muted" style="font-size: 0.58rem; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.15rem;" title="{{ song.artist }}">{{ song.artist }}</div>
+              <div class="mt-1" style="display:flex; gap:0.2rem; flex-wrap:wrap;">
+                {% if song.bpm %}<span class="sonic-badge-primary" style="font-size:0.58rem;padding:0.1rem 0.32rem;background:#fff;color:#191c1f;border:none;">{{ song.bpm|floatformat:0 }} BPM</span>{% endif %}
+                {% if song.key %}<span class="camelot-key camelot-{{ song.key }}" style="font-size:0.58rem;padding:0.1rem 0.32rem;">{{ song.key }}</span>{% endif %}
+              </div>
             </div>
           </div>
         {% endfor %}
@@ -2036,8 +2229,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <section class="mobile-group-stack">
       <div class="mobile-segmented">
-        <button type="button" class="dashboard-mobile-tab mobile-segmented-item is-active" data-dashboard-tab="bag">Maleta del DJ</button>
-        <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="played">Temes ja posats</button>
+        <button type="button" class="dashboard-mobile-tab mobile-segmented-item is-active" data-dashboard-tab="bag">Maleta</button>
+        <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="requests">Peticions</button>
+        <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="played">Posats</button>
       </div>
 
       <div id="dashboard-mobile-tab-bag" class="mobile-list-stack">
@@ -2143,14 +2337,120 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         {% endfor %}
       </div>
+
+      <div id="dashboard-mobile-tab-requests" class="d-none mobile-list-stack">
+        <div class="d-flex align-items-center justify-content-between mb-2 px-1">
+          <span style="font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: #3f4259; text-transform: uppercase;">Peticions</span>
+          <div class="req-toggle-wrap" style="margin: 0;">
+            <span class="req-toggle-label">Peticions</span>
+            <label class="req-toggle-switch" title="Activar / desactivar peticions">
+              <input type="checkbox" id="toggleAllowRequestsSwitchMobile"
+                     {% if party.allow_song_requests %}checked{% endif %}
+                     data-url="{% url 'toggle_allow_requests' party.id %}">
+              <span class="req-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        {% if not party.allow_song_requests %}
+          <div class="mobile-empty-state">
+            <i class="fas fa-ban fa-2x mb-2"></i>
+            <p class="mb-2">Les peticions estan desactivades</p>
+            <a href="{% url 'party_settings' party.id %}" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="display: inline-flex; gap: 0.35rem; align-items: center;">
+              <span class="material-symbols-outlined" style="font-size: 1rem;">settings</span>
+              Configuració
+            </a>
+          </div>
+        {% elif pending_requests or accepted_unplayed_requests %}
+          {% for req in pending_requests %}
+            <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
+              <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
+                {% if req.album_image_url %}
+                  <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="w-100 h-100" style="object-fit: cover;">
+                {% else %}
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                    <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 pe-1" style="min-width: 0;">
+                <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ req.title }}</div>
+                <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
+                  <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ req.artist }}</span>
+                  <span class="flex-shrink-0">{{ req.user.username }}</span>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-auto ps-2">
+                <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="request_id" value="{{ req.id }}">
+                  <input type="hidden" name="action" value="accept">
+                  <button type="submit" class="sonic-btn sonic-btn-tertiary sonic-btn-sm" style="display:inline-flex;align-items:center;gap:0.18rem;padding:0.22rem 0.42rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">check</span>
+                    <span style="font-size:0.62rem;line-height:1;">OK</span>
+                  </button>
+                </form>
+                <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="request_id" value="{{ req.id }}">
+                  <input type="hidden" name="action" value="reject">
+                  <button type="submit" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="display:inline-flex;align-items:center;gap:0.18rem;padding:0.22rem 0.42rem;border-color: #ba1a1a; color: #ba1a1a;">
+                    <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
+                    <span style="font-size:0.62rem;line-height:1;">NO</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+          {% for req in accepted_unplayed_requests %}
+            <div class="mobile-list-card mobile-list-card--positive d-flex align-items-center gap-2 p-2">
+              <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
+                {% if req.album_image_url %}
+                  <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="w-100 h-100" style="object-fit: cover;">
+                {% else %}
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+                    <i class="fas fa-music" style="color: #1cc88a; font-size: 0.875rem;"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1 pe-1" style="min-width: 0;">
+                <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ req.title }}</div>
+                <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
+                  <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ req.artist }}</span>
+                  <span class="flex-shrink-0">{{ req.user.username }}</span>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
+                {% if req.linked_song_id and is_djjukebox_active %}
+                  <form method="post" action="{% url 'mark_song_played' req.linked_song_id %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="sonic-btn-posada">LOAD</button>
+                  </form>
+                {% else %}
+                  <span class="d-inline-flex align-items-center justify-content-center" style="width: 2rem; height: 2rem; color: #1cc88a; font-size: 1.2rem;">
+                    <i class="fas fa-check-circle"></i>
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="mobile-empty-state">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0">No hi ha temes demanats</p>
+          </div>
+        {% endif %}
+      </div>
     </section>
   </main>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var dashboardTabButtons = document.querySelectorAll('.dashboard-mobile-tab');
-  var dashboardBag = document.getElementById('dashboard-mobile-tab-bag');
-  var dashboardPlayed = document.getElementById('dashboard-mobile-tab-played');
+  var dashboardPanels = {
+    bag: document.getElementById('dashboard-mobile-tab-bag'),
+    requests: document.getElementById('dashboard-mobile-tab-requests'),
+    played: document.getElementById('dashboard-mobile-tab-played')
+  };
 
   dashboardTabButtons.forEach(function(button) {
     button.addEventListener('click', function() {
@@ -2166,19 +2466,17 @@ document.addEventListener('DOMContentLoaded', function() {
       button.style.background = '#eef2ff';
       button.style.color = '#0040e0';
 
-      if (dashboardBag && dashboardPlayed) {
-        if (target === 'played') {
-          dashboardBag.classList.add('d-none');
-          dashboardBag.classList.remove('d-flex');
-          dashboardPlayed.classList.remove('d-none');
-          dashboardPlayed.classList.add('d-flex');
+      Object.keys(dashboardPanels).forEach(function(key) {
+        var panel = dashboardPanels[key];
+        if (!panel) return;
+        if (key === target) {
+          panel.classList.remove('d-none');
+          panel.classList.add('d-flex');
         } else {
-          dashboardPlayed.classList.add('d-none');
-          dashboardPlayed.classList.remove('d-flex');
-          dashboardBag.classList.remove('d-none');
-          dashboardBag.classList.add('d-flex');
+          panel.classList.add('d-none');
+          panel.classList.remove('d-flex');
         }
-      }
+      });
     });
   });
 });
@@ -2232,26 +2530,38 @@ document.addEventListener('DOMContentLoaded', function() {
   })();
 
   /* Toggle switch — palanca de peticions */
-  var reqSwitch = document.getElementById('toggleAllowRequestsSwitch');
-  if (reqSwitch) {
+  var reqSwitches = [
+    document.getElementById('toggleAllowRequestsSwitch'),
+    document.getElementById('toggleAllowRequestsSwitchMobile')
+  ].filter(Boolean);
+
+  reqSwitches.forEach(function(reqSwitch) {
     reqSwitch.addEventListener('change', function() {
       var url = this.dataset.url;
-      var prevChecked = !this.checked; // estat anterior (revert si error)
-      this.disabled = true;
+      var nextChecked = this.checked;
+      var prevChecked = !nextChecked;
+
+      reqSwitches.forEach(function(sw) {
+        sw.checked = nextChecked;
+        sw.disabled = true;
+      });
+
       fetch(url, {
         method: 'POST',
         headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' }
       })
       .then(function(r) { return r.json(); })
-      .then(function(data) {
+      .then(function() {
         window.location.reload();
       })
       .catch(function() {
-        reqSwitch.checked = prevChecked;
-        reqSwitch.disabled = false;
+        reqSwitches.forEach(function(sw) {
+          sw.checked = prevChecked;
+          sw.disabled = false;
+        });
       });
     });
-  }
+  });
 });
 </script>
 {% endblock %}

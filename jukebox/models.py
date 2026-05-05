@@ -37,7 +37,7 @@ class Party(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=True, default='')
@@ -104,11 +104,16 @@ class Party(models.Model):
         return uuid.uuid4().hex[:8].upper()
 
     def save(self, *args, **kwargs):
+        from django.db import IntegrityError
         self.code = self.normalize_code(self.code)
         if not self.code:
             self.code = self._generate_unique_code()
         self.is_jukebox_active = self.party_status == self.STATUS_DJJUKEBOX_ACTIVE
-        super().save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except IntegrityError:
+            self.code = self._generate_unique_code()
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -118,18 +123,21 @@ class Song(models.Model):
     title = models.CharField(max_length=200)
     artist = models.CharField(max_length=200)
     spotify_id = models.CharField(max_length=100)
-    album_image_url = models.URLField(max_length=500, null=True, blank=True)  # URL de la caràtula
-    preview_url = models.URLField(max_length=500, null=True, blank=True)  # URL del preview de 30s
-    bpm = models.FloatField(null=True, blank=True)           # ← Nou camp
-    key = models.CharField(max_length=4, null=True, blank=True)  # ← Nou camp (ex. “8B”)
+    album_image_url = models.URLField(max_length=500, null=True, blank=True)
+    preview_url = models.URLField(max_length=500, null=True, blank=True)
+    bpm = models.FloatField(null=True, blank=True)
+    key = models.CharField(max_length=4, null=True, blank=True)
     has_played = models.BooleanField(default=False)
-    votes = models.IntegerField(default=0)
     played = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = [['party', 'spotify_id']]
 
     def __str__(self):
         return f"{self.title} - {self.artist}"
 
 class Vote(models.Model):
+
     VOTE_TYPES = [
         ('like', _('M\'agrada')),
         ('dislike', _('No m\'agrada')),
@@ -151,7 +159,7 @@ class VotePackage(models.Model):
     party = models.ForeignKey(Party, on_delete=models.CASCADE)
     votes_purchased = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
-    payment_id = models.CharField(max_length=128, blank=True, null=True)  # per Stripe/Paypal
+    payment_id = models.CharField(max_length=128, blank=True, null=True, unique=True)  # per Stripe/Paypal
 
 
 class PartyCoinsGrant(models.Model):
@@ -167,6 +175,7 @@ class PartyCoinsGrant(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = [['user', 'party', 'reason']]
 
 
 class SongRequest(models.Model):

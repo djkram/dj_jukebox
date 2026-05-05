@@ -571,6 +571,15 @@
 </div>
 
 <script>
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const isMobile = window.innerWidth < 768;
   const searchInput = document.getElementById(isMobile ? 'search-input-mobile' : 'search-input');
@@ -580,9 +589,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showMessage(message, type = 'success') {
     messageArea.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      <div class="alert alert-${escapeHtml(type)} alert-dismissible fade show" role="alert">
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-        ${message}
+        ${escapeHtml(message)}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     `;
@@ -611,7 +620,8 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         if (!data.ok) {
           if (data.status === 401 && data.data.reconnect_url) {
-            window.location.href = data.data.reconnect_url;
+            const url = data.data.reconnect_url;
+            if (url && url.startsWith('/')) window.location.href = url;
             return;
           }
           throw new Error(data.data.error || 'Error connectant amb Spotify');
@@ -714,7 +724,8 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(result => {
       if (!result.ok) {
         if (result.status === 401 && result.data.reconnect_url) {
-          window.location.href = result.data.reconnect_url;
+          const url = result.data.reconnect_url;
+          if (url && url.startsWith('/')) window.location.href = url;
           return;
         }
         throw new Error(result.data.error || 'Error al enviar la petició');

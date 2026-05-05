@@ -368,7 +368,7 @@
                     </span>
                   {% endif %}
                 {% elif notification.type == 'song_played' %}
-                  {% if notification.song.album_image_url %}
+                  {% if notification.song and notification.song.album_image_url %}
                     <img src="{{ notification.song.album_image_url }}" alt="{{ notification.song.title }}" class="notif-album-img">
                   {% endif %}
                 {% elif notification.type == 'coins_purchased' or notification.type == 'coins_received' %}

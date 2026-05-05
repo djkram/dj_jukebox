@@ -5,6 +5,8 @@ Handles conversion from Coins (global currency) to Votes (party-specific).
 Applies volume-based bonuses to incentivize bulk purchases.
 """
 from typing import Tuple
+from django.db import transaction
+from django.db.models import F
 
 
 def calculate_votes_from_coins(coins: int) -> int:
@@ -70,28 +72,31 @@ def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, st
             print(f"Error: {error}")
     """
     from jukebox.models import VotePackage
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
 
     # Validation
     if coins_to_convert <= 0:
         return False, "La quantitat ha de ser superior a 0", 0
 
-    if coins_to_convert > user.credits:
-        return False, f"No tens prous Coins (tens {user.credits})", 0
-
     # Calculate votes with bonuses
     votes_to_add = calculate_votes_from_coins(coins_to_convert)
 
-    # Create conversion record
-    VotePackage.objects.create(
-        user=user,
-        party=party,
-        votes_purchased=votes_to_add
-    )
+    with transaction.atomic():
+        updated = User.objects.filter(
+            pk=user.pk, credits__gte=coins_to_convert
+        ).update(credits=F('credits') - coins_to_convert)
 
-    # Deduct coins
-    user.credits -= coins_to_convert
-    user.save(update_fields=['credits'])
+        if not updated:
+            return False, f"No tens prous Coins", 0
 
+        VotePackage.objects.create(
+            user=user,
+            party=party,
+            votes_purchased=votes_to_add
+        )
+
+    user.refresh_from_db(fields=['credits'])
     return True, "", votes_to_add
 
 

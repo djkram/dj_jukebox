@@ -862,17 +862,26 @@
 <!-- Audio Element for preview (shared between desktop and mobile) -->
 <audio id="preview-audio" preload="none"></audio>
 
-{% if has_spotify and spotify_token %}
+{% if has_spotify %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 {% endif %}
 
 <script>
-{% if has_spotify and spotify_token %}
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+{% if has_spotify %}
 // Spotify Web Playback SDK Variables
 let spotifyPlayer = null;
 let spotifyDeviceId = null;
-const SPOTIFY_TOKEN = '{{ spotify_token }}';
+let SPOTIFY_TOKEN = null;
 const HAS_SPOTIFY_PLAYER = true;
 let spotifySdkReady = false;
 let spotifyPlayerInitPromise = null;
@@ -898,7 +907,12 @@ function ensureSpotifyPlayer() {
   spotifyPlayerInitPromise = new Promise((resolve, reject) => {
     spotifyPlayer = new Spotify.Player({
       name: 'DJ Jukebox Web Player',
-      getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+      getOAuthToken: cb => {
+        fetch('/api/spotify-token/')
+          .then(r => r.json())
+          .then(data => { SPOTIFY_TOKEN = data.token; cb(data.token); })
+          .catch(() => cb(null));
+      },
       volume: 0.7
     });
 
@@ -1253,7 +1267,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showMessage(text, isSuccess = true) {
-    messageArea.innerHTML = `<div class="alert ${isSuccess ? 'alert-success' : 'alert-danger'}">${text}</div>`;
+    messageArea.innerHTML = `<div class="alert ${isSuccess ? 'alert-success' : 'alert-danger'}">${escapeHtml(text)}</div>`;
     setTimeout(() => {
       messageArea.innerHTML = '';
     }, 2000);

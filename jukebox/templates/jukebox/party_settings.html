@@ -350,6 +350,7 @@
       font-weight: 700;
       padding: 0.25rem 0.5rem;
       border-radius: 0.375rem;
+      white-space: nowrap;
     }
     .settings-key-badge {
       background: rgba(94,36,225,0.05);
@@ -866,7 +867,7 @@
           <div class="settings-spotify-logo">
             <span class="material-symbols-outlined" style="color: white;">queue_music</span>
           </div>
-          {% if party.playlist %}
+          {% if party.playlist and has_spotify %}
           <span class="settings-spotify-badge">Connectat</span>
           {% endif %}
         </div>
@@ -889,9 +890,11 @@
             <button type="button" id="reloadSongsBtn" class="btn btn-success btn-sm flex-fill">
               <i class="fas fa-sync-alt me-1"></i>Recarrega
             </button>
+            {% if has_spotify %}
             <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm flex-fill">
               Neteja
             </a>
+            {% endif %}
           </div>
 
           <!-- Auto-Sync Toggle -->
@@ -1131,11 +1134,13 @@
                       {% else %}
                         <span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>
                       {% endif %}
+                      {% if has_spotify %}
                       <button class="settings-action-btn delete delete-song-btn"
                               data-song-id="{{ song.id }}"
                               title="Elimina de la playlist i de la festa">
                         <span class="material-symbols-outlined" style="font-size: 1.125rem;">delete</span>
                       </button>
+                      {% endif %}
                     </div>
                   </td>
                 </tr>
@@ -1270,7 +1275,9 @@
           <button type="button" id="reloadSongsBtnMobile" class="btn btn-success flex-fill">
             <i class="fas fa-sync-alt me-1"></i>Recarrega
           </button>
+          {% if has_spotify %}
           <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
+          {% endif %}
         </div>
 
         <!-- Auto-Sync Toggle Mobile -->
@@ -1433,12 +1440,14 @@
                       <i class="fas fa-chart-line"></i>
                     </button>
                   {% endif %}
+                  {% if has_spotify %}
                   <button class="btn btn-sm btn-outline-danger delete-song-btn flex-shrink-0"
                           data-song-id="{{ song.id }}"
                           style="font-size: 0.7rem; padding: 0.25rem 0.5rem;"
                           title="Elimina de la playlist i de la festa">
                     <i class="fas fa-trash"></i>
                   </button>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -1594,6 +1603,15 @@
 
 {# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
 <script>
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Auto-hide and scroll for server-rendered Django messages
   var djangoAlerts = document.querySelectorAll('#party-alert-area .alert');
@@ -1616,9 +1634,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
 
     alertArea.innerHTML = `
-      <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
-        <i class="fas ${iconClass} me-2"></i>
-        ${message}
+      <div id="${alertId}" class="alert alert-${escapeHtml(type)} alert-dismissible fade show shadow" role="alert">
+        <i class="fas ${escapeHtml(iconClass)} me-2"></i>
+        ${escapeHtml(message)}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     `;
@@ -1666,7 +1684,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function maybeReconnectSpotify(result, fallbackMessage) {
     if (result.status === 401 && result.data && result.data.reconnect_url) {
-      window.location.href = result.data.reconnect_url;
+      const url = result.data.reconnect_url;
+      if (url && url.startsWith('/')) window.location.href = url;
       return true;
     }
     throw new Error((result.data && result.data.error) || fallbackMessage || 'Error desconegut');
@@ -1827,30 +1846,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getDeleteButtonHtml(songId, isMobile) {
     var classes = isMobile
-      ? 'btn btn-sm btn-outline-danger delete-song-btn flex-shrink-0'
-      : 'btn btn-sm btn-outline-danger delete-song-btn';
-    var style = isMobile
-      ? 'font-size: 0.7rem; padding: 0.25rem 0.5rem;'
-      : 'padding: 0.25rem 0.45rem;';
-
-    return '<button class="' + classes + '" data-song-id="' + songId + '" title="Elimina de la playlist i de la festa" style="' + style + '"><i class="fas fa-trash"></i></button>';
+      ? 'settings-action-btn delete delete-song-btn flex-shrink-0'
+      : 'settings-action-btn delete delete-song-btn';
+    return '<button class="' + classes + '" data-song-id="' + songId + '" title="Elimina de la playlist i de la festa"><span class="material-symbols-outlined" style="font-size: 1.125rem;">delete</span></button>';
   }
 
   function getDesktopActionCellHtml(song) {
     var analyzeHtml = song.needs_analysis
-      ? '<button class="btn btn-sm btn-primary analyze-audio-btn" data-song-id="' + song.id + '" title="Analitza BPM i Key" style="padding: 0.25rem 0.4rem;"><i class="fas fa-chart-line"></i></button>'
-      : '<span class="text-success small"><i class="fas fa-check"></i></span>';
+      ? '<button class="settings-action-btn analyze-audio-btn" data-song-id="' + song.id + '" title="Analitza BPM i Key"><span class="material-symbols-outlined" style="font-size: 1.125rem;">analytics</span></button>'
+      : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>';
 
-    return '<div class="d-flex align-items-center gap-2">' + analyzeHtml + getDeleteButtonHtml(song.id, false) + '</div>';
+    return '<div class="settings-song-actions">' + analyzeHtml + getDeleteButtonHtml(song.id, false) + '</div>';
   }
 
   function getMobileActionCellHtml(song) {
     var analyzeHtml = song.needs_analysis
-      ? '<button class="btn btn-sm btn-primary analyze-audio-btn flex-shrink-0" data-song-id="' + song.id + '" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;" title="Analitza BPM i Key"><i class="fas fa-chart-line"></i></button>'
-      : '';
+      ? '<button class="settings-action-btn analyze-audio-btn flex-shrink-0" data-song-id="' + song.id + '" title="Analitza BPM i Key"><span class="material-symbols-outlined" style="font-size: 1.125rem;">analytics</span></button>'
+      : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>';
 
     return '<div class="d-flex flex-column gap-2 align-items-end">' + analyzeHtml + getDeleteButtonHtml(song.id, true) + '</div>';
   }
+
+  var EXISTING_SONG_COUNT = {{ songs|length }};
 
   function assignPlaylist(selectEl, triggerBtn) {
     if (!selectEl || !triggerBtn) return;
@@ -1858,6 +1875,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!selectedPlaylist) {
       showAlert('Selecciona una playlist de Spotify.', 'warning');
       return;
+    }
+
+    if (EXISTING_SONG_COUNT > 0) {
+      var confirmed = window.confirm(
+        'Canviar la playlist eliminarà ' + EXISTING_SONG_COUNT + ' cançons i tots els vots associats. Vols continuar?'
+      );
+      if (!confirmed) return;
     }
 
     triggerBtn.disabled = true;
@@ -1941,15 +1965,15 @@ document.addEventListener('DOMContentLoaded', function() {
     container.innerHTML = tracks.map(function(track) {
       var buttonHtml = track.already_in_party
         ? '<button type="button" class="btn btn-sm btn-outline-secondary" disabled>Ja hi és</button>'
-        : '<button type="button" class="btn btn-sm btn-primary add-track-btn" data-spotify-id="' + track.id + '" data-title="' + track.title.replace(/"/g, '&quot;') + '" data-artist="' + track.artist.replace(/"/g, '&quot;') + '" data-album-image-url="' + (track.album_image_url || '') + '"><i class="fas fa-plus me-1"></i>Afegir</button>';
+        : '<button type="button" class="btn btn-sm btn-primary add-track-btn" data-spotify-id="' + escapeHtml(track.id) + '" data-title="' + escapeHtml(track.title) + '" data-artist="' + escapeHtml(track.artist) + '" data-album-image-url="' + escapeHtml(track.album_image_url || '') + '"><i class="fas fa-plus me-1"></i>Afegir</button>';
 
       return '<div class="spotify-search-result d-flex align-items-center gap-3">' +
         (track.album_image_url
-          ? '<img src="' + track.album_image_url + '" alt="' + track.title.replace(/"/g, '&quot;') + '">'
+          ? '<img src="' + escapeHtml(track.album_image_url) + '" alt="' + escapeHtml(track.title) + '">'
           : '<div class="d-flex align-items-center justify-content-center bg-secondary text-white" style="width:52px;height:52px;border-radius:10px;"><i class="fas fa-music"></i></div>') +
         '<div class="flex-grow-1" style="min-width:0;">' +
-          '<div class="fw-semibold" style="line-height:1.1;color:#191c1f;">' + track.title + '</div>' +
-          '<div class="text-muted small">' + track.artist + '</div>' +
+          '<div class="fw-semibold" style="line-height:1.1;color:#191c1f;">' + escapeHtml(track.title) + '</div>' +
+          '<div class="text-muted small">' + escapeHtml(track.artist) + '</div>' +
         '</div>' +
         '<div class="' + (isMobile ? 'align-self-stretch d-flex align-items-center' : '') + '">' + buttonHtml + '</div>' +
       '</div>';
@@ -2000,8 +2024,8 @@ document.addEventListener('DOMContentLoaded', function() {
             : `<div class="bg-secondary rounded d-flex align-items-center justify-content-center w-100 h-100"><i class="fas fa-music text-white"></i></div>`}
         </div>
       </td>
-      <td>${song.title}</td>
-      <td>${song.artist}</td>
+      <td>${escapeHtml(song.title)}</td>
+      <td>${escapeHtml(song.artist)}</td>
       <td class="bpm-cell">${song.bpm || '<span class="text-muted">-</span>'}</td>
       <td class="key-cell">${song.key ? `<span class="camelot-key camelot-${song.key}">${song.key}</span>` : '<span class="text-muted">-</span>'}</td>
       <td>0</td>
@@ -2018,8 +2042,8 @@ document.addEventListener('DOMContentLoaded', function() {
     wrapper.innerHTML = `
       <div class="d-flex justify-content-between align-items-start">
         <div class="flex-grow-1">
-          <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">${song.title}</div>
-          <div style="font-size: 0.82rem; color: #434656;" data-song-artist>${song.artist}</div>
+          <div class="fw-semibold" data-song-title style="font-size: 0.95rem; color: #191c1f; line-height: 1.1;">${escapeHtml(song.title)}</div>
+          <div style="font-size: 0.82rem; color: #434656;" data-song-artist>${escapeHtml(song.artist)}</div>
           <div class="d-flex align-items-center gap-2 mt-2" style="font-size: 0.75rem;">
             <span style="color: #747688;">BPM: <span class="bpm-cell-mobile">${song.bpm || '-'}</span></span>
             <span style="color: #747688;">Key: <span class="key-cell-mobile">${song.key ? `<span class="camelot-key camelot-${song.key}" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">${song.key}</span>` : '-'}</span></span>
@@ -2345,7 +2369,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var analyzeCell = row.querySelector('.analyze-cell');
 
       if (bpmCell && data.bpm) {
-        bpmCell.textContent = Math.round(data.bpm);
+        bpmCell.innerHTML = '<span class="settings-bpm-badge">' + Math.round(data.bpm) + ' BPM</span>';
       }
 
       if (bpmCellMobile && data.bpm) {
@@ -2353,11 +2377,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (keyCell && data.key) {
-        keyCell.innerHTML = '<span class="camelot-key camelot-' + data.key + '">' + data.key + '</span>';
+        keyCell.innerHTML = '<span class="camelot-key camelot-' + escapeHtml(data.key) + '">' + escapeHtml(data.key) + '</span>';
       }
 
       if (keyCellMobile && data.key) {
-        keyCellMobile.innerHTML = '<span class="camelot-key camelot-' + data.key + '" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">' + data.key + '</span>';
+        keyCellMobile.innerHTML = '<span class="camelot-key camelot-' + escapeHtml(data.key) + '" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">' + escapeHtml(data.key) + '</span>';
       }
 
       row.querySelectorAll('.analyze-audio-btn').forEach(function(button) {
@@ -2376,7 +2400,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (row.hasAttribute('data-song-row')) {
         var actionWrapper = row.querySelector('.d-flex.flex-column.gap-2.align-items-end');
         if (actionWrapper) {
-          actionWrapper.innerHTML = getDeleteButtonHtml(songId, true);
+          actionWrapper.innerHTML = getMobileActionCellHtml({
+            id: songId,
+            needs_analysis: false,
+          });
           var mobileDeleteBtn = actionWrapper.querySelector('.delete-song-btn');
           if (mobileDeleteBtn) bindDeleteButton(mobileDeleteBtn);
         }
@@ -2773,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-{% if has_spotify and spotify_token %}
+{% if has_spotify %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
@@ -2809,13 +2836,18 @@ let spotifyPlayer = null;
 let spotifyDeviceId = null;
 let currentPlayingSpotifyId = null;
 let isCurrentlyPlaying = false;
-const SPOTIFY_TOKEN = '{{ spotify_token }}';
+let SPOTIFY_TOKEN = null;
 
 // Initialize Spotify Player
 window.onSpotifyWebPlaybackSDKReady = () => {
   spotifyPlayer = new Spotify.Player({
     name: 'DJ Jukebox Web Player',
-    getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+    getOAuthToken: cb => {
+      fetch('/api/spotify-token/')
+        .then(r => r.json())
+        .then(data => { SPOTIFY_TOKEN = data.token; cb(data.token); })
+        .catch(() => cb(null));
+    },
     volume: 0.7
   });
 

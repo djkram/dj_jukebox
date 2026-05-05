@@ -540,19 +540,18 @@
     </div>
   </div>
 
-  {% if songs %}
-    <!-- Songs Grid - Two Columns -->
-    <div class="row g-4">
-      <!-- Column 1: Maleta del DJ -->
-      <div class="col-lg-6">
-        <div class="songs-column-card">
-          <div class="songs-column-header">
-            <div class="d-flex align-items-center gap-3">
-              <div style="background: rgba(246, 194, 62, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
-                <span class="material-symbols-outlined" style="color: #f6c23e;">work</span>
-              </div>
-              <h3 class="songs-column-title">{% trans "Maleta del DJ" %}</h3>
+  <!-- Songs Grid - Two Columns -->
+  <div class="row g-4">
+    <!-- Column 1: Maleta del DJ -->
+    <div class="col-lg-6">
+      <div class="songs-column-card">
+        <div class="songs-column-header">
+          <div class="d-flex align-items-center gap-3">
+            <div style="background: rgba(246, 194, 62, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
+              <span class="material-symbols-outlined" style="color: #f6c23e;">work</span>
             </div>
+            <h3 class="songs-column-title">{% trans "Maleta del DJ" %}</h3>
+          </div>
             <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
               <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
               <input id="search-pending" type="search" class="songs-column-search" placeholder="{% trans 'Cerca...' %}">
@@ -678,7 +677,13 @@
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="5" class="songs-table-empty">{% trans "No queden temes pendents." %}</td>
+                    <td colspan="5" class="songs-table-empty">
+                      {% if songs %}
+                        {% trans "No queden temes pendents." %}
+                      {% else %}
+                        {% trans "La llista de cançons de la maleta del DJ encara no està disponible." %}
+                      {% endif %}
+                    </td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -773,18 +778,9 @@
         </div>
       </div>
     </div>
-  {% else %}
-    <!-- Vista desktop - No songs -->
-    <div class="songs-column-card" style="padding: 3rem; text-align: center;">
-      <span class="material-symbols-outlined" style="font-size: 4rem; color: #c4c5d8;">music_off</span>
-      <h3 style="font-family: 'Epilogue', sans-serif; font-weight: 700; color: #181c1e; margin: 1rem 0 0.5rem 0;">{% trans "No hi ha cançons" %}</h3>
-      <p style="color: #747687;">{% trans "Aquesta festa encara no té cançons disponibles" %}</p>
-    </div>
-  {% endif %}
 </div>
 
 <!-- Vista de cards per mòbil (NOU DISSENY TAILWIND) -->
-{% if songs %}
 <div class="mobile-songs-grid mobile-page-shell d-md-none">
       <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
         <div class="mobile-group-stack" style="gap: 0.5rem;">
@@ -954,8 +950,27 @@
               </div>
             </div>
           {% empty %}
-            <div class="mobile-empty-state">{% trans "No queden temes pendents." %}</div>
+            <div class="mobile-empty-state">
+              {% if songs %}
+                {% trans "No queden temes pendents." %}
+              {% else %}
+                {% trans "La llista de cançons de la maleta del DJ encara no està disponible." %}
+              {% endif %}
+            </div>
           {% endfor %}
+          </div>
+
+          <div id="mobile-bag-no-results" class="mobile-empty-state d-none" style="margin-top: 0.5rem;">
+            <p class="mb-2">{% trans "No s'ha trobat cap tema a la maleta." %}</p>
+            <a id="mobile-bag-search-spotify-btn"
+               href="https://open.spotify.com/search/"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="sonic-btn sonic-btn-tertiary sonic-btn-sm"
+               style="display:inline-flex;align-items:center;gap:0.35rem;">
+              <i class="fab fa-spotify"></i>
+              {% trans "Buscar-la a Spotify" %}
+            </a>
           </div>
         </section>
 
@@ -1018,21 +1033,11 @@
         {% endif %}
       </main>
     </div>
-{% else %}
-<!-- Vista mòbil - No songs -->
-<div class="mobile-page-shell d-md-none">
-  <div class="mobile-page-content text-center py-4">
-    <i class="fas fa-music mb-2" style="font-size: 2.5rem; color: #747688; opacity: 0.5;"></i>
-    <h4 class="fw-bold mb-1" style="color: #191c1f;">{% trans "No hi ha cançons" %}</h4>
-    <p class="mb-0" style="color: #434656; font-size: 0.875rem;">{% trans "Aquesta festa encara no té cançons disponibles" %}</p>
-  </div>
-</div>
-{% endif %}
 
 <!-- Alert area for Spotify errors -->
 <div id="spotify-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
 
-{% if has_spotify and spotify_token %}
+{% if has_spotify %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
@@ -1068,7 +1073,7 @@ let spotifyPlayer = null;
 let spotifyDeviceId = null;
 let currentPlayingSpotifyId = null;
 let isCurrentlyPlaying = false;
-const SPOTIFY_TOKEN = '{{ spotify_token }}';
+let SPOTIFY_TOKEN = null;
 let spotifySdkReady = false;
 let spotifyPlayerInitPromise = null;
 
@@ -1128,7 +1133,12 @@ function ensureSpotifyPlayer() {
   spotifyPlayerInitPromise = new Promise((resolve, reject) => {
     spotifyPlayer = new Spotify.Player({
       name: 'DJ Jukebox Web Player',
-      getOAuthToken: cb => { cb(SPOTIFY_TOKEN); },
+      getOAuthToken: cb => {
+        fetch('/api/spotify-token/')
+          .then(r => r.json())
+          .then(data => { SPOTIFY_TOKEN = data.token; cb(data.token); })
+          .catch(() => cb(null));
+      },
       volume: 0.7
     });
 
@@ -1348,15 +1358,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var mobileInput = document.getElementById('mobile-song-search');
   if (mobileInput) {
+    var noResultsBox = document.getElementById('mobile-bag-no-results');
+    var spotifySearchBtn = document.getElementById('mobile-bag-search-spotify-btn');
+
     mobileInput.addEventListener('input', function() {
       var q = mobileInput.value.trim().toLowerCase();
+      var rawQuery = mobileInput.value.trim();
       var cards = document.querySelectorAll('.mobile-bag-song-card');
+      var visibleCount = 0;
 
       cards.forEach(function(card) {
         var title = card.getAttribute('data-song-title').toLowerCase();
         var artist = card.getAttribute('data-song-artist').toLowerCase();
-        card.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
+        var isMatch = (title.includes(q) || artist.includes(q));
+        card.style.display = isMatch ? '' : 'none';
+        if (isMatch) visibleCount += 1;
       });
+
+      if (noResultsBox) {
+        if (rawQuery && visibleCount === 0) {
+          noResultsBox.classList.remove('d-none');
+          if (spotifySearchBtn) {
+            spotifySearchBtn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
+          }
+        } else {
+          noResultsBox.classList.add('d-none');
+        }
+      }
     });
   }
 });

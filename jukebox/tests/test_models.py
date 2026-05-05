@@ -134,7 +134,6 @@ class SongModelTests(TestCase):
             spotify_id='spotify123'
         )
         self.assertEqual(song.title, 'Test Song')
-        self.assertEqual(song.votes, 0)
         self.assertFalse(song.played)
         self.assertFalse(song.has_played)
 
@@ -263,12 +262,14 @@ class PartyCoinsGrantModelTests(TestCase):
         grant1 = PartyCoinsGrant.objects.create(
             user=self.user,
             party=self.party,
-            coins_granted=10
+            coins_granted=10,
+            reason='free_coins',
         )
         grant2 = PartyCoinsGrant.objects.create(
             user=self.user,
             party=self.party,
-            coins_granted=20
+            coins_granted=20,
+            reason='adjustment',
         )
 
         grants = PartyCoinsGrant.objects.all()

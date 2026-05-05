@@ -2,6 +2,7 @@
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks
@@ -102,6 +103,18 @@ class PartySettingsForm(forms.ModelForm):
         if instance and instance.playlist:
             self.fields['spotify_playlist'].initial = instance.playlist.spotify_id
 
+    def clean_max_votes_per_user(self):
+        value = self.cleaned_data.get('max_votes_per_user')
+        if value is not None and value < 1:
+            raise forms.ValidationError(_("El nombre mínim de vots per usuari és 1."))
+        return value
+
+    def clean_song_request_cost(self):
+        value = self.cleaned_data.get('song_request_cost')
+        if value is not None and value < 1:
+            raise forms.ValidationError(_("El cost mínim per demanar una cançó és 1 Coin."))
+        return value
+
     def clean_code(self):
         code = Party.normalize_code(self.cleaned_data.get('code'))
         if len(code) < 4:
@@ -142,7 +155,7 @@ class PartySettingsForm(forms.ModelForm):
             # ➐ Si hem seleccionat una nova playlist i load_songs=True, carregar cançons
             if sp_id and load_songs:
                 party.songs.all().delete()
-                for tr in get_playlist_tracks(self.request, sp_id):
+                for tr in get_playlist_tracks(sp_id):
                     Song.objects.create(
                         party=party,
                         title=tr['title'],

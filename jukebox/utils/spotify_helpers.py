@@ -123,13 +123,11 @@ def get_spotify_context_for_view(user) -> dict:
         provider="spotify"
     ).exists()
 
-    spotify_token = None
     if has_spotify:
-        spotify_token = get_user_spotify_token(user, raise_on_error=False)
-        if not spotify_token:
+        token = get_user_spotify_token(user, raise_on_error=False)
+        if not token:
             has_spotify = False
 
     return {
         'has_spotify': has_spotify,
-        'spotify_token': spotify_token,
     }

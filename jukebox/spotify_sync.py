@@ -2,7 +2,7 @@
 
 from django.utils import timezone
 from .models import Party, Song
-from .spotify_api import get_playlist_tracks_basic, SpotifyAuthError
+from .spotify_api import get_playlist_tracks_basic
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,26 +50,10 @@ def sync_playlist_with_spotify(party_id):
             logger.warning(f"[SYNC] Party {party_id} - No playlist assigned")
             return {'error': 'No playlist assigned'}
 
-        # Validar que hi hagi owner per accedir a Spotify
-        if not party.owner:
-            logger.warning(f"[SYNC] Party {party_id} - No owner assigned")
-            return {'error': 'No owner assigned (cannot access Spotify)'}
-
-        # 1. Obtenir tracks de Spotify (només metadata bàsica)
+        # 1. Obtenir tracks de Spotify (només metadata bàsica, usa Client Credentials)
         logger.info(f"[SYNC] Party {party_id} - Fetching tracks from Spotify playlist {playlist.spotify_id}")
 
-        # Crear un request mock amb l'usuari owner
-        class MockRequest:
-            def __init__(self, user):
-                self.user = user
-
-        mock_request = MockRequest(party.owner)
-
-        try:
-            spotify_tracks = get_playlist_tracks_basic(mock_request, playlist.spotify_id)
-        except SpotifyAuthError as e:
-            logger.error(f"[SYNC] Party {party_id} - Spotify auth error: {e}")
-            return {'error': f'Spotify authentication error: {str(e)}'}
+        spotify_tracks = get_playlist_tracks_basic(playlist.spotify_id)
 
         if not spotify_tracks:
             logger.warning(f"[SYNC] Party {party_id} - No tracks found in Spotify playlist")

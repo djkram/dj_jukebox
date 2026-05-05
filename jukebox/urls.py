@@ -41,6 +41,7 @@ urlpatterns = [
     path('party/<int:party_id>/force-sync/', views.force_sync_playlist, name='force_sync_playlist'),
     path('party/<int:party_id>/toggle-auto-analyze/', views.toggle_auto_analyze, name='toggle_auto_analyze'),
     path('get_spotify_playlists/', views.get_spotify_playlists, name='get_spotify_playlists'),
+    path('api/spotify-token/', views.api_spotify_token, name='api_spotify_token'),
     path('buy-coins/', views.buy_votes, name='buy_votes'),
     path('buy-coins/success/', views.buy_votes_success, name='buy_votes_success'),
     path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),

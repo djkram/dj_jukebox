@@ -111,6 +111,14 @@ def _run_spotify_call(request_or_user, operation_name, callback):
         raise
 
 
+def _get_cc_spotify():
+    """Returns a Spotify client using app Client Credentials (env vars). No user OAuth needed."""
+    return Spotify(auth_manager=SpotifyClientCredentials(
+        client_id=settings.SPOTIFY_CLIENT_ID,
+        client_secret=settings.SPOTIFY_CLIENT_SECRET,
+    ))
+
+
 def _camelot_from_key_mode(key, mode):
     mapping = {
         (0, 1): "8B", (7, 1): "9B", (2, 1): "10B", (9, 1): "11B",
@@ -589,30 +597,26 @@ def _chunked(lst, n):
         yield lst[i:i + n]
 
 
-def get_playlist_tracks_basic(request_or_user, playlist_id):
+def get_playlist_tracks_basic(playlist_id):
     """
     Obté només la metadata bàsica de les cançons (títol, artista, ID)
     sense processar BPM ni clau musical. Molt més ràpid.
+    Usa Client Credentials — no requereix OAuth d'usuari.
     """
     logger.info(f"[SPOTIFY] Carregant tracks bàsics de la playlist {playlist_id}")
 
     try:
-        def fetch_tracks(sp_user):
-            all_items = []
-            results = sp_user.playlist_items(
-                playlist_id,
-                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,items.track.preview_url,next",
-                additional_types=["track"]
-            )
+        sp = _get_cc_spotify()
+        all_items = []
+        results = sp.playlist_items(
+            playlist_id,
+            fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,items.track.preview_url,next",
+            additional_types=["track"]
+        )
+        all_items.extend(results["items"])
+        while results.get("next"):
+            results = sp.next(results)
             all_items.extend(results["items"])
-            while results.get("next"):
-                results = sp_user.next(results)
-                all_items.extend(results["items"])
-            return all_items
-
-        all_items = _run_spotify_call(request_or_user, "playlist_items_basic", fetch_tracks)
-    except SpotifyAuthError:
-        raise
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al carregar tracks bàsics: {e}")
         return []
@@ -647,26 +651,26 @@ def get_playlist_tracks_basic(request_or_user, playlist_id):
     return out
 
 
-def get_playlist_tracks(request_or_user, playlist_id):
+def get_playlist_tracks(playlist_id):
+    """
+    Carrega els tracks d’una playlist amb BPM i key.
+    Usa Client Credentials — no requereix OAuth d’usuari.
+    Nota: la playlist ha de ser pública o col·laborativa.
+    """
     logger.info(f"[SPOTIFY] Carregant tracks de la playlist {playlist_id}")
 
     try:
-        def fetch_tracks(sp_user):
-            all_items = []
-            results = sp_user.playlist_items(
-                playlist_id,
-                fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
-                additional_types=["track"]
-            )
+        sp = _get_cc_spotify()
+        all_items = []
+        results = sp.playlist_items(
+            playlist_id,
+            fields="items.track.id,items.track.name,items.track.artists,items.track.album.images,next",
+            additional_types=["track"]
+        )
+        all_items.extend(results["items"])
+        while results.get("next"):
+            results = sp.next(results)
             all_items.extend(results["items"])
-            while results.get("next"):
-                results = sp_user.next(results)
-                all_items.extend(results["items"])
-            return all_items
-
-        all_items = _run_spotify_call(request_or_user, "playlist_items", fetch_tracks)
-    except SpotifyAuthError:
-        raise
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al carregar tracks de playlist: {e}")
         return []
@@ -680,7 +684,6 @@ def get_playlist_tracks(request_or_user, playlist_id):
             continue
         ids.append(sid)
 
-        # Obtenir la imatge de l'àlbum
         album_image_url = None
         if tr.get("album") and tr["album"].get("images"):
             images = tr["album"]["images"]
@@ -698,8 +701,8 @@ def get_playlist_tracks(request_or_user, playlist_id):
     features_map = {}
     for idx, chunk in enumerate(_chunked(ids, 50)):
         try:
-            logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks) amb token d’usuari")
-            feats = sp_user.audio_features(tracks=chunk)
+            logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks)")
+            feats = sp.audio_features(tracks=chunk)
             for f in feats:
                 if not f:
                     continue
@@ -738,9 +741,10 @@ def get_playlist_tracks(request_or_user, playlist_id):
     return out
 
 
-def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
+def get_audio_features_for_songs(song_ids_with_metadata):
     """
     Obté BPM i clau musical per una llista de cançons.
+    Usa Client Credentials — no requereix OAuth d'usuari.
 
     Args:
         song_ids_with_metadata: List[dict] amb 'id', 'title', 'artist'
@@ -752,24 +756,17 @@ def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
         return {}
 
     try:
-        def fetch_audio_features(sp_user, chunk):
-            return sp_user.audio_features(tracks=chunk)
-
+        sp = _get_cc_spotify()
         ids = [s['id'] for s in song_ids_with_metadata]
         meta = {s['id']: {'title': s['title'], 'artist': s['artist']}
                 for s in song_ids_with_metadata}
 
         features_map = {}
 
-        # Intentar obtenir features de Spotify en chunks de 50
         for idx, chunk in enumerate(_chunked(ids, 50)):
             try:
                 logger.debug(f"[SPOTIFY] Carregant features chunk {idx+1} ({len(chunk)} tracks)")
-                feats = _run_spotify_call(
-                    request_or_user,
-                    f"audio_features chunk {idx+1}",
-                    lambda sp_user, c=chunk: fetch_audio_features(sp_user, c),
-                )
+                feats = sp.audio_features(tracks=chunk)
                 for f in feats:
                     if not f:
                         continue
@@ -777,11 +774,8 @@ def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
                         "bpm": f.get("tempo"),
                         "key": _camelot_from_key_mode(f.get("key"), f.get("mode"))
                     }
-            except SpotifyAuthError:
-                raise
             except Exception as e:
                 logger.error(f"[SPOTIFY] ERROR al carregar audio features per chunk {idx+1}: {e}")
-                # Si falla Spotify, utilitzar GetSongBPM per aquest chunk
                 for sid in chunk:
                     if sid not in features_map:
                         features_map[sid] = _get_getsongbpm_features(
@@ -789,19 +783,16 @@ def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
                             meta[sid]["artist"]
                         )
 
-        # Per les cançons sense features, intentar GetSongBPM i després MusicBrainz
         for sid in ids:
             if sid not in features_map or (
                 not features_map[sid].get("bpm") and not features_map[sid].get("key")
             ):
-                # Fallback 1: GetSongBPM
                 logger.debug(f"[FALLBACK] Spotify no té features, provant GetSongBPM")
                 features_map[sid] = _get_getsongbpm_features(
                     meta[sid]["title"],
                     meta[sid]["artist"]
                 )
 
-                # Fallback 2: MusicBrainz si GetSongBPM tampoc ho té
                 if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
                     logger.debug(f"[FALLBACK] GetSongBPM no té features, provant MusicBrainz")
                     features_map[sid] = _get_musicbrainz_features(
@@ -810,8 +801,6 @@ def get_audio_features_for_songs(request_or_user, song_ids_with_metadata):
                     )
 
         return features_map
-    except SpotifyAuthError:
-        raise
     except Exception as e:
         logger.error(f"[SPOTIFY] Error al inicialitzar client d'audio features: {e}")
         return {}

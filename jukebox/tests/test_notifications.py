@@ -168,7 +168,7 @@ class NotificationsTests(TestCase):
 
         self.client.login(username='testuser', password='testpass123')
         url = reverse('mark_all_notifications_read')
-        response = self.client.get(url)
+        response = self.client.post(url)
 
         # Verificar resposta
         self.assertEqual(response.status_code, 200)

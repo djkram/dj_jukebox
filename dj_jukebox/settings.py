@@ -55,6 +55,12 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
 SPOTIFY_CLIENT_ID     = os.environ.get("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
+
+# yt-dlp cookie authentication (needed to bypass YouTube bot detection)
+# Option 1: path to a Netscape-format cookies.txt file (preferred for servers)
+YTDLP_COOKIES_FILE = os.environ.get('YTDLP_COOKIES_FILE', '')
+# Option 2: browser name to read cookies from ('chrome', 'firefox', 'safari') — local dev only
+YTDLP_COOKIES_FROM_BROWSER = os.environ.get('YTDLP_COOKIES_FROM_BROWSER', '')
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 
@@ -268,6 +274,9 @@ X_FRAME_OPTIONS = os.environ.get("X_FRAME_OPTIONS", "DENY")
 
 if IS_PRODUCTION and SECRET_KEY.startswith("django-insecure-"):
     raise RuntimeError("SECRET_KEY insegura en produccio. Defineix una clau segura a l'entorn.")
+
+if IS_PRODUCTION and not STRIPE_WEBHOOK_SECRET:
+    raise RuntimeError("STRIPE_WEBHOOK_SECRET no configurat en producció.")
 
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'

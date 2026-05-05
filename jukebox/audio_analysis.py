@@ -53,12 +53,32 @@ def _load_audio_libraries():
     return librosa, np
 
 
+def _get_ytdlp_cookie_opts():
+    """Returns yt-dlp options for YouTube cookie authentication."""
+    from django.conf import settings
+
+    cookies_file = getattr(settings, 'YTDLP_COOKIES_FILE', '') or ''
+    if cookies_file and os.path.exists(cookies_file):
+        logger.debug(f"[AUDIO_ANALYSIS] Usant cookies file: {cookies_file}")
+        return {'cookiefile': cookies_file}
+
+    cookies_browser = getattr(settings, 'YTDLP_COOKIES_FROM_BROWSER', '') or ''
+    if cookies_browser:
+        logger.debug(f"[AUDIO_ANALYSIS] Usant cookies del navegador: {cookies_browser}")
+        return {'cookiesfrombrowser': (cookies_browser,)}
+
+    return {}
+
+
 def download_temporary_song_audio(title, artist, timeout=60):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
     Prova múltiples variants de cerca; si un vídeo no és disponible en la
     regió, passa automàticament a la variant següent.
+
+    Requereix autenticació de YouTube per evitar el bloqueig de bots.
+    Configura YTDLP_COOKIES_FILE o YTDLP_COOKIES_FROM_BROWSER al .env.
     """
     from yt_dlp import YoutubeDL
     from yt_dlp.utils import DownloadError
@@ -74,6 +94,14 @@ def download_temporary_song_audio(title, artist, timeout=60):
     ]
 
     logger.info(f"[AUDIO_ANALYSIS] Buscant àudio temporal per '{title}' - '{artist}'")
+
+    cookie_opts = _get_ytdlp_cookie_opts()
+    if not cookie_opts:
+        logger.warning(
+            "[AUDIO_ANALYSIS] No hi ha cookies de YouTube configurades. "
+            "Afegeix YTDLP_COOKIES_FILE o YTDLP_COOKIES_FROM_BROWSER al .env "
+            "per evitar bloquejos de bot."
+        )
 
     last_error = None
     for i, query in enumerate(search_variants):
@@ -95,6 +123,7 @@ def download_temporary_song_audio(title, artist, timeout=60):
                 "preferredcodec": "mp3",
                 "preferredquality": "192",
             }],
+            **cookie_opts,
         }
 
         try:

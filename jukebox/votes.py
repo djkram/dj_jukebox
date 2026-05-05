@@ -1,5 +1,6 @@
 from .models import Vote, VotePackage, PartyCoinsGrant
-from django.db.models import Sum
+from django.db import transaction
+from django.db.models import Sum, F
 
 def get_user_votes_left(user, party):
     """
@@ -34,23 +35,32 @@ def ensure_user_has_free_coins(user, party):
     """
     S'assegura que l'usuari tingui els coins gratuïts de la festa.
     Comprova si ja se li han donat i ajusta si ha canviat free_coins_per_user.
+    Uses a single row per (user, party, reason) updated in place.
     """
-    current_granted = PartyCoinsGrant.objects.filter(
-        user=user,
-        party=party,
-        reason='free_coins'
-    ).aggregate(total=Sum('coins_granted'))['total'] or 0
+    from django.db import IntegrityError
 
     expected = party.free_coins_per_user
-    difference = expected - current_granted
+    if expected <= 0:
+        return 0
 
-    if difference != 0:
-        # Donar o ajustar coins
-        PartyCoinsGrant.objects.create(
-            user=user,
-            party=party,
-            coins_granted=difference,
-            reason='free_coins'
-        )
-
-    return difference
+    with transaction.atomic():
+        try:
+            grant = PartyCoinsGrant.objects.select_for_update().get(
+                user=user, party=party, reason='free_coins'
+            )
+            diff = expected - grant.coins_granted
+            if diff != 0:
+                grant.coins_granted = expected
+                grant.save(update_fields=['coins_granted'])
+            return diff
+        except PartyCoinsGrant.DoesNotExist:
+            try:
+                PartyCoinsGrant.objects.create(
+                    user=user,
+                    party=party,
+                    coins_granted=expected,
+                    reason='free_coins'
+                )
+                return expected
+            except IntegrityError:
+                return 0

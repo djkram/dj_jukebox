@@ -53,113 +53,115 @@ def _load_audio_libraries():
     return librosa, np
 
 
-def _get_ytdlp_cookie_opts():
-    """Returns yt-dlp options for YouTube cookie authentication."""
+def _get_ytdlp_cookie_args():
+    """Returns yt-dlp CLI arguments for YouTube cookie authentication."""
     from django.conf import settings
 
     cookies_file = getattr(settings, 'YTDLP_COOKIES_FILE', '') or ''
     if cookies_file and os.path.exists(cookies_file):
-        logger.debug(f"[AUDIO_ANALYSIS] Usant cookies file: {cookies_file}")
-        return {'cookiefile': cookies_file}
+        return ['--cookies', cookies_file]
 
     cookies_browser = getattr(settings, 'YTDLP_COOKIES_FROM_BROWSER', '') or ''
     if cookies_browser:
-        logger.debug(f"[AUDIO_ANALYSIS] Usant cookies del navegador: {cookies_browser}")
-        return {'cookiesfrombrowser': (cookies_browser,)}
+        return ['--cookies-from-browser', cookies_browser]
 
-    return {}
+    return []
 
 
-def download_temporary_song_audio(title, artist, timeout=60, max_wall_seconds=25):
+def download_temporary_song_audio(title, artist, per_attempt_timeout=15, max_wall_seconds=20):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
-    Prova múltiples variants de cerca amb un límit de temps total
-    (max_wall_seconds) per evitar worker timeouts a gunicorn.
+    Executa yt-dlp com a subprocess amb timeout dur per garantir que
+    mai no excedeix el timeout de gunicorn.
     """
+    import sys
     import time as _time
-    import resource
-
-    from yt_dlp import YoutubeDL
-    from yt_dlp.utils import DownloadError
+    import subprocess
 
     search_variants = [
         f"{title} {artist} audio",
         f"{title} {artist}",
-        f"{title} audio",
     ]
 
-    def _mem_mb():
-        try:
-            return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        except Exception:
-            return 0
-
     t_start = _time.time()
-    logger.info(f"[YT-DLP] ▶ START '{title}' - '{artist}' (mem={_mem_mb():.0f}MB)")
+    logger.info(f"[YT-DLP] ▶ START '{title}' - '{artist}'")
 
-    cookie_opts = _get_ytdlp_cookie_opts()
-    logger.info(f"[YT-DLP] Cookies: {'configurades' if cookie_opts else 'NO configurades'}")
+    cookie_args = _get_ytdlp_cookie_args()
+    logger.info(f"[YT-DLP] Cookies: {'configurades' if cookie_args else 'NO configurades'}")
+
+    temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
+    output_template = os.path.join(temp_dir, "audio.%(ext)s")
 
     last_error = None
     for i, query in enumerate(search_variants):
         elapsed = _time.time() - t_start
-        if elapsed > max_wall_seconds:
-            logger.warning(f"[YT-DLP] ⏱ Wall timeout ({elapsed:.0f}s > {max_wall_seconds}s), abortant")
+        remaining = max_wall_seconds - elapsed
+        if remaining < 5:
+            logger.warning(f"[YT-DLP] ⏱ Wall timeout ({elapsed:.0f}s), abortant")
             break
 
+        attempt_timeout = min(per_attempt_timeout, remaining)
+
+        logger.info(
+            f"[YT-DLP] Intent {i+1}/{len(search_variants)}: "
+            f"'{query}' (elapsed={elapsed:.1f}s, timeout={attempt_timeout:.0f}s)"
+        )
+
+        cmd = [
+            sys.executable, '-m', 'yt_dlp',
+            '--no-playlist',
+            '-q', '--no-warnings',
+            '-o', output_template,
+            '-x', '--audio-format', 'mp3', '--audio-quality', '128',
+            '--socket-timeout', '10',
+            '--no-part',
+            '--force-overwrites',
+            *cookie_args,
+            f'ytsearch1:{query}',
+        ]
+
         t_iter = _time.time()
-        search_query = f"ytsearch1:{query}"
-        temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
-        output_template = os.path.join(temp_dir, "audio.%(ext)s")
-
-        logger.info(f"[YT-DLP] Intent {i+1}/{len(search_variants)}: '{query}' (elapsed={elapsed:.1f}s, mem={_mem_mb():.0f}MB)")
-
-        ydl_opts = {
-            "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
-            "noplaylist": True,
-            "quiet": True,
-            "no_warnings": True,
-            "outtmpl": output_template,
-            "default_search": "ytsearch1",
-            "socket_timeout": min(timeout, 15),
-            "nopart": True,
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-                "preferredquality": "128",
-            }],
-            **cookie_opts,
-        }
-
         try:
-            with YoutubeDL(ydl_opts) as ydl:
-                logger.info(f"[YT-DLP] Intent {i+1}: extract_info start (mem={_mem_mb():.0f}MB)")
-                ydl.extract_info(search_query, download=True)
-                logger.info(f"[YT-DLP] Intent {i+1}: extract_info OK ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB)")
+            proc = subprocess.run(
+                cmd,
+                timeout=attempt_timeout,
+                capture_output=True,
+                text=True,
+            )
+            dt = _time.time() - t_iter
+            if proc.returncode != 0:
+                stderr_short = (proc.stderr or '').strip()[-200:]
+                logger.warning(f"[YT-DLP] Intent {i+1}: FAIL exit={proc.returncode} ({dt:.1f}s): {stderr_short}")
+                last_error = RuntimeError(f"yt-dlp exit {proc.returncode}")
+            else:
+                logger.info(f"[YT-DLP] Intent {i+1}: OK ({dt:.1f}s)")
 
-            for filename in os.listdir(temp_dir):
-                if filename.endswith(".mp3"):
-                    temp_path = os.path.join(temp_dir, filename)
-                    fsize = os.path.getsize(temp_path) / 1024
-                    logger.info(f"[YT-DLP] ✓ MP3 descarregat intent {i+1}: {fsize:.0f}KB (total {_time.time() - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
-                    return temp_path, temp_dir
-
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            last_error = RuntimeError("No s'ha generat cap MP3 temporal")
-            logger.warning(f"[YT-DLP] Intent {i+1}: extract OK però sense MP3 ({_time.time() - t_iter:.1f}s)")
-
-        except DownloadError as e:
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            logger.warning(f"[YT-DLP] Intent {i+1} DownloadError ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB): {e}")
-            last_error = e
+        except subprocess.TimeoutExpired:
+            logger.warning(f"[YT-DLP] Intent {i+1}: TIMEOUT ({attempt_timeout:.0f}s)")
+            last_error = RuntimeError(f"yt-dlp timeout ({attempt_timeout:.0f}s)")
+            for fn in os.listdir(temp_dir):
+                try:
+                    os.remove(os.path.join(temp_dir, fn))
+                except OSError:
+                    pass
             continue
-        except Exception as e:
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            logger.error(f"[YT-DLP] Intent {i+1} EXCEPTION ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB): {type(e).__name__}: {e}")
-            raise
 
-    logger.error(f"[YT-DLP] ✗ FAIL tots els intents (total {_time.time() - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
+        for filename in os.listdir(temp_dir):
+            if filename.endswith(".mp3"):
+                temp_path = os.path.join(temp_dir, filename)
+                fsize = os.path.getsize(temp_path) / 1024
+                logger.info(f"[YT-DLP] ✓ MP3 intent {i+1}: {fsize:.0f}KB (total {_time.time() - t_start:.1f}s)")
+                return temp_path, temp_dir
+
+        for fn in os.listdir(temp_dir):
+            try:
+                os.remove(os.path.join(temp_dir, fn))
+            except OSError:
+                pass
+
+    shutil.rmtree(temp_dir, ignore_errors=True)
+    logger.error(f"[YT-DLP] ✗ FAIL tots els intents (total {_time.time() - t_start:.1f}s)")
     raise last_error or RuntimeError("Cap variant de cerca ha funcionat")
 
 
@@ -341,31 +343,24 @@ def analyze_from_preview_url(preview_url):
 def analyze_song_from_temporary_mp3(title, artist):
     """
     Cerca, descarrega, analitza i esborra un MP3 temporal d'una cançó.
-    Utilitza yt-dlp (pot fallar en servidors cloud per bot detection).
+    Utilitza yt-dlp com a subprocess (pot fallar en servidors cloud per bot detection).
     """
     import time as _time
-    import resource
-
-    def _mem_mb():
-        try:
-            return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-        except Exception:
-            return 0
 
     temp_file = None
     temp_dir = None
     try:
         temp_file, temp_dir = download_temporary_song_audio(title, artist)
-        logger.info(f"[AUDIO_ANALYSIS] MP3 obtingut, iniciant librosa (mem={_mem_mb():.0f}MB)")
+        logger.info("[AUDIO_ANALYSIS] MP3 obtingut, iniciant librosa")
         t0 = _time.time()
         result = analyze_audio_file(temp_file)
         logger.info(
-            f"[AUDIO_ANALYSIS] ✓ Anàlisi completat per '{title}' - '{artist}': "
-            f"BPM={result['bpm']}, Key={result['key']} (librosa {_time.time() - t0:.1f}s, mem={_mem_mb():.0f}MB)"
+            f"[AUDIO_ANALYSIS] ✓ '{title}' - '{artist}': "
+            f"BPM={result['bpm']}, Key={result['key']} (librosa {_time.time() - t0:.1f}s)"
         )
         return result
     except Exception as e:
-        logger.error(f"[AUDIO_ANALYSIS] ✗ Error àudio temporal (mem={_mem_mb():.0f}MB): {e}")
+        logger.error(f"[AUDIO_ANALYSIS] ✗ Error àudio temporal: {e}")
         return None
     finally:
         if temp_dir and os.path.exists(temp_dir):

@@ -70,15 +70,12 @@ def _get_ytdlp_cookie_opts():
     return {}
 
 
-def download_temporary_song_audio(title, artist, timeout=60):
+def download_temporary_song_audio(title, artist, timeout=60, max_wall_seconds=25):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
-    Prova múltiples variants de cerca; si un vídeo no és disponible en la
-    regió, passa automàticament a la variant següent.
-
-    Requereix autenticació de YouTube per evitar el bloqueig de bots.
-    Configura YTDLP_COOKIES_FILE o YTDLP_COOKIES_FROM_BROWSER al .env.
+    Prova múltiples variants de cerca amb un límit de temps total
+    (max_wall_seconds) per evitar worker timeouts a gunicorn.
     """
     import time as _time
     import resource
@@ -88,11 +85,7 @@ def download_temporary_song_audio(title, artist, timeout=60):
 
     search_variants = [
         f"{title} {artist} audio",
-        f"{title} {artist} official audio",
         f"{title} {artist}",
-        f"{title} {artist} lyrics",
-        f"{title} {artist} official video",
-        f"{artist} {title} audio",
         f"{title} audio",
     ]
 
@@ -110,26 +103,31 @@ def download_temporary_song_audio(title, artist, timeout=60):
 
     last_error = None
     for i, query in enumerate(search_variants):
+        elapsed = _time.time() - t_start
+        if elapsed > max_wall_seconds:
+            logger.warning(f"[YT-DLP] ⏱ Wall timeout ({elapsed:.0f}s > {max_wall_seconds}s), abortant")
+            break
+
         t_iter = _time.time()
         search_query = f"ytsearch1:{query}"
         temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
         output_template = os.path.join(temp_dir, "audio.%(ext)s")
 
-        logger.info(f"[YT-DLP] Intent {i+1}/7: '{query}' (elapsed={t_iter - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
+        logger.info(f"[YT-DLP] Intent {i+1}/{len(search_variants)}: '{query}' (elapsed={elapsed:.1f}s, mem={_mem_mb():.0f}MB)")
 
         ydl_opts = {
-            "format": "bestaudio/best",
+            "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
             "noplaylist": True,
             "quiet": True,
             "no_warnings": True,
             "outtmpl": output_template,
             "default_search": "ytsearch1",
-            "socket_timeout": timeout,
+            "socket_timeout": min(timeout, 15),
             "nopart": True,
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": "mp3",
-                "preferredquality": "192",
+                "preferredquality": "128",
             }],
             **cookie_opts,
         }

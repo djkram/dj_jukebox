@@ -700,8 +700,10 @@ def process_song_features(request, party_id):
 @require_POST
 def analyze_song_audio(request, party_id, song_id):
     """
-    Intenta obtenir BPM i Key via GetSongBPM i, si no n'hi ha prou,
-    fa fallback a un MP3 temporal analitzat amb librosa.
+    Intenta obtenir BPM i Key per aquest ordre:
+    1) GetSongBPM
+    2) Spotify audio features (si hi ha spotify_id)
+    3) MP3 temporal (yt-dlp + librosa)
     """
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
@@ -720,6 +722,20 @@ def analyze_song_audio(request, party_id, song_id):
         bpm = result.get('bpm') if result else None
         key = result.get('key') if result else None
         logger.info("[ANALYZE_AUDIO] GetSongBPM song_id=%s → BPM=%s Key=%s (%.1fs)", song.id, bpm, key, t1 - t0)
+
+        if (not bpm and not key) and song.spotify_id:
+            logger.info("[ANALYZE_AUDIO] Fallback Spotify features per song_id=%s spotify_id=%s", song.id, song.spotify_id)
+            features_map = get_audio_features_for_songs([{
+                'id': song.spotify_id,
+                'title': song.title,
+                'artist': song.artist,
+            }])
+            feature_data = features_map.get(song.spotify_id, {}) if features_map else {}
+            bpm = bpm or feature_data.get('bpm')
+            key = key or feature_data.get('key')
+            if bpm or key:
+                source = "spotify_features"
+            logger.info("[ANALYZE_AUDIO] Spotify features song_id=%s → BPM=%s Key=%s", song.id, bpm, key)
 
         if not bpm and not key:
             logger.info("[ANALYZE_AUDIO] Fallback yt-dlp per song_id=%s (preview_url=%s)", song.id, bool(song.preview_url))

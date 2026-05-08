@@ -162,14 +162,16 @@ class PartySettingsForm(forms.ModelForm):
             if sp_id and load_songs:
                 party.songs.all().delete()
                 for tr in get_playlist_tracks(sp_id):
-                    Song.objects.create(
+                    Song.objects.get_or_create(
                         party=party,
-                        title=tr['title'],
-                        artist=tr['artist'],
                         spotify_id=tr['id'],
-                        album_image_url=tr.get('album_image_url'),
-                        bpm=tr.get('bpm'),
-                        key=tr.get('key'),
+                        defaults={
+                            'title': tr['title'],
+                            'artist': tr['artist'],
+                            'album_image_url': tr.get('album_image_url'),
+                            'bpm': tr.get('bpm'),
+                            'key': tr.get('key'),
+                        },
                     )
 
         return party

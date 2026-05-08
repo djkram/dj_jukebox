@@ -68,7 +68,7 @@ def _get_ytdlp_cookie_args():
     return []
 
 
-def download_temporary_song_audio(title, artist, per_attempt_timeout=15, max_wall_seconds=20):
+def download_temporary_song_audio(title, artist, per_attempt_timeout=25, max_wall_seconds=60):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
@@ -113,11 +113,15 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=15, max_wal
             '--no-playlist',
             '-q', '--no-warnings',
             '-o', output_template,
+            '--format', 'bestaudio/best',
             '-x', '--audio-format', 'mp3', '--audio-quality', '128',
             '--socket-timeout', '10',
+            '--extractor-retries', '1',
+            '--fragment-retries', '1',
+            '--force-ipv4',
             '--no-part',
             '--force-overwrites',
-            '--extractor-args', 'youtube:player_client=ios,mweb',
+            '--extractor-args', 'youtube:player_client=android,web',
             *cookie_args,
             f'ytsearch1:{query}',
         ]
@@ -132,7 +136,7 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=15, max_wal
             )
             dt = _time.time() - t_iter
             if proc.returncode != 0:
-                stderr_short = (proc.stderr or '').strip()[-200:]
+                stderr_short = (proc.stderr or '').strip()[-500:]
                 logger.warning(f"[YT-DLP] Intent {i+1}: FAIL exit={proc.returncode} ({dt:.1f}s): {stderr_short}")
                 last_error = RuntimeError(f"yt-dlp exit {proc.returncode}")
             else:

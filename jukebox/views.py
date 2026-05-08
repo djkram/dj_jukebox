@@ -717,14 +717,6 @@ def analyze_song_audio(request, party_id, song_id):
         key = result.get('key') if result else None
 
         if not bpm and not key:
-            logger.info("[ANALYZE_AUDIO] GetSongBPM sense dades, fallback a MP3 temporal per song_id=%s", song.id)
-            temp_result = analyze_song_from_temporary_mp3(song.title, song.artist)
-            if temp_result:
-                bpm = bpm or temp_result.get('bpm')
-                key = key or temp_result.get('key')
-                source = "temporary_mp3"
-
-        if not bpm and not key:
             return JsonResponse({
                 'success': False,
                 'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.'

@@ -294,9 +294,42 @@ def analyze_audio_file(audio_path):
         raise
 
 
+def analyze_from_preview_url(preview_url):
+    """
+    Descarrega un Spotify preview MP3 (30s) i analitza BPM/Key amb librosa.
+    Molt més lleuger que yt-dlp: HTTP GET directe, sense autenticació.
+    """
+    import requests
+
+    if not preview_url:
+        return None
+
+    temp_dir = None
+    try:
+        logger.info(f"[AUDIO_ANALYSIS] Descarregant preview URL: {preview_url[:80]}...")
+        resp = requests.get(preview_url, timeout=15)
+        resp.raise_for_status()
+
+        temp_dir = tempfile.mkdtemp(prefix="preview-analysis-")
+        temp_path = os.path.join(temp_dir, "preview.mp3")
+        with open(temp_path, 'wb') as f:
+            f.write(resp.content)
+
+        result = analyze_audio_file(temp_path)
+        logger.info(f"[AUDIO_ANALYSIS] Preview analitzat: BPM={result['bpm']}, Key={result['key']}")
+        return result
+    except Exception as e:
+        logger.error(f"[AUDIO_ANALYSIS] Error analitzant preview: {e}")
+        return None
+    finally:
+        if temp_dir and os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 def analyze_song_from_temporary_mp3(title, artist):
     """
     Cerca, descarrega, analitza i esborra un MP3 temporal d'una cançó.
+    Utilitza yt-dlp (pot fallar en servidors cloud per bot detection).
     """
     temp_file = None
     temp_dir = None
@@ -315,6 +348,5 @@ def analyze_song_from_temporary_mp3(title, artist):
         if temp_dir and os.path.exists(temp_dir):
             try:
                 shutil.rmtree(temp_dir, ignore_errors=True)
-                logger.debug(f"[AUDIO_ANALYSIS] Directori temporal eliminat: {temp_dir}")
             except Exception as e:
                 logger.warning(f"[AUDIO_ANALYSIS] No s'ha pogut eliminar el temporal: {e}")

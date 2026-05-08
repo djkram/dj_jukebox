@@ -286,19 +286,23 @@ LOGIN_URL = '/login/'
 
 SOCIALACCOUNT_PROVIDERS = {
     'spotify': {
+        'APP': {
+            'client_id': SPOTIFY_CLIENT_ID,
+            'secret': SPOTIFY_CLIENT_SECRET,
+        },
         'SCOPE': [
-            'user-read-email',             # email de l'usuari
-            'user-read-private',           # dades bàsiques del perfil
-            'playlist-read-private',       # playlists privades
-            'playlist-read-collaborative', # playlists col·laboratives
-            'playlist-modify-public',      # afegir cançons a playlists públiques
-            'playlist-modify-private',     # afegir cançons a playlists privades
-            'streaming',                   # reproduir música amb Web Playback SDK
-            'user-read-playback-state',    # llegir estat de reproducció
-            'user-modify-playback-state',  # controlar reproducció
+            'user-read-email',
+            'user-read-private',
+            'playlist-read-private',
+            'playlist-read-collaborative',
+            'playlist-modify-public',
+            'playlist-modify-private',
+            'streaming',
+            'user-read-playback-state',
+            'user-modify-playback-state',
         ],
         'AUTH_PARAMS': {
-            'show_dialog': True,           # força diàleg per regenerar tokens
+            'show_dialog': True,
         },
     },
     'google': {

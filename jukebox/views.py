@@ -709,14 +709,30 @@ def analyze_song_audio(request, party_id, song_id):
     song = get_object_or_404(Song, pk=song_id, party=party)
 
     try:
-        logger.info("[ANALYZE_AUDIO] Analitzant song_id=%s", song.id)
+        import time as _time
+        t0 = _time.time()
+        logger.info("[ANALYZE_AUDIO] ▶ START song_id=%s '%s' - '%s'", song.id, song.title, song.artist)
+
         source = "getsongbpm"
         result = _get_getsongbpm_features(song.title, song.artist)
+        t1 = _time.time()
 
         bpm = result.get('bpm') if result else None
         key = result.get('key') if result else None
+        logger.info("[ANALYZE_AUDIO] GetSongBPM song_id=%s → BPM=%s Key=%s (%.1fs)", song.id, bpm, key, t1 - t0)
 
         if not bpm and not key:
+            logger.info("[ANALYZE_AUDIO] Fallback yt-dlp per song_id=%s (preview_url=%s)", song.id, bool(song.preview_url))
+            temp_result = analyze_song_from_temporary_mp3(song.title, song.artist)
+            t2 = _time.time()
+            logger.info("[ANALYZE_AUDIO] yt-dlp song_id=%s → %s (%.1fs)", song.id, temp_result, t2 - t1)
+            if temp_result:
+                bpm = bpm or temp_result.get('bpm')
+                key = key or temp_result.get('key')
+                source = "temporary_mp3"
+
+        if not bpm and not key:
+            logger.warning("[ANALYZE_AUDIO] ✗ FAIL song_id=%s sense dades (total %.1fs)", song.id, _time.time() - t0)
             return JsonResponse({
                 'success': False,
                 'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.'
@@ -728,7 +744,7 @@ def analyze_song_audio(request, party_id, song_id):
             song.key = key
         song.save()
 
-        logger.info("[ANALYZE_AUDIO] Cançó analitzada via %s per song_id=%s (BPM=%s, Key=%s)", source, song.id, bpm, key)
+        logger.info("[ANALYZE_AUDIO] ✓ OK song_id=%s via %s BPM=%s Key=%s (total %.1fs)", song.id, source, bpm, key, _time.time() - t0)
 
         return JsonResponse({
             'success': True,
@@ -739,7 +755,7 @@ def analyze_song_audio(request, party_id, song_id):
         })
 
     except Exception:
-        logger.exception("[ANALYZE_AUDIO] Error analitzant song_id=%s", song_id)
+        logger.exception("[ANALYZE_AUDIO] ✗ EXCEPTION song_id=%s (total %.1fs)", song_id, _time.time() - t0)
 
         return JsonResponse({
             'success': False,

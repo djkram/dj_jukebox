@@ -80,6 +80,9 @@ def download_temporary_song_audio(title, artist, timeout=60):
     Requereix autenticació de YouTube per evitar el bloqueig de bots.
     Configura YTDLP_COOKIES_FILE o YTDLP_COOKIES_FROM_BROWSER al .env.
     """
+    import time as _time
+    import resource
+
     from yt_dlp import YoutubeDL
     from yt_dlp.utils import DownloadError
 
@@ -93,21 +96,26 @@ def download_temporary_song_audio(title, artist, timeout=60):
         f"{title} audio",
     ]
 
-    logger.info(f"[AUDIO_ANALYSIS] Buscant àudio temporal per '{title}' - '{artist}'")
+    def _mem_mb():
+        try:
+            return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+        except Exception:
+            return 0
+
+    t_start = _time.time()
+    logger.info(f"[YT-DLP] ▶ START '{title}' - '{artist}' (mem={_mem_mb():.0f}MB)")
 
     cookie_opts = _get_ytdlp_cookie_opts()
-    if not cookie_opts:
-        logger.warning(
-            "[AUDIO_ANALYSIS] No hi ha cookies de YouTube configurades. "
-            "Afegeix YTDLP_COOKIES_FILE o YTDLP_COOKIES_FROM_BROWSER al .env "
-            "per evitar bloquejos de bot."
-        )
+    logger.info(f"[YT-DLP] Cookies: {'configurades' if cookie_opts else 'NO configurades'}")
 
     last_error = None
     for i, query in enumerate(search_variants):
+        t_iter = _time.time()
         search_query = f"ytsearch1:{query}"
         temp_dir = tempfile.mkdtemp(prefix="song-analysis-")
         output_template = os.path.join(temp_dir, "audio.%(ext)s")
+
+        logger.info(f"[YT-DLP] Intent {i+1}/7: '{query}' (elapsed={t_iter - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
 
         ydl_opts = {
             "format": "bestaudio/best",
@@ -128,26 +136,32 @@ def download_temporary_song_audio(title, artist, timeout=60):
 
         try:
             with YoutubeDL(ydl_opts) as ydl:
+                logger.info(f"[YT-DLP] Intent {i+1}: extract_info start (mem={_mem_mb():.0f}MB)")
                 ydl.extract_info(search_query, download=True)
+                logger.info(f"[YT-DLP] Intent {i+1}: extract_info OK ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB)")
 
             for filename in os.listdir(temp_dir):
                 if filename.endswith(".mp3"):
                     temp_path = os.path.join(temp_dir, filename)
-                    logger.info(f"[AUDIO_ANALYSIS] MP3 descarregat (intent {i+1}): {temp_path}")
+                    fsize = os.path.getsize(temp_path) / 1024
+                    logger.info(f"[YT-DLP] ✓ MP3 descarregat intent {i+1}: {fsize:.0f}KB (total {_time.time() - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
                     return temp_path, temp_dir
 
             shutil.rmtree(temp_dir, ignore_errors=True)
             last_error = RuntimeError("No s'ha generat cap MP3 temporal")
+            logger.warning(f"[YT-DLP] Intent {i+1}: extract OK però sense MP3 ({_time.time() - t_iter:.1f}s)")
 
         except DownloadError as e:
             shutil.rmtree(temp_dir, ignore_errors=True)
-            logger.warning(f"[AUDIO_ANALYSIS] Intent {i+1} fallat ('{query}'): {e}")
+            logger.warning(f"[YT-DLP] Intent {i+1} DownloadError ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB): {e}")
             last_error = e
             continue
         except Exception as e:
             shutil.rmtree(temp_dir, ignore_errors=True)
+            logger.error(f"[YT-DLP] Intent {i+1} EXCEPTION ({_time.time() - t_iter:.1f}s, mem={_mem_mb():.0f}MB): {type(e).__name__}: {e}")
             raise
 
+    logger.error(f"[YT-DLP] ✗ FAIL tots els intents (total {_time.time() - t_start:.1f}s, mem={_mem_mb():.0f}MB)")
     raise last_error or RuntimeError("Cap variant de cerca ha funcionat")
 
 
@@ -331,22 +345,30 @@ def analyze_song_from_temporary_mp3(title, artist):
     Cerca, descarrega, analitza i esborra un MP3 temporal d'una cançó.
     Utilitza yt-dlp (pot fallar en servidors cloud per bot detection).
     """
+    import time as _time
+    import resource
+
+    def _mem_mb():
+        try:
+            return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+        except Exception:
+            return 0
+
     temp_file = None
     temp_dir = None
     try:
         temp_file, temp_dir = download_temporary_song_audio(title, artist)
+        logger.info(f"[AUDIO_ANALYSIS] MP3 obtingut, iniciant librosa (mem={_mem_mb():.0f}MB)")
+        t0 = _time.time()
         result = analyze_audio_file(temp_file)
         logger.info(
-            f"[AUDIO_ANALYSIS] Anàlisi completat per '{title}' - '{artist}': "
-            f"BPM={result['bpm']}, Key={result['key']}"
+            f"[AUDIO_ANALYSIS] ✓ Anàlisi completat per '{title}' - '{artist}': "
+            f"BPM={result['bpm']}, Key={result['key']} (librosa {_time.time() - t0:.1f}s, mem={_mem_mb():.0f}MB)"
         )
         return result
     except Exception as e:
-        logger.error(f"[AUDIO_ANALYSIS] Error analitzant àudio temporal: {e}")
+        logger.error(f"[AUDIO_ANALYSIS] ✗ Error àudio temporal (mem={_mem_mb():.0f}MB): {e}")
         return None
     finally:
         if temp_dir and os.path.exists(temp_dir):
-            try:
-                shutil.rmtree(temp_dir, ignore_errors=True)
-            except Exception as e:
-                logger.warning(f"[AUDIO_ANALYSIS] No s'ha pogut eliminar el temporal: {e}")
+            shutil.rmtree(temp_dir, ignore_errors=True)

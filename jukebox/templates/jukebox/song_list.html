@@ -163,52 +163,709 @@
     }
 
     .songs-column-card {
-      background: #f1f4f7;
+      background: #141418;
       border-radius: 1rem;
       padding: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      border: 1px solid rgba(116,118,136,0.1);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
       height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
+    /* ── CDJ-style column headers ──────────────────────────────────────────── */
     .songs-column-header {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      min-height: 14rem;
+      background: linear-gradient(180deg, #1e1e24 0%, #141418 100%);
+      border-bottom: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .sl-header-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
+    .cdj-col-led {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cdj-col-display-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+    }
+    .cdj-col-sublabel {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 0.45rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+      line-height: 1;
+    }
+    .cdj-col-maintitle {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: rgba(255,255,255,0.88);
+      text-shadow: 0 0 10px rgba(255,255,255,0.12);
+      line-height: 1.2;
+    }
+    .cdj-col-wave {
+      display: flex;
+      align-items: flex-end;
+      height: 1.25rem;
+      gap: 2px;
+      margin-left: 0.4rem;
+    }
+    .cdj-col-wave .cdj-bar {
+      width: 3px;
+      border-radius: 1px 1px 0 0;
+    }
+    @keyframes cdj-song-wave {
+      0%, 100% { transform: scaleY(0.45); opacity: 0.38; }
+      50%       { transform: scaleY(1);    opacity: 0.72; }
+    }
+
+    /* ── LCD display inside each column header ──────────────────────────────── */
+    .sl-lcd {
+      background: #07070d;
+      border: 1px solid #18181f;
+      border-radius: 6px;
+      padding: 0.7rem 1rem 0.6rem;
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+      align-self: stretch;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 3px 16px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(0,0,0,0.5);
+    }
+    .sl-lcd::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(30,60,180,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .sl-lcd                 { --lc: #2a4060; --lb: #8ac0e8; --lg: rgba(138,192,232,0.3); }
+    .sl-lcd.sl-lcd-visible  { --lc: #1a3a55; --lb: #4a9ec0; --lg: rgba(74,158,192,0.3); }
+    .sl-lcd.sl-lcd-show     { --lc: #1a4a70; --lb: #5bc8ff; --lg: rgba(91,200,255,0.35); }
+    .sl-lcd.sl-lcd-requests { --lc: #3a2060; --lb: #c878ff; --lg: rgba(200,120,255,0.35); }
+    .sl-lcd.sl-lcd-active   { --lc: #0a3a20; --lb: #00e87a; --lg: rgba(0,232,122,0.4); }
+    .sl-lcd.sl-lcd-finished { --lc: #3a1010; --lb: #ff4444; --lg: rgba(255,68,68,0.35); }
+    .sl-lcd-inner {
+      display: flex;
+      align-items: stretch;
+      gap: 0.65rem;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+    }
+    .sl-lcd-main {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sl-lcd-section {
+      display: flex;
+      flex-direction: column;
+      padding: 0.35rem 0;
+    }
+    .sl-lcd-section-status {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0;
+    }
+    .sl-status-carousel {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .sl-status-times {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.22rem;
+      border-left: 1px solid rgba(255,255,255,0.06);
+      padding-left: 0.55rem;
+      min-width: 3.2rem;
+    }
+    .sl-time-clock {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      color: #ff8c00;
+      text-shadow: 0 0 6px rgba(255,140,0,0.55);
+      white-space: nowrap;
+      margin-bottom: 0.1rem;
+    }
+    .sl-time-clock.is-chrono {
+      color: #00e87a;
+      text-shadow: 0 0 6px rgba(0,232,122,0.65);
+    }
+    .sl-time-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1.1;
+    }
+    .sl-time-label {
+      font-size: 0.52rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--lb);
+      opacity: 0.65;
+    }
+    .sl-time-val {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--lb);
+      opacity: 0.92;
+      white-space: nowrap;
+    }
+    .sl-lcd-section-song {
+      flex-shrink: 0;
+      height: 3rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+      padding: 0.2rem 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    #slNowPlayingBlock {
+      overflow: hidden;
+      width: 100%;
+    }
+    .sl-lcd-section-search {
+      flex-shrink: 0;
+      height: 2.2rem;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    /* ── Carousel slides ───────────────────────────────────────────────────── */
+    .sl-carousel-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* línies sempre al mateix lloc */
+      padding: 0.2rem 0 0.1rem;
+      opacity: 0;
+      transition: opacity 0.75s ease;
+      pointer-events: none;
+    }
+    .sl-carousel-slide.sl-slide-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* Slot 1 fix: status sempre a la mateixa Y, sempre ocupa el mateix espai */
+    .sl-status-carousel .sl-lcd-status {
+      white-space: normal;
+      text-overflow: clip;
+      font-size: 1.4rem;
+      line-height: 1.1;
+      min-height: 2rem;   /* reserva espai fix per a 1 línia gran */
+      overflow: hidden;
+    }
+    /* Slot 2 fix: detail comença sempre al mateix Y, sota el status */
+    .sl-status-carousel .sl-lcd-detail {
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: clip;
+      font-size: 0.76rem;
+      opacity: 0.8;
+      line-height: 1.38;
+      margin-top: 0.25rem;
+      flex: 1;
+      min-height: 0;
+    }
+    .sl-slide-kpi-line {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--lb);
+      opacity: 0.7;
+      margin-top: 0.35rem;
+      line-height: 1.55;
+    }
+    .sl-slide-kpi-line strong {
+      font-size: 1rem;
+      font-weight: 800;
+      opacity: 1;
+    }
+    .sl-lcd-titlerow {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      padding: 1.5rem;
-      border-bottom: 1px solid rgba(116,118,136,0.1);
+      margin-bottom: 0.3rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    .songs-column-title {
-      font-family: 'Epilogue', sans-serif;
-      font-size: 1.125rem;
+    .sl-lcd-clock {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.06em;
+      color: #ff8c00;
+      white-space: nowrap;
+      text-shadow: 0 0 6px rgba(255,140,0,0.55);
+      flex-shrink: 0;
+    }
+    .sl-lcd-np-title {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 1rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin: 0;
-      color: #181c1e;
+      color: var(--lc, rgba(255,255,255,0.9));
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+      line-height: 1.35;
     }
+    .sl-lcd-np-artist {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+    /* LED ticker container */
+    .sl-np-ticker {
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+    .sl-np-ticker-inner {
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform;
+      padding-right: 2rem;
+    }
+    .sl-np-ticker-inner.is-scrolling {
+      animation: sl-ticker-scroll 13s ease-in-out infinite;
+    }
+    @keyframes sl-ticker-scroll {
+      0%,10%   { transform: translateX(0); }
+      80%,100% { transform: translateX(var(--sl-scroll-px,0px)); }
+    }
+    .sl-lcd-clock.is-chrono {
+      color: #00e87a;
+      text-shadow: 0 0 6px rgba(0,232,122,0.65), 0 0 14px rgba(0,232,122,0.3);
+      letter-spacing: 0.08em;
+    }
+    .sl-lcd-status {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--lb);
+      text-shadow: 0 0 14px var(--lg), 0 0 30px var(--lg);
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sl-lcd-detail {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      color: var(--lb);
+      opacity: 0.65;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 0.3rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .sl-lcd-jukebox-time {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #f6c23e;
+      text-shadow: 0 0 8px rgba(246,194,62,0.6);
+      display: block;
+      margin-top: 0.3rem;
+      white-space: nowrap;
+    }
+    .sl-lcd-votes-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .sl-lcd-votes-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.18rem 0.45rem;
+      border-radius: 0.3rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+    }
+    .sl-lcd-votes-chip.chip-votes-ok { color: #00e87a; border-color: rgba(0,232,122,0.3); background: rgba(0,232,122,0.08); }
+    .sl-lcd-votes-chip.chip-votes-empty { color: #ff4444; border-color: rgba(255,68,68,0.3); background: rgba(255,68,68,0.08); }
+    .sl-lcd-votes-chip.chip-coins { color: #f6c23e; border-color: rgba(246,194,62,0.3); background: rgba(246,194,62,0.08); }
+    .sl-lcd-votes-chip.chip-done { color: rgba(255,255,255,0.55); }
+    /* Search inside LCD */
+    .sl-lcd-search-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.3rem;
+      padding: 0 0.35rem;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .sl-lcd-search-row .material-symbols-outlined {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.28);
+      flex-shrink: 0;
+    }
+    .sl-lcd-search {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: rgba(255,255,255,0.82);
+      font-size: 0.6rem;
+      line-height: 1.2;
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      min-width: 0;
+    }
+    .sl-lcd-search::placeholder { color: rgba(255,255,255,0.22); }
+    .sl-lcd-search::-webkit-search-cancel-button { filter: invert(1) opacity(0.4); }
+
+    .sl-lcd-wave {
+      display: flex;
+      align-items: flex-end;
+      gap: 1px;
+      height: 1.6rem;
+      margin-top: 0.45rem;
+    }
+    .sl-lcd-wave .sl-bar {
+      flex: 1;
+      border-radius: 1px 1px 0 0;
+      background: var(--lb);
+      opacity: 0.2;
+    }
+    .sl-lcd-wave .sl-bar:nth-child(1)  { height: 40%; }
+    .sl-lcd-wave .sl-bar:nth-child(2)  { height: 70%; }
+    .sl-lcd-wave .sl-bar:nth-child(3)  { height: 50%; }
+    .sl-lcd-wave .sl-bar:nth-child(4)  { height: 85%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(5)  { height: 30%; }
+    .sl-lcd-wave .sl-bar:nth-child(6)  { height: 65%; }
+    .sl-lcd-wave .sl-bar:nth-child(7)  { height: 55%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(8)  { height: 90%; }
+    .sl-lcd-wave .sl-bar:nth-child(9)  { height: 40%; }
+    .sl-lcd-wave .sl-bar:nth-child(10) { height: 75%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(11) { height: 35%; }
+    .sl-lcd-wave .sl-bar:nth-child(12) { height: 60%; }
+    .sl-lcd-wave .sl-bar:nth-child(13) { height: 80%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(14) { height: 45%; }
+    .sl-lcd-wave .sl-bar:nth-child(15) { height: 68%; }
+    .sl-lcd-wave .sl-bar:nth-child(16) { height: 38%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(17) { height: 82%; }
+    .sl-lcd-wave .sl-bar:nth-child(18) { height: 52%; }
+    .sl-lcd-wave .sl-bar:nth-child(19) { height: 42%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(20) { height: 72%; }
+    .sl-lcd-wave .sl-bar:nth-child(21) { height: 28%; }
+    .sl-lcd-wave .sl-bar:nth-child(22) { height: 88%; opacity: 0.3; }
+    .sl-lcd-wave .sl-bar:nth-child(23) { height: 48%; }
+    .sl-lcd-wave .sl-bar:nth-child(24) { height: 62%; }
+
+    /* Waveform animation when previewing */
+    @keyframes sl-wave-beat {
+      0%, 100% { transform: scaleY(0.25); opacity: 0.18; }
+      50%       { transform: scaleY(1.0);  opacity: 0.85; }
+    }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar {
+      transform-origin: bottom;
+      animation: sl-wave-beat 0.7s ease-in-out infinite;
+      opacity: 1;
+    }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(1)  { animation-delay: 0.00s; animation-duration: 0.62s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(2)  { animation-delay: 0.08s; animation-duration: 0.70s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(3)  { animation-delay: 0.04s; animation-duration: 0.55s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(4)  { animation-delay: 0.12s; animation-duration: 0.78s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(5)  { animation-delay: 0.06s; animation-duration: 0.65s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(6)  { animation-delay: 0.16s; animation-duration: 0.60s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(7)  { animation-delay: 0.03s; animation-duration: 0.72s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(8)  { animation-delay: 0.10s; animation-duration: 0.58s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(9)  { animation-delay: 0.18s; animation-duration: 0.68s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(10) { animation-delay: 0.05s; animation-duration: 0.75s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(11) { animation-delay: 0.14s; animation-duration: 0.63s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(12) { animation-delay: 0.02s; animation-duration: 0.57s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(13) { animation-delay: 0.20s; animation-duration: 0.80s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(14) { animation-delay: 0.09s; animation-duration: 0.66s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(15) { animation-delay: 0.15s; animation-duration: 0.61s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(16) { animation-delay: 0.07s; animation-duration: 0.73s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(17) { animation-delay: 0.11s; animation-duration: 0.56s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(18) { animation-delay: 0.19s; animation-duration: 0.69s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(19) { animation-delay: 0.04s; animation-duration: 0.76s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(20) { animation-delay: 0.13s; animation-duration: 0.64s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(21) { animation-delay: 0.01s; animation-duration: 0.59s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(22) { animation-delay: 0.17s; animation-duration: 0.71s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(23) { animation-delay: 0.06s; animation-duration: 0.67s; }
+    #slLcd1.is-previewing .sl-lcd-wave .sl-bar:nth-child(24) { animation-delay: 0.22s; animation-duration: 0.54s; }
+
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar {
+      transform-origin: bottom;
+      animation: sl-wave-beat 0.7s ease-in-out infinite;
+      opacity: 1;
+    }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(1)  { animation-delay: 0.11s; animation-duration: 0.68s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(2)  { animation-delay: 0.03s; animation-duration: 0.57s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(3)  { animation-delay: 0.19s; animation-duration: 0.74s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(4)  { animation-delay: 0.07s; animation-duration: 0.62s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(5)  { animation-delay: 0.14s; animation-duration: 0.79s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(6)  { animation-delay: 0.01s; animation-duration: 0.56s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(7)  { animation-delay: 0.21s; animation-duration: 0.66s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(8)  { animation-delay: 0.09s; animation-duration: 0.72s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(9)  { animation-delay: 0.16s; animation-duration: 0.59s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(10) { animation-delay: 0.04s; animation-duration: 0.81s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(11) { animation-delay: 0.12s; animation-duration: 0.63s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(12) { animation-delay: 0.18s; animation-duration: 0.55s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(13) { animation-delay: 0.06s; animation-duration: 0.76s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(14) { animation-delay: 0.22s; animation-duration: 0.61s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(15) { animation-delay: 0.10s; animation-duration: 0.70s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(16) { animation-delay: 0.02s; animation-duration: 0.58s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(17) { animation-delay: 0.17s; animation-duration: 0.77s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(18) { animation-delay: 0.08s; animation-duration: 0.64s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(19) { animation-delay: 0.20s; animation-duration: 0.53s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(20) { animation-delay: 0.05s; animation-duration: 0.73s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(21) { animation-delay: 0.13s; animation-duration: 0.60s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(22) { animation-delay: 0.00s; animation-duration: 0.67s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(23) { animation-delay: 0.15s; animation-duration: 0.80s; }
+    #slLcd2.is-playing .sl-lcd-wave .sl-bar:nth-child(24) { animation-delay: 0.09s; animation-duration: 0.71s; }
+
+    .sl-kpi-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      border-left: 1px solid rgba(255,255,255,0.07);
+      padding-left: 0.65rem;
+      flex-shrink: 0;
+      justify-content: center;
+      min-width: 3.4rem;
+    }
+    .sl-kpi-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.1rem 0.15rem;
+    }
+    .sl-kpi-label {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      font-size: 0.48rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--lc);
+      white-space: nowrap;
+    }
+    .sl-kpi-value {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--lb);
+      line-height: 1;
+      text-shadow: 0 0 10px var(--lg);
+    }
+
+    /* ── CDJ knob button (same as dashboard, scaled to header size) ──────────── */
+    .sl-cassette-btn-circ {
+      border-radius: 50%;
+      padding: 0;
+      min-height: unset;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      text-decoration: none;
+    }
+    .sl-cassette-btn-knob {
+      width: 3rem;
+      height: 3rem;
+      background: radial-gradient(circle at 34% 28%,
+        #6a6a72 0%, #3c3c46 28%, #1e1e28 58%, #0e0e14 100%);
+      border: none;
+      clip-path: polygon(
+        50%  1%, 58% 10%, 69%  5%, 73% 16%, 85% 15%, 84% 27%,
+        95% 31%, 90% 42%, 99% 50%, 90% 58%, 95% 69%, 84% 73%,
+        85% 85%, 73% 84%, 69% 95%, 58% 90%, 50% 99%, 42% 90%,
+        31% 95%, 27% 84%, 15% 85%, 16% 73%,  5% 69%, 10% 58%,
+         1% 50%, 10% 42%,  5% 31%, 16% 27%, 15% 15%, 27% 16%,
+        31%  5%, 42% 10%
+      );
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.9));
+    }
+    .sl-cassette-btn-knob:hover {
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.85)) drop-shadow(0 0 5px rgba(180,180,200,0.4));
+    }
+    .sl-knob-ring-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+      flex-shrink: 0;
+    }
+    .sl-knob-ring-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow:
+        0 0 0 3px rgba(255,255,255,0.78),
+        0 0 0 6px rgba(255,255,255,0.18),
+        0 0 20px rgba(220,220,255,0.55),
+        0 0 40px rgba(200,200,240,0.18);
+    }
+    .sl-knob-glow-wrap {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+      filter:
+        drop-shadow(0 0 1px rgba(255,255,255,1.0))
+        drop-shadow(0 0 1px rgba(255,255,255,0.95))
+        drop-shadow(0 0 4px rgba(230,230,255,0.82))
+        drop-shadow(0 0 10px rgba(210,210,240,0.5));
+    }
+
+    /* ── Preview PLAY/PAUSE button (same dashboard green style) ─────────────── */
+    .sl-cassette-btn-play {
+      width: 3rem;
+      height: 3rem;
+      background-color: #0e120e;
+      border: 1px solid #253525;
+      box-shadow:
+        0 0 0 3px #0e1a0e,
+        0 0 0 5px #080e08,
+        0 2px 8px rgba(0,0,0,0.85);
+      color: #4a6a4a;
+      background-image: repeating-radial-gradient(
+        circle at center,
+        rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px,
+        transparent 1px, transparent 2.2px,
+        rgba(0,0,0,0.14) 2.2px, rgba(0,0,0,0.14) 2.8px,
+        transparent 2.8px, transparent 4.2px
+      );
+    }
+    .sl-cassette-btn-play:hover {
+      color: #3a6040;
+      box-shadow:
+        0 0 0 3px rgba(0,220,100,0.3),
+        0 0 0 6px rgba(0,220,100,0.08),
+        0 2px 8px rgba(0,0,0,0.8);
+    }
+    .sl-cassette-btn-play.is-pressed {
+      background-color: #060e08;
+      border-color: rgba(0,232,122,0.15);
+      color: #00e87a;
+      box-shadow:
+        0 0 0 3px rgba(0,232,122,0.82),
+        0 0 0 6px rgba(0,232,122,0.22),
+        0 0 20px rgba(0,232,122,0.62),
+        0 0 42px rgba(0,232,122,0.2);
+    }
+
     .songs-column-search {
       width: 100%;
-      background: #e0e3e6;
-      border: none;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.85);
       border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      padding: 0.45rem 0.75rem 0.45rem 2.25rem;
       font-size: 0.875rem;
       transition: all 200ms;
     }
+    .songs-column-search::placeholder {
+      color: rgba(255,255,255,0.28);
+    }
     .songs-column-search:focus {
       outline: none;
-      box-shadow: 0 0 0 2px rgba(0,64,224,0.2);
-      background: #ffffff;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(246,194,62,0.35);
+      box-shadow: 0 0 0 2px rgba(246,194,62,0.1);
+      color: #fff;
     }
 
     .songs-column-body {
       padding: 1.5rem;
       overflow-y: auto;
       flex-grow: 1;
+      background: #f1f4f7;
+      border-radius: 0 0 0.75rem 0.75rem;
+    }
+    .sl-col-listtitle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .sl-col-listlabel {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9a9db0;
+    }
+    .sl-col-listname {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #181c1e;
+      letter-spacing: 0.01em;
     }
 
     .songs-table {
@@ -503,61 +1160,649 @@
       opacity: 0.75;
     }
   }
+
+  /* ── Mobile CDJ Panel ──────────────────────────────────────────────────────
+     Global sl-lcd CSS lives inside @media(min-width:768px) so we must
+     duplicate ALL essential rules here for mobile.
+     ──────────────────────────────────────────────────────────────────────── */
+  .mob-cdj-wrap {
+    position: relative;
+    margin-top: 0.6rem;
+  }
+  .mob-cdj-panel {
+    position: relative;
+    z-index: 2;
+    padding: 0.5rem 0.75rem 0.65rem;
+    background: linear-gradient(180deg, #1a1a1e 0%, #111115 100%);
+    border-radius: 0.875rem;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(0,0,0,0.6);
+    border: 1px solid #0a0a0e;
+  }
+  .mob-cdj-panel .sl-lcd {
+    background: #07070d;
+    border: 1px solid #18181f;
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem 0.4rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 9.8rem;
+    box-shadow: inset 0 3px 16px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(0,0,0,0.5);
+  }
+  .mob-cdj-panel .sl-lcd::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(30,60,180,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .mob-cdj-panel .sl-lcd                 { --lc: #2a4060; --lb: #8ac0e8; --lg: rgba(138,192,232,0.3); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-visible  { --lc: #1a3a55; --lb: #4a9ec0; --lg: rgba(74,158,192,0.3); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-show     { --lc: #1a4a70; --lb: #5bc8ff; --lg: rgba(91,200,255,0.35); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-requests { --lc: #3a2060; --lb: #c878ff; --lg: rgba(200,120,255,0.35); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-active   { --lc: #0a3a20; --lb: #00e87a; --lg: rgba(0,232,122,0.4); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-finished { --lc: #3a1010; --lb: #ff4444; --lg: rgba(255,68,68,0.35); }
+  .mob-cdj-panel .sl-lcd-inner {
+    display: flex;
+    align-items: stretch;
+    gap: 0.35rem;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+  }
+  .mob-cdj-panel .sl-lcd-main {
+    flex: 1; min-width: 0; min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .mob-cdj-panel .sl-lcd-section {
+    display: flex; flex-direction: column; padding: 0.35rem 0;
+  }
+  .mob-cdj-panel .sl-lcd-section-status {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: row; align-items: stretch; gap: 0.5rem; padding: 0;
+  }
+  .mob-cdj-panel .sl-status-carousel {
+    flex: 1; min-width: 0;
+    position: relative; overflow: hidden;
+  }
+  .mob-cdj-panel .sl-carousel-slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding: 0.2rem 0 0.1rem;
+    opacity: 0; transition: opacity 0.75s ease; pointer-events: none;
+  }
+  .mob-cdj-panel .sl-carousel-slide.sl-slide-active {
+    opacity: 1; pointer-events: auto;
+  }
+  .mob-cdj-panel .sl-lcd-status {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 1.4rem; font-weight: 900; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--lb);
+    text-shadow: 0 0 14px var(--lg), 0 0 30px var(--lg);
+    line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mob-cdj-panel .sl-status-carousel .sl-lcd-status {
+    white-space: normal; text-overflow: clip;
+    min-height: 1.8rem; overflow: hidden;
+  }
+  .mob-cdj-panel .sl-lcd-detail {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.01em;
+    color: var(--lb); opacity: 0.65;
+    overflow: hidden; text-overflow: ellipsis;
+    margin-top: 0.2rem; line-height: 1.3; white-space: nowrap;
+  }
+  .mob-cdj-panel .sl-status-carousel .sl-lcd-detail {
+    white-space: normal; text-overflow: clip;
+    font-size: 0.7rem; opacity: 0.8;
+    line-height: 1.35; flex: 1; min-height: 0;
+  }
+  .mob-cdj-panel .sl-status-times {
+    flex-shrink: 0; display: flex; flex-direction: column;
+    align-items: flex-end; justify-content: center; gap: 0.22rem;
+    border-left: 1px solid rgba(255,255,255,0.06);
+    padding-left: 0.35rem; min-width: 4.5rem;
+  }
+  .mob-cdj-panel .mob-times-carousel {
+    position: relative; overflow: hidden;
+  }
+  .mob-cdj-panel .mob-times-page {
+    display: flex; flex-direction: column;
+    align-items: flex-end; justify-content: center; gap: 0.15rem;
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .mob-cdj-panel .mob-times-page.mob-times-page-active {
+    opacity: 1; pointer-events: auto;
+  }
+  .mob-cdj-panel .sl-time-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.62rem; letter-spacing: 0.06em;
+    color: #ff8c00; text-shadow: 0 0 6px rgba(255,140,0,0.55);
+    white-space: nowrap; margin-bottom: 0.1rem;
+  }
+  .mob-cdj-panel .sl-time-clock.is-chrono {
+    color: #00e87a; text-shadow: 0 0 6px rgba(0,232,122,0.65);
+  }
+  .mob-cdj-panel .sl-time-row {
+    display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1;
+  }
+  .mob-cdj-panel .sl-time-label {
+    font-size: 0.52rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--lb); opacity: 0.65;
+    white-space: nowrap;
+  }
+  .mob-cdj-panel .sl-time-val {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--lb); opacity: 0.92; white-space: nowrap;
+  }
+  .mob-cdj-panel .sl-lcd-section-song {
+    flex-shrink: 0; height: 2.8rem; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 0; padding: 0.15rem 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .mob-cdj-panel .mob-song-row {
+    display: flex; align-items: center; gap: 0.4rem; height: 100%;
+  }
+  .mob-cdj-panel .mob-song-info {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;
+  }
+  .mob-cdj-panel .mob-preview-btns {
+    flex-shrink: 0;
+    display: flex; flex-direction: row; gap: 0.2rem;
+    align-items: center;
+  }
+  .mob-cdj-panel .mob-preview-btn {
+    width: 1.8rem; height: 1.8rem;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    color: var(--lb, #8ac0e8);
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: background 120ms, box-shadow 120ms;
+    opacity: 0.75;
+  }
+  .mob-cdj-panel .mob-preview-btn:active {
+    background: rgba(255,255,255,0.1);
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  .mob-cdj-panel .mob-preview-btn .material-symbols-outlined {
+    display: flex !important;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .mob-cdj-panel .sl-lcd-np-title {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    color: #fff;
+    white-space: nowrap; line-height: 1.35;
+    text-shadow: 0 0 8px rgba(255,140,0,0.5), 0 0 20px rgba(255,100,0,0.2);
+  }
+  .mob-cdj-panel .sl-np-ticker { overflow: hidden; white-space: nowrap; position: relative; }
+  .mob-cdj-panel .sl-np-ticker-inner {
+    display: inline-block; white-space: nowrap; will-change: transform; padding-right: 2rem;
+  }
+  .mob-cdj-panel .sl-np-ticker-inner.is-scrolling {
+    animation: sl-ticker-scroll-mob 13s ease-in-out infinite;
+  }
+  @keyframes sl-ticker-scroll-mob {
+    0%,10%   { transform: translateX(0); }
+    80%,100% { transform: translateX(var(--sl-scroll-px,0px)); }
+  }
+  .mob-cdj-panel .sl-lcd-wave {
+    display: flex; align-items: flex-end; gap: 1px;
+    height: 1rem; margin-top: 0.1rem;
+  }
+  @keyframes sl-wave-beat-mob {
+    0%, 100% { transform: scaleY(0.25); opacity: 0.18; }
+    50%       { transform: scaleY(1.0);  opacity: 0.85; }
+  }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar,
+  #slMobileLcd.is-playing .sl-lcd-wave .sl-bar {
+    transform-origin: bottom;
+    animation: sl-wave-beat-mob 0.7s ease-in-out infinite;
+    opacity: 1;
+  }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(1)  { animation-delay: 0.00s; animation-duration: 0.62s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(2)  { animation-delay: 0.08s; animation-duration: 0.70s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(3)  { animation-delay: 0.04s; animation-duration: 0.55s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(4)  { animation-delay: 0.12s; animation-duration: 0.78s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(5)  { animation-delay: 0.06s; animation-duration: 0.65s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(6)  { animation-delay: 0.16s; animation-duration: 0.60s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(7)  { animation-delay: 0.03s; animation-duration: 0.72s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(8)  { animation-delay: 0.10s; animation-duration: 0.58s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(9)  { animation-delay: 0.18s; animation-duration: 0.68s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(10) { animation-delay: 0.05s; animation-duration: 0.75s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(11) { animation-delay: 0.14s; animation-duration: 0.63s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(12) { animation-delay: 0.02s; animation-duration: 0.57s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(13) { animation-delay: 0.20s; animation-duration: 0.80s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(14) { animation-delay: 0.09s; animation-duration: 0.66s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(15) { animation-delay: 0.15s; animation-duration: 0.61s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(16) { animation-delay: 0.07s; animation-duration: 0.73s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(17) { animation-delay: 0.11s; animation-duration: 0.56s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(18) { animation-delay: 0.19s; animation-duration: 0.69s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(19) { animation-delay: 0.04s; animation-duration: 0.76s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(20) { animation-delay: 0.13s; animation-duration: 0.64s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(21) { animation-delay: 0.01s; animation-duration: 0.59s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(22) { animation-delay: 0.17s; animation-duration: 0.71s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(23) { animation-delay: 0.06s; animation-duration: 0.67s; }
+  #slMobileLcd.is-previewing .sl-lcd-wave .sl-bar:nth-child(24) { animation-delay: 0.22s; animation-duration: 0.54s; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar {
+    flex: 1; border-radius: 1px 1px 0 0;
+    opacity: 0.4;
+    background: linear-gradient(to top, #2266dd 0%, #4488ff 25%, #ff8c00 55%, #ffcc66 80%, #ffffff 100%);
+  }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(1)  { height: 40%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(2)  { height: 70%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(3)  { height: 50%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(4)  { height: 85%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(5)  { height: 30%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(6)  { height: 65%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(7)  { height: 55%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(8)  { height: 90%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(9)  { height: 40%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(10) { height: 75%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(11) { height: 35%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(12) { height: 60%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(13) { height: 80%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(14) { height: 45%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(15) { height: 68%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(16) { height: 38%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(17) { height: 82%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(18) { height: 52%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(19) { height: 42%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(20) { height: 72%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(21) { height: 28%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(22) { height: 88%; opacity: 0.5; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(23) { height: 48%; }
+  .mob-cdj-panel .sl-lcd-wave .sl-bar:nth-child(24) { height: 62%; }
+  .mob-cdj-panel .sl-kpi-col {
+    display: flex; flex-direction: column; gap: 0.02rem;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding-left: 0.4rem; flex-shrink: 0;
+    justify-content: center; min-width: 2.8rem;
+  }
+  .mob-cdj-panel .mob-kpi-carousel {
+    position: relative; overflow: hidden;
+  }
+  .mob-cdj-panel .mob-kpi-page {
+    display: flex; flex-direction: column; gap: 0.02rem;
+    justify-content: center;
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .mob-cdj-panel .mob-kpi-page.mob-kpi-page-active {
+    opacity: 1; pointer-events: auto;
+  }
+  .mob-cdj-panel .sl-kpi-item {
+    display: flex; flex-direction: column;
+    align-items: center; padding: 0.02rem 0.1rem;
+  }
+  .mob-cdj-panel .sl-kpi-label {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.4rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--lc); white-space: nowrap;
+  }
+  .mob-cdj-panel .sl-kpi-value {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--lb); line-height: 1;
+    text-shadow: 0 0 10px var(--lg);
+  }
+  /* ── Mobile power-off button (CDJ top-mount style) ── */
+  .mob-cdj-wrap .mob-poweroff {
+    position: absolute;
+    top: -0.3rem;
+    right: 1.2rem;
+    z-index: 1;
+    text-decoration: none;
+  }
+  .mob-cdj-wrap .mob-poweroff-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    background: linear-gradient(180deg, #363639 0%, #222226 50%, #161619 100%);
+    border: none;
+    box-shadow:
+      inset 0  1px 0   rgba(255,255,255,0.14),
+      inset 0 -1px 0   rgba(0,0,0,0.85),
+      inset  1px 0 0   rgba(255,255,255,0.07),
+      inset -1px 0 0   rgba(0,0,0,0.7),
+      0  1px 0   #0a0a0e,
+      0  3px 0   rgba(0,0,0,0.85),
+      0  5px 14px rgba(0,0,0,0.9);
+    transition: box-shadow 0.1s ease, transform 0.1s ease;
+  }
+  .mob-cdj-wrap .mob-poweroff-btn:active {
+    background: linear-gradient(180deg, #200c0c 0%, #140606 50%, #0c0404 100%);
+    transform: translateY(2px);
+    box-shadow:
+      inset 0  1px 0   rgba(255,255,255,0.04),
+      inset 0 -1px 0   rgba(0,0,0,0.9),
+      0  1px 0   rgba(40,0,0,0.9),
+      0  2px 6px rgba(0,0,0,0.8),
+      0  0  16px rgba(255,40,40,0.5),
+      0  0  36px rgba(255,40,40,0.2);
+  }
+  #slMobileLcd .mob-poweroff-icon {
+    position: absolute;
+    top: 0.15rem;
+    right: 1rem;
+    font-size: 0.55rem;
+    line-height: 1;
+    color: rgba(160,160,165,0.45);
+    pointer-events: none;
+    user-select: none;
+    z-index: 5;
+  }
+  @keyframes hint-pulse-orange {
+    0%, 100% { color: rgba(255,160,0,0.55); } 50% { color: rgba(255,180,0,0.9); }
+  }
+  @keyframes hint-pulse-green {
+    0%, 100% { color: rgba(0,220,100,0.55); } 50% { color: rgba(0,240,120,0.9); }
+  }
+
+  /* ── Hot Cue navigation buttons ── */
+  .mob-cdj-panel .mob-hotcue-wrap {
+    padding: 0 0.6rem 0.55rem;
+  }
+  .mob-cdj-panel .mob-hotcue-label {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0 0.1rem 0.35rem;
+  }
+  .mob-cdj-panel .mob-hotcue-label::before,
+  .mob-cdj-panel .mob-hotcue-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(255,255,255,0.18);
+  }
+  .mob-cdj-panel .mob-hotcue-label span {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.45rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    white-space: nowrap;
+  }
+  .mob-cdj-panel .mob-hotcue-bar {
+    display: flex; gap: 0.3rem;
+  }
+  .mob-cdj-panel .mob-hotcue-btn {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.15rem 0.55rem;
+    background: #101014;
+    border: 1px solid #2a2a2e;
+    border-radius: 4px;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+    transition: background 100ms, transform 100ms;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .mob-cdj-panel .mob-hotcue-btn::after {
+    content: '';
+    position: absolute; bottom: 4px; left: 15%; right: 15%;
+    height: 3px; border-radius: 1px;
+    background: var(--hc-color, #555);
+    box-shadow: 0 0 6px var(--hc-color, #555);
+  }
+  .mob-cdj-panel .mob-hotcue-btn:active {
+    transform: scale(0.96);
+    background: #1a1a1e;
+  }
+  .mob-cdj-panel .mob-hotcue-btn .material-symbols-outlined {
+    display: flex !important;
+    font-size: 1rem;
+    color: inherit;
+    opacity: 0.75;
+  }
 </style>
 <div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
-  <!-- Page Header -->
-  <div class="songs-page-header">
-    <div class="songs-page-stats">
-      <div class="songs-page-stat">
-        <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">play_circle</span>
-        <div>
-          <p class="songs-page-stat-label">{% trans "Sonades" %}</p>
-          <p class="songs-page-stat-value">{{ songs_played }}</p>
-        </div>
-      </div>
-      <div class="songs-page-stat">
-        <span class="material-symbols-outlined" style="color: #e74c3c; font-variation-settings: 'FILL' 1;">favorite</span>
-        <div>
-          <p class="songs-page-stat-label">{% trans "Vots totals" %}</p>
-          <p class="songs-page-stat-value">{{ total_votes }}</p>
-        </div>
-      </div>
-      <div class="songs-page-stat">
-        <span class="material-symbols-outlined" style="color: #0040e0; font-variation-settings: 'FILL' 1;">how_to_vote</span>
-        <div>
-          <p class="songs-page-stat-label">{% trans "Disponibles" %}</p>
-          <p class="songs-page-stat-value">{{ votes_left }}</p>
-        </div>
-      </div>
-      <a href="{% url 'select_party' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">event_repeat</span>
-        {% trans "Canviar Festa" %}
-      </a>
-      <a href="{% url 'unset_party' %}" class="btn btn-outline-secondary" style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-        <span class="material-symbols-outlined" style="font-size: 1.25rem;">logout</span>
-        {% trans "Sortir de la festa" %}
-      </a>
-    </div>
-  </div>
-
   <!-- Songs Grid - Two Columns -->
   <div class="row g-4">
     <!-- Column 1: Maleta del DJ -->
     <div class="col-lg-6">
       <div class="songs-column-card">
         <div class="songs-column-header">
-          <div class="d-flex align-items-center gap-3">
-            <div style="background: rgba(246, 194, 62, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
-              <span class="material-symbols-outlined" style="color: #f6c23e;">work</span>
-            </div>
-            <h3 class="songs-column-title">{% trans "Maleta del DJ" %}</h3>
+          <!-- Knob: Canviar de festa -->
+          <div class="sl-header-side">
+            <span class="sl-knob-ring-wrap">
+              <span class="sl-knob-glow-wrap">
+                <a href="{% url 'select_party' %}" class="sl-cassette-btn-circ sl-cassette-btn-knob" title="{% trans 'Canviar de festa' %}"></a>
+              </span>
+            </span>
+            <span style="font-family:-apple-system,'Helvetica Neue',sans-serif;font-size:0.42rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.32);white-space:nowrap;">{% trans "Canviar" %}</span>
           </div>
-            <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
-              <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
-              <input id="search-pending" type="search" class="songs-column-search" placeholder="{% trans 'Cerca...' %}">
+          <!-- LCD display: títol + estat de la festa + KPIs -->
+          <div id="slLcd1" class="sl-lcd {% if party.party_status == 'party_visible' %}sl-lcd-visible{% elif party.party_status == 'show_party' %}sl-lcd-show{% elif party.party_status == 'requests_open' %}sl-lcd-requests{% elif party.party_status == 'djjukebox_active' %}sl-lcd-active{% elif party.party_status == 'finished' %}sl-lcd-finished{% endif %}">
+            <div class="sl-lcd-inner">
+              <div class="sl-lcd-main">
+                <!-- ZONA 1: Estat (carousel rotatiu) -->
+                <div class="sl-lcd-section sl-lcd-section-status">
+                  <div class="sl-status-carousel" id="slCarousel1">
+
+                    <!-- Slide 1: estat principal + explicació -->
+                    <div class="sl-carousel-slide sl-slide-active">
+                      <div id="slStatus1" class="sl-lcd-status">
+                        {% if party.party_status == 'party_visible' %}AVIAT
+                        {% elif party.party_status == 'show_party' %}EXPLORA
+                        {% elif party.party_status == 'requests_open' %}VOTA ARA
+                        {% elif party.party_status == 'djjukebox_active' %}VOTA!
+                        {% elif party.party_status == 'finished' %}ACABAT
+                        {% else %}ESPERANT...{% endif %}
+                      </div>
+                      <div id="slDetail1" class="sl-lcd-detail">
+                        {% if party.party_status == 'party_visible' %}La llista obrirà aviat. Prepara't per votar els temes que vols sentir.
+                        {% elif party.party_status == 'show_party' %}Explora la llista i vota els temes. El jukebox encara no és actiu, però els vots ja es comptabilitzen.
+                        {% elif party.party_status == 'requests_open' %}Vota els temes que vols sentir! Els vots s'acumulen a la cua. Quan el DJ activi el jukebox, sonaran els més votats.
+                        {% elif party.party_status == 'djjukebox_active' %}El jukebox és actiu! Com més vots té un tema, abans sona. El DJ segueix la cua en directe.
+                        {% elif party.party_status == 'finished' %}La sessió ha acabat. Gràcies per participar i votar!
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <!-- Slide 2: stats de l'usuari -->
+                    <div class="sl-carousel-slide">
+                      {% if party.party_status == 'party_visible' %}
+                        <div class="sl-lcd-status">{{ total_songs }} TEMES</div>
+                        <div class="sl-lcd-detail">La playlist té {{ total_songs }} temes preparats. {{ active_users }} usuari{% if active_users != 1 %}s{% endif %} connectat{% if active_users != 1 %}s{% endif %}.</div>
+                      {% elif party.party_status == 'show_party' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots disponibles i {{ credits }} coins. Vota els temes que vols que soni el DJ.</div>
+                      {% elif party.party_status == 'requests_open' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS · {{ credits }}C</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots i {{ credits }} coins. Ja has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %} aquesta nit.</div>
+                      {% elif party.party_status == 'djjukebox_active' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots restants. Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. Cada vot influeix ara en directe.</div>
+                      {% elif party.party_status == 'finished' %}
+                        <div class="sl-lcd-status">{{ user_votes_count }} VOTS ♥</div>
+                        <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %} aquesta nit. Total de {{ total_votes }} vots a la festa.</div>
+                      {% endif %}
+                    </div>
+
+                    <!-- Slide 3: crida a l'acció / propera etapa -->
+                    <div class="sl-carousel-slide">
+                      {% if party.party_status == 'party_visible' %}
+                        <div class="sl-lcd-status">PREPARA'T</div>
+                        <div class="sl-lcd-detail">Obre la llista, tria els temes que t'aguden i estàs a punt quan comenci la votació.</div>
+                      {% elif party.party_status == 'show_party' %}
+                        <div class="sl-lcd-status">JB PENDENT</div>
+                        <div class="sl-lcd-detail">Vota ara per acumular posicions a la cua. Quan el DJ premi PLAY, el jukebox seguirà els més votats.</div>
+                      {% elif party.party_status == 'requests_open' %}
+                        <div class="sl-lcd-status">{{ user_votes_count }} FETS ♥</div>
+                        <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. L'activació del jukebox és imminent. Segueix votant per pujar a la cua!</div>
+                      {% elif party.party_status == 'djjukebox_active' %}
+                        <div class="sl-lcd-status">JB ACTIU</div>
+                        <div class="sl-lcd-detail">Vota ara per moure temes cap amunt a la cua. Com més vots tingui un tema, més aviat el DJ el posarà.</div>
+                      {% elif party.party_status == 'finished' %}
+                        <div class="sl-lcd-status">FI DE SESSIÓ</div>
+                        <div class="sl-lcd-detail">La sessió de jukebox ha acabat. Fins a la propera festa!</div>
+                      {% endif %}
+                    </div>
+
+                    <!-- Slide 4: nom de la festa + explicació de la maleta -->
+                    <div class="sl-carousel-slide">
+                      <div class="sl-lcd-status">{{ party.name }}</div>
+                      <div class="sl-lcd-detail">Aquesta és la maleta de temes que el DJ té disponibles per posar. Vota els que vols sentir i pugen a la cua.</div>
+                    </div>
+
+                  </div>
+                  <!-- Columna fixa: rellotge + horari de la festa -->
+                  <div class="sl-status-times">
+                    <span class="sl-time-clock" id="slClock1">--:--</span>
+                    {% if party.date %}
+                    <div class="sl-time-row">
+                      <span class="sl-time-label">Data festa</span>
+                      <span class="sl-time-val">{{ party.date|date:"d/m" }}</span>
+                    </div>
+                    <div class="sl-time-row">
+                      <span class="sl-time-label">Inici festa</span>
+                      <span class="sl-time-val">{{ party.date|date:"H:i" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if party.party_ends_at %}
+                    <div class="sl-time-row">
+                      <span class="sl-time-label">Fi festa</span>
+                      <span class="sl-time-val">{{ party.party_ends_at|time:"H:i" }}</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <!-- ZONA 2: Preescolta / Ona d'àudio -->
+                <div class="sl-lcd-section sl-lcd-section-song">
+                  <div id="slPreviewSongBlock" style="display:none;overflow:hidden;width:100%;">
+                    <div class="sl-np-ticker" id="slPreviewTicker">
+                      <span class="sl-np-ticker-inner sl-lcd-np-title" id="slPreviewTickerInner"><span id="slPreviewTitle"></span><span id="slPreviewArtist" style="font-weight:400;opacity:0.6;margin-left:0.4em;"></span></span>
+                    </div>
+                  </div>
+                  <div class="sl-lcd-wave" style="height:2rem;margin-top:auto;margin-bottom:auto;">
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                  </div>
+                </div>
+                <!-- ZONA 3: Buscador (pinnat al fons) -->
+                <div class="sl-lcd-section sl-lcd-section-search">
+                  <div class="sl-lcd-search-row">
+                    <span class="material-symbols-outlined">search</span>
+                    <input id="search-pending" type="search" class="sl-lcd-search" placeholder="{% trans 'Cerca...' %}">
+                  </div>
+                </div>
+              </div>
+              <!-- KPIs columna dreta -->
+              <div class="sl-kpi-col">
+                {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                    <span class="sl-kpi-value" id="slLTemes">{{ total_songs }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value" id="slLUsuaris">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'requests_open' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                    <span class="sl-kpi-value" id="slLVotsMeus" style="{% if votes_left == 0 %}color:#ff4444;text-shadow:0 0 10px rgba(255,68,68,0.5);{% endif %}">{{ votes_left }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">Coins</span>
+                    <span class="sl-kpi-value" id="slLCoins" style="color:#f6c23e;text-shadow:0 0 10px rgba(246,194,62,0.5);">{{ credits }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                    <span class="sl-kpi-value" id="slLFets">{{ user_votes_count }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                    <span class="sl-kpi-value">{{ total_songs }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'djjukebox_active' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                    <span class="sl-kpi-value" id="slLVotsMeus3" style="{% if votes_left == 0 %}color:#ff4444;text-shadow:0 0 10px rgba(255,68,68,0.5);{% endif %}">{{ votes_left }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">Coins</span>
+                    <span class="sl-kpi-value" id="slLCoins3" style="color:#f6c23e;text-shadow:0 0 10px rgba(246,194,62,0.5);">{{ credits }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                    <span class="sl-kpi-value" id="slLFets3">{{ user_votes_count }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Total" %}</span>
+                    <span class="sl-kpi-value" id="slLVots">{{ total_votes }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'finished' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                    <span class="sl-kpi-value" id="slLPosades">{{ songs_played }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Total" %}</span>
+                    <span class="sl-kpi-value" id="slLVotsF">{{ total_votes }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                    <span class="sl-kpi-value">{{ user_votes_count }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value">{{ active_users }}</span>
+                  </div>
+                {% endif %}
+              </div>
             </div>
           </div>
+          <div id="slPreviewBtnWrap" class="sl-header-side">
+            <button id="slPreviewPlayBtn" class="sl-cassette-btn-circ sl-cassette-btn-play" title="{% trans 'Pausa / reprèn preescolta' %}">
+              <span id="slPreviewIcon" class="material-symbols-outlined" style="font-size:1.25rem;font-variation-settings:'FILL' 1;">headphones</span>
+            </button>
+            <span style="font-family:-apple-system,'Helvetica Neue',sans-serif;font-size:0.42rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.28);white-space:nowrap;">PREESCOLTA</span>
+          </div>
+        </div>
           <div class="songs-column-body">
+            <div class="sl-col-listtitle">
+              <div class="cdj-col-led" style="background:#f6c23e;box-shadow:0 0 6px #f6c23e,0 0 12px rgba(246,194,62,0.4);"></div>
+              <span class="sl-col-listlabel">DJ BAG</span>
+              <span class="sl-col-listname">{% trans "Maleta del DJ" %}</span>
+            </div>
             <table class="songs-table">
               <thead>
                 <tr>
@@ -611,7 +1856,7 @@
                     </td>
                     <td class="songs-table-cell text-center">
                       <div class="d-flex flex-column align-items-center">
-                        <span class="songs-table-votes-count">{{ song.vote_count|default:"0" }}</span>
+                        <span class="songs-table-votes-count">{{ song.num_likes|default:"0" }}</span>
                         <span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.5rem; padding: 0.125rem 0.375rem; font-weight: 600; border-radius: 0.25rem; text-transform: uppercase;">
                           {{ song.badge_label }}
                         </span>
@@ -696,18 +1941,217 @@
       <div class="col-lg-6">
         <div class="songs-column-card">
           <div class="songs-column-header">
-            <div class="d-flex align-items-center gap-3">
-              <div style="background: rgba(28, 200, 138, 0.1); padding: 0.5rem; border-radius: 0.5rem;">
-                <span class="material-symbols-outlined" style="color: #1cc88a; font-variation-settings: 'FILL' 1;">check_circle</span>
-              </div>
-              <h3 class="songs-column-title">{% trans "Ja posades" %}</h3>
+            <!-- Knob: Sortir de la festa -->
+            <div class="sl-header-side">
+              <span class="sl-knob-ring-wrap">
+                <span class="sl-knob-glow-wrap">
+                  <a href="{% url 'unset_party' %}" class="sl-cassette-btn-circ sl-cassette-btn-knob" title="{% trans 'Sortir de la festa' %}"></a>
+                </span>
+              </span>
+              <span style="font-family:-apple-system,'Helvetica Neue',sans-serif;font-size:0.42rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.32);white-space:nowrap;">{% trans "Sortir" %}</span>
             </div>
-            <div class="position-relative" style="flex-grow: 1; max-width: 16rem;">
-              <span class="material-symbols-outlined position-absolute" style="left: 0.75rem; top: 50%; transform: translateY(-50%); color: #747687; font-size: 1rem;">search</span>
-              <input id="search-played" type="search" class="songs-column-search" placeholder="{% trans 'Cerca...' %}">
+            <!-- LCD display: títol + última cançó + KPI posades -->
+            <div id="slLcd2" class="sl-lcd {% if party.party_status == 'djjukebox_active' %}sl-lcd-active is-playing{% elif party.party_status == 'finished' %}sl-lcd-finished{% elif party.party_status == 'requests_open' %}sl-lcd-requests{% elif party.party_status == 'show_party' %}sl-lcd-show{% else %}sl-lcd-visible{% endif %}">
+              <div class="sl-lcd-inner">
+                <div class="sl-lcd-main">
+                  <!-- ZONA 1: Estat Jukebox (carousel rotatiu) -->
+                  <div class="sl-lcd-section sl-lcd-section-status">
+                    <div class="sl-status-carousel" id="slCarousel2">
+
+                      <!-- Slide 1: estat CUE/PLAY/FI + detall de sessió -->
+                      <div class="sl-carousel-slide sl-slide-active">
+                        <div id="slLastTitle" class="sl-lcd-status">
+                          {% if party.party_status == 'djjukebox_active' %}▶ PLAY
+                          {% elif party.party_status == 'requests_open' %}● CUE
+                          {% elif party.party_status == 'show_party' %}● CUE
+                          {% elif party.party_status == 'finished' %}■ FI
+                          {% else %}○ STANDBY{% endif %}
+                        </div>
+                        <div id="slLastArtist" class="sl-lcd-detail">
+                          {% if party.party_status == 'djjukebox_active' %}Sessió jukebox activa. El DJ segueix els vots en directe i posa els temes més votats.
+                          {% elif party.party_status == 'requests_open' %}Sessió en espera. Els teus vots s'acumulen a la cua fins que el DJ activi el jukebox.
+                          {% elif party.party_status == 'show_party' %}Sessió pendent. El DJ decidirà quan activar el jukebox i seguir els vots.
+                          {% elif party.party_status == 'party_visible' %}El DJ prepara la sessió. La llista estarà disponible en breu.
+                          {% elif party.party_status == 'finished' %}Sessió tancada. La nit ha acabat.
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <!-- Slide 2: horari del jukebox + countdown -->
+                      <div class="sl-carousel-slide">
+                        {% if party.jukebox_starts_at %}
+                          <div class="sl-lcd-status">
+                            {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} → {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}
+                          </div>
+                          <div class="sl-lcd-detail">
+                            Horari del jukebox · <span id="slJbCountdown">...</span>
+                          </div>
+                        {% elif party.party_status == 'djjukebox_active' %}
+                          <div class="sl-lcd-status">▶ EN DIRECTE</div>
+                          <div class="sl-lcd-detail">Jukebox actiu. El DJ segueix la cua de vots en temps real.</div>
+                        {% else %}
+                          <div class="sl-lcd-status">HORARI PENDENT</div>
+                          <div class="sl-lcd-detail">El DJ encara no ha definit l'horari del jukebox. Estarà disponible aviat.</div>
+                        {% endif %}
+                      </div>
+
+                      <!-- Slide 3: cua de cançons -->
+                      <div class="sl-carousel-slide">
+                        {% if party.party_status == 'party_visible' %}
+                          <div class="sl-lcd-status">{{ total_songs }} TEMES</div>
+                          <div class="sl-lcd-detail">Playlist preparada amb {{ total_songs }} temes. {{ active_users }} usuari{% if active_users != 1 %}s{% endif %} conectat{% if active_users != 1 %}s{% endif %}.</div>
+                        {% elif party.party_status == 'show_party' %}
+                          <div class="sl-lcd-status">{{ total_votes }} VOTS</div>
+                          <div class="sl-lcd-detail">{{ total_votes }} vots acumulats a la cua fins ara. La cua es construeix mentre el jukebox no és actiu.</div>
+                        {% elif party.party_status == 'requests_open' %}
+                          <div class="sl-lcd-status">CUA ACTIVA</div>
+                          <div class="sl-lcd-detail">{{ total_votes }} vots registrats. {% if now_playing %}Propera posició: {{ now_playing.title }} ({{ now_playing.num_likes }} vots).{% else %}Vota per construir la cua!{% endif %}</div>
+                        {% elif party.party_status == 'djjukebox_active' %}
+                          <div class="sl-lcd-status">PROPERA CUA</div>
+                          <div class="sl-lcd-detail">{% if now_playing %}{{ now_playing.title }} · {{ now_playing.num_likes }} vots{% if now_playing.artist %} · {{ now_playing.artist }}{% endif %}{% else %}Esperant que hi hagi temes votats a la cua.{% endif %}</div>
+                        {% elif party.party_status == 'finished' %}
+                          <div class="sl-lcd-status">{{ songs_played }} POSADES</div>
+                          <div class="sl-lcd-detail">El DJ ha posat {{ songs_played }} cançó{% if songs_played != 1 %}ns{% endif %} amb un total de {{ total_votes }} vots registrats aquesta nit.</div>
+                        {% endif %}
+                      </div>
+
+                      <!-- Slide 4: explicació del jukebox -->
+                      <div class="sl-carousel-slide">
+                        <div class="sl-lcd-status">JUKEBOX</div>
+                        <div class="sl-lcd-detail">Franja de la festa on el DJ posa en directe els temes més votats per vosaltres. Com més vots, abans sona.</div>
+                      </div>
+
+                    </div>
+                    <!-- Columna fixa: rellotge/crono + horari del jukebox -->
+                    <div class="sl-status-times">
+                      <span class="sl-time-clock {% if party.party_status == 'djjukebox_active' %}is-chrono{% endif %}" id="slClock2">--:--</span>
+                      {% if party.date %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Data festa</span>
+                        <span class="sl-time-val">{{ party.date|date:"d/m" }}</span>
+                      </div>
+                      {% endif %}
+                      {% if party.jukebox_starts_at %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Inici jukebox</span>
+                        <span class="sl-time-val">{{ party.jukebox_starts_at|time:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                      {% if party.jukebox_ends_at %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Fi jukebox</span>
+                        <span class="sl-time-val">{{ party.jukebox_ends_at|time:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <!-- ZONA 2: Cançó actual / ona -->
+                  <div class="sl-lcd-section sl-lcd-section-song">
+                    <div id="slNowPlayingBlock" style="{% if party.party_status == 'djjukebox_active' and played_songs %}{% else %}display:none;{% endif %}">
+                      <div class="sl-np-ticker" id="slNpTicker">
+                        <span class="sl-np-ticker-inner sl-lcd-np-title" id="slNpTickerInner">
+                          <span id="slNowPlayingTitle">{% if played_songs %}{{ played_songs.0.title }}{% endif %}</span><span id="slNowPlayingArtist" style="font-weight:400;opacity:0.6;margin-left:0.4em;">{% if played_songs %}{{ played_songs.0.artist }}{% endif %}</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="sl-lcd-wave" style="height:2rem;margin-top:auto;margin-bottom:auto;">
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                    </div>
+                  </div>
+                  <!-- ZONA 3: Buscador (pinnat al fons) -->
+                  <div class="sl-lcd-section sl-lcd-section-search">
+                    <div class="sl-lcd-search-row">
+                      <span class="material-symbols-outlined">search</span>
+                      <input id="search-played" type="search" class="sl-lcd-search" placeholder="{% trans 'Cerca...' %}">
+                    </div>
+                  </div>
+                </div>
+                <!-- KPIs columna dreta -->
+                <div class="sl-kpi-col">
+                  {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                      <span class="sl-kpi-value" id="slRTemes">{{ total_songs }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                      <span class="sl-kpi-value">{{ active_users }}</span>
+                    </div>
+                    {% if party.jukebox_starts_at %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">Jukebox</span>
+                      <span class="sl-kpi-value" style="font-size:0.82rem;color:#f6c23e;text-shadow:0 0 8px rgba(246,194,62,0.5);">{{ party.jukebox_starts_at|time:"H:i" }}</span>
+                    </div>
+                    {% endif %}
+                  {% elif party.party_status == 'requests_open' %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                      <span class="sl-kpi-value" id="slRPosades">{{ songs_played }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Peticions" %}</span>
+                      <span class="sl-kpi-value" id="slRPeticions">{{ pending_requests_count }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                      <span class="sl-kpi-value">{{ active_users }}</span>
+                    </div>
+                    {% if party.jukebox_starts_at %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">Jukebox</span>
+                      <span class="sl-kpi-value" style="font-size:0.82rem;color:#f6c23e;text-shadow:0 0 8px rgba(246,194,62,0.5);">{{ party.jukebox_starts_at|time:"H:i" }}</span>
+                    </div>
+                    {% endif %}
+                  {% elif party.party_status == 'djjukebox_active' %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                      <span class="sl-kpi-value" id="slRPosades2">{{ songs_played }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Restants" %}</span>
+                      <span class="sl-kpi-value">{{ songs_remaining }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Els meus ♥" %}</span>
+                      <span class="sl-kpi-value" id="slRMyPlayed" style="color:#1cc88a;text-shadow:0 0 10px rgba(28,200,138,0.5);">{{ my_played_votes }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                      <span class="sl-kpi-value">{{ active_users }}</span>
+                    </div>
+                  {% elif party.party_status == 'finished' %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                      <span class="sl-kpi-value">{{ songs_played }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Els meus ♥" %}</span>
+                      <span class="sl-kpi-value" style="color:#1cc88a;text-shadow:0 0 10px rgba(28,200,138,0.5);">{{ my_played_votes }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Total vots" %}</span>
+                      <span class="sl-kpi-value">{{ total_votes }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                      <span class="sl-kpi-value">{{ active_users }}</span>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           </div>
           <div class="songs-column-body">
+            <div class="sl-col-listtitle">
+              <div class="cdj-col-led" style="background:#1cc88a;box-shadow:0 0 6px #1cc88a,0 0 12px rgba(28,200,138,0.4);"></div>
+              <span class="sl-col-listlabel">HISTORIAL</span>
+              <span class="sl-col-listname">{% trans "Ja posades" %}</span>
+            </div>
             <table class="songs-table">
               <thead>
                 <tr>
@@ -761,10 +2205,14 @@
                       {% endif %}
                     </td>
                     <td class="songs-table-cell text-center">
-                      <span class="songs-table-votes-count">{{ song.vote_count|default:"0" }}</span>
+                      <span class="songs-table-votes-count">{{ song.num_likes|default:"0" }}</span>
                     </td>
                     <td class="songs-table-cell-last text-center">
-                      <span class="material-symbols-outlined" style="color: #1cc88a; font-size: 1.25rem; font-variation-settings: 'FILL' 1;">check_circle</span>
+                      {% if song.played_at %}
+                        <span style="font-family:'Courier New',monospace;font-size:0.75rem;font-weight:700;color:#1cc88a;letter-spacing:0.04em;">{{ song.played_at|time:"H:i" }}</span>
+                      {% else %}
+                        <span class="material-symbols-outlined" style="color: #1cc88a; font-size: 1.25rem; font-variation-settings: 'FILL' 1;">check_circle</span>
+                      {% endif %}
                     </td>
                   </tr>
                 {% empty %}
@@ -784,59 +2232,292 @@
 <div class="mobile-songs-grid mobile-page-shell d-md-none">
       <main class="mobile-page-content mobile-page-content--tight mobile-page-stack">
         <div class="mobile-group-stack" style="gap: 0.5rem;">
-        <!-- Party Info Card -->
-        <section class="mobile-section-header">
-          <span class="mobile-kicker">{% trans "LA TEVA FESTA" %}</span>
-          <div class="mobile-surface-card overflow-hidden d-flex flex-column">
-            <div class="d-flex p-3 gap-3 align-items-center">
-              <span style="font-size: 2rem;">🎉</span>
-              <div class="flex-grow-1">
-                <h2 class="font-extrabold mb-0" style="font-size: 1.25rem; letter-spacing: -0.025em; font-family: 'Epilogue', sans-serif; color: #191c1f;">{{ party.name }}</h2>
-                {% if party.date %}
-                  <p class="mb-0 mt-1" style="color: #747688; font-size: 0.75rem;">{{ party.date|date:"d/m/Y H:i" }}</p>
-                {% endif %}
-              </div>
-              <a href="{% url 'select_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="{% trans 'Canvia de festa' %}" title="{% trans 'Canvia de festa' %}" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #eef2ff; color: #0040e0;">
-                <i class="fas fa-exchange-alt"></i>
-              </a>
-              <a href="{% url 'unset_party' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none flex-shrink-0" aria-label="{% trans 'Sortir de la festa' %}" title="{% trans 'Sortir de la festa' %}" style="width: 2.75rem; height: 2.75rem; border-radius: 10px; background: #fff5f5; color: #e74c3c;">
-                <i class="fas fa-sign-out-alt"></i>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <!-- Stats Grid - 3 columnes -->
-        <section class="mobile-stat-grid">
-          <div class="mobile-stat-card">
-            <div class="mobile-stat-top">
-              <div class="mobile-stat-icon" style="background: rgba(28, 200, 138, 0.1);">
-                <i class="fas fa-play-circle" style="color: #1cc88a; font-size: 1rem;"></i>
-              </div>
-              <p class="mobile-stat-value mb-0">{{ songs_played }}</p>
-            </div>
-            <span class="mobile-stat-label">{% trans "Sonades" %}</span>
-          </div>
-          <div class="mobile-stat-card">
-            <div class="mobile-stat-top">
-              <div class="mobile-stat-icon" style="background: rgba(231, 76, 60, 0.1);">
-                <i class="fas fa-heart" style="color: #e74c3c; font-size: 1rem;"></i>
-              </div>
-              <p class="mobile-stat-value mb-0">{{ total_votes }}</p>
-            </div>
-            <span class="mobile-stat-label">{% trans "Vots totals" %}</span>
-          </div>
-          <a href="{% url 'buy_votes' %}" class="mobile-stat-card d-block text-decoration-none">
-            <div class="mobile-stat-top">
-              <div class="mobile-stat-icon" style="background: rgba(0, 64, 224, 0.1);">
-                <i class="fas fa-vote-yea" style="color: #0040e0; font-size: 1rem;"></i>
-              </div>
-              <p class="mobile-stat-value mb-0">{{ votes_left }}</p>
-            </div>
-            <span class="mobile-stat-label">{% trans "Disponibles" %}</span>
+        <!-- ── Mobile CDJ Header (estil sl-lcd desktop) ─────────────── -->
+        <div class="mob-cdj-wrap">
+          <a href="{% url 'select_party' %}" class="mob-poweroff" title="Sortir de la festa">
+            <span class="mob-poweroff-btn"></span>
           </a>
-        </section>
-        </div>
+        <div class="mob-cdj-panel">
+          <div id="slMobileLcd" class="sl-lcd {% if party.party_status == 'party_visible' %}sl-lcd-visible{% elif party.party_status == 'show_party' %}sl-lcd-show{% elif party.party_status == 'requests_open' %}sl-lcd-requests{% elif party.party_status == 'djjukebox_active' %}sl-lcd-active is-playing{% elif party.party_status == 'finished' %}sl-lcd-finished{% endif %}">
+            <span class="mob-poweroff-icon">⏻</span>
+            <div class="sl-lcd-inner">
+              <div class="sl-lcd-main">
+                <div class="sl-lcd-section sl-lcd-section-status">
+                  <div class="sl-status-carousel" id="slMobileCarousel">
+
+                    <div class="sl-carousel-slide sl-slide-active">
+                      <div id="slMobileStatus1" class="sl-lcd-status">
+                        {% if party.party_status == 'party_visible' %}AVIAT
+                        {% elif party.party_status == 'show_party' %}EXPLORA
+                        {% elif party.party_status == 'requests_open' %}VOTA ARA
+                        {% elif party.party_status == 'djjukebox_active' %}VOTA!
+                        {% elif party.party_status == 'finished' %}ACABAT
+                        {% else %}ESPERANT...{% endif %}
+                      </div>
+                      <div id="slMobileDetail1" class="sl-lcd-detail">
+                        {% if party.party_status == 'party_visible' %}La llista obrirà aviat. Prepara't per votar els temes que vols sentir.
+                        {% elif party.party_status == 'show_party' %}Explora la llista i vota els temes. El jukebox encara no és actiu, però els vots ja es comptabilitzen.
+                        {% elif party.party_status == 'requests_open' %}Vota els temes que vols sentir! Els vots s'acumulen a la cua. Quan el DJ activi el jukebox, sonaran els més votats.
+                        {% elif party.party_status == 'djjukebox_active' %}El jukebox és actiu! Com més vots té un tema, abans sona. El DJ segueix la cua en directe.
+                        {% elif party.party_status == 'finished' %}La sessió ha acabat. Gràcies per participar i votar!
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="sl-carousel-slide">
+                      {% if party.party_status == 'party_visible' %}
+                        <div class="sl-lcd-status">{{ total_songs }} TEMES</div>
+                        <div class="sl-lcd-detail">La playlist té {{ total_songs }} temes preparats. {{ active_users }} usuari{% if active_users != 1 %}s{% endif %} connectat{% if active_users != 1 %}s{% endif %}.</div>
+                      {% elif party.party_status == 'show_party' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots disponibles i {{ credits }} coins. Vota els temes que vols que soni el DJ.</div>
+                      {% elif party.party_status == 'requests_open' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS · {{ credits }}C</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots i {{ credits }} coins. Ja has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %} aquesta nit.</div>
+                      {% elif party.party_status == 'djjukebox_active' %}
+                        <div class="sl-lcd-status">{{ votes_left }} VOTS</div>
+                        <div class="sl-lcd-detail">Tens {{ votes_left }} vots restants. Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. Cada vot influeix ara en directe.</div>
+                      {% elif party.party_status == 'finished' %}
+                        <div class="sl-lcd-status">{{ user_votes_count }} VOTS ♥</div>
+                        <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %} aquesta nit. Total de {{ total_votes }} vots a la festa.</div>
+                      {% endif %}
+                    </div>
+
+                    <div class="sl-carousel-slide">
+                      {% if party.party_status == 'party_visible' %}
+                        <div class="sl-lcd-status">PREPARA'T</div>
+                        <div class="sl-lcd-detail">Obre la llista, tria els temes que t'agraden i estàs a punt quan comenci la votació.</div>
+                      {% elif party.party_status == 'show_party' %}
+                        <div class="sl-lcd-status">JB PENDENT</div>
+                        <div class="sl-lcd-detail">Vota ara per acumular posicions a la cua. Quan el DJ premi PLAY, el jukebox seguirà els més votats.</div>
+                      {% elif party.party_status == 'requests_open' %}
+                        <div class="sl-lcd-status">{{ user_votes_count }} FETS ♥</div>
+                        <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. L'activació del jukebox és imminent. Segueix votant per pujar a la cua!</div>
+                      {% elif party.party_status == 'djjukebox_active' %}
+                        <div class="sl-lcd-status">JB ACTIU</div>
+                        <div class="sl-lcd-detail">Vota ara per moure temes cap amunt a la cua. Com més vots tingui un tema, més aviat el DJ el posarà.</div>
+                      {% elif party.party_status == 'finished' %}
+                        <div class="sl-lcd-status">FI DE SESSIÓ</div>
+                        <div class="sl-lcd-detail">La sessió de jukebox ha acabat. Fins a la propera festa!</div>
+                      {% endif %}
+                    </div>
+
+                    <div class="sl-carousel-slide">
+                      <div class="sl-lcd-status">{{ party.name }}</div>
+                      <div class="sl-lcd-detail">Aquesta és la maleta de temes que el DJ té disponibles per posar. Vota els que vols sentir i pugen a la cua.</div>
+                    </div>
+
+                  </div><!-- /slMobileCarousel -->
+
+                  <!-- Columna temps (rellotge + horari) -->
+                  <div class="sl-status-times mob-times-carousel" id="slMobTimesCarousel">
+                    {# Pàgina A — idèntic LCD1 desktop #}
+                    <div class="mob-times-page mob-times-page-active">
+                      <span class="sl-time-clock" id="slMobileClock">--:--</span>
+                      {% if party.date %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Data festa</span>
+                        <span class="sl-time-val">{{ party.date|date:"d/m" }}</span>
+                      </div>
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Inici festa</span>
+                        <span class="sl-time-val">{{ party.date|date:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                      {% if party.party_ends_at %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Fi festa</span>
+                        <span class="sl-time-val">{{ party.party_ends_at|time:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                    {# Pàgina B — idèntic LCD2 desktop #}
+                    <div class="mob-times-page">
+                      <span class="sl-time-clock {% if party.party_status == 'djjukebox_active' %}is-chrono{% endif %}" id="slMobileClock2">--:--</span>
+                      {% if party.date %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Data festa</span>
+                        <span class="sl-time-val">{{ party.date|date:"d/m" }}</span>
+                      </div>
+                      {% endif %}
+                      {% if party.jukebox_starts_at %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Inici jukebox</span>
+                        <span class="sl-time-val">{{ party.jukebox_starts_at|time:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                      {% if party.jukebox_ends_at %}
+                      <div class="sl-time-row">
+                        <span class="sl-time-label">Fi jukebox</span>
+                        <span class="sl-time-val">{{ party.jukebox_ends_at|time:"H:i" }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div><!-- /sl-lcd-section-status -->
+
+                <!-- Secció: preescolta + ona -->
+                <div class="sl-lcd-section sl-lcd-section-song">
+                  <div class="mob-song-row">
+                    <div class="mob-song-info" id="slMobSongInfo">
+                      <div id="slMobileNpBlock" style="{% if party.party_status == 'djjukebox_active' and played_songs %}{% else %}display:none;{% endif %}overflow:hidden;width:100%;">
+                        <div class="sl-np-ticker" id="slMobileNpTicker">
+                          <span class="sl-np-ticker-inner sl-lcd-np-title" id="slMobileNpTickerInner">
+                            <span id="slMobileNpTitle">{% if played_songs %}{{ played_songs.0.title }}{% endif %}</span>
+                            <span id="slMobileNpArtist" style="font-weight:400;opacity:0.6;margin-left:0.4em;">{% if played_songs %}{{ played_songs.0.artist }}{% endif %}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="sl-lcd-wave" style="margin-top:auto;margin-bottom:auto;">
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                        <div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div><div class="sl-bar"></div>
+                      </div>
+                    </div>
+                    <div id="slMobPreviewBtns" class="mob-preview-btns" style="display:none;">
+                      <button type="button" id="slMobPreviewBtn" class="mob-preview-btn" title="Play / Pausa">
+                        <span id="slMobPreviewIcon" class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">pause</span>
+                      </button>
+                      <button type="button" id="slMobStopBtn" class="mob-preview-btn" title="Stop">
+                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">stop</span>
+                      </button>
+                    </div>
+                  </div>
+                </div><!-- /sl-lcd-section-song -->
+
+              </div><!-- /sl-lcd-main -->
+
+              <!-- KPIs lateral dret (igual que desktop LCD1) -->
+              <div class="sl-kpi-col mob-kpi-carousel" id="slMobKpiCarousel">
+                {# Pàgina A — KPIs LCD1 (maleta) #}
+                <div class="mob-kpi-page mob-kpi-page-active">
+                {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                    <span class="sl-kpi-value">{{ total_songs }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                    <span class="sl-kpi-value" id="slMobVots" style="{% if votes_left == 0 %}color:#ff4444;text-shadow:0 0 10px rgba(255,68,68,0.5);{% endif %}">{{ votes_left }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">Coins</span>
+                    <span class="sl-kpi-value" id="slMobCoins" style="color:#f6c23e;text-shadow:0 0 10px rgba(246,194,62,0.5);">{{ credits }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                    <span class="sl-kpi-value" id="slMobFets">{{ user_votes_count }}</span>
+                  </div>
+                {% elif party.party_status == 'finished' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                    <span class="sl-kpi-value" id="slMobPosades">{{ songs_played }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Total" %}</span>
+                    <span class="sl-kpi-value" id="slMobTotal">{{ total_votes }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                    <span class="sl-kpi-value" id="slMobFetsF">{{ user_votes_count }}</span>
+                  </div>
+                {% endif %}
+                </div>
+                {# Pàgina B — KPIs LCD2 (el que ha sonat) #}
+                <div class="mob-kpi-page">
+                {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value">{{ active_users }}</span>
+                  </div>
+                  {% if party.jukebox_starts_at %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">Jukebox</span>
+                    <span class="sl-kpi-value" style="font-size:0.82rem;color:#f6c23e;text-shadow:0 0 8px rgba(246,194,62,0.5);">{{ party.jukebox_starts_at|time:"H:i" }}</span>
+                  </div>
+                  {% endif %}
+                {% elif party.party_status == 'requests_open' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                    <span class="sl-kpi-value" id="slMobPosadesB">{{ songs_played }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Peticions" %}</span>
+                    <span class="sl-kpi-value" id="slMobPeticions">{{ pending_requests_count }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value" id="slMobUsuarisB">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'djjukebox_active' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Posades" %}</span>
+                    <span class="sl-kpi-value" id="slMobPosadesB">{{ songs_played }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Restants" %}</span>
+                    <span class="sl-kpi-value" id="slMobRestants">{{ songs_remaining }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value" id="slMobUsuarisB">{{ active_users }}</span>
+                  </div>
+                {% elif party.party_status == 'finished' %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Els meus ♥" %}</span>
+                    <span class="sl-kpi-value" id="slMobMyPlayed" style="color:#1cc88a;text-shadow:0 0 10px rgba(28,200,138,0.5);">{{ my_played_votes }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
+                    <span class="sl-kpi-value" id="slMobUsuarisB">{{ active_users }}</span>
+                  </div>
+                {% endif %}
+                </div>
+              </div><!-- /sl-kpi-col -->
+
+            </div><!-- /sl-lcd-inner -->
+
+          </div><!-- /slMobileLcd sl-lcd -->
+
+          <div class="mob-hotcue-wrap">
+            <div class="mob-hotcue-label"><span>HOT CUE</span></div>
+            <div class="mob-hotcue-bar">
+              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn" style="--hc-color:#c878ff;">
+                <span class="material-symbols-outlined">swipe</span>
+                <span>Match</span>
+              </a>
+              {% if party.allow_song_requests %}
+              <a href="{% url 'request_song' %}" class="mob-hotcue-btn" style="--hc-color:#4488ff;">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Peticions</span>
+              </a>
+              {% else %}
+              <a href="{% url 'notifications' %}" class="mob-hotcue-btn" style="--hc-color:#4488ff;">
+                <span class="material-symbols-outlined">notifications</span>
+                <span>Alertes</span>
+              </a>
+              {% endif %}
+              <a href="{% url 'buy_votes' %}" class="mob-hotcue-btn" style="--hc-color:#00cc66;">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span>Compra</span>
+              </a>
+              <a href="{% url 'select_party' %}" class="mob-hotcue-btn" style="--hc-color:#ff4444;">
+                <span class="material-symbols-outlined">swap_horiz</span>
+                <span>Canviar</span>
+              </a>
+            </div>
+          </div>
+
+        </div><!-- /mob-cdj-panel -->
+        </div><!-- /mob-cdj-wrap -->
 
         <!-- Song Tabs Header -->
         <section>
@@ -1037,6 +2718,124 @@
 <!-- Alert area for Spotify errors -->
 <div id="spotify-alert-area" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px;"></div>
 
+<!-- Preview LCD state (shared between Spotify block and polling) -->
+<script>
+window.slPreviewActive = false;
+window.slPreviewTitle  = '';
+window.slPreviewArtist = '';
+
+window.updateLcdForPreview = function(title, artist, isPlaying) {
+  var lcd        = document.getElementById('slLcd1');
+  var btn        = document.getElementById('slPreviewPlayBtn');
+  var st         = document.getElementById('slStatus1');
+  var detail     = document.getElementById('slDetail1');
+  var songBlock  = document.getElementById('slPreviewSongBlock');
+  var songTitle  = document.getElementById('slPreviewTitle');
+  var songArtist = document.getElementById('slPreviewArtist');
+  var ticker     = document.getElementById('slPreviewTicker');
+  var tickerInner= document.getElementById('slPreviewTickerInner');
+  // Mobile LCD elements (sl-lcd style)
+  var mLcd        = document.getElementById('slMobileLcd');
+  var mStatusText = document.getElementById('slMobileStatus1');
+  var mNextStep   = document.getElementById('slMobileDetail1');
+
+  var mSongBlock  = document.getElementById('slMobileNpBlock');
+  var mTicker     = document.getElementById('slMobileNpTicker');
+  var mTickerInner= document.getElementById('slMobileNpTickerInner');
+  var mBtns       = document.getElementById('slMobPreviewBtns');
+  var mIcon       = document.getElementById('slMobPreviewIcon');
+
+  function setMobTickerText(text) {
+    if (!mTickerInner || !mTicker) return;
+    mTickerInner.innerHTML = '';
+    var sp = document.createElement('span');
+    sp.className = 'sl-lcd-np-title';
+    sp.textContent = text;
+    mTickerInner.appendChild(sp);
+    mTickerInner.classList.remove('is-scrolling');
+    mTickerInner.style.removeProperty('--sl-scroll-px');
+    requestAnimationFrame(function() {
+      var ov = mTickerInner.scrollWidth - mTicker.offsetWidth;
+      if (ov > 6) {
+        mTickerInner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
+        mTickerInner.classList.add('is-scrolling');
+      }
+    });
+  }
+
+  if (title) {
+    window.slPreviewActive = true;
+    window.slPreviewTitle  = title;
+    window.slPreviewArtist = artist || '';
+
+    // Desktop LCD
+    if (isPlaying) {
+      if (st)     st.textContent     = '▶ PREESCOLTANT';
+      if (detail) detail.textContent = artist || '';
+      if (lcd)    lcd.classList.add('is-previewing');
+    } else {
+      if (st)     st.textContent     = '⏸ PREESCOLTA PAUSADA';
+      if (detail) detail.textContent = artist || '';
+      if (lcd)    lcd.classList.remove('is-previewing');
+    }
+    if (songTitle)  songTitle.textContent  = title;
+    if (songArtist) songArtist.textContent = artist || '';
+    if (songBlock)  songBlock.style.display = '';
+    if (btn) btn.classList.toggle('is-pressed', isPlaying);
+    if (ticker && tickerInner) {
+      tickerInner.classList.remove('is-scrolling');
+      tickerInner.style.removeProperty('--sl-scroll-px');
+      requestAnimationFrame(function() {
+        var ov = tickerInner.scrollWidth - ticker.offsetWidth;
+        if (ov > 6) {
+          tickerInner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
+          tickerInner.classList.add('is-scrolling');
+        }
+      });
+    }
+
+    // Mobile LCD — song section only
+    if (mSongBlock) mSongBlock.style.display = '';
+    if (mBtns)      mBtns.style.display = '';
+    if (mIcon)      mIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
+    if (isPlaying) {
+      if (mLcd) mLcd.classList.add('is-previewing');
+    } else {
+      if (mLcd) mLcd.classList.remove('is-previewing');
+    }
+
+    window._mobPreviewData = { title: title, artist: artist || '' };
+    if (window._mobPreviewInterval) clearInterval(window._mobPreviewInterval);
+    var label = isPlaying ? '▶ PREESCOLTANT' : '⏸ PREESCOLTA PAUSADA';
+    window._mobPreviewAlt = true;
+    setMobTickerText(label);
+    window._mobPreviewInterval = setInterval(function() {
+      window._mobPreviewAlt = !window._mobPreviewAlt;
+      var d = window._mobPreviewData;
+      if (window._mobPreviewAlt) {
+        setMobTickerText(label);
+      } else {
+        setMobTickerText(d.title + '  ·  ' + d.artist);
+      }
+    }, 3000);
+
+  } else {
+    window.slPreviewActive = false;
+    if (songBlock) songBlock.style.display = 'none';
+    if (tickerInner) { tickerInner.classList.remove('is-scrolling'); tickerInner.style.removeProperty('--sl-scroll-px'); }
+    if (lcd) lcd.classList.remove('is-previewing');
+    if (btn) btn.classList.remove('is-pressed');
+    if (mLcd) mLcd.classList.remove('is-previewing');
+    if (window._mobPreviewInterval) { clearInterval(window._mobPreviewInterval); window._mobPreviewInterval = null; }
+    if (mSongBlock) mSongBlock.style.display = 'none';
+    if (mBtns)      mBtns.style.display = 'none';
+    if (mTickerInner) { mTickerInner.classList.remove('is-scrolling'); mTickerInner.style.removeProperty('--sl-scroll-px'); }
+    if (window.slRestoreMobileLcd) window.slRestoreMobileLcd();
+    if (window.slRestoreLcd) window.slRestoreLcd();
+  }
+};
+</script>
+
 {% if has_spotify %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
@@ -1157,15 +2956,19 @@ function ensureSpotifyPlayer() {
         currentPlayingSpotifyId = null;
         isCurrentlyPlaying = false;
         updateSpotifyButtons(null, false);
+        window.updateLcdForPreview(null, null, false);
         return;
       }
+      if (window._spotifyStopped) return;
 
       const isPlaying = !state.paused;
-      const track_id = state.track_window.current_track.id;
+      const track    = state.track_window.current_track;
+      const track_id = track.id;
 
       currentPlayingSpotifyId = track_id;
       isCurrentlyPlaying = isPlaying;
       updateSpotifyButtons(track_id, isPlaying);
+      window.updateLcdForPreview(track.name, track.artists[0].name, isPlaying);
     });
 
     spotifyPlayer.connect().then(success => {
@@ -1208,6 +3011,46 @@ function playSpotifyTrack(spotifyId) {
 
 // Setup play button and overlay listeners
 document.addEventListener('DOMContentLoaded', function() {
+  // CDJ preview play/pause button (desktop)
+  var previewBtn = document.getElementById('slPreviewPlayBtn');
+  if (previewBtn) {
+    previewBtn.addEventListener('click', function() {
+      if (!spotifyPlayer) return;
+      if (isCurrentlyPlaying) {
+        spotifyPlayer.pause().catch(function() {});
+      } else {
+        spotifyPlayer.resume().catch(function() {});
+      }
+    });
+  }
+
+  // Mobile preview play/pause button
+  var mobPreviewBtn = document.getElementById('slMobPreviewBtn');
+  if (mobPreviewBtn) {
+    mobPreviewBtn.addEventListener('click', function() {
+      if (!spotifyPlayer) return;
+      if (isCurrentlyPlaying) {
+        spotifyPlayer.pause().catch(function() {});
+      } else {
+        spotifyPlayer.resume().catch(function() {});
+      }
+    });
+  }
+
+  // Mobile stop button
+  var mobStopBtn = document.getElementById('slMobStopBtn');
+  if (mobStopBtn) {
+    mobStopBtn.addEventListener('click', function() {
+      if (!spotifyPlayer) return;
+      window._spotifyStopped = true;
+      spotifyPlayer.pause().catch(function() {});
+      currentPlayingSpotifyId = null;
+      isCurrentlyPlaying = false;
+      updateSpotifyButtons(null, false);
+      window.updateLcdForPreview(null, null, false);
+    });
+  }
+
   // Play button clicks
   document.querySelectorAll('.spotify-play-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
@@ -1215,6 +3058,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.stopPropagation();
 
       const spotifyId = this.dataset.spotifyId;
+      window._spotifyStopped = false;
 
       if (currentPlayingSpotifyId === spotifyId) {
         // Same track - toggle play/pause
@@ -1275,6 +3119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentPlayingSpotifyId = null;
     isCurrentlyPlaying = false;
     updateSpotifyButtons(null, false);
+    window.updateLcdForPreview(null, null, false);
   }
 
   window.addEventListener('pagehide', cleanupSpotifyPlayback);
@@ -1388,5 +3233,442 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// ── LCD clocks ────────────────────────────────────────────────────────────
+(function() {
+  function hhMM() {
+    var now = new Date();
+    return String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  }
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  // Left clock: always HH:MM
+  var el1 = document.getElementById('slClock1');
+  function tickLeft() { if (el1) el1.textContent = hhMM(); }
+  tickLeft();
+  setInterval(tickLeft, 1000);
+
+  // Right clock: chrono (elapsed since jukebox activated) when djjukebox_active, else HH:MM
+  var el2 = document.getElementById('slClock2');
+  var CHRONO_KEY = 'jukebox_chrono_{{ party.id }}';
+  var IS_ACTIVE  = '{{ party.party_status }}' === 'djjukebox_active';
+
+  if (IS_ACTIVE && el2) {
+    var stored = localStorage.getItem(CHRONO_KEY);
+    var startTs = stored ? parseInt(stored, 10) : Date.now();
+    if (!stored) localStorage.setItem(CHRONO_KEY, startTs);
+
+    el2.classList.add('is-chrono');
+    function tickChrono() {
+      var elapsed = Math.floor((Date.now() - startTs) / 1000);
+      var h = Math.floor(elapsed / 3600);
+      var m = Math.floor((elapsed % 3600) / 60);
+      var s = elapsed % 60;
+      el2.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+    tickChrono();
+    setInterval(tickChrono, 1000);
+  } else {
+    if (el2) el2.classList.remove('is-chrono');
+    function tickRight() { if (el2) el2.textContent = hhMM(); }
+    tickRight();
+    setInterval(tickRight, 1000);
+    if (!IS_ACTIVE) localStorage.removeItem(CHRONO_KEY);
+  }
+  // Mobile clock (HH:MM) + chrono when jukebox active
+  var elMClock  = document.getElementById('slMobileClock');
+  var elMClock2 = document.getElementById('slMobileClock2');
+  function tickMobile() {
+    var t = hhMM();
+    if (elMClock)  elMClock.textContent = t;
+    if (elMClock2) elMClock2.textContent = t;
+  }
+  tickMobile();
+  setInterval(tickMobile, 1000);
+})();
+
+// ── Jukebox schedule countdown ────────────────────────────────────────────
+(function() {
+  var JB_START = '{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:"H:i" }}{% endif %}';
+  var JB_END   = '{% if party.jukebox_ends_at %}{{ party.jukebox_ends_at|time:"H:i" }}{% endif %}';
+  var IS_ACTIVE = '{{ party.party_status }}' === 'djjukebox_active';
+  var IS_DONE   = '{{ party.party_status }}' === 'finished';
+
+  function parseTime(str) {
+    if (!str) return null;
+    var p = str.split(':');
+    var now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(p[0],10), parseInt(p[1],10), 0);
+  }
+
+  function updateCountdown() {
+    var text;
+    if (IS_DONE) {
+      text = 'sessió acabada';
+    } else if (IS_ACTIVE) {
+      var endT = parseTime(JB_END);
+      if (endT) {
+        var left = Math.floor((endT - Date.now()) / 60000);
+        if (left > 0) { text = 'queden ' + left + ' min'; }
+      }
+      if (!text) text = 'en curs';
+    } else {
+      var startT = parseTime(JB_START);
+      if (!startT) {
+        text = 'horari no definit';
+      } else {
+        var diff = Math.floor((startT - Date.now()) / 60000);
+        if (diff <= 0) { text = 'en breu'; }
+        else { var h = Math.floor(diff / 60), m = diff % 60; text = 'falta ' + (h > 0 ? h + 'h ' : '') + m + ' min'; }
+      }
+    }
+    ['slJbCountdown'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = text;
+    });
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 30000);
+})();
+
+// ── Party status polling ───────────────────────────────────────────────────
+(function() {
+  var POLL_URL = '{% url "party_status_api" %}';
+  var currentStatus = '{{ party.party_status }}';
+  var partyDate = '{% if party.date %}{{ party.date|date:"d/m H:i" }}{% endif %}';
+  var initialNowPlaying = '{% if now_playing %}{{ now_playing.title|escapejs }}{% endif %}';
+
+  var LCD_STATE_CLASSES = ['sl-lcd-visible','sl-lcd-show','sl-lcd-requests','sl-lcd-active','sl-lcd-finished'];
+
+  var STATUS_CLASS = {
+    party_visible:    'sl-lcd-visible',
+    show_party:       'sl-lcd-show',
+    requests_open:    'sl-lcd-requests',
+    djjukebox_active: 'sl-lcd-active',
+    finished:         'sl-lcd-finished',
+  };
+  // ── Left LCD: voting & playlist state ─────────────────────────────────────
+  // ── Left LCD: voting state ─────────────────────────────────────────────────
+  var STATUS_LABEL = {
+    party_visible:    'AVIAT',
+    show_party:       'EXPLORA',
+    requests_open:    'VOTA ARA',
+    djjukebox_active: 'VOTA!',
+    finished:         'ACABAT',
+  };
+  function detailText(status) {
+    if (status === 'party_visible')    return 'La llista s\'obrirà aviat · espera';
+    if (status === 'show_party')       return 'Vota els temes que vols sentir · jukebox no actiu';
+    if (status === 'requests_open')    return 'Els vots s\'acumulen · espera l\'activació';
+    if (status === 'djjukebox_active') return 'Com més vots té un tema, abans sona';
+    if (status === 'finished')         return 'Gràcies per participar!';
+    return '';
+  }
+
+  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
+  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
+  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
+  var RIGHT_STATUS_LABEL = {
+    party_visible:    '○ STANDBY',
+    show_party:       '● CUE',
+    requests_open:    '● CUE',
+    djjukebox_active: '▶ PLAY',
+    finished:         '■ FI',
+  };
+  function rightDetailText(status) {
+    if (status === 'djjukebox_active') return 'Sessió jukebox activa · el DJ segueix els vots';
+    if (status === 'requests_open')    return 'Sessió pendent · els vots s\'acumulen';
+    if (status === 'show_party')       return 'Sessió pendent · el DJ decidirà quan activar';
+    if (status === 'party_visible')    return 'El DJ prepara la sessió';
+    if (status === 'finished')         return 'Sessió tancada';
+    return '—';
+  }
+
+  // Cache last known song data for LCD restore after preview
+  var lastSongData = {
+    nowPlaying:        initialNowPlaying || '',
+    nowPlayingArtist:  '{% if now_playing %}{{ now_playing.artist|escapejs }}{% endif %}',
+    lastPlayed:        '{% if played_songs %}{{ played_songs.0.title|escapejs }}{% endif %}',
+    lastPlayedArtist:  '{% if played_songs %}{{ played_songs.0.artist|escapejs }}{% endif %}',
+    songsPlayed:       {{ songs_played }},
+  };
+
+  // ── Status carousel: rota slides cada 5 s ──────────────────────────────
+  function initCarousel(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var slides = el.querySelectorAll('.sl-carousel-slide');
+    if (slides.length < 2) return;
+    var idx = 0;
+    setInterval(function() {
+      slides[idx].classList.remove('sl-slide-active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('sl-slide-active');
+    }, 5000);
+  }
+  initCarousel('slCarousel1');
+  initCarousel('slCarousel2');
+  initCarousel('slMobileCarousel');
+
+  // Mobile KPI + Times page alternation (synced)
+  (function() {
+    var kpiEl = document.getElementById('slMobKpiCarousel');
+    var timEl = document.getElementById('slMobTimesCarousel');
+    var kpiPages = kpiEl ? kpiEl.querySelectorAll('.mob-kpi-page') : [];
+    var timPages = timEl ? timEl.querySelectorAll('.mob-times-page') : [];
+    if (kpiPages.length < 2 && timPages.length < 2) return;
+    var idx = 0;
+    setInterval(function() {
+      if (kpiPages.length > 1) {
+        kpiPages[idx % kpiPages.length].classList.remove('mob-kpi-page-active');
+      }
+      if (timPages.length > 1) {
+        timPages[idx % timPages.length].classList.remove('mob-times-page-active');
+      }
+      idx = (idx + 1);
+      if (kpiPages.length > 1) {
+        kpiPages[idx % kpiPages.length].classList.add('mob-kpi-page-active');
+      }
+      if (timPages.length > 1) {
+        timPages[idx % timPages.length].classList.add('mob-times-page-active');
+      }
+    }, 5000);
+  })();
+
+  function updateKpiVisibility(status) {
+    document.querySelectorAll('[data-kpi-states]').forEach(function(item) {
+      var states = item.getAttribute('data-kpi-states').split(' ');
+      item.style.display = states.indexOf(status) !== -1 ? '' : 'none';
+    });
+  }
+
+  var MOBILE_STATUS_LABEL = {
+    party_visible: 'AVIAT', show_party: 'EXPLORA',
+    requests_open: 'VOTA ARA', djjukebox_active: 'VOTA!', finished: 'ACABAT',
+  };
+  var MOBILE_DETAIL = {
+    party_visible: 'La llista obrirà aviat. Prepara\'t per votar els temes que vols sentir.',
+    show_party: 'Explora la llista i vota els temes. El jukebox encara no és actiu, però els vots ja es comptabilitzen.',
+    requests_open: 'Vota els temes que vols sentir! Els vots s\'acumulen a la cua. Quan el DJ activi el jukebox, sonaran els més votats.',
+    djjukebox_active: 'El jukebox és actiu! Com més vots té un tema, abans sona. El DJ segueix la cua en directe.',
+    finished: 'La sessió ha acabat. Gràcies per participar i votar!',
+  };
+  window.slRestoreMobileLcd = function() {
+    var mst = document.getElementById('slMobileStatus1');
+    var mns = document.getElementById('slMobileDetail1');
+    if (mst) mst.textContent = MOBILE_STATUS_LABEL[currentStatus] || '';
+    if (mns) mns.textContent = MOBILE_DETAIL[currentStatus] || '';
+  };
+
+  // Mobile now-playing: show/hide block + set text immediately
+  function updateMobileNowPlaying(status) {
+    if (window.slPreviewActive) return;
+    var block  = document.getElementById('slMobileNpBlock');
+    var ticker = document.getElementById('slMobileNpTicker');
+    var inner  = document.getElementById('slMobileNpTickerInner');
+    if (!block) return;
+    if (status === 'djjukebox_active' && lastSongData.lastPlayed) {
+      block.style.display = '';
+      if (inner && ticker) {
+        inner.innerHTML = '';
+        var sp = document.createElement('span');
+        sp.className = 'sl-lcd-np-title';
+        sp.textContent = lastSongData.lastPlayed + '  ·  ' + (lastSongData.lastPlayedArtist || '');
+        inner.appendChild(sp);
+        inner.classList.remove('is-scrolling');
+        inner.style.removeProperty('--sl-scroll-px');
+        requestAnimationFrame(function() {
+          var ov = inner.scrollWidth - ticker.offsetWidth;
+          if (ov > 6) {
+            inner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
+            inner.classList.add('is-scrolling');
+          }
+        });
+      }
+    } else {
+      block.style.display = 'none';
+    }
+  }
+
+  // Standalone now-playing ticker alternation (decoupled from polling)
+  (function() {
+    var block  = document.getElementById('slMobileNpBlock');
+    var ticker = document.getElementById('slMobileNpTicker');
+    var inner  = document.getElementById('slMobileNpTickerInner');
+    if (!block || !ticker || !inner) return;
+    var ALT_TEXT = '▶ Sonant ara mateix a la sessió';
+    var showSong = true;
+
+    function setContent(text) {
+      inner.innerHTML = '';
+      var sp = document.createElement('span');
+      sp.className = 'sl-lcd-np-title';
+      sp.textContent = text;
+      inner.appendChild(sp);
+      inner.classList.remove('is-scrolling');
+      inner.style.removeProperty('--sl-scroll-px');
+      requestAnimationFrame(function() {
+        var ov = inner.scrollWidth - ticker.offsetWidth;
+        if (ov > 6) {
+          inner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
+          inner.classList.add('is-scrolling');
+        }
+      });
+    }
+
+    setInterval(function() {
+      if (window.slPreviewActive) return;
+      if (block.style.display === 'none') { showSong = true; return; }
+      showSong = !showSong;
+      if (showSong) {
+        var song = lastSongData.lastPlayed;
+        if (!song) return;
+        setContent(song + '  ·  ' + (lastSongData.lastPlayedArtist || ''));
+      } else {
+        setContent(ALT_TEXT);
+      }
+    }, 4000);
+  })();
+
+  function applyStatus(status, nowPlaying, lastPlayed, songsPlayed) {
+    // Desktop LCD color classes
+    document.querySelectorAll('.sl-lcd').forEach(function(lcd) {
+      LCD_STATE_CLASSES.forEach(function(c) { lcd.classList.remove(c); });
+      if (STATUS_CLASS[status]) lcd.classList.add(STATUS_CLASS[status]);
+    });
+
+    // Right LCD wave: animate when jukebox active
+    var lcd2 = document.getElementById('slLcd2');
+    if (lcd2) {
+      if (status === 'djjukebox_active') lcd2.classList.add('is-playing');
+      else lcd2.classList.remove('is-playing');
+    }
+
+    // Mobile LCD wave + now-playing
+    var mLcd = document.getElementById('slMobileLcd');
+    if (mLcd) {
+      if (status === 'djjukebox_active') mLcd.classList.add('is-playing');
+      else mLcd.classList.remove('is-playing');
+    }
+    updateMobileNowPlaying(status);
+
+    // Left LCD: voting info (skip if Spotify preview active)
+    if (!window.slPreviewActive) {
+      var st = document.getElementById('slStatus1');
+      var dt = document.getElementById('slDetail1');
+      if (st) st.textContent = STATUS_LABEL[status] || status;
+      if (dt) dt.textContent = detailText(status);
+      // Mobile status text
+      window.slRestoreMobileLcd();
+    }
+
+    // LED ticker: start scroll if text overflows container
+  function startTicker() {
+    var ticker = document.getElementById('slNpTicker');
+    var inner  = document.getElementById('slNpTickerInner');
+    if (!ticker || !inner) return;
+    inner.classList.remove('is-scrolling');
+    inner.style.removeProperty('--sl-scroll-px');
+    requestAnimationFrame(function() {
+      var overflow = inner.scrollWidth - ticker.offsetWidth;
+      if (overflow > 6) {
+        inner.style.setProperty('--sl-scroll-px', '-' + overflow + 'px');
+        inner.classList.add('is-scrolling');
+      }
+    });
+  }
+
+  // Right LCD: mode label + now-playing block or explanatory text
+    var rst   = document.getElementById('slLastTitle');
+    var rdt   = document.getElementById('slLastArtist');
+    var npBlock  = document.getElementById('slNowPlayingBlock');
+    var npTitle  = document.getElementById('slNowPlayingTitle');
+    var npArtist = document.getElementById('slNowPlayingArtist');
+    if (rst) rst.textContent = RIGHT_STATUS_LABEL[status] || status;
+    if (rdt) rdt.textContent = rightDetailText(status);
+    if (status === 'djjukebox_active') {
+      var songTitle  = lastSongData.lastPlayed;
+      var songArtist = lastSongData.lastPlayedArtist;
+      if (songTitle) {
+        if (npTitle)  npTitle.textContent  = songTitle;
+        if (npArtist) npArtist.textContent = songArtist || '';
+        if (npBlock) npBlock.style.display = '';
+        startTicker();
+      } else {
+        if (npBlock) npBlock.style.display = 'none';
+      }
+    } else {
+      if (npBlock) npBlock.style.display = 'none';
+    }
+
+    updateKpiVisibility(status);
+  }
+
+  // Expose for preview restore
+  window.slRestoreLcd = function() {
+    applyStatus(currentStatus, lastSongData.nowPlaying, lastSongData.lastPlayed, lastSongData.songsPlayed);
+  };
+  window.slCurrentStatus = currentStatus;
+
+  // Init on page load
+  updateKpiVisibility(currentStatus);
+  if (currentStatus === 'djjukebox_active') startTicker();
+  updateMobileNowPlaying(currentStatus);
+
+  function pollStatus() {
+    fetch(POLL_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+
+        if (data.party_status !== currentStatus) {
+          window.location.reload();
+          return;
+        }
+
+        // Cache song data
+        lastSongData.nowPlaying       = data.now_playing_title   || '';
+        lastSongData.nowPlayingArtist = data.now_playing_artist  || '';
+        lastSongData.lastPlayed       = data.last_played_title   || '';
+        lastSongData.lastPlayedArtist = data.last_played_artist  || '';
+        lastSongData.songsPlayed      = data.songs_played        || 0;
+
+        applyStatus(data.party_status, lastSongData.nowPlaying, lastSongData.lastPlayed, lastSongData.songsPlayed);
+
+        // Update left KPIs
+        var el;
+        el = document.getElementById('slLTemes');    if (el) el.textContent = data.total_songs;
+        el = document.getElementById('slLUsuaris');  if (el) el.textContent = data.active_users;
+        el = document.getElementById('slLVotsMeus'); if (el) el.textContent = data.votes_left;
+        el = document.getElementById('slLCoins');    if (el) el.textContent = data.credits;
+        el = document.getElementById('slLVots');     if (el) el.textContent = data.total_votes;
+        el = document.getElementById('slLPosades');  if (el) el.textContent = data.songs_played;
+        el = document.getElementById('slLVotsF');    if (el) el.textContent = data.total_votes;
+
+        // Update right KPIs
+        el = document.getElementById('slRTemes');     if (el) el.textContent = data.total_songs;
+        el = document.getElementById('slRPosades');   if (el) el.textContent = data.songs_played;
+        el = document.getElementById('slRPeticions'); if (el) el.textContent = data.pending_requests_count;
+        el = document.getElementById('slRMyPlayed');  if (el) el.textContent = data.my_played_votes;
+
+        // Update mobile KPIs
+        el = document.getElementById('slMobVots');     if (el) el.textContent = data.votes_left;
+        el = document.getElementById('slMobCoins');    if (el) el.textContent = data.credits;
+        el = document.getElementById('slMobFets');     if (el) el.textContent = data.user_votes_count;
+        el = document.getElementById('slMobPosades');  if (el) el.textContent = data.songs_played;
+        el = document.getElementById('slMobTotal');    if (el) el.textContent = data.total_votes;
+        el = document.getElementById('slMobFetsF');    if (el) el.textContent = data.user_votes_count;
+        el = document.getElementById('slMobPosadesB'); if (el) el.textContent = data.songs_played;
+        el = document.getElementById('slMobRestants'); if (el) el.textContent = data.songs_remaining;
+        el = document.getElementById('slMobPeticions');if (el) el.textContent = data.pending_requests_count;
+        el = document.getElementById('slMobUsuarisB'); if (el) el.textContent = data.active_users;
+        el = document.getElementById('slMobMyPlayed'); if (el) el.textContent = data.my_played_votes;
+      })
+      .catch(function() {});
+  }
+
+  setInterval(pollStatus, 5000);
+})();
 </script>
 {% endblock %}

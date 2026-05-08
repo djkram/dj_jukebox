@@ -49,6 +49,7 @@ urlpatterns = [
 
     # RUTA per a la llista de cançons de la festa seleccionada
     path('songs/', views.song_list, name='song_list'),
+    path('songs/status-api/', views.party_status_api, name='party_status_api'),
     path('songs/swipe/', views.song_swipe, name='song_swipe'),
     path('songs/request/', views.request_song, name='request_song'),
     path('dj/manage-requests/', views.manage_song_requests, name='manage_song_requests'),

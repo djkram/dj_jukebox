@@ -1033,13 +1033,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updatePlayButton() {
     if (!playBtn) return;
-    const icon = playBtn.querySelector('i');
-    if (isPlaying) {
-      icon.classList.remove('fa-play');
-      icon.classList.add('fa-pause');
-    } else {
-      icon.classList.remove('fa-pause');
-      icon.classList.add('fa-play');
+    const iIcon = playBtn.querySelector('i');
+    if (iIcon) {
+      if (isPlaying) {
+        iIcon.classList.remove('fa-play');
+        iIcon.classList.add('fa-pause');
+      } else {
+        iIcon.classList.remove('fa-pause');
+        iIcon.classList.add('fa-play');
+      }
+      return;
+    }
+    const spanIcon = playBtn.querySelector('.material-symbols-outlined');
+    if (spanIcon) {
+      spanIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
     }
   }
 
@@ -1412,30 +1419,32 @@ document.addEventListener('DOMContentLoaded', function() {
         song_id: songId
       })
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) {
+      if (response.redirected || !response.headers.get('content-type')?.includes('application/json')) {
+        window.location.reload();
+        return null;
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      if (!data) return;
       if (data.success) {
-        // Actualitzar comptadors (mòbil i desktop)
         if (votesCount) votesCount.textContent = data.votes_left;
         if (creditsCount) creditsCount.textContent = data.credits;
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
         if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
-
         animateCardOut('left', songId, 'skip');
-        // Reactivar botons després de l'animació
-        setTimeout(() => {
-          disableCurrentButtons(false);
-        }, 350);
+        setTimeout(() => { disableCurrentButtons(false); }, 350);
       } else {
         showMessage(data.error || 'Error al saltar la cançó', false);
         disableCurrentButtons(false);
       }
     })
-    .catch(error => {
-      console.error('Error:', error);
-      showMessage('Error al saltar la cançó', false);
+    .catch(function(error) {
+      console.error('Skip error:', error);
+      showMessage('No s\'ha pogut saltar · comprova la connexió', false);
       disableCurrentButtons(false);
     });
   }
@@ -1459,31 +1468,34 @@ document.addEventListener('DOMContentLoaded', function() {
         song_id: songId
       })
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) {
+      if (response.redirected || !response.headers.get('content-type')?.includes('application/json')) {
+        // Sessió caducada o resposta inesperada → reload
+        window.location.reload();
+        return null;
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      if (!data) return;
       if (data.success) {
-        // Actualitzar comptadors (mòbil i desktop)
         if (votesCount) votesCount.textContent = data.votes_left;
         if (creditsCount) creditsCount.textContent = data.credits;
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
         if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
-
         showMessage('Match! ❤️ (1 Vot)', true);
         animateCardOut('right', songId, 'like');
-        // Reactivar botons després de l'animació
-        setTimeout(() => {
-          disableCurrentButtons(false);
-        }, 350);
+        setTimeout(() => { disableCurrentButtons(false); }, 350);
       } else {
         showMessage(data.error || 'Error al fer match', false);
         disableCurrentButtons(false);
       }
     })
-    .catch(error => {
-      console.error('Error:', error);
-      showMessage('Error al votar', false);
+    .catch(function(error) {
+      console.error('Like error:', error);
+      showMessage('No s\'ha pogut votar · comprova la connexió', false);
       disableCurrentButtons(false);
     });
   }

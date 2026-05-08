@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-01 23:59+0200\n"
+"POT-Creation-Date: 2026-05-06 00:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,123 +17,199 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: jukebox/forms.py:29
+#: jukebox/forms.py:31
 msgid "Playlist de Spotify"
 msgstr "Spotify Playlist"
 
-#: jukebox/forms.py:54
+#: jukebox/forms.py:50
+msgid "Ex: G30A"
+msgstr "Ex: G30A"
+
+#: jukebox/forms.py:69
 msgid "Nom de la festa"
 msgstr "Party Name"
 
-#: jukebox/forms.py:55
+#: jukebox/forms.py:70
 msgid "Data i hora"
 msgstr "Date and Time"
 
-#: jukebox/forms.py:56
+#: jukebox/forms.py:71
+msgid "Codi d'entrada"
+msgstr "Entry Code"
+
+#: jukebox/forms.py:72
+msgid "Imatge de portada"
+msgstr "Cover Image"
+
+#: jukebox/forms.py:73
+msgid "Festa pública (llistada)"
+msgstr "Public Party (listed)"
+
+#: jukebox/forms.py:74
+msgid "Requerir codi per unir-se"
+msgstr "Require code to join"
+
+#: jukebox/forms.py:75
 msgid "Vots gratuïts per usuari"
 msgstr "Free Votes per User"
 
-#: jukebox/forms.py:57
+#: jukebox/forms.py:76
 msgid "Coins gratuïts per usuari"
 msgstr "Free Coins per User"
 
-#: jukebox/forms.py:58
+#: jukebox/forms.py:77
 msgid "Cost per demanar cançó (Coins)"
 msgstr "Cost to Request Song (Coins)"
 
-#: jukebox/forms.py:66
+#: jukebox/forms.py:78
+msgid "Permetre peticions de cançons"
+msgstr "Allow song requests"
+
+#: jukebox/forms.py:79
+msgid "DJs de la festa"
+msgstr "Party DJs"
+
+#: jukebox/forms.py:87
 msgid "--- Selecciona una playlist ---"
 msgstr "--- Select a playlist ---"
 
-#: jukebox/forms.py:71
+#: jukebox/forms.py:92
 msgid "⚠️ Reconnecta Spotify per veure playlists"
 msgstr "⚠️ Reconnect Spotify to see playlists"
 
-#: jukebox/models.py:28
+#: jukebox/forms.py:109
+msgid "El nombre mínim de vots per usuari és 1."
+msgstr "The minimum number of votes per user is 1."
+
+#: jukebox/forms.py:115
+msgid "El cost mínim per demanar una cançó és 1 Coin."
+msgstr "The minimum cost to request a song is 1 Coin."
+
+#: jukebox/forms.py:121
+msgid "El codi ha de tenir almenys 4 caràcters alfanumèrics."
+msgstr "The code must have at least 4 alphanumeric characters."
+
+#: jukebox/forms.py:127
+msgid "Aquest codi ja està en ús. Tria'n un altre."
+msgstr "This code is already in use. Please choose another."
+
+#: jukebox/models.py:31
 msgid "Festa oculta"
 msgstr "Hidden Party"
 
-#: jukebox/models.py:29
-msgid "Mostrar festa"
-msgstr "Show Party"
+#: jukebox/models.py:32
+msgid "Festa visible (sense llista)"
+msgstr "Visible Party (no list)"
 
-#: jukebox/models.py:30
+#: jukebox/models.py:33
+msgid "Mostrar festa i llista"
+msgstr "Show Party and List"
+
+#: jukebox/models.py:34
 msgid "Obrir peticions"
 msgstr "Open Requests"
 
-#: jukebox/models.py:31
+#: jukebox/models.py:35
 msgid "Iniciar Jukebox"
 msgstr "Start Jukebox"
 
-#: jukebox/models.py:32
+#: jukebox/models.py:36
 msgid "Acabar festa"
 msgstr "End Party"
 
-#: jukebox/models.py:36
+#: jukebox/models.py:40
 msgid "Creador de la festa (necessari per Spotify sync)"
 msgstr "Party Creator (required for Spotify sync)"
 
 #: jukebox/models.py:44
+msgid "Imatge de portada de la festa"
+msgstr "Party Cover Image"
+
+#: jukebox/models.py:45
+msgid "Requerir codi per unir-se a la festa"
+msgstr "Require code to join the party"
+
+#: jukebox/models.py:46
+msgid "Festa pública (llistada) o privada (no llistada)"
+msgstr "Public party (listed) or private (unlisted)"
+
+#: jukebox/models.py:50
+msgid "Permetre als usuaris demanar cançons noves (es paguen amb Coins)"
+msgstr "Allow users to request new songs (paid with Coins)"
+
+#: jukebox/models.py:52
 msgid "Hora prevista d'activació del DJJukebox"
 msgstr "Expected DJJukebox activation time"
 
-#: jukebox/models.py:45
+#: jukebox/models.py:53
 msgid "Indica si el jukebox està actiu per aquesta festa"
 msgstr "Indicates if the jukebox is active for this party"
 
-#: jukebox/models.py:46
+#: jukebox/models.py:54
 msgid "Sincronitzar automàticament amb Spotify cada 5 minuts"
 msgstr "Automatically sync with Spotify every 5 minutes"
 
-#: jukebox/models.py:47
+#: jukebox/models.py:55
 msgid "Última sincronització exitosa"
 msgstr "Last successful sync"
 
-#: jukebox/models.py:48
+#: jukebox/models.py:56
 msgid "Analitzar automàticament àudio cada 5 minuts"
 msgstr "Automatically analyze audio every 5 minutes"
 
-#: jukebox/models.py:49
+#: jukebox/models.py:57
 msgid "Última anàlisi automàtica"
 msgstr "Last automatic analysis"
 
-#: jukebox/models.py:78
+#: jukebox/models.py:58
+msgid "Nom o adreça de la localització"
+msgstr "Location name or address"
+
+#: jukebox/models.py:61
+msgid "Radi en km per restringir accés per ubicació (0 = sense restricció)"
+msgstr "Radius in km to restrict access by location (0 = no restriction)"
+
+#: jukebox/models.py:62
+msgid "Usuaris amb rol de DJ per a aquesta festa"
+msgstr "Users with DJ role for this party"
+
+#: jukebox/models.py:142
 msgid "M'agrada"
 msgstr "Like"
 
-#: jukebox/models.py:79
+#: jukebox/models.py:143
 msgid "No m'agrada"
 msgstr "Dislike"
 
-#: jukebox/models.py:80
+#: jukebox/models.py:144
 msgid "Passar"
 msgstr "Skip"
 
-#: jukebox/models.py:118
+#: jukebox/models.py:183
 msgid "Pendent"
 msgstr "Pending"
 
-#: jukebox/models.py:119
+#: jukebox/models.py:184
 msgid "Acceptada"
 msgstr "Accepted"
 
-#: jukebox/models.py:120
+#: jukebox/models.py:185
 msgid "Rebutjada"
 msgstr "Rejected"
 
-#: jukebox/models.py:141 jukebox/templates/jukebox/notifications.html:402
+#: jukebox/models.py:206 jukebox/templates/jukebox/notifications.html:402
 msgid "Cançó acceptada"
 msgstr "Song Accepted"
 
-#: jukebox/models.py:142 jukebox/templates/jukebox/notifications.html:411
+#: jukebox/models.py:207 jukebox/templates/jukebox/notifications.html:411
 msgid "Cançó reproduïda"
 msgstr "Song Played"
 
-#: jukebox/models.py:143
+#: jukebox/models.py:208
 msgid "Coins comprats"
 msgstr "Coins Purchased"
 
-#: jukebox/models.py:144
+#: jukebox/models.py:209
 msgid "Coins rebuts"
 msgstr "Coins Received"
 
@@ -210,11 +286,8 @@ msgid "Entra i viu la sessió des de dins."
 msgstr "Enter and live the session from within."
 
 #: jukebox/templates/account/login.html:378
-msgid ""
-"Vota cançons, descobreix què sona i participa en directe des de la pista."
-msgstr ""
-"Vote on songs, discover what's playing and participate live from the "
-"dancefloor."
+msgid "Vota cançons, descobreix què sona i participa en directe des de la pista."
+msgstr "Vote on songs, discover what's playing and participate live from the dancefloor."
 
 #: jukebox/templates/account/login.html:382
 msgid "Fes peticions i segueix la música en temps real"
@@ -236,51 +309,51 @@ msgstr "Welcome back"
 msgid "Entra per continuar a DJ Jukebox"
 msgstr "Log in to continue to DJ Jukebox"
 
-#: jukebox/templates/account/login.html:420
+#: jukebox/templates/account/login.html:427
 msgid "Has oblidat la contrasenya?"
 msgstr "Forgot your password?"
 
-#: jukebox/templates/account/login.html:447
-#: jukebox/templates/account/login.html:527
+#: jukebox/templates/account/login.html:454
+#: jukebox/templates/account/login.html:547
 msgid "Entra"
 msgstr "Log in"
 
-#: jukebox/templates/account/login.html:454
+#: jukebox/templates/account/login.html:462
 msgid "o continua amb"
 msgstr "or continue with"
 
-#: jukebox/templates/account/login.html:473
-#: jukebox/templates/account/login.html:552
+#: jukebox/templates/account/login.html:486
+#: jukebox/templates/account/login.html:578
 msgid "No tens compte?"
 msgstr "Don't have an account?"
 
-#: jukebox/templates/account/login.html:473
-#: jukebox/templates/account/login.html:552
+#: jukebox/templates/account/login.html:486
+#: jukebox/templates/account/login.html:578
 #: jukebox/templates/account/signup.html:415
-#: jukebox/templates/account/signup.html:454
-#: jukebox/templates/account/signup.html:486
-#: jukebox/templates/jukebox/admin_base.html:2169
+#: jukebox/templates/account/signup.html:460
+#: jukebox/templates/account/signup.html:492
+#: jukebox/templates/jukebox/admin_base.html:2202
 msgid "Registra't"
 msgstr "Sign up"
 
-#: jukebox/templates/account/login.html:486
-#: jukebox/templates/jukebox/admin_base.html:2166
+#: jukebox/templates/account/login.html:499
+#: jukebox/templates/jukebox/admin_base.html:2199
 msgid "Login"
 msgstr "Login"
 
-#: jukebox/templates/account/login.html:503
+#: jukebox/templates/account/login.html:523
 msgid "Recupera-la"
 msgstr "Recover it"
 
-#: jukebox/templates/account/login.html:535
+#: jukebox/templates/account/login.html:556
 msgid "o connecta't amb"
 msgstr "or connect with"
 
-#: jukebox/templates/account/login.html:540
+#: jukebox/templates/account/login.html:562
 msgid "Connecta't amb Spotify"
 msgstr "Connect with Spotify"
 
-#: jukebox/templates/account/login.html:545
+#: jukebox/templates/account/login.html:569
 msgid "Connecta't amb Google"
 msgstr "Connect with Google"
 
@@ -313,12 +386,8 @@ msgid "No et preocupis, ho solucionem."
 msgstr "Don't worry, we'll fix it."
 
 #: jukebox/templates/account/password_reset.html:219
-msgid ""
-"Introdueix el teu correu electrònic i t'enviarem un enllaç segur per "
-"restablir la contrasenya en pocs segons."
-msgstr ""
-"Enter your email address and we'll send you a secure link to reset your "
-"password in seconds."
+msgid "Introdueix el teu correu electrònic i t'enviarem un enllaç segur per restablir la contrasenya en pocs segons."
+msgstr "Enter your email address and we'll send you a secure link to reset your password in seconds."
 
 #: jukebox/templates/account/password_reset.html:228
 #: jukebox/templates/account/password_reset.html:274
@@ -367,102 +436,96 @@ msgid "Uneix-te a la millor experiència musical"
 msgstr "Join the best music experience"
 
 #: jukebox/templates/account/signup.html:398
-#: jukebox/templates/account/signup.html:471
+#: jukebox/templates/account/signup.html:477
 msgid "Mínim 8 caràcters. Evita una clau fàcil o només numèrica."
 msgstr "Minimum 8 characters. Avoid an easy or numeric-only password."
 
 #: jukebox/templates/account/signup.html:400
-#: jukebox/templates/account/signup.html:473
+#: jukebox/templates/account/signup.html:479
 msgid "Repeteix la mateixa contrasenya."
 msgstr "Repeat the same password."
 
-#: jukebox/templates/account/signup.html:422
-#: jukebox/templates/account/signup.html:494
+#: jukebox/templates/account/signup.html:423
+#: jukebox/templates/account/signup.html:501
 msgid "o registra't amb"
 msgstr "or sign up with"
 
-#: jukebox/templates/account/signup.html:441
-#: jukebox/templates/account/signup.html:511
+#: jukebox/templates/account/signup.html:447
+#: jukebox/templates/account/signup.html:523
 msgid "Ja tens compte?"
 msgstr "Already have an account?"
 
-#: jukebox/templates/account/signup.html:441
-#: jukebox/templates/account/signup.html:511
+#: jukebox/templates/account/signup.html:447
+#: jukebox/templates/account/signup.html:523
 msgid "Fes login"
 msgstr "Log in"
 
-#: jukebox/templates/account/signup.html:499
+#: jukebox/templates/account/signup.html:507
 msgid "Registra't amb Spotify"
 msgstr "Sign up with Spotify"
 
-#: jukebox/templates/account/signup.html:504
+#: jukebox/templates/account/signup.html:514
 msgid "Registra't amb Google"
 msgstr "Sign up with Google"
 
-#: jukebox/templates/jukebox/admin_base.html:1953
-msgid "DJ Tools"
-msgstr "DJ Tools"
+#: jukebox/templates/jukebox/admin_base.html:2001
+msgid "Admin"
+msgstr "Admin"
 
-#: jukebox/templates/jukebox/admin_base.html:1958
-msgid "Dashboard DJ"
-msgstr "DJ Dashboard"
-
-#: jukebox/templates/jukebox/admin_base.html:1965
-msgid "Gestionar peticions"
-msgstr "Manage Requests"
-
-#: jukebox/templates/jukebox/admin_base.html:1973
-msgid "Configuració festa"
-msgstr "Party Settings"
-
-#: jukebox/templates/jukebox/admin_base.html:1981
+#: jukebox/templates/jukebox/admin_base.html:2006
 msgid "Backoffice"
 msgstr "Backoffice"
 
-#: jukebox/templates/jukebox/admin_base.html:1986
+#: jukebox/templates/jukebox/admin_base.html:2012
+msgid "DJ Tools"
+msgstr "DJ Tools"
+
+#: jukebox/templates/jukebox/admin_base.html:2017
+msgid "Dashboard DJ"
+msgstr "DJ Dashboard"
+
+#: jukebox/templates/jukebox/admin_base.html:2024
+msgid "Gestionar peticions"
+msgstr "Manage Requests"
+
+#: jukebox/templates/jukebox/admin_base.html:2032
+msgid "Configuració festa"
+msgstr "Party Settings"
+
+#: jukebox/templates/jukebox/admin_base.html:2039
 msgid "Festa"
 msgstr "Party"
 
-#: jukebox/templates/jukebox/admin_base.html:1995
-#: jukebox/templates/jukebox/song_list.html:5
-msgid "Festa activa"
-msgstr "Active Party"
-
-#: jukebox/templates/jukebox/admin_base.html:2004
+#: jukebox/templates/jukebox/admin_base.html:2052
 msgid "Busca Match"
 msgstr "Find Match"
 
-#: jukebox/templates/jukebox/admin_base.html:2011
+#: jukebox/templates/jukebox/admin_base.html:2061
 msgid "Demanar cançó"
 msgstr "Request Song"
 
-#: jukebox/templates/jukebox/admin_base.html:2014
+#: jukebox/templates/jukebox/admin_base.html:2066
 msgid "General"
 msgstr "General"
 
-#: jukebox/templates/jukebox/admin_base.html:2019
+#: jukebox/templates/jukebox/admin_base.html:2071
+msgid "Tria una altra festa"
+msgstr "Choose Another Party"
+
+#: jukebox/templates/jukebox/admin_base.html:2078
 #: jukebox/templates/jukebox/buy_votes.html:3
 msgid "Compra Coins"
 msgstr "Buy Coins"
 
-#: jukebox/templates/jukebox/admin_base.html:2026
-msgid "Tria una altra festa"
-msgstr "Choose Another Party"
-
-#: jukebox/templates/jukebox/admin_base.html:2033
-#: jukebox/templates/jukebox/admin_base.html:2152
+#: jukebox/templates/jukebox/admin_base.html:2085
 #: jukebox/templates/jukebox/profile.html:5
 msgid "Perfil"
 msgstr "Profile"
 
-#: jukebox/templates/jukebox/admin_base.html:2043
-#: jukebox/templates/jukebox/profile.html:540
+#: jukebox/templates/jukebox/admin_base.html:2095
+#: jukebox/templates/jukebox/profile.html:536
 msgid "Tancar sessió"
 msgstr "Log out"
-
-#: jukebox/templates/jukebox/admin_base.html:2159
-msgid "Sortir"
-msgstr "Exit"
 
 #: jukebox/templates/jukebox/buy_votes.html:314
 #: jukebox/templates/jukebox/buy_votes.html:559
@@ -573,36 +636,24 @@ msgid "Adquireix Coins"
 msgstr "Acquire Coins"
 
 #: jukebox/templates/jukebox/buy_votes.html:511
-msgid ""
-"Els Coins són la moneda principal. Pots comprar-los directament amb targeta "
-"o PayPal per carregar el teu moneder digital."
-msgstr ""
-"Coins are the main currency. You can buy them directly with card or PayPal "
-"to load your digital wallet."
+msgid "Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital."
+msgstr "Coins are the main currency. You can buy them directly with card or PayPal to load your digital wallet."
 
 #: jukebox/templates/jukebox/buy_votes.html:518
 msgid "Converteix a Vots"
 msgstr "Convert to Votes"
 
 #: jukebox/templates/jukebox/buy_votes.html:519
-msgid ""
-"Utilitza el convertidor per transformar Coins en Vots. Com més Coins "
-"converteixis a la vegada, més vots extra rebràs com a bonus."
-msgstr ""
-"Use the converter to transform Coins into Votes. The more Coins you convert "
-"at once, the more extra votes you'll receive as a bonus."
+msgid "Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus."
+msgstr "Use the converter to transform Coins into Votes. The more Coins you convert at once, the more extra votes you'll receive as a bonus."
 
 #: jukebox/templates/jukebox/buy_votes.html:526
 msgid "Participa al Show"
 msgstr "Participate in the Show"
 
 #: jukebox/templates/jukebox/buy_votes.html:527
-msgid ""
-"Fes servir els Vots per promocionar cançons a la cua, demanar temes "
-"especials o votar en enquestes en temps real durant el set."
-msgstr ""
-"Use Votes to promote songs in the queue, request special tracks or vote in "
-"real-time polls during the set."
+msgid "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set."
+msgstr "Use Votes to promote songs in the queue, request special tracks or vote in real-time polls during the set."
 
 #: jukebox/templates/jukebox/buy_votes.html:534
 msgid "Pagament segur garantit"
@@ -617,9 +668,7 @@ msgid "BOTIGA"
 msgstr "SHOP"
 
 #: jukebox/templates/jukebox/buy_votes.html:569
-msgid ""
-"Alimenta l'ambient. Usa coins per demanar cançons i impulsar les teves "
-"favorites."
+msgid "Alimenta l'ambient. Usa coins per demanar cançons i impulsar les teves favorites."
 msgstr "Fuel the vibe. Use coins to request songs and boost your favorites."
 
 #: jukebox/templates/jukebox/buy_votes.html:580
@@ -667,8 +716,10 @@ msgid "Moneder"
 msgstr "Wallet"
 
 #: jukebox/templates/jukebox/buy_votes.html:783
-#: jukebox/templates/jukebox/song_list.html:564
-#: jukebox/templates/jukebox/song_list.html:706
+#: jukebox/templates/jukebox/song_list.html:1020
+#: jukebox/templates/jukebox/song_list.html:1028
+#: jukebox/templates/jukebox/song_list.html:1048
+#: jukebox/templates/jukebox/song_list.html:1265
 msgid "Vots"
 msgstr "Votes"
 
@@ -701,6 +752,7 @@ msgid "Cost:"
 msgstr "Cost:"
 
 #: jukebox/templates/jukebox/notifications.html:362
+#: jukebox/templates/jukebox/song_list.html:1016
 msgid "Coins"
 msgstr "Coins"
 
@@ -737,11 +789,8 @@ msgid "Has rebut coins gratuïts"
 msgstr "You received free coins"
 
 #: jukebox/templates/jukebox/notifications.html:437
-msgid ""
-"Les notificacions es marquen com a llegides automàticament quan visites "
-"aquesta pàgina."
-msgstr ""
-"Notifications are marked as read automatically when you visit this page."
+msgid "Les notificacions es marquen com a llegides automàticament quan visites aquesta pàgina."
+msgstr "Notifications are marked as read automatically when you visit this page."
 
 #: jukebox/templates/jukebox/notifications.html:450
 #: jukebox/templates/jukebox/notifications.html:561
@@ -749,11 +798,8 @@ msgid "No tens notificacions"
 msgstr "You have no notifications"
 
 #: jukebox/templates/jukebox/notifications.html:451
-msgid ""
-"Quan succeixin esdeveniments importants a les festes, rebràs notificacions "
-"aquí!"
-msgstr ""
-"When important events happen at parties, you'll receive notifications here!"
+msgid "Quan succeixin esdeveniments importants a les festes, rebràs notificacions aquí!"
+msgstr "When important events happen at parties, you'll receive notifications here!"
 
 #: jukebox/templates/jukebox/notifications.html:455
 #: jukebox/templates/jukebox/notifications.html:565
@@ -798,12 +844,12 @@ msgid "Quan succeixin esdeveniments importants, apareixeran aquí!"
 msgstr "When important events happen, they will appear here!"
 
 #: jukebox/templates/jukebox/profile.html:379
-#: jukebox/templates/jukebox/profile.html:575
+#: jukebox/templates/jukebox/profile.html:571
 msgid "Membre Premium"
 msgstr "Premium Member"
 
 #: jukebox/templates/jukebox/profile.html:379
-#: jukebox/templates/jukebox/profile.html:575
+#: jukebox/templates/jukebox/profile.html:571
 msgid "Membre"
 msgstr "Member"
 
@@ -812,8 +858,7 @@ msgid "Els teus Coins"
 msgstr "Your Coins"
 
 #: jukebox/templates/jukebox/profile.html:402
-#: jukebox/templates/jukebox/select_party.html:517
-#: jukebox/templates/jukebox/song_list.html:707
+#: jukebox/templates/jukebox/song_list.html:1266
 msgid "Estat"
 msgstr "Status"
 
@@ -838,12 +883,8 @@ msgid "Els Coins són la moneda virtual."
 msgstr "Coins are the virtual currency."
 
 #: jukebox/templates/jukebox/profile.html:421
-msgid ""
-"Compra Coins i converteix-los en Vots per votar a les festes. Més "
-"converteixes, més bonus reps!"
-msgstr ""
-"Buy Coins and convert them into Votes to vote at parties. The more you "
-"convert, the more bonus you get!"
+msgid "Compra Coins i converteix-los en Vots per votar a les festes. Més converteixes, més bonus reps!"
+msgstr "Buy Coins and convert them into Votes to vote at parties. The more you convert, the more bonus you get!"
 
 #: jukebox/templates/jukebox/profile.html:423
 #, python-format
@@ -873,23 +914,15 @@ msgid "Integració Spotify"
 msgstr "Spotify Integration"
 
 #: jukebox/templates/jukebox/profile.html:446
-msgid ""
-"El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les "
-"connexions socials des del botó inferior."
-msgstr ""
-"Your Spotify account is connected and synced. You can manage social "
-"connections from the button below."
+msgid "El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les connexions socials des del botó inferior."
+msgstr "Your Spotify account is connected and synced. You can manage social connections from the button below."
 
 #: jukebox/templates/jukebox/profile.html:448
-msgid ""
-"Connecta el teu compte de Spotify per sincronitzar les teves llistes i "
-"gaudir de la reproducció integrada."
-msgstr ""
-"Connect your Spotify account to sync your playlists and enjoy integrated "
-"playback."
+msgid "Connecta el teu compte de Spotify per sincronitzar les teves llistes i gaudir de la reproducció integrada."
+msgstr "Connect your Spotify account to sync your playlists and enjoy integrated playback."
 
 #: jukebox/templates/jukebox/profile.html:454
-#: jukebox/templates/jukebox/profile.html:605
+#: jukebox/templates/jukebox/profile.html:601
 msgid "Connectar Spotify"
 msgstr "Connect Spotify"
 
@@ -918,372 +951,568 @@ msgid "Connexions socials"
 msgstr "Social Connections"
 
 #: jukebox/templates/jukebox/profile.html:516
-#: jukebox/templates/jukebox/profile.html:659
+#: jukebox/templates/jukebox/profile.html:655
 msgid "Idioma"
 msgstr "Language"
 
-#: jukebox/templates/jukebox/profile.html:589
+#: jukebox/templates/jukebox/profile.html:585
 msgid "Estat Spotify"
 msgstr "Spotify Status"
 
-#: jukebox/templates/jukebox/profile.html:593
+#: jukebox/templates/jukebox/profile.html:589
 msgid "Connectat Actualment"
 msgstr "Currently Connected"
 
-#: jukebox/templates/jukebox/profile.html:593
+#: jukebox/templates/jukebox/profile.html:589
 msgid "Desconnectat Actualment"
 msgstr "Currently Disconnected"
 
-#: jukebox/templates/jukebox/profile.html:597
+#: jukebox/templates/jukebox/profile.html:593
 msgid "El teu compte de Spotify està connectat i sincronitzat."
 msgstr "Your Spotify account is connected and synced."
 
-#: jukebox/templates/jukebox/profile.html:599
-msgid ""
-"Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb "
-"la festa."
+#: jukebox/templates/jukebox/profile.html:595
+msgid "Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb la festa."
 msgstr "Connect to sync your playlists and share your rhythm with the party."
 
-#: jukebox/templates/jukebox/profile.html:616
+#: jukebox/templates/jukebox/profile.html:612
 msgid "Preferències"
 msgstr "Preferences"
 
-#: jukebox/templates/jukebox/profile.html:624
+#: jukebox/templates/jukebox/profile.html:620
 msgid "Editar Email"
 msgstr "Edit Email"
 
-#: jukebox/templates/jukebox/profile.html:635
+#: jukebox/templates/jukebox/profile.html:631
 msgid "Establir Contrasenya"
 msgstr "Set Password"
 
-#: jukebox/templates/jukebox/profile.html:635
+#: jukebox/templates/jukebox/profile.html:631
 msgid "Canviar Contrasenya"
 msgstr "Change Password"
 
-#: jukebox/templates/jukebox/profile.html:647
+#: jukebox/templates/jukebox/profile.html:643
 msgid "Connexions Socials"
 msgstr "Social Connections"
 
-#: jukebox/templates/jukebox/profile.html:682
+#: jukebox/templates/jukebox/profile.html:674
 msgid "Tancar Sessió"
 msgstr "Log Out"
 
 #: jukebox/templates/jukebox/select_party.html:4
-msgid "Selecciona una festa"
-msgstr "Select a Party"
+msgid "Festes DJ Jukebox"
+msgstr "DJ Jukebox Parties"
 
-#: jukebox/templates/jukebox/select_party.html:445
-msgid "EN DIRECTE"
-msgstr "LIVE"
-
-#: jukebox/templates/jukebox/select_party.html:454
-#: jukebox/templates/jukebox/select_party.html:590
-msgid "Data per confirmar"
-msgstr "Date to be confirmed"
-
-#: jukebox/templates/jukebox/select_party.html:458
-#: jukebox/templates/jukebox/select_party.html:558
-msgid "Sense playlist assignada"
-msgstr "No playlist assigned"
-
-#: jukebox/templates/jukebox/select_party.html:463
-msgid "Entrar a la sessió"
-msgstr "Enter the Session"
-
-#: jukebox/templates/jukebox/select_party.html:475
-msgid "Nou a DJ Jukebox"
-msgstr "New to DJ Jukebox"
-
-#: jukebox/templates/jukebox/select_party.html:476
-msgid "Afegeix la teva festa"
-msgstr "Add Your Party"
-
-#: jukebox/templates/jukebox/select_party.html:477
-msgid "Publica-la a DJ Jukebox i activa l'experiència per als teus convidats."
-msgstr "Publish it on DJ Jukebox and activate the experience for your guests."
-
-#: jukebox/templates/jukebox/select_party.html:479
-msgid "Crear festa"
-msgstr "Create Party"
-
-#: jukebox/templates/jukebox/select_party.html:489
+#: jukebox/templates/jukebox/select_party.html:660
 msgid "Ets l'amo de la pista?"
 msgstr "Are you the master of the floor?"
 
-#: jukebox/templates/jukebox/select_party.html:490
-msgid "Demana cançons al moment, mira què sona i recupera tota la sessió."
-msgstr ""
-"Request songs instantly, see what's playing and retrieve the full session."
+#: jukebox/templates/jukebox/select_party.html:661
+msgid "Fes sentir la teva veu i vota els temes que vols que sonin."
+msgstr "Make your voice heard and vote for the tracks you want to hear."
 
-#: jukebox/templates/jukebox/select_party.html:493
-msgid "Sessions Totals"
-msgstr "Total Sessions"
+#: jukebox/templates/jukebox/select_party.html:664
+msgid "Introdueix el codi de la festa"
+msgstr "Enter the party code"
 
-#: jukebox/templates/jukebox/select_party.html:497
-msgid "Festes Actives"
-msgstr "Active Parties"
+#: jukebox/templates/jukebox/select_party.html:665
+#: jukebox/templates/jukebox/select_party.html:740
+#: jukebox/templates/jukebox/select_party.html:757
+msgid "Entrar"
+msgstr "Enter"
 
-#: jukebox/templates/jukebox/select_party.html:508
-msgid "Sistema"
-msgstr "System"
+#: jukebox/templates/jukebox/select_party.html:677
+msgid "Sistema de vots"
+msgstr "Voting System"
 
-#: jukebox/templates/jukebox/select_party.html:509
+#: jukebox/templates/jukebox/select_party.html:678
 #, python-format
 msgid "100%% Operatiu"
 msgstr "100%% Operational"
 
-#: jukebox/templates/jukebox/select_party.html:518
-msgid "En línia"
-msgstr "Online"
+#: jukebox/templates/jukebox/select_party.html:686
+msgid "Pròximes festes"
+msgstr "Upcoming Parties"
 
-#: jukebox/templates/jukebox/select_party.html:526
-#: jukebox/templates/jukebox/select_party.html:617
+#: jukebox/templates/jukebox/select_party.html:710
+msgid "EN DIRECTE"
+msgstr "LIVE"
+
+#: jukebox/templates/jukebox/select_party.html:715
+msgid "REQUEREIX CODI"
+msgstr "REQUIRES CODE"
+
+#: jukebox/templates/jukebox/select_party.html:724
+msgid "Data per confirmar"
+msgstr "Date to be confirmed"
+
+#: jukebox/templates/jukebox/select_party.html:728
+msgid "Sense playlist assignada"
+msgstr "No playlist assigned"
+
+#: jukebox/templates/jukebox/select_party.html:737
+msgid "Codi d\\"
+msgstr "Code:"
+
+#: jukebox/templates/jukebox/select_party.html:749
+msgid "Entrar a la sessió"
+msgstr "Enter the Session"
+
+#: jukebox/templates/jukebox/select_party.html:770
+#: jukebox/templates/jukebox/select_party.html:886
 msgid "No hi ha festes disponibles"
 msgstr "No parties available"
 
-#: jukebox/templates/jukebox/select_party.html:527
+#: jukebox/templates/jukebox/select_party.html:771
 msgid "Crea una nova festa al backoffice per començar"
 msgstr "Create a new party in the backoffice to get started"
 
-#: jukebox/templates/jukebox/select_party.html:540
+#: jukebox/templates/jukebox/select_party.html:782
+#: jukebox/templates/jukebox/select_party.html:894
+msgid "Porta la teva festa al següent nivell"
+msgstr "Take your party to the next level"
+
+#: jukebox/templates/jukebox/select_party.html:783
+#: jukebox/templates/jukebox/select_party.html:896
+msgid "Fes servir DJ Jukebox per revolucionar el teu públic! Crea festes, comparteix codis QR i deixa que votin."
+msgstr "Use DJ Jukebox to revolutionize your audience! Create parties, share QR codes and let them vote."
+
+#: jukebox/templates/jukebox/select_party.html:789
+#: jukebox/templates/jukebox/select_party.html:902
+msgid "Codis QR"
+msgstr "QR Codes"
+
+#: jukebox/templates/jukebox/select_party.html:793
+#: jukebox/templates/jukebox/select_party.html:906
+msgid "Votacions"
+msgstr "Voting"
+
+#: jukebox/templates/jukebox/select_party.html:798
+#: jukebox/templates/jukebox/select_party.html:911
+msgid "Comença ara"
+msgstr "Get started"
+
+#: jukebox/templates/jukebox/select_party.html:821
 msgid "Escull la teva festa i fes sentir les teves preferències."
 msgstr "Choose your party and make your preferences heard."
 
-#: jukebox/templates/jukebox/select_party.html:547
-msgid "En Directe Ara"
-msgstr "Live Now"
+#: jukebox/templates/jukebox/select_party.html:829
+msgid "Tens un codi?"
+msgstr "Have a code?"
 
-#: jukebox/templates/jukebox/select_party.html:553
-msgid "Alta Energia"
-msgstr "High Energy"
+#: jukebox/templates/jukebox/select_party.html:830
+msgid "Accedeix directament"
+msgstr "Access directly"
 
-#: jukebox/templates/jukebox/select_party.html:561
-msgid "Unir-se a la Festa"
-msgstr "Join the Party"
+#: jukebox/templates/jukebox/select_party.html:836
+msgid "Codi de la festa"
+msgstr "Party Code"
 
-#: jukebox/templates/jukebox/select_party.html:573
-msgid "Properes Festes"
-msgstr "Upcoming Parties"
+#: jukebox/templates/jukebox/select_party.html:854
+msgid "Festes Disponibles"
+msgstr "Available Parties"
 
-#: jukebox/templates/jukebox/select_party.html:599
-msgid "Sense playlist"
-msgstr "No Playlist"
+#: jukebox/templates/jukebox/select_party.html:875
+msgid "Pròximament"
+msgstr "Coming soon"
 
-#: jukebox/templates/jukebox/select_party.html:604
-msgid "Unir-se"
-msgstr "Join"
-
-#: jukebox/templates/jukebox/select_party.html:618
+#: jukebox/templates/jukebox/select_party.html:887
 msgid "Torna aviat per veure propers esdeveniments!"
 msgstr "Come back soon to see upcoming events!"
 
-#: jukebox/templates/jukebox/song_list.html:514
-#: jukebox/templates/jukebox/song_list.html:813
-msgid "Sonades"
-msgstr "Played"
+#: jukebox/templates/jukebox/select_party.html:984
+msgid "Aquesta festa requereix un codi d\\'entrada. Si us plau, introdueix el codi:"
+msgstr "This party requires an entry code. Please enter the code:"
 
-#: jukebox/templates/jukebox/song_list.html:521
-#: jukebox/templates/jukebox/song_list.html:822
-msgid "Vots totals"
-msgstr "Total Votes"
+#: jukebox/templates/jukebox/song_list.html:5
+msgid "Festa activa"
+msgstr "Active Party"
 
-#: jukebox/templates/jukebox/song_list.html:528
-#: jukebox/templates/jukebox/song_list.html:831
-msgid "Disponibles"
-msgstr "Available"
-
-#: jukebox/templates/jukebox/song_list.html:534
-msgid "Canviar Festa"
+#: jukebox/templates/jukebox/song_list.html:954
+#, fuzzy
+#| msgid "Canvia de festa"
+msgid "Canviar de festa"
 msgstr "Change Party"
 
-#: jukebox/templates/jukebox/song_list.html:550
-#: jukebox/templates/jukebox/song_list.html:839
+#: jukebox/templates/jukebox/song_list.html:957
+#, fuzzy
+#| msgid "Canviar Festa"
+msgid "Canviar"
+msgstr "Change Party"
+
+#: jukebox/templates/jukebox/song_list.html:968
+#: jukebox/templates/jukebox/song_list.html:1392
 msgid "Maleta del DJ"
 msgstr "DJ's Crate"
 
-#: jukebox/templates/jukebox/song_list.html:554
-#: jukebox/templates/jukebox/song_list.html:696
+#: jukebox/templates/jukebox/song_list.html:982
+msgid "Les votacions obriran aviat"
+msgstr "Voting will open soon"
+
+#: jukebox/templates/jukebox/song_list.html:983
+msgid "Explora els temes · votacions aviat"
+msgstr "Explore the tracks · voting coming soon"
+
+#: jukebox/templates/jukebox/song_list.html:984
+msgid "Les teves votacions arriben al DJ"
+msgstr "Your votes reach the DJ"
+
+#: jukebox/templates/jukebox/song_list.html:985
+msgid "Vota ara · el DJ ho veu en directe"
+msgstr "Vote now · the DJ sees it live"
+
+#: jukebox/templates/jukebox/song_list.html:986
+msgid "Gràcies per participar!"
+msgstr "Thanks for participating!"
+
+#: jukebox/templates/jukebox/song_list.html:999
+#: jukebox/templates/jukebox/song_list.html:1234
 msgid "Cerca..."
 msgstr "Search..."
 
-#: jukebox/templates/jukebox/song_list.html:561
-#: jukebox/templates/jukebox/song_list.html:703
+#: jukebox/templates/jukebox/song_list.html:1004
+#: jukebox/templates/jukebox/song_list.html:1239
+msgid "Temes"
+msgstr "Tracks"
+
+#: jukebox/templates/jukebox/song_list.html:1008
+msgid "Usuaris"
+msgstr "Users"
+
+#: jukebox/templates/jukebox/song_list.html:1012
+msgid "Vots meus"
+msgstr "My Votes"
+
+#: jukebox/templates/jukebox/song_list.html:1024
+#: jukebox/templates/jukebox/song_list.html:1243
+#, fuzzy
+#| msgid "Sonades"
+msgid "Posades"
+msgstr "Played"
+
+#: jukebox/templates/jukebox/song_list.html:1035
+msgid "Pausa / reprèn preescolta"
+msgstr "Pause / resume preview"
+
+#: jukebox/templates/jukebox/song_list.html:1045
+#: jukebox/templates/jukebox/song_list.html:1262
 msgid "Títol i Artista"
 msgstr "Title and Artist"
 
-#: jukebox/templates/jukebox/song_list.html:565
+#: jukebox/templates/jukebox/song_list.html:1049
 msgid "Acció"
 msgstr "Action"
 
-#: jukebox/templates/jukebox/song_list.html:623
-#: jukebox/templates/jukebox/song_list.html:894
+#: jukebox/templates/jukebox/song_list.html:1109
+#: jukebox/templates/jukebox/song_list.html:1448
 msgid "Desfer vot positiu"
 msgstr "Undo positive vote"
 
-#: jukebox/templates/jukebox/song_list.html:623
-#: jukebox/templates/jukebox/song_list.html:636
-#: jukebox/templates/jukebox/song_list.html:894
-#: jukebox/templates/jukebox/song_list.html:907
+#: jukebox/templates/jukebox/song_list.html:1109
+#: jukebox/templates/jukebox/song_list.html:1122
+#: jukebox/templates/jukebox/song_list.html:1448
+#: jukebox/templates/jukebox/song_list.html:1461
 msgid "Desfer vot"
 msgstr "Undo vote"
 
-#: jukebox/templates/jukebox/song_list.html:627
-#: jukebox/templates/jukebox/song_list.html:898
+#: jukebox/templates/jukebox/song_list.html:1113
+#: jukebox/templates/jukebox/song_list.html:1452
 msgid "Vot negatiu no seleccionat"
 msgstr "Negative vote not selected"
 
-#: jukebox/templates/jukebox/song_list.html:631
-#: jukebox/templates/jukebox/song_list.html:902
+#: jukebox/templates/jukebox/song_list.html:1117
+#: jukebox/templates/jukebox/song_list.html:1456
 msgid "Vot positiu no seleccionat"
 msgstr "Positive vote not selected"
 
-#: jukebox/templates/jukebox/song_list.html:636
-#: jukebox/templates/jukebox/song_list.html:907
+#: jukebox/templates/jukebox/song_list.html:1122
+#: jukebox/templates/jukebox/song_list.html:1461
 msgid "Desfer vot negatiu"
 msgstr "Undo negative vote"
 
-#: jukebox/templates/jukebox/song_list.html:648
-#: jukebox/templates/jukebox/song_list.html:919
+#: jukebox/templates/jukebox/song_list.html:1134
+#: jukebox/templates/jukebox/song_list.html:1473
 msgid "Vot positiu"
 msgstr "Positive vote"
 
-#: jukebox/templates/jukebox/song_list.html:655
-#: jukebox/templates/jukebox/song_list.html:926
+#: jukebox/templates/jukebox/song_list.html:1141
+#: jukebox/templates/jukebox/song_list.html:1480
 msgid "Vot negatiu"
 msgstr "Negative vote"
 
-#: jukebox/templates/jukebox/song_list.html:662
-#: jukebox/templates/jukebox/song_list.html:665
+#: jukebox/templates/jukebox/song_list.html:1148
+#: jukebox/templates/jukebox/song_list.html:1151
 msgid "Necessites Coins per votar"
 msgstr "You need Coins to vote"
 
-#: jukebox/templates/jukebox/song_list.html:675
-#: jukebox/templates/jukebox/song_list.html:946
+#: jukebox/templates/jukebox/song_list.html:1163
+#: jukebox/templates/jukebox/song_list.html:1503
 msgid "No queden temes pendents."
 msgstr "No pending tracks left."
 
-#: jukebox/templates/jukebox/song_list.html:692
-msgid "Ja posades"
-msgstr "Already Played"
+#: jukebox/templates/jukebox/song_list.html:1165
+#: jukebox/templates/jukebox/song_list.html:1505
+msgid "La llista de cançons de la maleta del DJ encara no està disponible."
+msgstr "The DJ's crate is not yet available."
 
-#: jukebox/templates/jukebox/song_list.html:761
-#: jukebox/templates/jukebox/song_list.html:996
+#: jukebox/templates/jukebox/song_list.html:1184
+#: jukebox/templates/jukebox/song_list.html:1350
+msgid "Sortir de la festa"
+msgstr "Leave Party"
+
+#: jukebox/templates/jukebox/song_list.html:1187
+msgid "Sortir"
+msgstr "Exit"
+
+#: jukebox/templates/jukebox/song_list.html:1198
+msgid "Jukebox"
+msgstr "Jukebox"
+
+#: jukebox/templates/jukebox/song_list.html:1247
+msgid "Peticions"
+msgstr "Requests"
+
+#: jukebox/templates/jukebox/song_list.html:1251
+msgid "Els meus ♥"
+msgstr "My ♥"
+
+#: jukebox/templates/jukebox/song_list.html:1320
+#: jukebox/templates/jukebox/song_list.html:1570
 msgid "Encara no ha començat la festa."
 msgstr "The party hasn't started yet."
 
-#: jukebox/templates/jukebox/song_list.html:774
-#: jukebox/templates/jukebox/song_list.html:1015
-msgid "No hi ha cançons"
-msgstr "No Songs"
-
-#: jukebox/templates/jukebox/song_list.html:775
-#: jukebox/templates/jukebox/song_list.html:1016
-msgid "Aquesta festa encara no té cançons disponibles"
-msgstr "This party doesn't have any songs available yet"
-
-#: jukebox/templates/jukebox/song_list.html:787
+#: jukebox/templates/jukebox/song_list.html:1337
 msgid "LA TEVA FESTA"
 msgstr "YOUR PARTY"
 
-#: jukebox/templates/jukebox/song_list.html:797
+#: jukebox/templates/jukebox/song_list.html:1347
 msgid "Canvia de festa"
 msgstr "Change Party"
 
-#: jukebox/templates/jukebox/song_list.html:840
+#: jukebox/templates/jukebox/song_list.html:1366
+msgid "Sonades"
+msgstr "Played"
+
+#: jukebox/templates/jukebox/song_list.html:1375
+msgid "Vots totals"
+msgstr "Total Votes"
+
+#: jukebox/templates/jukebox/song_list.html:1384
+msgid "Disponibles"
+msgstr "Available"
+
+#: jukebox/templates/jukebox/song_list.html:1393
 msgid "El que ha sonat"
 msgstr "What's been played"
 
-#: jukebox/templates/jukebox/song_list.html:849
+#: jukebox/templates/jukebox/song_list.html:1402
 msgid "Busca una cançó o artista"
 msgstr "Search for a song or artist"
 
-#: jukebox/templates/jukebox/song_list.html:932
+#: jukebox/templates/jukebox/song_list.html:1486
 msgid "Necessites vots per votar"
 msgstr "You need votes to vote"
 
-#: jukebox/templates/jukebox/song_list.html:1109
+#: jukebox/templates/jukebox/song_list.html:1512
+msgid "No s'ha trobat cap tema a la maleta."
+msgstr "No tracks found in the crate."
+
+#: jukebox/templates/jukebox/song_list.html:1520
+msgid "Buscar-la a Spotify"
+msgstr "Search on Spotify"
+
+#: jukebox/templates/jukebox/song_list.html:1702
 msgid "El reproductor de Spotify no està llest. Espera uns segons..."
 msgstr "Spotify player is not ready. Wait a few seconds..."
 
-#: jukebox/templates/jukebox/song_list.html:1177
+#: jukebox/templates/jukebox/song_list.html:1778
 msgid "Necessites Spotify Premium per reproduir cançons completes"
 msgstr "You need Spotify Premium to play full songs"
 
-#: jukebox/templates/jukebox/song_list.html:1180
+#: jukebox/templates/jukebox/song_list.html:1781
 msgid "Sessió de Spotify caducada. Reconnecta el teu compte des del perfil."
 msgstr "Spotify session expired. Reconnect your account from your profile."
 
-#: jukebox/templates/jukebox/song_list.html:1183
+#: jukebox/templates/jukebox/song_list.html:1784
 msgid "Error reproduint la cançó. Torna-ho a provar."
 msgstr "Error playing the song. Try again."
 
-#: jukebox/views.py:226
-msgid "No s'ha seleccionat cap playlist."
-msgstr "No playlist selected."
+#: jukebox/utils/vote_validation.py:54
+msgid "Ja has votat aquesta cançó"
+msgstr "You have already voted for this song"
 
-#: jukebox/views.py:232
-msgid ""
-"La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar."
-msgstr "Spotify session has expired. Reconnect Spotify to continue."
-
-#: jukebox/views.py:238
-msgid "No s'ha trobat aquesta playlist a Spotify."
-msgstr "This playlist was not found on Spotify."
-
-#: jukebox/views.py:278
-msgid "No playlist ID provided"
-msgstr "No playlist ID provided"
-
-#: jukebox/views.py:380
-msgid "La festa encara no té una playlist assignada."
-msgstr "The party doesn't have a playlist assigned yet."
-
-#: jukebox/views.py:388
-msgid "Falten dades de la cançó."
-msgstr "Missing song data."
-
-#: jukebox/views.py:391
-msgid "Aquesta cançó ja és a la playlist de la festa."
-msgstr "This song is already in the party playlist."
-
-#: jukebox/views.py:1487
-msgid "No tens vots! Converteix Coins a Vots per fer like."
-msgstr "You have no votes! Convert Coins to Votes to like."
-
-#: jukebox/views.py:1489 jukebox/views.py:1509 jukebox/views.py:1529
-msgid "No tens Coins! Compra Coins i converteix-los a Vots."
-msgstr "You have no Coins! Buy Coins and convert them to Votes."
-
-#: jukebox/views.py:1507 jukebox/views.py:1527
+#: jukebox/utils/vote_validation.py:61
 msgid "No tens vots! Converteix Coins a Vots per continuar."
 msgstr "You have no votes! Convert Coins to Votes to continue."
 
-#: jukebox/views.py:1675
+#: jukebox/utils/vote_validation.py:63
+msgid "No tens Coins! Compra Coins i converteix-los a Vots."
+msgstr "You have no Coins! Buy Coins and convert them to Votes."
+
+#: jukebox/views.py:158
+msgid "Codi invàlid. Comprova que l'has escrit correctament."
+msgstr "Invalid code. Check that you've written it correctly."
+
+#: jukebox/views.py:181
+msgid "Codi incorrecte. Aquesta festa requereix un codi d'entrada."
+msgstr "Incorrect code. This party requires an entry code."
+
+#: jukebox/views.py:192
+msgid "Aquesta festa requereix verificar la teva ubicació per unir-te."
+msgstr "This party requires verifying your location to join."
+
+#: jukebox/views.py:197
+msgid "Per entrar a aquesta festa has de ser-hi físicament present."
+msgstr "To enter this party you must be physically present."
+
+#: jukebox/views.py:200
+msgid "No s'ha pogut verificar la teva ubicació."
+msgstr "Could not verify your location."
+
+#: jukebox/views.py:204
+#, python-format
+msgid "T'has unit a la festa: %(name)s"
+msgstr "You joined the party: %(name)s"
+
+#: jukebox/views.py:254
+msgid "Configuració guardada correctament."
+msgstr "Settings saved successfully."
+
+#: jukebox/views.py:347
+msgid "No s'ha seleccionat cap playlist."
+msgstr "No playlist selected."
+
+#: jukebox/views.py:356
+msgid "No s'ha trobat aquesta playlist a Spotify."
+msgstr "This playlist was not found on Spotify."
+
+#: jukebox/views.py:399
+msgid "No playlist ID provided"
+msgstr "No playlist ID provided"
+
+#: jukebox/views.py:534
+msgid "La festa encara no té una playlist assignada."
+msgstr "The party doesn't have a playlist assigned yet."
+
+#: jukebox/views.py:542
+msgid "Falten dades de la cançó."
+msgstr "Missing song data."
+
+#: jukebox/views.py:545
+msgid "Aquesta cançó ja és a la playlist de la festa."
+msgstr "This song is already in the party playlist."
+
+#: jukebox/views.py:590
+msgid "No s'ha pogut afegir la cançó ara mateix."
+msgstr "Could not add the song right now."
+
+#: jukebox/views.py:625
+msgid "No s'ha pogut eliminar la cançó ara mateix."
+msgstr "Could not remove the song right now."
+
+#: jukebox/views.py:692
+msgid "No s'han pogut processar les metadades de les cançons."
+msgstr "Could not process song metadata."
+
+#: jukebox/views.py:754
+msgid "Error analitzant l'àudio de la cançó."
+msgstr "Error analyzing song audio."
+
+#: jukebox/views.py:1524
+msgid "Els vots encara no estan disponibles per a aquesta festa."
+msgstr "Votes are not yet available for this party."
+
+#: jukebox/views.py:1587
+msgid "Les peticions de cançons no estan activades per a aquesta festa."
+msgstr "Song requests are not enabled for this party."
+
+#: jukebox/views.py:1608
 msgid "Dades incompletes"
 msgstr "Incomplete data"
 
-#: jukebox/views.py:1679
+#: jukebox/views.py:1612
 msgid "Aquesta cançó ja està a la llista!"
 msgstr "This song is already on the list!"
 
-#: jukebox/views.py:1683
+#: jukebox/views.py:1616
 msgid "Aquesta cançó ja ha estat demanada i està pendent"
 msgstr "This song has already been requested and is pending"
 
-#: jukebox/views.py:1697
+#: jukebox/views.py:1630
 #, python-format
 msgid "Petició enviada! Cost: %(cost)s Coins (només si s'accepta)"
 msgstr "Request sent! Cost: %(cost)s Coins (only if accepted)"
 
-#: jukebox/views.py:1848
+#: jukebox/views.py:1782
+msgid "Petició no trobada o ja processada."
+msgstr "Request not found or already processed."
+
+#: jukebox/views.py:1804
 msgid "Cançó acceptada i afegida sense càrrec"
 msgstr "Song accepted and added without charge"
 
-#: jukebox/views.py:1853
+#: jukebox/views.py:1809
 #, python-format
 msgid "L'usuari no té prou Coins (%(current)s/%(required)s)"
 msgstr "User doesn't have enough Coins (%(current)s/%(required)s)"
 
-#: jukebox/views.py:1865
+#: jukebox/views.py:1821
 msgid "Cançó rebutjada (sense càrrec)"
 msgstr "Song rejected (no charge)"
+
+#~ msgid "Selecciona una festa"
+#~ msgstr "Select a Party"
+
+#~ msgid "Afegeix la teva festa"
+#~ msgstr "Add Your Party"
+
+#~ msgid "Publica-la a DJ Jukebox i activa l'experiència per als teus convidats."
+#~ msgstr "Publish it on DJ Jukebox and activate the experience for your guests."
+
+#~ msgid "Crear festa"
+#~ msgstr "Create Party"
+
+#~ msgid "Demana cançons al moment, mira què sona i recupera tota la sessió."
+#~ msgstr "Request songs instantly, see what's playing and retrieve the full session."
+
+#~ msgid "Sessions Totals"
+#~ msgstr "Total Sessions"
+
+#~ msgid "Festes Actives"
+#~ msgstr "Active Parties"
+
+#~ msgid "Sistema"
+#~ msgstr "System"
+
+#~ msgid "En línia"
+#~ msgstr "Online"
+
+#~ msgid "En Directe Ara"
+#~ msgstr "Live Now"
+
+#~ msgid "Alta Energia"
+#~ msgstr "High Energy"
+
+#~ msgid "Unir-se a la Festa"
+#~ msgstr "Join the Party"
+
+#~ msgid "Sense playlist"
+#~ msgstr "No Playlist"
+
+#~ msgid "Unir-se"
+#~ msgstr "Join"
+
+#~ msgid "Ja posades"
+#~ msgstr "Already Played"
+
+#~ msgid "No hi ha cançons"
+#~ msgstr "No Songs"
+
+#~ msgid "Aquesta festa encara no té cançons disponibles"
+#~ msgstr "This party doesn't have any songs available yet"
+
+#~ msgid "La sessió de Spotify ha caducat. Torna a connectar Spotify per continuar."
+#~ msgstr "Spotify session has expired. Reconnect Spotify to continue."
+
+#~ msgid "No tens vots! Converteix Coins a Vots per fer like."
+#~ msgstr "You have no votes! Convert Coins to Votes to like."

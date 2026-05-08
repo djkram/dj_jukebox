@@ -50,6 +50,8 @@ class Party(models.Model):
     allow_song_requests = models.BooleanField(default=True, help_text=_("Permetre als usuaris demanar cançons noves (es paguen amb Coins)"))
     party_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_HIDDEN)
     jukebox_starts_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista d'activació del DJJukebox"))
+    jukebox_ends_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista de fi del DJJukebox"))
+    party_ends_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista de fi de la festa"))
     is_jukebox_active = models.BooleanField(default=True, help_text=_("Indica si el jukebox està actiu per aquesta festa"))
     auto_sync_playlist = models.BooleanField(default=False, help_text=_("Sincronitzar automàticament amb Spotify cada 5 minuts"))
     last_sync_at = models.DateTimeField(null=True, blank=True, help_text=_("Última sincronització exitosa"))
@@ -129,6 +131,7 @@ class Song(models.Model):
     key = models.CharField(max_length=4, null=True, blank=True)
     has_played = models.BooleanField(default=False)
     played = models.BooleanField(default=False)
+    played_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = [['party', 'spotify_id']]

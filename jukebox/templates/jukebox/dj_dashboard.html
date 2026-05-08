@@ -1263,13 +1263,7 @@
 
 <div id="dashboard-request-message" class="sonic-mb-4"></div>
 
-<!-- Layout 2 columnes: 60% / 40% -->
-<div style="display: grid; grid-template-columns: 6fr 4fr; gap: 1.25rem;">
-
-    <!-- COLUMNA ESQUERRA (60%) -->
-    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-
-        {# ── CASSETTE DECK STATUS CONTROLS ────────────────────────────── #}
+{# ── CASSETTE DECK STATUS CONTROLS — ample complet ─────────────────── #}
         <section class="cassette-panel" style="position:relative;">
 
           {# Botó OFF — sobresurt del capdemunt #}
@@ -1307,7 +1301,7 @@
               {% elif party.party_status == 'requests_open' %}lcd-requests
               {% elif party.party_status == 'djjukebox_active' %}lcd-active
               {% elif party.party_status == 'finished' %}lcd-finished{% endif %}"
-              style="margin-bottom:0; flex:1; min-width:0; display:flex; gap:0; align-items:stretch;">
+              style="margin-bottom:0; flex:1; max-width:52rem; min-width:0; display:flex; gap:0; align-items:stretch;">
               {# Left: waveform section #}
               <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
                 <div class="cassette-display-toprow">
@@ -1401,6 +1395,12 @@
             </div>
           </div>
         </section>
+
+<!-- Layout 2 columnes: 60% / 40% -->
+<div style="display: grid; grid-template-columns: 6fr 4fr; gap: 1.25rem; margin-top: 1.25rem;">
+
+    <!-- COLUMNA ESQUERRA (60%) -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
 
         <!-- Stats Grid -->
 

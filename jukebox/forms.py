@@ -35,7 +35,7 @@ class PartySettingsForm(forms.ModelForm):
 
     class Meta:
         model = Party
-        fields = ['name', 'date', 'code', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost', 'allow_song_requests', 'djs']
+        fields = ['name', 'date', 'party_ends_at', 'jukebox_starts_at', 'jukebox_ends_at', 'code', 'cover_image', 'is_public', 'require_join_code', 'max_votes_per_user', 'free_coins_per_user', 'song_request_cost', 'allow_song_requests', 'djs']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'date': forms.DateTimeInput(
@@ -55,6 +55,9 @@ class PartySettingsForm(forms.ModelForm):
             'require_join_code': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'allow_song_requests': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'djs': forms.CheckboxSelectMultiple(),
+            'party_ends_at': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'jukebox_starts_at': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'jukebox_ends_at': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'max_votes_per_user': forms.NumberInput(
                 attrs={'class': 'form-control', 'min': 0}
             ),
@@ -77,6 +80,9 @@ class PartySettingsForm(forms.ModelForm):
             'song_request_cost': _('Cost per demanar cançó (Coins)'),
             'allow_song_requests': _('Permetre peticions de cançons'),
             'djs': _('DJs de la festa'),
+            'party_ends_at': _('Fi de la festa'),
+            'jukebox_starts_at': _('Inici del Jukebox'),
+            'jukebox_ends_at': _('Fi del Jukebox'),
         }
 
     def __init__(self, *args, instance=None, request=None, **kwargs):

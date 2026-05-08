@@ -611,6 +611,27 @@
   .form-switch input[type=checkbox]:checked::before {
     transform: translateX(1.25rem);
   }
+  .settings-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3c4fe0;
+    border-bottom: 1px solid #e0e3f5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .settings-subsection-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #747688;
+    margin-bottom: 0.6rem;
+  }
 </style>
 
 <div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
@@ -625,54 +646,46 @@
         <form method="post" enctype="multipart/form-data" id="partySettingsForm">
           {% csrf_token %}
 
+          {# ── SECCIÓ: Detalls de la festa ──────────────────────────────── #}
+          <div class="settings-section-title">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">celebration</span>
+            Detalls de la festa
+          </div>
+
           <div class="settings-field">
             <label class="settings-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
             {{ form.name }}
           </div>
 
-          <div class="settings-field">
-            <label class="settings-label" for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
-            {{ form.date }}
-          </div>
-
-          <div class="settings-field">
-            <label class="settings-label" for="{{ form.max_votes_per_user.id_for_label }}">{{ form.max_votes_per_user.label }}</label>
-            {{ form.max_votes_per_user }}
-            <p class="settings-help">
-              Vots gratuïts per festa. Si puges el valor, els usuaris reben més vots automàticament.
-            </p>
-          </div>
-
-          <div class="settings-field">
-            <label class="settings-label" for="{{ form.free_coins_per_user.id_for_label }}">{{ form.free_coins_per_user.label }}</label>
-            {{ form.free_coins_per_user }}
-            <p class="settings-help">
-              Coins gratuïts de festa. Funciona igual que els vots: si puges el valor, els usuaris reben la diferència.
-            </p>
-          </div>
-
-          <div class="settings-field">
-            <label class="settings-label" for="{{ form.song_request_cost.id_for_label }}">{{ form.song_request_cost.label }}</label>
-            {{ form.song_request_cost }}
-            <p class="settings-help">
-              Cost en Coins que un usuari ha de pagar per demanar una cançó nova.
-            </p>
-          </div>
-
-          <div class="settings-field">
-            <div class="d-flex align-items-center justify-content-between p-3" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;">
-              <div>
-                <div style="font-weight:600;font-size:0.9rem;color:#191c1f;">{{ form.allow_song_requests.label }}</div>
-                <div style="font-size:0.78rem;color:#747688;">Si està desactivat, els usuaris no veuran l'opció de demanar cançons.</div>
+          <!-- Horaris de la festa i del jukebox -->
+          <div style="display:none;">{{ form.date }}</div>
+          <div class="settings-field" style="margin-bottom:1.25rem;">
+            <div class="settings-subsection-label">Horaris</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div style="margin-bottom:0;grid-column:1/-1;">
+                <label class="settings-label" for="fake_party_date">Data de la festa</label>
+                <input type="date" id="fake_party_date" class="form-control"
+                       value="{{ party.date|date:'Y-m-d' }}">
               </div>
-              <div class="form-check form-switch mb-0 ms-2">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.allow_song_requests.id_for_label }}"
-                       name="allow_song_requests"
-                       {% if party.allow_song_requests %}checked{% endif %}
-                       style="width:2.5rem;height:1.25rem;cursor:pointer;">
+              <div style="margin-bottom:0;">
+                <label class="settings-label" for="fake_party_time">Hora d'inici</label>
+                <input type="time" id="fake_party_time" class="form-control"
+                       value="{{ party.date|date:'H:i' }}">
+              </div>
+              <div style="margin-bottom:0;">
+                <label class="settings-label" for="{{ form.party_ends_at.id_for_label }}">{{ form.party_ends_at.label }}</label>
+                {{ form.party_ends_at }}
+              </div>
+              <div style="margin-bottom:0;">
+                <label class="settings-label" for="{{ form.jukebox_starts_at.id_for_label }}">{{ form.jukebox_starts_at.label }}</label>
+                {{ form.jukebox_starts_at }}
+              </div>
+              <div style="margin-bottom:0;">
+                <label class="settings-label" for="{{ form.jukebox_ends_at.id_for_label }}">{{ form.jukebox_ends_at.label }}</label>
+                {{ form.jukebox_ends_at }}
               </div>
             </div>
+            <p class="settings-help" style="margin-top:0.5rem;">Les hores del Jukebox es mostren als usuaris als displays de la festa.</p>
           </div>
 
           <div class="settings-field">
@@ -683,9 +696,7 @@
                 Imatge actual: <a href="{{ party.cover_image.url }}" target="_blank">Veure imatge</a>
               </p>
             {% endif %}
-            <p class="settings-help">
-              Imatge de portada per a la festa (JPEG, PNG).
-            </p>
+            <p class="settings-help">Imatge de portada per a la festa (JPEG, PNG).</p>
           </div>
 
           <div class="settings-field">
@@ -700,6 +711,45 @@
                        name="is_public"
                        {% if party.is_public %}checked{% endif %}
                        style="width:2.5rem;height:1.25rem;cursor:pointer;">
+              </div>
+            </div>
+          </div>
+
+          {# ── SECCIÓ: Peticions i Vots ─────────────────────────────────── #}
+          <div class="settings-section-title" style="margin-top:2rem;">
+            <span class="material-symbols-outlined" style="font-size:0.95rem;">how_to_vote</span>
+            Peticions i Vots
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+              <label class="settings-label" for="{{ form.max_votes_per_user.id_for_label }}">{{ form.max_votes_per_user.label }}</label>
+              {{ form.max_votes_per_user }}
+              <p class="settings-help">Vots gratuïts per festa.</p>
+            </div>
+            <div>
+              <label class="settings-label" for="{{ form.free_coins_per_user.id_for_label }}">{{ form.free_coins_per_user.label }}</label>
+              {{ form.free_coins_per_user }}
+              <p class="settings-help">Coins gratuïts per festa.</p>
+            </div>
+            <div>
+              <label class="settings-label" for="{{ form.song_request_cost.id_for_label }}">{{ form.song_request_cost.label }}</label>
+              {{ form.song_request_cost }}
+              <p class="settings-help">Cost per demanar una cançó nova.</p>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <div class="d-flex align-items-center justify-content-between p-3 w-100" style="background:#f8f9fe;border-radius:8px;border:1px solid #e0e3e6;height:100%;">
+                <div>
+                  <div style="font-weight:600;font-size:0.85rem;color:#191c1f;">{{ form.allow_song_requests.label }}</div>
+                  <div style="font-size:0.72rem;color:#747688;margin-top:0.2rem;">Permetre peticions de cançons</div>
+                </div>
+                <div class="form-check form-switch mb-0 ms-2">
+                  <input class="form-check-input" type="checkbox"
+                         id="{{ form.allow_song_requests.id_for_label }}"
+                         name="allow_song_requests"
+                         {% if party.allow_song_requests %}checked{% endif %}
+                         style="width:2.5rem;height:1.25rem;cursor:pointer;">
+                </div>
               </div>
             </div>
           </div>
@@ -737,7 +787,7 @@
             </div>
           </div>
 
-          <div id="loc-fields-desktop" {% if not party.latitude or not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
+          <div id="loc-fields-desktop">
             <div class="mb-3">
               <label class="settings-label">Adreça o nom del lloc</label>
               <div class="input-group">
@@ -749,7 +799,7 @@
               <p class="settings-help">Escriu l'adreça i fes clic a la lupa, o clica directament al mapa.</p>
             </div>
             <div id="partyMapDesktop" style="height:280px;border-radius:8px;border:1px solid #e0e3e6;position:relative;" class="mb-3"></div>
-            <div class="mb-3">
+            <div id="loc-radius-wrapper-desktop" class="mb-3" {% if not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
               <label class="settings-label">Radi de restricció d'accés (km)</label>
               <div class="input-group">
                 <input type="number" id="loc-radius-desktop" class="form-control" min="1" max="500" value="{{ party.location_radius_km|default:2 }}" placeholder="2">
@@ -1520,7 +1570,7 @@
         </div>
       </div>
 
-      <div id="loc-fields-mobile" {% if not party.latitude or not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
+      <div id="loc-fields-mobile">
         <div class="mb-3">
           <div class="input-group">
             <input type="text" id="loc-name-mobile" class="form-control" value="{{ party.location_name|default:'' }}" placeholder="Ex: Sala Razzmatazz, Barcelona">
@@ -1531,7 +1581,7 @@
           <p class="help-text mt-1">Escriu l'adreça i cerca, o clica al mapa.</p>
         </div>
         <div id="partyMapMobile" style="height:220px;border-radius:8px;border:1px solid #e0e3e6;position:relative;" class="mb-3"></div>
-        <div class="mb-3">
+        <div id="loc-radius-wrapper-mobile" class="mb-3" {% if not party.location_radius_km or party.location_radius_km == 0 %}style="display:none"{% endif %}>
           <label class="mobile-label">Radi de restricció (km)</label>
           <div class="input-group">
             <input type="number" id="loc-radius-mobile" class="form-control" min="1" max="500" value="{{ party.location_radius_km|default:2 }}" placeholder="2">
@@ -3052,15 +3102,6 @@ document.addEventListener('DOMContentLoaded', function() {
       doSaveLocation('loc-lat-mobile','loc-lng-mobile','loc-name-mobile','loc-radius-mobile','loc-save-msg-mobile', btnM, 'loc-enabled-mobile');
     });
 
-    // Toggle show/hide location fields
-    ['desktop','mobile'].forEach(function(side) {
-      var toggle = document.getElementById('loc-enabled-' + side);
-      var fields = document.getElementById('loc-fields-' + side);
-      if (!toggle || !fields) return;
-      toggle.addEventListener('change', function() {
-        fields.style.display = toggle.checked ? '' : 'none';
-      });
-    });
   });
 })();
 </script>
@@ -3156,18 +3197,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!cb.getAttribute('form')) cb.setAttribute('form', 'partySettingsForm');
   });
 
-  // ── Toggle restricció de proximitat ────────────────────────────────────
+  // ── Toggle restricció de proximitat (només mostra/amaga el radi) ───────
   function setupLocationToggle(toggleId, fieldsId, map) {
     var toggle = document.getElementById(toggleId);
-    var fields = document.getElementById(fieldsId);
-    if (!toggle || !fields) return;
+    var side = toggleId.replace('loc-enabled-', '');
+    var radiusWrapper = document.getElementById('loc-radius-wrapper-' + side);
+    if (!toggle) return;
     toggle.addEventListener('change', function() {
-      if (toggle.checked) {
-        fields.style.display = '';
-        if (map) setTimeout(function() { map.invalidateSize(); }, 100);
-      } else {
-        fields.style.display = 'none';
-      }
+      if (radiusWrapper) radiusWrapper.style.display = toggle.checked ? '' : 'none';
+      if (map) setTimeout(function() { map.invalidateSize(); }, 100);
     });
   }
 
@@ -3179,8 +3217,8 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     mapMobile = initMap('partyMapMobile', 'loc-lat-mobile', 'loc-lng-mobile', 'loc-name-mobile', 'geocodeMobileBtn');
   } catch(e) {}
-  if (mapDesktop) setTimeout(function() { mapDesktop.invalidateSize(); }, 500);
-  if (mapMobile)  setTimeout(function() { mapMobile.invalidateSize(); }, 500);
+  if (mapDesktop) setTimeout(function() { mapDesktop.invalidateSize(); }, 300);
+  if (mapMobile)  setTimeout(function() { mapMobile.invalidateSize(); }, 300);
 
   setupLocationToggle('loc-enabled-desktop', 'loc-fields-desktop', mapDesktop);
   setupLocationToggle('loc-enabled-mobile',  'loc-fields-mobile',  mapMobile);
@@ -3199,6 +3237,19 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   });
+
+  // Combina els inputs visuals de data + hora d'inici en el camp datetime-local ocult
+  var partySettingsForm = document.getElementById('partySettingsForm');
+  if (partySettingsForm) {
+    partySettingsForm.addEventListener('submit', function() {
+      var d = document.getElementById('fake_party_date');
+      var t = document.getElementById('fake_party_time');
+      var real = document.getElementById('{{ form.date.id_for_label }}');
+      if (d && t && real && d.value) {
+        real.value = d.value + 'T' + (t.value || '00:00');
+      }
+    });
+  }
 });
 </script>
 {% endblock %}

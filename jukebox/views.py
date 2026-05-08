@@ -824,30 +824,11 @@ def song_list(request):
                 Vote.objects.create(user=user, song=song, party=party, vote_type=vote_type)
                 return redirect('song_list')
             else:
-                # Mostra error segons el cas
                 if credits > 0:
-                    error = "No tens vots! Converteix Coins a Vots per votar."
+                    messages.warning(request, _("No tens vots! Converteix Coins a Vots per votar."))
                 else:
-                    error = "No tens Coins! Compra Coins i converteix-los a Vots."
-
-                # Afegir badges per mostrar amb error
-                error_pending = annotated_songs.filter(has_played=False).order_by('-num_likes', 'title')
-                error_played = annotated_songs.filter(has_played=True).order_by('id')
-
-                # Aplicar badges utilitzant utils
-                calculate_and_apply_badges(party, error_pending)
-                calculate_and_apply_badges(party, error_played)
-
-                return render(request, "jukebox/song_list.html", {
-                    "party": party,
-                    "songs": annotated_songs.order_by('-num_likes', 'title'),
-                    "pending_songs": error_pending,
-                    "played_songs": error_played,
-                    "votes_left": votes_left,
-                    "credits": credits,
-                    "party_coins": party_coins,
-                    "error": error,
-                })
+                    messages.warning(request, _("No tens Coins! Compra Coins i converteix-los a Vots."))
+                return redirect('song_list')
 
     # Comptar només els likes per ordenar
     songs = annotated_songs.order_by('-num_likes', 'title')
@@ -863,6 +844,7 @@ def song_list(request):
     user_votes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
     total_songs = party.songs.count()
     total_votes = Vote.objects.filter(party=party, vote_type='like').count()
+    songs_remaining = total_songs - songs_played
 
     # KPIs addicionals
     active_users = User.objects.filter(
@@ -885,6 +867,11 @@ def song_list(request):
         num_likes=Count('vote', filter=Q(vote__vote_type='like'))
     ).order_by('-num_likes').first()
 
+    # Vots de l'usuari que ja han sonat
+    my_played_votes = Vote.objects.filter(
+        user=user, party=party, vote_type='like', song__has_played=True
+    ).count()
+
     # Aplicar badges dinàmics a les cançons
     calculate_and_apply_badges(party, pending_songs)
     calculate_and_apply_badges(party, played_songs)
@@ -905,6 +892,7 @@ def song_list(request):
         "credits": credits,
         "party_coins": party_coins,
         "songs_played": songs_played,
+        "songs_remaining": songs_remaining,
         "user_votes_count": user_votes_count,
         "total_songs": total_songs,
         "total_votes": total_votes,
@@ -918,6 +906,55 @@ def song_list(request):
         "songs_with_votes_percentage": songs_with_votes_percentage,
         "total_coins_spent": total_coins_spent,
         "voting_enabled": voting_enabled,
+        "my_played_votes": my_played_votes,
+    })
+
+
+@login_required
+def party_status_api(request):
+    """Lightweight JSON endpoint for polling party status from song_list."""
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return JsonResponse({'error': 'No party selected'}, status=400)
+    party = get_object_or_404(Party, pk=party_id)
+    user = request.user
+
+    last_played = party.songs.filter(has_played=True).order_by('-id').first()
+    now_playing_song = party.songs.filter(has_played=False).annotate(
+        num_likes=Count('vote', filter=Q(vote__vote_type='like'))
+    ).order_by('-num_likes').first()
+
+    total_songs = party.songs.count()
+    total_votes = Vote.objects.filter(party=party, vote_type='like').count()
+    songs_played = party.songs.filter(has_played=True).count()
+    user_votes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
+    songs_remaining = total_songs - songs_played
+    my_played_votes = Vote.objects.filter(
+        user=user, party=party, vote_type='like', song__has_played=True
+    ).count()
+    pending_requests_count = SongRequest.objects.filter(party=party, status='pending').count()
+    User = get_user_model()
+    active_users = User.objects.filter(
+        Q(vote__party=party) | Q(songrequest__party=party)
+    ).distinct().count()
+
+    return JsonResponse({
+        'party_status': party.party_status,
+        'total_songs': total_songs,
+        'total_votes': total_votes,
+        'songs_played': songs_played,
+        'songs_remaining': songs_remaining,
+        'user_votes_count': user_votes_count,
+        'last_played_title': last_played.title if last_played else None,
+        'last_played_artist': last_played.artist if last_played else None,
+        'now_playing_title': now_playing_song.title if now_playing_song else None,
+        'now_playing_artist': now_playing_song.artist if now_playing_song else None,
+        'party_date': party.date.strftime('%d/%m %H:%M') if party.date else None,
+        'votes_left': get_user_votes_left(user, party),
+        'credits': user.credits,
+        'my_played_votes': my_played_votes,
+        'pending_requests_count': pending_requests_count,
+        'active_users': active_users,
     })
 
 
@@ -1102,6 +1139,7 @@ def mark_song_played(request, song_id):
     if not (request.user.is_superuser or (song.party and song.party.djs.filter(pk=request.user.pk).exists())):
         return HttpResponse(status=403)
     song.has_played = True
+    song.played_at = timezone.now()
     song.save()
 
     # Notificar a tots els que van votar aquesta cançó
@@ -1490,11 +1528,19 @@ def song_swipe(request):
         # Gestió unificada de vots (like/dislike/skip)
         if action in ['like', 'dislike', 'skip'] and song_id:
             from .utils import handle_vote_action
-            song = get_object_or_404(Song, pk=song_id, party=party)
-            return handle_vote_action(
-                user, song, party, action,
-                response_type='json'
-            )
+            try:
+                song = get_object_or_404(Song, pk=song_id, party=party)
+                return handle_vote_action(
+                    user, song, party, action,
+                    response_type='json'
+                )
+            except Exception as exc:
+                import logging
+                logging.getLogger(__name__).exception('Error al votar song_id=%s', song_id)
+                return JsonResponse({'success': False, 'error': str(exc) or _('Error inesperat al votar')}, status=500)
+
+        # Qualsevol POST no reconegut retorna JSON (evita HTML fall-through)
+        return JsonResponse({'success': False, 'error': _('Acció no vàlida')}, status=400)
 
     # Obtenir cançons que l'usuari encara no ha votat amb annotations
     voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)

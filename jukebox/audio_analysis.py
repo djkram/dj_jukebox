@@ -117,6 +117,7 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=15, max_wal
             '--socket-timeout', '10',
             '--no-part',
             '--force-overwrites',
+            '--extractor-args', 'youtube:player_client=ios,mweb',
             *cookie_args,
             f'ytsearch1:{query}',
         ]

@@ -57,9 +57,20 @@ SPOTIFY_CLIENT_ID     = os.environ.get("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
 
 # yt-dlp cookie authentication (needed to bypass YouTube bot detection)
-# Option 1: path to a Netscape-format cookies.txt file (preferred for servers)
-YTDLP_COOKIES_FILE = os.environ.get('YTDLP_COOKIES_FILE', '')
-# Option 2: browser name to read cookies from ('chrome', 'firefox', 'safari') — local dev only
+# YTDLP_COOKIES_B64: base64-encoded Netscape cookies.txt (for ephemeral filesystems like Render)
+# YTDLP_COOKIES_FILE: direct path to cookies.txt (local dev or persistent disk)
+# YTDLP_COOKIES_FROM_BROWSER: browser name ('chrome', 'firefox') — local dev only
+_ytdlp_cookies_b64 = os.environ.get('YTDLP_COOKIES_B64', '')
+if _ytdlp_cookies_b64:
+    import base64, tempfile
+    _cookies_dir = os.path.join(tempfile.gettempdir(), 'ytdlp')
+    os.makedirs(_cookies_dir, exist_ok=True)
+    _cookies_path = os.path.join(_cookies_dir, 'cookies.txt')
+    with open(_cookies_path, 'wb') as f:
+        f.write(base64.b64decode(_ytdlp_cookies_b64))
+    YTDLP_COOKIES_FILE = _cookies_path
+else:
+    YTDLP_COOKIES_FILE = os.environ.get('YTDLP_COOKIES_FILE', '')
 YTDLP_COOKIES_FROM_BROWSER = os.environ.get('YTDLP_COOKIES_FROM_BROWSER', '')
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")

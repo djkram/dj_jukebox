@@ -135,7 +135,7 @@ def _camelot_from_key_string(key_string):
     if not key_string:
         return None
 
-    normalized = key_string.strip()
+    normalized = key_string.strip().replace('♯', '#').replace('♭', 'b')
     mode = 0 if normalized.endswith("m") else 1
     note = normalized[:-1] if mode == 0 else normalized
     note_map = {

@@ -100,12 +100,14 @@ def _accept_song_request(song_request, processed_by, charge_user):
                 raise ValueError("Insufficient credits")
             charged_amount = song_request.coins_cost
 
-        Song.objects.create(
+        Song.objects.get_or_create(
             party=song_request.party,
-            title=song_request.title,
-            artist=song_request.artist,
             spotify_id=song_request.spotify_id,
-            album_image_url=song_request.album_image_url,
+            defaults={
+                'title': song_request.title,
+                'artist': song_request.artist,
+                'album_image_url': song_request.album_image_url,
+            },
         )
 
         song_request.status = 'accepted'
@@ -711,39 +713,37 @@ def analyze_song_audio(request, party_id, song_id):
         source = "getsongbpm"
         result = _get_getsongbpm_features(song.title, song.artist)
 
-        if not result or not result.get('bpm') or not result.get('key'):
-            logger.info("[ANALYZE_AUDIO] Fallback a MP3 temporal per song_id=%s", song.id)
+        bpm = result.get('bpm') if result else None
+        key = result.get('key') if result else None
+
+        if not bpm and not key:
+            logger.info("[ANALYZE_AUDIO] GetSongBPM sense dades, fallback a MP3 temporal per song_id=%s", song.id)
             temp_result = analyze_song_from_temporary_mp3(song.title, song.artist)
             if temp_result:
-                merged_result = {
-                    'bpm': result.get('bpm') if result and result.get('bpm') else temp_result.get('bpm'),
-                    'key': result.get('key') if result and result.get('key') else temp_result.get('key'),
-                    'key_note': temp_result.get('key_note'),
-                    'key_mode': temp_result.get('key_mode'),
-                }
-                result = merged_result
+                bpm = bpm or temp_result.get('bpm')
+                key = key or temp_result.get('key')
                 source = "temporary_mp3"
 
-        if not result or not result.get('bpm') or not result.get('key'):
+        if not bpm and not key:
             return JsonResponse({
                 'success': False,
                 'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.'
             }, status=500)
 
-        # Actualitzar cançó amb resultats
-        song.bpm = result['bpm']
-        song.key = result['key']
+        if bpm:
+            song.bpm = bpm
+        if key:
+            song.key = key
         song.save()
 
-        logger.info("[ANALYZE_AUDIO] Cançó analitzada via %s per song_id=%s", source, song.id)
+        logger.info("[ANALYZE_AUDIO] Cançó analitzada via %s per song_id=%s (BPM=%s, Key=%s)", source, song.id, bpm, key)
 
         return JsonResponse({
             'success': True,
-            'bpm': result['bpm'],
-            'key': result['key'],
-            'key_note': result.get('key_note'),
-            'key_mode': result.get('key_mode'),
+            'bpm': bpm,
+            'key': key,
             'source': source,
+            'partial': not bpm or not key,
         })
 
     except Exception:

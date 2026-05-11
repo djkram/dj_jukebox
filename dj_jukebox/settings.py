@@ -72,6 +72,23 @@ if _ytdlp_cookies_b64:
 else:
     YTDLP_COOKIES_FILE = os.environ.get('YTDLP_COOKIES_FILE', '')
 YTDLP_COOKIES_FROM_BROWSER = os.environ.get('YTDLP_COOKIES_FROM_BROWSER', '')
+
+# Audio analysis runtime limits (important on Render free instances)
+ENABLE_YTDLP_FALLBACK = env_bool('ENABLE_YTDLP_FALLBACK', default=True)
+_analysis_is_production = os.environ.get("APP_ENV", os.environ.get("DJANGO_ENV", "development")).strip().lower() in {"production", "prod"}
+ANALYZE_YTDLP_PER_ATTEMPT_TIMEOUT = int(
+    os.environ.get('ANALYZE_YTDLP_PER_ATTEMPT_TIMEOUT', '8' if _analysis_is_production else '25')
+)
+ANALYZE_YTDLP_MAX_WALL_SECONDS = int(
+    os.environ.get('ANALYZE_YTDLP_MAX_WALL_SECONDS', '18' if _analysis_is_production else '60')
+)
+ANALYZE_AUDIO_SECONDS = int(
+    os.environ.get('ANALYZE_AUDIO_SECONDS', '20' if _analysis_is_production else '45')
+)
+ANALYZE_AUDIO_SAMPLE_RATE = int(
+    os.environ.get('ANALYZE_AUDIO_SAMPLE_RATE', '16000' if _analysis_is_production else '22050')
+)
+
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 
@@ -82,6 +99,7 @@ IS_PRODUCTION = APP_ENV in {"production", "prod"}
 DEBUG = env_bool("DEBUG", default=not IS_PRODUCTION)
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
+LOG_FILE_PATH = os.environ.get("LOG_FILE_PATH", str(BASE_DIR / "server.log"))
 
 LOGGING = {
     'version': 1,
@@ -90,19 +108,24 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILE_PATH,
+            'encoding': 'utf-8',
+        },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': LOG_LEVEL,
     },
     'loggers': {
         'allauth': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
         'django.db.backends': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -297,10 +320,6 @@ LOGIN_URL = '/login/'
 
 SOCIALACCOUNT_PROVIDERS = {
     'spotify': {
-        'APP': {
-            'client_id': SPOTIFY_CLIENT_ID,
-            'secret': SPOTIFY_CLIENT_SECRET,
-        },
         'SCOPE': [
             'user-read-email',
             'user-read-private',

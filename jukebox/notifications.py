@@ -22,25 +22,23 @@ def create_song_accepted_notification(song_request, charged_amount=None):
 
 def create_song_played_notification(song):
     """Notifica a tots els que van votar la cançó que s'ha reproduït"""
-    from .models import Vote
-
-    # Obtenir tots els usuaris que van votar aquesta cançó
     voters = User.objects.filter(
         vote__song=song,
         vote__party=song.party
     ).distinct()
 
-    for voter in voters:
-        Notification.objects.create(
-            user=voter,
-            type='song_played',
-            title=_('Match! La teva cançó ha sonat 🎵'),
-            message=_('\"%(title)s\" de %(artist)s s\'ha reproduït! Has fet match!') % {
-                'title': song.title,
-                'artist': song.artist
-            },
-            song=song
-        )
+    title = _('Match! La teva cançó ha sonat 🎵')
+    message = _('\"%(title)s\" de %(artist)s s\'ha reproduït! Has fet match!') % {
+        'title': song.title,
+        'artist': song.artist
+    }
+
+    notifications = [
+        Notification(user=voter, type='song_played', title=title, message=message, song=song)
+        for voter in voters
+    ]
+    if notifications:
+        Notification.objects.bulk_create(notifications)
 
 
 def create_coins_purchased_notification(user, amount):

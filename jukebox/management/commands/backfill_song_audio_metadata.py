@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         for song in queryset.iterator():
             checked += 1
-            features = _get_getsongbpm_features(song.title, song.artist)
+            features = _get_getsongbpm_features(song.title, song.artist, song.spotify_id)
             if features["bpm"] is None and not features["key"]:
                 continue
 

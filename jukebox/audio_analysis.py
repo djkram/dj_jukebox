@@ -6,8 +6,50 @@ import os
 import shutil
 import tempfile
 import logging
+import re
+import unicodedata
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_search_text(text):
+    if not text:
+        return ""
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    text = re.sub(r"[\"'`´‘’“”()\[\]{}]", " ", text)
+    text = re.sub(r"[^A-Za-z0-9\s-]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _normalize_search_text_soft(text):
+    if not text:
+        return ""
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    text = re.sub(r"[\"'`´‘’“”]", "", text)
+    text = re.sub(r"[^A-Za-z0-9\s,\-!]", " ", text)
+    text = re.sub(r"!{2,}", "!", text)
+    text = re.sub(r"\s*,\s*", ", ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text.strip(" ,-!")
+
+
+def _simplify_title_for_search(title):
+    if not title:
+        return ""
+    # Treure fragments de versió/remix que embruten la cerca
+    simple = re.sub(r"\s*\([^)]*\)", "", title)
+    simple = re.sub(r"\s+-\s+.*$", "", simple)
+    return _normalize_search_text(simple)
+
+
+def _first_artist_for_search(artist):
+    if not artist:
+        return ""
+    return _normalize_search_text(artist.split(",")[0].strip())
 
 
 # Mapa de pitch class a notació musical
@@ -68,7 +110,7 @@ def _get_ytdlp_cookie_args():
     return []
 
 
-def download_temporary_song_audio(title, artist, per_attempt_timeout=25, max_wall_seconds=60):
+def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_wall_seconds=None):
     """
     Descarrega temporalment l'àudio d'una cançó a partir d'una cerca externa.
 
@@ -79,10 +121,31 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=25, max_wal
     import time as _time
     import subprocess
 
+    if per_attempt_timeout is None:
+        per_attempt_timeout = int(getattr(settings, "ANALYZE_YTDLP_PER_ATTEMPT_TIMEOUT", 8))
+    if max_wall_seconds is None:
+        max_wall_seconds = int(getattr(settings, "ANALYZE_YTDLP_MAX_WALL_SECONDS", 18))
+
+    clean_title = _normalize_search_text(title)
+    soft_clean_title = _normalize_search_text_soft(title)
+    simple_title = _simplify_title_for_search(title)
+    soft_simple_title = _normalize_search_text_soft(_simplify_title_for_search(title))
+    first_artist = _first_artist_for_search(artist)
+    soft_first_artist = _normalize_search_text_soft(artist.split(",")[0].strip() if artist else "")
     search_variants = [
-        f"{title} {artist} audio",
-        f"{title} {artist}",
+        f"{soft_simple_title} {soft_first_artist} audio".strip(),
+        f"{soft_simple_title} - {soft_first_artist} audio".strip(),
+        f"{simple_title} {first_artist} audio".strip(),
+        f"{soft_simple_title} {soft_first_artist}".strip(),
+        f"{soft_simple_title} - {soft_first_artist}".strip(),
+        f"{simple_title} {first_artist}".strip(),
+        f"{soft_clean_title} {soft_first_artist}".strip(),
+        f"{clean_title} {first_artist}".strip(),
     ]
+    # Dedupe i evitar variants buides
+    _seen = set()
+    search_variants = [q for q in search_variants if q and not (q in _seen or _seen.add(q))]
+    logger.info("[YT-DLP] Query variants (%s): %s", len(search_variants), search_variants)
 
     t_start = _time.time()
     logger.info(f"[YT-DLP] ▶ START '{title}' - '{artist}'")
@@ -183,8 +246,10 @@ def detect_bpm(audio_path):
     try:
         librosa, np = _load_audio_libraries()
 
-        # Carregar àudio (només els primers 45s per estalviar memòria)
-        y, sr = librosa.load(audio_path, duration=45, sr=22050)
+        analyze_seconds = int(getattr(settings, "ANALYZE_AUDIO_SECONDS", 20))
+        sample_rate = int(getattr(settings, "ANALYZE_AUDIO_SAMPLE_RATE", 16000))
+        # Carregar àudio parcial per reduir CPU/RAM a Render
+        y, sr = librosa.load(audio_path, duration=analyze_seconds, sr=sample_rate)
 
         # Detectar tempo amb onset strength
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
@@ -217,8 +282,10 @@ def detect_key(audio_path):
     try:
         librosa, np = _load_audio_libraries()
 
-        # Carregar àudio
-        y, sr = librosa.load(audio_path, duration=45, sr=22050)
+        analyze_seconds = int(getattr(settings, "ANALYZE_AUDIO_SECONDS", 20))
+        sample_rate = int(getattr(settings, "ANALYZE_AUDIO_SAMPLE_RATE", 16000))
+        # Carregar àudio parcial per reduir CPU/RAM a Render
+        y, sr = librosa.load(audio_path, duration=analyze_seconds, sr=sample_rate)
 
         # Extreure chroma features (12 pitch classes)
         chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
@@ -355,6 +422,9 @@ def analyze_song_from_temporary_mp3(title, artist):
     temp_file = None
     temp_dir = None
     try:
+        if not bool(getattr(settings, "ENABLE_YTDLP_FALLBACK", True)):
+            logger.warning("[YT-DLP] Fallback desactivat per configuració")
+            return None
         temp_file, temp_dir = download_temporary_song_audio(title, artist)
         logger.info("[AUDIO_ANALYSIS] MP3 obtingut, iniciant librosa")
         t0 = _time.time()

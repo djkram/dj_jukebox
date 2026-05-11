@@ -5,6 +5,7 @@ Provides unified logic for validating vote availability and creating
 votes with consistent error messages across different response types.
 """
 from typing import Tuple, Optional
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
@@ -17,58 +18,28 @@ def validate_and_create_vote(
     vote_type: str = 'like'
 ) -> Tuple[bool, Optional[str]]:
     """
-    Validates and creates a vote with error handling.
-
-    Checks:
-    1. User hasn't already voted this song
-    2. User has votes available (via get_user_votes_left)
-    3. User has coins to convert if no votes left
-
-    Args:
-        user: User instance
-        song: Song instance
-        party: Party instance
-        vote_type: Vote type ('like', 'dislike', 'skip')
-
-    Returns:
-        Tuple[success: bool, error_msg: Optional[str]]
-        - success: True if vote created successfully
-        - error_msg: Error message if failed, None if successful
-
-    Example:
-        success, error = validate_and_create_vote(user, song, party, 'like')
-        if not success:
-            return JsonResponse({'error': error}, status=400)
+    Validates and creates a vote atomically with race-condition protection.
     """
     from jukebox.models import Vote
     from jukebox.votes import get_user_votes_left
 
-    # Check if already voted
-    existing_vote = Vote.objects.filter(
-        user=user,
-        song=song,
-        party=party
-    ).first()
+    try:
+        with transaction.atomic():
+            if Vote.objects.filter(user=user, song=song, party=party).exists():
+                return False, _("Ja has votat aquesta cançó")
 
-    if existing_vote:
+            votes_left = get_user_votes_left(user, party)
+            if votes_left <= 0:
+                if user.credits > 0:
+                    return False, _("No tens vots! Converteix Coins a Vots per continuar.")
+                else:
+                    return False, _("No tens Coins! Compra Coins i converteix-los a Vots.")
+
+            Vote.objects.create(
+                user=user, song=song, party=party, vote_type=vote_type
+            )
+    except IntegrityError:
         return False, _("Ja has votat aquesta cançó")
-
-    # Check votes available
-    votes_left = get_user_votes_left(user, party)
-
-    if votes_left <= 0:
-        if user.credits > 0:
-            return False, _("No tens vots! Converteix Coins a Vots per continuar.")
-        else:
-            return False, _("No tens Coins! Compra Coins i converteix-los a Vots.")
-
-    # Create vote
-    Vote.objects.create(
-        user=user,
-        song=song,
-        party=party,
-        vote_type=vote_type
-    )
 
     return True, None
 

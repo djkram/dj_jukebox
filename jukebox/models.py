@@ -129,7 +129,18 @@ class Song(models.Model):
     preview_url = models.URLField(max_length=500, null=True, blank=True)
     bpm = models.FloatField(null=True, blank=True)
     key = models.CharField(max_length=4, null=True, blank=True)
-    has_played = models.BooleanField(default=False)
+    key_text = models.CharField(max_length=16, null=True, blank=True)
+    duration = models.CharField(max_length=16, null=True, blank=True)
+    popularity = models.IntegerField(null=True, blank=True)
+    energy = models.IntegerField(null=True, blank=True)
+    danceability = models.IntegerField(null=True, blank=True)
+    happiness = models.IntegerField(null=True, blank=True)
+    acousticness = models.IntegerField(null=True, blank=True)
+    instrumentalness = models.IntegerField(null=True, blank=True)
+    liveness = models.IntegerField(null=True, blank=True)
+    speechiness = models.IntegerField(null=True, blank=True)
+    loudness = models.FloatField(null=True, blank=True)
+    has_played = models.BooleanField(default=False, db_index=True)
     played = models.BooleanField(default=False)
     played_at = models.DateTimeField(null=True, blank=True)
 
@@ -150,7 +161,7 @@ class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, related_name='vote', on_delete=models.CASCADE)
     party = models.ForeignKey(Party, on_delete=models.CASCADE)
-    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES, default='like')
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES, default='like', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -194,7 +205,7 @@ class SongRequest(models.Model):
     artist = models.CharField(max_length=200)
     spotify_id = models.CharField(max_length=100)
     album_image_url = models.URLField(max_length=500, null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', db_index=True)
     coins_cost = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
@@ -219,7 +230,7 @@ class Notification(models.Model):
     song = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True, blank=True)
     song_request = models.ForeignKey(SongRequest, on_delete=models.SET_NULL, null=True, blank=True)
     amount = models.IntegerField(null=True, blank=True)  # Per Coins
-    is_read = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

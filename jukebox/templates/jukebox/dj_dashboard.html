@@ -1622,6 +1622,7 @@
                     <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                         <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
                             {% csrf_token %}
+                            <input type="hidden" name="party_id" value="{{ party.id }}">
                             <input type="hidden" name="request_id" value="{{ req.id }}">
                             <input type="hidden" name="action" value="accept">
                             <button type="submit" class="sonic-btn sonic-btn-tertiary sonic-btn-sm">
@@ -1630,6 +1631,7 @@
                         </form>
                         <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form">
                             {% csrf_token %}
+                            <input type="hidden" name="party_id" value="{{ party.id }}">
                             <input type="hidden" name="request_id" value="{{ req.id }}">
                             <input type="hidden" name="action" value="reject">
                             <button type="submit" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="border-color: #ba1a1a; color: #ba1a1a;">
@@ -1985,7 +1987,12 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(event) {
       event.preventDefault();
 
-      var action = form.querySelector('input[name="action"]').value;
+      var actionInput = form.querySelector('input[name="action"]');
+      if (!actionInput) {
+        form.submit();
+        return;
+      }
+      var action = actionInput.value;
       var userCredits = parseInt(form.dataset.userCredits || '0', 10);
       var cost = parseInt(form.dataset.cost || '0', 10);
       var allowWithoutCharge = false;
@@ -2034,8 +2041,21 @@ document.addEventListener('DOMContentLoaded', function() {
           body: formData
         })
         .then(function(response) {
-          return response.json().then(function(data) {
-            return { ok: response.ok, data: data };
+          var contentType = response.headers.get('content-type') || '';
+          if (contentType.indexOf('application/json') !== -1) {
+            return response.json().then(function(data) {
+              return { ok: response.ok, data: data };
+            });
+          }
+          return response.text().then(function(text) {
+            return {
+              ok: response.ok,
+              data: {
+                success: false,
+                error: 'Resposta inesperada del servidor (' + response.status + ').'
+              },
+              raw: text
+            };
           });
         })
         .then(function(result) {
@@ -2382,6 +2402,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="d-flex align-items-center gap-1 flex-shrink-0 ms-auto ps-2">
                 <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
                   {% csrf_token %}
+                  <input type="hidden" name="party_id" value="{{ party.id }}">
                   <input type="hidden" name="request_id" value="{{ req.id }}">
                   <input type="hidden" name="action" value="accept">
                   <button type="submit" class="sonic-btn sonic-btn-tertiary sonic-btn-sm" style="display:inline-flex;align-items:center;gap:0.18rem;padding:0.22rem 0.42rem;">
@@ -2391,6 +2412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </form>
                 <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form">
                   {% csrf_token %}
+                  <input type="hidden" name="party_id" value="{{ party.id }}">
                   <input type="hidden" name="request_id" value="{{ req.id }}">
                   <input type="hidden" name="action" value="reject">
                   <button type="submit" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="display:inline-flex;align-items:center;gap:0.18rem;padding:0.22rem 0.42rem;border-color: #ba1a1a; color: #ba1a1a;">

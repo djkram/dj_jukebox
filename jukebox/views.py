@@ -39,7 +39,7 @@ from .utils.spotify_helpers import get_spotify_reconnect_url
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
 from datetime import datetime
-from .audio_analysis import analyze_song_from_temporary_mp3
+from .audio_analysis import analyze_song_from_temporary_mp3, analyze_from_preview_url
 
 # Import utils for refactoring
 from .utils import (
@@ -100,15 +100,34 @@ def _accept_song_request(song_request, processed_by, charge_user):
                 raise ValueError("Insufficient credits")
             charged_amount = song_request.coins_cost
 
-        Song.objects.get_or_create(
-            party=song_request.party,
-            spotify_id=song_request.spotify_id,
-            defaults={
-                'title': song_request.title,
-                'artist': song_request.artist,
-                'album_image_url': song_request.album_image_url,
-            },
-        )
+        spotify_id = (song_request.spotify_id or "").strip()
+        if spotify_id:
+            existing_song = Song.objects.filter(
+                party=song_request.party,
+                spotify_id=spotify_id,
+            ).order_by("id").first()
+            if not existing_song:
+                Song.objects.create(
+                    party=song_request.party,
+                    spotify_id=spotify_id,
+                    title=song_request.title,
+                    artist=song_request.artist,
+                    album_image_url=song_request.album_image_url,
+                )
+        else:
+            existing_song = Song.objects.filter(
+                party=song_request.party,
+                title=song_request.title,
+                artist=song_request.artist,
+            ).order_by("id").first()
+            if not existing_song:
+                Song.objects.create(
+                    party=song_request.party,
+                    spotify_id=f"request-{song_request.id}",
+                    title=song_request.title,
+                    artist=song_request.artist,
+                    album_image_url=song_request.album_image_url,
+                )
 
         song_request.status = 'accepted'
         song_request.processed_at = timezone.now()
@@ -324,6 +343,7 @@ def party_qr_code(request, party_id):
 
 @login_required
 @user_passes_test(is_dj_admin)
+@require_POST
 def remove_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
@@ -425,17 +445,18 @@ def process_playlist_songs(request, party_id):
         new_songs_count = 0
         for tr in tracks:
             if tr['id'] in new_spotify_ids:
-                Song.objects.create(
+                song_obj, created = Song.objects.get_or_create(
                     party=party,
-                    title=tr['title'],
-                    artist=tr['artist'],
                     spotify_id=tr['id'],
-                    album_image_url=tr.get('album_image_url'),
-                    preview_url=tr.get('preview_url'),
-                    bpm=None,
-                    key=None,
+                    defaults={
+                        'title': tr['title'],
+                        'artist': tr['artist'],
+                        'album_image_url': tr.get('album_image_url'),
+                        'preview_url': tr.get('preview_url'),
+                    },
                 )
-                new_songs_count += 1
+                if created:
+                    new_songs_count += 1
 
         # Preparar missatge informatiu
         message_parts = []
@@ -459,8 +480,9 @@ def process_playlist_songs(request, party_id):
         return create_spotify_auth_error_response(request)
 
     except Exception as e:
+        logger.exception("[PROCESS_SONGS] Error for party_id=%s", party_id)
         return JsonResponse({
-            'error': str(e)
+            'error': _('Error intern processant les cançons.')
         }, status=500)
 
 
@@ -498,7 +520,8 @@ def save_party_location(request, party_id):
 
         return JsonResponse({'success': True, 'location_name': party.location_name})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        logger.exception("[SAVE_LOCATION] Error for party_id=%s", party_id)
+        return JsonResponse({'error': _('Error guardant la ubicació.')}, status=400)
 
 
 @login_required
@@ -555,15 +578,19 @@ def add_track_to_party_playlist(request, party_id):
             'artist': artist,
         }]).get(spotify_id, {})
 
-        song = Song.objects.create(
+        song, created = Song.objects.get_or_create(
             party=party,
-            title=title,
-            artist=artist,
             spotify_id=spotify_id,
-            album_image_url=album_image_url or None,
-            bpm=features.get('bpm'),
-            key=features.get('key'),
+            defaults={
+                'title': title,
+                'artist': artist,
+                'album_image_url': album_image_url or None,
+                'bpm': features.get('bpm'),
+                'key': features.get('key'),
+            },
         )
+        if not created:
+            return JsonResponse({'error': _('Aquesta cançó ja és a la playlist de la festa.')}, status=400)
 
         pending_analysis_count = party.songs.filter(
             Q(bpm__isnull=True) | Q(key__isnull=True)
@@ -637,8 +664,11 @@ def process_song_features(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
         return err
-    chunk_size = int(request.POST.get('chunk_size', 10))
-    offset = int(request.POST.get('offset', 0))
+    try:
+        chunk_size = int(request.POST.get('chunk_size', 10))
+        offset = int(request.POST.get('offset', 0))
+    except (ValueError, TypeError):
+        chunk_size, offset = 10, 0
 
     try:
         # Obtenir cançons sense features
@@ -701,8 +731,8 @@ def process_song_features(request, party_id):
 def analyze_song_audio(request, party_id, song_id):
     """
     Intenta obtenir BPM i Key per aquest ordre:
-    1) GetSongBPM
-    2) Spotify audio features (si hi ha spotify_id)
+    1) Tunebat
+    2) Preview URL (si existeix)
     3) MP3 temporal (yt-dlp + librosa)
     """
     party = get_object_or_404(Party, pk=party_id)
@@ -715,27 +745,22 @@ def analyze_song_audio(request, party_id, song_id):
         t0 = _time.time()
         logger.info("[ANALYZE_AUDIO] ▶ START song_id=%s '%s' - '%s'", song.id, song.title, song.artist)
 
-        source = "getsongbpm"
-        result = _get_getsongbpm_features(song.title, song.artist)
+        source = "tunebat"
+        result = _get_getsongbpm_features(song.title, song.artist, song.spotify_id)
         t1 = _time.time()
 
         bpm = result.get('bpm') if result else None
         key = result.get('key') if result else None
-        logger.info("[ANALYZE_AUDIO] GetSongBPM song_id=%s → BPM=%s Key=%s (%.1fs)", song.id, bpm, key, t1 - t0)
+        tunebat_url = result.get('tunebat_url') if result else None
+        logger.info("[ANALYZE_AUDIO] Tunebat song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, tunebat_url, t1 - t0)
 
-        if (not bpm and not key) and song.spotify_id:
-            logger.info("[ANALYZE_AUDIO] Fallback Spotify features per song_id=%s spotify_id=%s", song.id, song.spotify_id)
-            features_map = get_audio_features_for_songs([{
-                'id': song.spotify_id,
-                'title': song.title,
-                'artist': song.artist,
-            }])
-            feature_data = features_map.get(song.spotify_id, {}) if features_map else {}
-            bpm = bpm or feature_data.get('bpm')
-            key = key or feature_data.get('key')
-            if bpm or key:
-                source = "spotify_features"
-            logger.info("[ANALYZE_AUDIO] Spotify features song_id=%s → BPM=%s Key=%s", song.id, bpm, key)
+        if not bpm and not key and song.preview_url:
+            logger.info("[ANALYZE_AUDIO] Fallback preview_url per song_id=%s", song.id)
+            preview_result = analyze_from_preview_url(song.preview_url)
+            if preview_result:
+                bpm = bpm or preview_result.get('bpm')
+                key = key or preview_result.get('key')
+                source = "preview_mp3"
 
         if not bpm and not key:
             logger.info("[ANALYZE_AUDIO] Fallback yt-dlp per song_id=%s (preview_url=%s)", song.id, bool(song.preview_url))
@@ -758,16 +783,42 @@ def analyze_song_audio(request, party_id, song_id):
             song.bpm = bpm
         if key:
             song.key = key
+
+        # Mètriques extra (Tunebat scraping)
+        if result:
+            song.key_text = result.get('key_text') or song.key_text
+            song.duration = result.get('duration') or song.duration
+            song.popularity = result.get('popularity') if result.get('popularity') is not None else song.popularity
+            song.energy = result.get('energy') if result.get('energy') is not None else song.energy
+            song.danceability = result.get('danceability') if result.get('danceability') is not None else song.danceability
+            song.happiness = result.get('happiness') if result.get('happiness') is not None else song.happiness
+            song.acousticness = result.get('acousticness') if result.get('acousticness') is not None else song.acousticness
+            song.instrumentalness = result.get('instrumentalness') if result.get('instrumentalness') is not None else song.instrumentalness
+            song.liveness = result.get('liveness') if result.get('liveness') is not None else song.liveness
+            song.speechiness = result.get('speechiness') if result.get('speechiness') is not None else song.speechiness
+            song.loudness = result.get('loudness') if result.get('loudness') is not None else song.loudness
+
         song.save()
 
-        logger.info("[ANALYZE_AUDIO] ✓ OK song_id=%s via %s BPM=%s Key=%s (total %.1fs)", song.id, source, bpm, key, _time.time() - t0)
+        logger.info("[ANALYZE_AUDIO] ✓ OK song_id=%s via %s BPM=%s Key=%s TunebatURL=%s (total %.1fs)", song.id, source, bpm, key, tunebat_url, _time.time() - t0)
 
         return JsonResponse({
             'success': True,
             'bpm': bpm,
             'key': key,
             'source': source,
+            'tunebat_url': tunebat_url,
             'partial': not bpm or not key,
+            'duration': song.duration,
+            'popularity': song.popularity,
+            'energy': song.energy,
+            'danceability': song.danceability,
+            'happiness': song.happiness,
+            'acousticness': song.acousticness,
+            'instrumentalness': song.instrumentalness,
+            'liveness': song.liveness,
+            'speechiness': song.speechiness,
+            'loudness': song.loudness,
         })
 
     except Exception:
@@ -834,25 +885,13 @@ def song_list(request):
         # Votar una cançó
         elif 'vote_song_id' in request.POST and voting_enabled:
             song = get_object_or_404(Song, pk=request.POST['vote_song_id'], party=party)
-            vote_type = request.POST.get('vote_type', 'like')  # like o dislike
+            vote_type = request.POST.get('vote_type', 'like')
 
-            # Comprovar si l'usuari ja ha votat aquesta cançó
-            existing_vote = Vote.objects.filter(user=user, song=song, party=party).first()
-            if existing_vote:
-                # L'usuari ja ha votat aquesta cançó, no fer res
-                return redirect('song_list')
-
-            # Comprovar si té vots disponibles
-            if votes_left > 0:
-                # Crear el vot (consumeix 1 Vot)
-                Vote.objects.create(user=user, song=song, party=party, vote_type=vote_type)
-                return redirect('song_list')
-            else:
-                if credits > 0:
-                    messages.warning(request, _("No tens vots! Converteix Coins a Vots per votar."))
-                else:
-                    messages.warning(request, _("No tens Coins! Compra Coins i converteix-los a Vots."))
-                return redirect('song_list')
+            from jukebox.utils.vote_validation import validate_and_create_vote
+            success, error_msg = validate_and_create_vote(user, song, party, vote_type)
+            if not success and error_msg:
+                messages.warning(request, error_msg)
+            return redirect('song_list')
 
     # Comptar només els likes per ordenar
     songs = annotated_songs.order_by('-num_likes', 'title')
@@ -883,8 +922,9 @@ def song_list(request):
     songs_with_votes = party.songs.annotate(vote_count=Count('vote')).filter(vote_count__gt=0).count()
     songs_with_votes_percentage = round((songs_with_votes / total_songs * 100) if total_songs > 0 else 0, 1)
 
-    accepted_requests = SongRequest.objects.filter(party=party, status='accepted')
-    total_coins_spent = sum([req.coins_cost for req in accepted_requests if req.coins_cost])
+    total_coins_spent = SongRequest.objects.filter(
+        party=party, status='accepted'
+    ).aggregate(total=Sum('coins_cost'))['total'] or 0
 
     # Cançó que està sonant (la propera en la cua)
     now_playing = party.songs.filter(has_played=False).annotate(
@@ -1067,9 +1107,9 @@ def dj_dashboard(request):
     songs_with_votes_percentage = round((songs_with_votes / total_songs * 100) if total_songs > 0 else 0, 1)
 
     # 5. Coins gastats (peticions acceptades)
-    # Només comptem coins gastats en peticions, ja que VotePackage no té camp 'coins'
-    accepted_requests = SongRequest.objects.filter(party=party, status='accepted')
-    total_coins_spent = sum([req.coins_cost for req in accepted_requests if req.coins_cost])
+    total_coins_spent = SongRequest.objects.filter(
+        party=party, status='accepted'
+    ).aggregate(total=Sum('coins_cost'))['total'] or 0
 
     # Alternativa: comptar VotePackages creats per aquesta party (conversions coins->vots)
     vote_conversions_count = VotePackage.objects.filter(party=party).count()
@@ -1164,9 +1204,8 @@ def mark_song_played(request, song_id):
         return HttpResponse(status=403)
     song.has_played = True
     song.played_at = timezone.now()
-    song.save()
+    song.save(update_fields=['has_played', 'played_at'])
 
-    # Notificar a tots els que van votar aquesta cançó
     create_song_played_notification(song)
 
     return redirect('dj_dashboard')
@@ -1770,7 +1809,7 @@ def force_sync_playlist(request, party_id):
         party.last_sync_at = original_last_sync
         party.save(update_fields=['auto_sync_playlist', 'last_sync_at'])
 
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': _('Error intern sincronitzant la playlist.')}, status=500)
 
 
 @login_required
@@ -1778,6 +1817,8 @@ def force_sync_playlist(request, party_id):
 def manage_song_requests(request):
     """Vista per DJs per gestionar peticions de cançons"""
     party_id = request.session.get('selected_party_id')
+    if request.method == 'POST' and not party_id:
+        party_id = request.POST.get('party_id')
     if not party_id:
         return redirect('select_party')
 
@@ -1790,59 +1831,68 @@ def manage_song_requests(request):
         request_id = request.POST.get('request_id')
         action = request.POST.get('action')  # 'accept' o 'reject'
         allow_without_charge = request.POST.get('allow_without_charge') == '1'
+        if not request_id or action not in {'accept', 'reject'}:
+            return JsonResponse({'success': False, 'error': _('Paràmetres invàlids.')}, status=400)
 
-        with transaction.atomic():
-            try:
-                song_request = SongRequest.objects.select_for_update().get(
-                    pk=request_id,
-                    party=party,
-                    status='pending',
-                )
-            except SongRequest.DoesNotExist:
-                return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
-
-            if action == 'accept':
-                if song_request.user.credits >= song_request.coins_cost:
-                    charged_amount = _accept_song_request(
-                        song_request=song_request,
-                        processed_by=request.user,
-                        charge_user=True,
+        try:
+            with transaction.atomic():
+                try:
+                    song_request = SongRequest.objects.select_for_update().get(
+                        pk=request_id,
+                        party=party,
+                        status='pending',
                     )
-                    return JsonResponse({
-                        'success': True,
-                        'message': f'Cançó acceptada i afegida! S\'han cobrat {charged_amount} Coins',
-                    })
+                except SongRequest.DoesNotExist:
+                    return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
 
-                if allow_without_charge:
-                    _accept_song_request(
-                        song_request=song_request,
-                        processed_by=request.user,
-                        charge_user=False,
-                    )
+                if action == 'accept':
+                    try:
+                        charged_amount = _accept_song_request(
+                            song_request=song_request,
+                            processed_by=request.user,
+                            charge_user=not allow_without_charge,
+                        )
+                    except ValueError:
+                        if allow_without_charge:
+                            charged_amount = _accept_song_request(
+                                song_request=song_request,
+                                processed_by=request.user,
+                                charge_user=False,
+                            )
+                        else:
+                            song_request.user.refresh_from_db(fields=['credits'])
+                            return JsonResponse({
+                                'success': False,
+                                'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
+                                    'current': song_request.user.credits,
+                                    'required': song_request.coins_cost
+                                },
+                            }, status=400)
+
+                    if charged_amount:
+                        return JsonResponse({
+                            'success': True,
+                            'message': f'Cançó acceptada i afegida! S\'han cobrat {charged_amount} Coins',
+                        })
                     return JsonResponse({
                         'success': True,
                         'message': _('Cançó acceptada i afegida sense càrrec'),
                     })
 
-                return JsonResponse({
-                    'success': False,
-                    'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
-                        'current': song_request.user.credits,
-                        'required': song_request.coins_cost
-                    },
-                }, status=400)
+                elif action == 'reject':
+                    song_request.status = 'rejected'
+                    song_request.processed_at = timezone.now()
+                    song_request.processed_by = request.user
+                    song_request.save()
 
-            elif action == 'reject':
-                song_request.status = 'rejected'
-                song_request.processed_at = timezone.now()
-                song_request.processed_by = request.user
-                song_request.save()
-
-                return JsonResponse({'success': True, 'message': _('Cançó rebutjada (sense càrrec)')})
+                    return JsonResponse({'success': True, 'message': _('Cançó rebutjada (sense càrrec)')})
+        except Exception:
+            logger.exception("[REQUESTS] Error processant petició request_id=%s action=%s party_id=%s", request_id, action, party.id)
+            return JsonResponse({'success': False, 'error': _('Error intern processant la petició.')}, status=500)
 
     # Llistar totes les peticions pendents
-    pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')
-    processed_requests = SongRequest.objects.filter(party=party).exclude(status='pending').order_by('-processed_at')[:20]
+    pending_requests = SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at')
+    processed_requests = SongRequest.objects.filter(party=party).exclude(status='pending').select_related('user', 'processed_by').order_by('-processed_at')[:20]
 
     return render(request, 'jukebox/manage_song_requests.html', {
         'party': party,

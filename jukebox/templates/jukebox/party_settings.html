@@ -941,9 +941,10 @@
               <i class="fas fa-sync-alt me-1"></i>Recarrega
             </button>
             {% if has_spotify %}
-            <a href="{% url 'remove_playlist' party.id %}" class="btn btn-danger btn-sm flex-fill">
-              Neteja
-            </a>
+            <form method="post" action="{% url 'remove_playlist' party.id %}" class="flex-fill m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm w-100">Neteja</button>
+            </form>
             {% endif %}
           </div>
 
@@ -1326,7 +1327,10 @@
             <i class="fas fa-sync-alt me-1"></i>Recarrega
           </button>
           {% if has_spotify %}
-          <a href="{% url 'remove_playlist' party.id %}" class="btn btn-outline-danger flex-fill">Neteja</a>
+          <form method="post" action="{% url 'remove_playlist' party.id %}" class="flex-fill m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger w-100">Neteja</button>
+          </form>
           {% endif %}
         </div>
 
@@ -1904,7 +1908,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function getDesktopActionCellHtml(song) {
     var analyzeHtml = song.needs_analysis
       ? '<button class="settings-action-btn analyze-audio-btn" data-song-id="' + song.id + '" title="Analitza BPM i Key"><span class="material-symbols-outlined" style="font-size: 1.125rem;">analytics</span></button>'
-      : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>';
+      : (song.tunebat_url
+        ? '<a class="text-success" href="' + escapeHtml(song.tunebat_url) + '" target="_blank" rel="noopener noreferrer" title="Obre detall a Tunebat"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></a>'
+        : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>');
 
     return '<div class="settings-song-actions">' + analyzeHtml + getDeleteButtonHtml(song.id, false) + '</div>';
   }
@@ -1912,7 +1918,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function getMobileActionCellHtml(song) {
     var analyzeHtml = song.needs_analysis
       ? '<button class="settings-action-btn analyze-audio-btn flex-shrink-0" data-song-id="' + song.id + '" title="Analitza BPM i Key"><span class="material-symbols-outlined" style="font-size: 1.125rem;">analytics</span></button>'
-      : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>';
+      : (song.tunebat_url
+        ? '<a class="text-success" href="' + escapeHtml(song.tunebat_url) + '" target="_blank" rel="noopener noreferrer" title="Obre detall a Tunebat"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></a>'
+        : '<span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>');
 
     return '<div class="d-flex flex-column gap-2 align-items-end">' + analyzeHtml + getDeleteButtonHtml(song.id, true) + '</div>';
   }
@@ -2442,6 +2450,7 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeCell.innerHTML = getDesktopActionCellHtml({
           id: songId,
           needs_analysis: false,
+          tunebat_url: data.tunebat_url || '',
         });
         var deleteBtn = analyzeCell.querySelector('.delete-song-btn');
         if (deleteBtn) bindDeleteButton(deleteBtn);
@@ -2453,6 +2462,7 @@ document.addEventListener('DOMContentLoaded', function() {
           actionWrapper.innerHTML = getMobileActionCellHtml({
             id: songId,
             needs_analysis: false,
+            tunebat_url: data.tunebat_url || '',
           });
           var mobileDeleteBtn = actionWrapper.querySelector('.delete-song-btn');
           if (mobileDeleteBtn) bindDeleteButton(mobileDeleteBtn);

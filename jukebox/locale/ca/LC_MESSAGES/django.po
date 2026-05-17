@@ -1107,11 +1107,11 @@ msgstr "Accedeix directament"
 
 #: jukebox/templates/jukebox/select_party.html:836
 msgid "Codi de la festa"
-msgstr "Nom de la festa"
+msgstr "Codi de la festa"
 
 #: jukebox/templates/jukebox/select_party.html:854
 msgid "Festes Disponibles"
-msgstr "Vots disponibles"
+msgstr "Festes Disponibles"
 
 #: jukebox/templates/jukebox/select_party.html:875
 msgid "Pròximament"

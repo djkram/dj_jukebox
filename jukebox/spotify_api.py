@@ -592,6 +592,79 @@ def _get_songbpm_features(title, artist, spotify_id=None):
     return result
 
 
+_ACOUSTICBRAINZ_CACHE = {}
+_ACOUSTICBRAINZ_CACHE_TTL = 3600
+
+
+def _get_acousticbrainz_features(title, artist):
+    """
+    Cerca BPM i key a AcousticBrainz via MusicBrainz.
+    Busca fins a 5 MBIDs per la cançó i retorna el primer amb dades.
+    """
+    import urllib.request
+
+    cache_key = (_normalize_lookup(title), _normalize_lookup(artist))
+    now = time.time()
+    cached = _ACOUSTICBRAINZ_CACHE.get(cache_key)
+    if cached and (now - cached["ts"] <= _ACOUSTICBRAINZ_CACHE_TTL):
+        return cached["data"]
+
+    result = {"bpm": None, "key": None, "source_url": None}
+    try:
+        mb_result = musicbrainzngs.search_recordings(
+            artist=artist,
+            recording=title,
+            limit=5,
+            strict=False,
+        )
+        recordings = mb_result.get("recording-list", [])
+        if not recordings:
+            logger.info("[ACOUSTICBRAINZ] Sense MBIDs per '%s' - '%s'", title, artist)
+            _ACOUSTICBRAINZ_CACHE[cache_key] = {"ts": now, "data": result}
+            return result
+
+        logger.info("[ACOUSTICBRAINZ] Provant %d MBIDs per '%s' - '%s'", len(recordings), title, artist)
+        for rec in recordings:
+            mbid = rec.get("id")
+            if not mbid:
+                continue
+            url = f"https://acousticbrainz.org/api/v1/{mbid}/low-level"
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "dj_jukebox/1.0 (djkram@gmail.com)"})
+                with urllib.request.urlopen(req, timeout=8) as r:
+                    data = __import__("json").loads(r.read())
+                if "message" in data:
+                    continue
+                rhythm = data.get("rhythm", {})
+                tonal = data.get("tonal", {})
+                bpm_raw = rhythm.get("bpm")
+                key_key = tonal.get("key_key")
+                key_scale = tonal.get("key_scale")
+                if not bpm_raw and not key_key:
+                    continue
+                bpm = round(float(bpm_raw), 1) if bpm_raw else None
+                camelot = None
+                if key_key and key_scale:
+                    suffix = "m" if "minor" in key_scale.lower() else ""
+                    camelot = _camelot_from_key_string(f"{key_key}{suffix}")
+                result = {"bpm": bpm, "key": camelot, "source_url": url}
+                logger.info(
+                    "[ACOUSTICBRAINZ] OK mbid=%s BPM=%s Key=%s (%s %s)",
+                    mbid, bpm, camelot, key_key, key_scale,
+                )
+                break
+            except Exception as e:
+                logger.debug("[ACOUSTICBRAINZ] mbid=%s error: %s", mbid, e)
+    except Exception as e:
+        logger.warning("[ACOUSTICBRAINZ] Error cercant '%s' - '%s': %s", title, artist, e)
+
+    if not result["bpm"] and not result["key"]:
+        logger.info("[ACOUSTICBRAINZ] Sense dades per '%s' - '%s'", title, artist)
+
+    _ACOUSTICBRAINZ_CACHE[cache_key] = {"ts": now, "data": result}
+    return result
+
+
 def _get_musicbrainz_features(title, artist):
     """
     Busca BPM i key a MusicBrainz com a últim recurs.
@@ -902,9 +975,14 @@ def get_playlist_tracks(playlist_id):
             logger.debug(f"[FALLBACK] Spotify no té features per '{meta[sid]['title']}', provant SongBPM")
             feature_data = _get_songbpm_features(meta[sid]["title"], meta[sid]["artist"], sid)
 
-        # Fallback 2: MusicBrainz
+        # Fallback 2: AcousticBrainz
         if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] SongBPM no té features per '{meta[sid]['title']}', provant MusicBrainz")
+            logger.debug(f"[FALLBACK] SongBPM no té features per '{meta[sid]['title']}', provant AcousticBrainz")
+            feature_data = _get_acousticbrainz_features(meta[sid]["title"], meta[sid]["artist"])
+
+        # Fallback 3: MusicBrainz
+        if not feature_data.get("bpm") and not feature_data.get("key"):
+            logger.debug(f"[FALLBACK] AcousticBrainz no té features per '{meta[sid]['title']}', provant MusicBrainz")
             feature_data = _get_musicbrainz_features(meta[sid]["title"], meta[sid]["artist"])
 
         out.append({
@@ -975,7 +1053,14 @@ def get_audio_features_for_songs(song_ids_with_metadata):
                 )
 
                 if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
-                    logger.debug(f"[FALLBACK] SongBPM no té features, provant MusicBrainz")
+                    logger.debug(f"[FALLBACK] SongBPM no té features, provant AcousticBrainz")
+                    features_map[sid] = _get_acousticbrainz_features(
+                        meta[sid]["title"],
+                        meta[sid]["artist"],
+                    )
+
+                if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
+                    logger.debug(f"[FALLBACK] AcousticBrainz no té features, provant MusicBrainz")
                     features_map[sid] = _get_musicbrainz_features(
                         meta[sid]["title"],
                         meta[sid]["artist"]

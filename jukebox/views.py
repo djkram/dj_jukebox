@@ -26,6 +26,7 @@ from .notifications import (
 from .spotify_api import (
     SpotifyAuthError,
     _get_songbpm_features,
+    _get_acousticbrainz_features,
     add_track_to_playlist,
     remove_track_from_playlist,
     get_user_playlists,
@@ -751,8 +752,9 @@ def analyze_song_audio(request, party_id, song_id):
     """
     Intenta obtenir BPM i Key per aquest ordre:
     1) SongBPM
-    2) Preview URL (si existeix)
-    3) MP3 temporal (yt-dlp + librosa)
+    2) AcousticBrainz
+    3) Preview URL (si existeix)
+    4) MP3 temporal (yt-dlp + librosa)
     """
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
@@ -772,6 +774,17 @@ def analyze_song_audio(request, party_id, song_id):
         key = result.get('key') if result else None
         source_url = result.get('source_url') if result else None
         logger.info("[ANALYZE_AUDIO] SongBPM song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, source_url, t1 - t0)
+
+        if not bpm and not key:
+            logger.info("[ANALYZE_AUDIO] Fallback AcousticBrainz per song_id=%s", song.id)
+            ab_result = _get_acousticbrainz_features(song.title, song.artist)
+            t_ab = _time.time()
+            bpm = ab_result.get('bpm') if ab_result else None
+            key = ab_result.get('key') if ab_result else None
+            source_url = ab_result.get('source_url') if ab_result else None
+            logger.info("[ANALYZE_AUDIO] AcousticBrainz song_id=%s → BPM=%s Key=%s (%.1fs)", song.id, bpm, key, t_ab - t1)
+            if bpm or key:
+                source = "acousticbrainz"
 
         if not bpm and not key and song.preview_url:
             logger.info("[ANALYZE_AUDIO] Fallback preview_url per song_id=%s", song.id)

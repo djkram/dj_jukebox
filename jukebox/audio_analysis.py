@@ -149,21 +149,14 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
     if max_wall_seconds is None:
         max_wall_seconds = int(getattr(settings, "ANALYZE_YTDLP_MAX_WALL_SECONDS", 18))
 
-    clean_title = _normalize_search_text(title)
-    soft_clean_title = _normalize_search_text_soft(title)
     simple_title = _simplify_title_for_search(title)
-    soft_simple_title = _normalize_search_text_soft(_simplify_title_for_search(title))
+    clean_title = _normalize_search_text(title)
     first_artist = _first_artist_for_search(artist)
-    soft_first_artist = _normalize_search_text_soft(artist.split(",")[0].strip() if artist else "")
     search_variants = [
-        f"{soft_simple_title} {soft_first_artist} audio".strip(),
-        f"{soft_simple_title} - {soft_first_artist} audio".strip(),
-        f"{simple_title} {first_artist} audio".strip(),
-        f"{soft_simple_title} {soft_first_artist}".strip(),
-        f"{soft_simple_title} - {soft_first_artist}".strip(),
-        f"{simple_title} {first_artist}".strip(),
-        f"{soft_clean_title} {soft_first_artist}".strip(),
-        f"{clean_title} {first_artist}".strip(),
+        f"{simple_title} {first_artist}",
+        f"{simple_title} {first_artist} audio",
+        f"{clean_title} {first_artist}",
+        f"{simple_title}",
     ]
     # Dedupe i evitar variants buides
     _seen = set()

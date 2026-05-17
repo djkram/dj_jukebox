@@ -370,7 +370,7 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         res = fetcher.get(url, timeout=timeout)
         status = getattr(res, "status", "?")
         logger.info("[SCRAPLING] GET done status=%s (%.1fs) %s", status, time.time() - t0, url)
-        _TUNEBAT_NEXT_REQUEST_AT = time.time() + 1.5
+        _TUNEBAT_NEXT_REQUEST_AT = time.time() + 4.0
         return res
 
     def _to_float(value):
@@ -637,33 +637,41 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         return result
 
     try:
-        from scrapling import Fetcher
-        try:
-            Fetcher.configure(huge_tree=True)
-        except Exception:
-            pass
+        from scrapling.fetchers import FetcherSession
     except Exception as e:
         logger.error("[TUNEBAT] Scrapling no disponible: %s", e)
         return {"bpm": None, "key": None, "tunebat_url": None}
 
-    fetcher = Fetcher
-
     t1 = _normalize_search_text(_simplify_title(clean_title))
     t2 = _normalize_search_text(clean_title)
-    # Tunebat Search returns 0 results without quotes; quoted query finds results.
-    # Strategy: quoted first, unquoted as fallback (in case of temporary empty response).
+    # Tunebat needs quoted title: "Title" (%22Title%22) to return results.
+    # Unquoted is fallback for transient failures.
     raw_qs = [f'"{t1}"', f'"{t2}"', t1, t2]
     search_queries = list(dict.fromkeys(q for q in raw_qs if q.strip('"')))[:3]
     logger.info("[TUNEBAT] Search queries (title-only, quoted-first): %s", search_queries)
 
     matched = None
-    for query in search_queries:
-        try:
-            matched = _search_and_extract(fetcher, query, spotify_id, title, artist)
-            if matched:
-                break
-        except Exception as e:
-            logger.debug("[TUNEBAT] Error a _search_and_extract query='%s': %s", query, e)
+    try:
+        with FetcherSession(stealthy_headers=True) as session:
+            # Warm up: visit homepage first to establish session/cookies before searching.
+            # Tunebat Cloudflare rejects direct search URL without a valid session.
+            try:
+                _fetch_with_throttle(session, "https://tunebat.com/", timeout=30)
+                logger.info("[TUNEBAT] Homepage warm-up OK, esperant 4s")
+                time.sleep(4.0)
+                _TUNEBAT_NEXT_REQUEST_AT = time.time() + 1.0
+            except Exception as e:
+                logger.warning("[TUNEBAT] Warm-up homepage error (continuant): %s", e)
+
+            for query in search_queries:
+                try:
+                    matched = _search_and_extract(session, query, spotify_id, title, artist)
+                    if matched:
+                        break
+                except Exception as e:
+                    logger.debug("[TUNEBAT] Error a _search_and_extract query='%s': %s", query, e)
+    except Exception as e:
+        logger.warning("[TUNEBAT] Error creant FetcherSession: %s", e)
 
     if not matched:
         logger.warning("[TUNEBAT] ✗ Cap match a Search per '%s' - '%s'", title, artist)

@@ -922,7 +922,7 @@
         {% csrf_token %}
         <div class="input-group mb-2">
           <input type="text" name="party_code" id="mobile-party-code-input" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
-                 style="text-transform: uppercase; font-weight: 600;" maxlength="12" required>
+                 style="text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;" maxlength="12" required>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-sign-in-alt"></i>
           </button>
@@ -944,26 +944,26 @@
       <!-- Party Grid -->
       <section>
         <h3 class="font-headline font-bold mb-3" style="font-size: 1.25rem;">{% trans "Festes Disponibles" %}</h3>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
           {% for party in parties %}
             <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card"
                {% if party.require_join_code %}data-requires-code="true"{% endif %}
                {% if party.location_radius_km %}data-requires-location="true"{% endif %}
                data-party-id="{{ party.id }}"
                data-set-url="{% url 'set_party' party.id %}">
-              <div class="position-relative overflow-hidden text-white shadow-xl" style="aspect-ratio: 1; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
+              <div class="position-relative overflow-hidden text-white shadow-xl" style="height: 90px; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
                 {% if party.cover_image %}
                   <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
                 {% endif %}
-                <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));"></div>
-                <div class="position-relative d-flex flex-column justify-content-end h-100 p-3" style="z-index: 10;">
+                <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.1));"></div>
+                <div class="position-relative d-flex flex-column justify-content-center h-100 px-4" style="z-index: 10;">
                   {% if party.require_join_code %}
-                    <div class="px-2 py-1 rounded-pill mb-2 d-inline-flex align-items-center" style="background: #e74c3c; color: white; font-size: 0.5rem; font-weight: 700; width: fit-content;">
-                      <i class="fas fa-lock" style="font-size: 0.5rem;"></i>
+                    <div class="d-inline-flex align-items-center gap-1 mb-1" style="color: #ffb3b3; font-size: 0.65rem; font-weight: 700;">
+                      <i class="fas fa-lock" style="font-size: 0.6rem;"></i> {% trans "Requereix codi" %}
                     </div>
                   {% endif %}
-                  <h4 class="font-bold mb-1" style="font-size: 0.95rem; line-height: 1.1;">{{ party.name }}</h4>
-                  <p class="mb-0" style="font-size: 0.65rem; opacity: 0.9;">
+                  <h4 class="font-bold mb-0" style="font-size: 1.05rem; line-height: 1.2;">{{ party.name }}</h4>
+                  <p class="mb-0" style="font-size: 0.75rem; opacity: 0.85; margin-top: 0.2rem;">
                     {% if party.date %}{{ party.date|date:"M d • H:i" }}{% else %}{% trans "Pròximament" %}{% endif %}
                   </p>
                 </div>

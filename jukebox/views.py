@@ -263,6 +263,26 @@ def create_party(request):
 
 
 @login_required
+@require_POST
+def update_party_code(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
+        return JsonResponse({'ok': False, 'error': 'forbidden'}, status=403)
+
+    new_code = Party.normalize_code(request.POST.get('code', ''))
+    if not new_code:
+        return JsonResponse({'ok': False, 'error': 'El codi no pot estar buit.'})
+    if len(new_code) > 12:
+        return JsonResponse({'ok': False, 'error': 'El codi no pot tenir més de 12 caràcters.'})
+    if Party.objects.exclude(pk=party_id).filter(code=new_code).exists():
+        return JsonResponse({'ok': False, 'error': 'Aquest codi ja l\'utilitza una altra festa.'})
+
+    party.code = new_code
+    party.save(update_fields=['code'])
+    return JsonResponse({'ok': True, 'code': party.code})
+
+
+@login_required
 @user_passes_test(is_dj_admin)
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)

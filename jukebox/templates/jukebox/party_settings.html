@@ -835,11 +835,18 @@
                      maxlength="12"
                      required
                      form="partySettingsForm"
-                     style="text-transform: uppercase;">
-              <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeDesktop').value)">
+                     style="text-transform: uppercase;"
+                     autocomplete="off">
+              <button class="btn btn-outline-secondary" type="button" id="copyCodeDesktop" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeDesktop').value)">
                 <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
               </button>
+              <button class="btn btn-primary" type="button" id="saveCodeDesktop"
+                      data-url="{% url 'update_party_code' party.id %}"
+                      data-input="partyCodeDesktop">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">save</span>
+              </button>
             </div>
+            <div id="codeDesktopMsg" style="font-size:0.78rem;margin-top:0.35rem;min-height:1rem;"></div>
             {% if form.code.errors %}
               <div class="text-danger mt-1" style="font-size: 0.8rem;">
                 {{ form.code.errors|striptags }}
@@ -1524,11 +1531,18 @@
                  maxlength="12"
                  required
                  form="partySettingsFormMobile"
-                 style="text-transform: uppercase;">
+                 style="text-transform: uppercase;"
+                 autocomplete="off">
           <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('partyCodeMobile').value)">
             <i class="fas fa-copy"></i>
           </button>
+          <button class="btn btn-primary" type="button" id="saveCodeMobile"
+                  data-url="{% url 'update_party_code' party.id %}"
+                  data-input="partyCodeMobile">
+            <i class="fas fa-save"></i>
+          </button>
         </div>
+        <div id="codeMobileMsg" style="font-size:0.78rem;margin-top:0.35rem;min-height:1rem;"></div>
         {% if form.code.errors %}
           <div class="text-danger mt-1" style="font-size: 0.8rem;">
             {{ form.code.errors|striptags }}
@@ -3247,6 +3261,53 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   });
+
+  // ── Desar codi de festa inline ──────────────────────────────────────────
+  function setupSaveCodeBtn(btnId, msgId) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+    var msgEl = document.getElementById(msgId);
+    btn.addEventListener('click', function() {
+      var input = document.getElementById(btn.dataset.input);
+      if (!input) return;
+      var code = input.value.trim().toUpperCase();
+      var url = btn.dataset.url;
+      var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      btn.disabled = true;
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
+        body: 'code=' + encodeURIComponent(code),
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        btn.disabled = false;
+        if (data.ok) {
+          input.value = data.code;
+          // sync the other input
+          ['partyCodeDesktop', 'partyCodeMobile'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && el !== input) el.value = data.code;
+          });
+          // refresh QR previews
+          var src = qrBase + '?v=' + encodeURIComponent(data.code) + '&t=' + Date.now();
+          ['qrCodeImg', 'qrCodeImgMobile'].forEach(function(id) {
+            var img = document.getElementById(id); if (img) img.src = src;
+          });
+          ['qrDownloadLink'].forEach(function(id) {
+            var a = document.getElementById(id); if (a) a.href = src.replace('&t='+Date.now().toString(), '');
+          });
+          if (msgEl) { msgEl.style.color = '#1a8a3a'; msgEl.textContent = 'Codi desat correctament.'; }
+          setTimeout(function() { if (msgEl) msgEl.textContent = ''; }, 3000);
+        } else {
+          if (msgEl) { msgEl.style.color = '#c0392b'; msgEl.textContent = data.error || 'Error desant el codi.'; }
+        }
+      }).catch(function() {
+        btn.disabled = false;
+        if (msgEl) { msgEl.style.color = '#c0392b'; msgEl.textContent = 'Error de connexió.'; }
+      });
+    });
+  }
+  setupSaveCodeBtn('saveCodeDesktop', 'codeDesktopMsg');
+  setupSaveCodeBtn('saveCodeMobile', 'codeMobileMsg');
 
   // Combina els inputs visuals de data + hora d'inici en el camp datetime-local ocult
   var partySettingsForm = document.getElementById('partySettingsForm');

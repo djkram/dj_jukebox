@@ -13,6 +13,7 @@ urlpatterns = [
     path('dj/nova-festa/', views.create_party, name='create_party'),
     path('dj/dashboard/', views.dj_dashboard, name='dj_dashboard'),
     path('party/<int:party_id>/update-status/', views.update_party_status, name='update_party_status'),
+    path('party/<int:party_id>/update-code/', views.update_party_code, name='update_party_code'),
     path('dj/mark_played/<int:song_id>/', views.mark_song_played, name='mark_song_played'),
     path('dj/unmark_played/<int:song_id>/', views.unmark_song_played, name='unmark_song_played'),
     

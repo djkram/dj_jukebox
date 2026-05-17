@@ -871,6 +871,20 @@
             </div>
           </div>
 
+          <div class="mb-3">
+            <label class="settings-label">Enllaç directe a la festa</label>
+            <div class="input-group">
+              <input type="text" id="partyDirectUrlDesktop" class="form-control" readonly
+                     value="{{ request.scheme }}://{{ request.get_host }}{% url 'set_party' party.id %}?code={{ party.code }}"
+                     style="font-size:0.8rem;color:#434655;background:#f8f9fe;">
+              <button class="btn btn-outline-secondary" type="button"
+                      onclick="navigator.clipboard.writeText(document.getElementById('partyDirectUrlDesktop').value)">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+              </button>
+            </div>
+            <p class="settings-help">Comparteix aquest enllaç per accedir directament a la festa.</p>
+          </div>
+
           <div class="text-center">
             <img id="qrCodeImg" src="{% url 'party_qr_code' party.id %}?v={{ party.code }}" alt="Codi QR de la festa" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
             <p class="settings-help mt-2">
@@ -1564,6 +1578,20 @@
                  form="partySettingsFormMobile">
         </div>
       </div>
+      <div class="mb-3">
+        <label class="mobile-label">Enllaç directe a la festa</label>
+        <div class="input-group">
+          <input type="text" id="partyDirectUrlMobile" class="form-control" readonly
+                 value="{{ request.scheme }}://{{ request.get_host }}{% url 'set_party' party.id %}?code={{ party.code }}"
+                 style="font-size:0.75rem;color:#434655;background:#f8f9fe;">
+          <button class="btn btn-outline-secondary" type="button"
+                  onclick="navigator.clipboard.writeText(document.getElementById('partyDirectUrlMobile').value)">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <p class="help-text">Comparteix aquest enllaç per accedir directament a la festa.</p>
+      </div>
+
       <div class="text-center">
         <img id="qrCodeImgMobile" src="{% url 'party_qr_code' party.id %}?v={{ party.code }}" alt="Codi QR" style="max-width: 200px; border-radius: 8px; border: 1px solid #e0e3e6;">
         <p class="help-text mt-2">Escaneja amb el mòbil per unir-te directament.</p>
@@ -3292,8 +3320,14 @@ document.addEventListener('DOMContentLoaded', function() {
           ['qrCodeImg', 'qrCodeImgMobile'].forEach(function(id) {
             var img = document.getElementById(id); if (img) img.src = src;
           });
-          ['qrDownloadLink'].forEach(function(id) {
-            var a = document.getElementById(id); if (a) a.href = src.replace('&t='+Date.now().toString(), '');
+          var dlSrc = qrBase + '?v=' + encodeURIComponent(data.code);
+          var dlLink = document.getElementById('qrDownloadLink');
+          if (dlLink) { dlLink.href = dlSrc; dlLink.download = 'festa-' + data.code + '-qr.png'; }
+          // refresh direct URL fields
+          var setPartyBase2 = "{% url 'set_party' 0 %}".replace('/0/', '/');
+          var directUrl = window.location.protocol + '//' + window.location.host + setPartyBase2 + '{{ party.id }}/' + '?code=' + encodeURIComponent(data.code);
+          ['partyDirectUrlDesktop', 'partyDirectUrlMobile'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.value = directUrl;
           });
           if (msgEl) { msgEl.style.color = '#1a8a3a'; msgEl.textContent = 'Codi desat correctament.'; }
           setTimeout(function() { if (msgEl) msgEl.textContent = ''; }, 3000);

@@ -1031,6 +1031,7 @@
 }
 </style>
 
+{% trans "Aquesta festa requereix un codi d'entrada. Si us plau, introdueix el codi:" as js_code_prompt %}
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1283,7 +1284,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var partyId = this.dataset.partyId;
       var code = '';
       if (requiresCode) {
-        code = prompt('{% trans "Aquesta festa requereix un codi d\'entrada. Si us plau, introdueix el codi:" %}');
+        code = prompt('{{ js_code_prompt|escapejs }}');
         if (!code) return;
         code = code.trim().toUpperCase();
       }

@@ -25,7 +25,6 @@ from .notifications import (
 )
 from .spotify_api import (
     SpotifyAuthError,
-    _get_songdata_features,
     _get_songbpm_features,
     add_track_to_playlist,
     remove_track_from_playlist,
@@ -752,9 +751,8 @@ def analyze_song_audio(request, party_id, song_id):
     """
     Intenta obtenir BPM i Key per aquest ordre:
     1) SongBPM
-    2) SongData
-    3) Preview URL (si existeix)
-    4) MP3 temporal (yt-dlp + librosa)
+    2) Preview URL (si existeix)
+    3) MP3 temporal (yt-dlp + librosa)
     """
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
@@ -774,17 +772,6 @@ def analyze_song_audio(request, party_id, song_id):
         key = result.get('key') if result else None
         source_url = result.get('source_url') if result else None
         logger.info("[ANALYZE_AUDIO] SongBPM song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, source_url, t1 - t0)
-
-        if not bpm and not key:
-            logger.info("[ANALYZE_AUDIO] Fallback SongData per song_id=%s", song.id)
-            result = _get_songdata_features(song.title, song.artist, song.spotify_id)
-            t_songdata = _time.time()
-            bpm = result.get('bpm') if result else None
-            key = result.get('key') if result else None
-            source_url = result.get('source_url') if result else None
-            logger.info("[ANALYZE_AUDIO] SongData song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, source_url, t_songdata - t1)
-            if bpm or key:
-                source = "songdata"
 
         if not bpm and not key and song.preview_url:
             logger.info("[ANALYZE_AUDIO] Fallback preview_url per song_id=%s", song.id)

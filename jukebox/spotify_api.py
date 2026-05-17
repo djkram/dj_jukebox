@@ -21,11 +21,6 @@ SONGBPM_BASE_URL = "https://songbpm.com"
 SONGBPM_CACHE_TTL_SECONDS = 3600
 _SONGBPM_CACHE = {}
 _SONGBPM_NEXT_REQUEST_AT = 0.0
-SONGDATA_BASE_URL = "https://songdata.io"
-SONGDATA_CACHE_TTL_SECONDS = 3600
-_SONGDATA_CACHE = {}
-_SONGDATA_NEXT_REQUEST_AT = 0.0
-_SONGDATA_DISABLED_UNTIL = 0.0
 
 
 class SpotifyAuthError(Exception):
@@ -335,14 +330,6 @@ def _songbpm_key_to_camelot(key_text, mode=None):
     return _camelot_from_key_string(f"{note}{suffix}")
 
 
-def _songdata_slug(title, artist):
-    import re
-    text = f"{title or ''} by {_simplify_artist(artist or '')}"
-    text = _remove_accents(text)
-    text = re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-")
-    return text or "track"
-
-
 def _song_title_search_queries(title):
     """Genera variants de cerca només amb el títol, sense artista."""
     clean_title = (title or "").strip()
@@ -353,187 +340,6 @@ def _song_title_search_queries(title):
         if query and query not in seen:
             seen.append(query)
     return seen
-
-
-def _get_songdata_features(title, artist, spotify_id=None):
-    import re
-    from html import unescape
-    from urllib.parse import quote_plus, urljoin
-
-    global _SONGDATA_DISABLED_UNTIL, _SONGDATA_NEXT_REQUEST_AT
-
-    if not spotify_id:
-        logger.info("[SONGDATA] Sense spotify_id, saltant cerca per evitar matches imprecisos")
-        return {"bpm": None, "key": None, "source_url": None}
-
-    request_delay = float(getattr(settings, "SONGDATA_REQUEST_DELAY_SECONDS", 6.0))
-    cooldown_seconds = int(getattr(settings, "SONGDATA_BLOCK_COOLDOWN_SECONDS", 900))
-
-    def _strip_html(value):
-        value = re.sub(r"<[^>]+>", " ", value or "")
-        value = unescape(value)
-        return re.sub(r"\s+", " ", value).strip()
-
-    def _to_float(value):
-        if value is None:
-            return None
-        m = re.search(r"-?\d+(?:\.\d+)?", str(value))
-        return float(m.group(0)) if m else None
-
-    def _fetch_with_throttle(fetcher, url, timeout=30):
-        global _SONGDATA_NEXT_REQUEST_AT
-        now = time.time()
-        wait = max(0.0, _SONGDATA_NEXT_REQUEST_AT - now)
-        if wait > 0:
-            logger.info("[SCRAPLING] Throttle %.1fs abans de GET %s", wait, url)
-            time.sleep(wait)
-        logger.info("[SCRAPLING] GET %s (timeout=%s)", url, timeout)
-        t0 = time.time()
-        res = fetcher.get(url, timeout=timeout)
-        status = getattr(res, "status", "?")
-        logger.info("[SCRAPLING] GET done status=%s (%.1fs) %s", status, time.time() - t0, url)
-        _SONGDATA_NEXT_REQUEST_AT = time.time() + request_delay
-        return res
-
-    def _parse_track_links(html):
-        links = []
-        chunks = re.split(r'(?=href=["\']/track/[A-Za-z0-9]+/)', html or "")
-        pattern = r'href=["\'](?P<href>/track/(?P<spotify_id>[A-Za-z0-9]+)/[^"\']+)["\']'
-        for chunk in chunks:
-            match = re.search(pattern, chunk, re.IGNORECASE)
-            if not match:
-                continue
-            plain = _strip_html(chunk[:2500])
-            slug_text = match.group("href").rsplit("/", 1)[-1].replace("-", " ")
-            title_part, _, artist_part = slug_text.partition(" by ")
-            links.append({
-                "spotify_id": match.group("spotify_id"),
-                "url": urljoin(SONGDATA_BASE_URL, match.group("href")),
-                "title": title_part.strip(),
-                "artist": artist_part.strip(),
-                "text": plain,
-            })
-        return links
-
-    def _is_exact_title_artist_match(item):
-        expected_title = _normalize_match_text(title)
-        expected_artist = _normalize_match_text(_simplify_artist(artist))
-        item_title = _normalize_match_text(item.get("title"))
-        item_artist = _normalize_match_text(_simplify_artist(item.get("artist") or ""))
-        return bool(expected_title and expected_artist and item_title == expected_title and item_artist == expected_artist)
-
-    cache_key = (spotify_id, _normalize_lookup(title), _normalize_lookup(artist))
-    now = time.time()
-    cached = _SONGDATA_CACHE.get(cache_key)
-    if cached and (now - cached["ts"] <= SONGDATA_CACHE_TTL_SECONDS):
-        return cached["data"]
-
-    if now < _SONGDATA_DISABLED_UNTIL:
-        logger.warning(
-            "[SONGDATA] Cooldown actiu (%.0fs), saltant spotify_id=%s",
-            max(0.0, _SONGDATA_DISABLED_UNTIL - now), spotify_id,
-        )
-        return {"bpm": None, "key": None, "source_url": None}
-
-    try:
-        from scrapling.fetchers import FetcherSession
-    except Exception as e:
-        logger.error("[SONGDATA] Scrapling no disponible: %s", e)
-        return {"bpm": None, "key": None, "source_url": None}
-
-    html = ""
-    status = None
-    selected_url = None
-    search_queries = _song_title_search_queries(title)
-    logger.info("[SONGDATA] Search queries: %s", search_queries)
-    try:
-        with FetcherSession(stealthy_headers=True) as session:
-            for query in search_queries:
-                search_url = f"{SONGDATA_BASE_URL}/search?q={quote_plus(query)}"
-                logger.info("[SONGDATA] Search title-only URL: %s", search_url)
-                res = _fetch_with_throttle(session, search_url, timeout=30)
-                status = getattr(res, "status", None)
-                search_html = getattr(res, "html_content", None) or ""
-                if status and status >= 400:
-                    logger.warning("[SONGDATA] Search HTTP %s query='%s'", status, query)
-                    if status in (403, 429):
-                        break
-                    continue
-                links = _parse_track_links(search_html)
-                logger.info("[SONGDATA] Search links=%s query='%s'", len(links), query)
-                matching_link = next((link for link in links if link["spotify_id"] == spotify_id), None)
-                if not matching_link and links:
-                    matching_link = next((link for link in links if _is_exact_title_artist_match(link)), None)
-                    if matching_link:
-                        logger.info(
-                            "[SONGDATA] Fallback match per títol+artista exactes: expected_id=%s got_id=%s URL=%s",
-                            spotify_id, matching_link["spotify_id"], matching_link["url"],
-                        )
-                if not matching_link:
-                    if links:
-                        logger.info(
-                            "[SONGDATA] Spotify ID check: expected=%s links_with_mismatch=%s",
-                            spotify_id, len([link for link in links if link["spotify_id"] != spotify_id]),
-                        )
-                    continue
-                selected_url = matching_link["url"]
-                logger.info("[SONGDATA] Match per spotify_id=%s URL=%s", spotify_id, selected_url)
-                detail = _fetch_with_throttle(session, selected_url, timeout=30)
-                status = getattr(detail, "status", None)
-                html = getattr(detail, "html_content", None) or ""
-                break
-    except Exception as e:
-        logger.warning("[SONGDATA] Error cercant '%s' - '%s': %s", title, artist, e)
-
-    if status and status >= 400:
-        if status in (403, 429):
-            _SONGDATA_DISABLED_UNTIL = time.time() + cooldown_seconds
-            logger.warning("[SONGDATA] HTTP %s, activant cooldown %ss", status, cooldown_seconds)
-        logger.warning("[SONGDATA] HTTP %s per spotify_id=%s", status, spotify_id)
-        result = {"bpm": None, "key": None, "source_url": None}
-        _SONGDATA_CACHE[cache_key] = {"ts": now, "data": result}
-        return result
-
-    if not html:
-        result = {"bpm": None, "key": None, "source_url": None}
-        _SONGDATA_CACHE[cache_key] = {"ts": now, "data": result}
-        return result
-
-    text = _strip_html(html)
-    bpm = None
-    for pattern in [
-        r"\bBPM\s+(\d{2,3}(?:\.\d+)?)\b",
-        r"\b(\d{2,3}(?:\.\d+)?)\s+BPM\b",
-        r"tempo[^.]{0,80}?(\d{2,3}(?:\.\d+)?)\s+BPM",
-    ]:
-        m = re.search(pattern, text, re.IGNORECASE)
-        if m:
-            bpm = _to_float(m.group(1))
-            break
-
-    camelot = None
-    m = re.search(r"\bCamelot\s+(\d{1,2}[AB])\b", text, re.IGNORECASE)
-    if m:
-        camelot = m.group(1).upper()
-
-    key_text = None
-    m = re.search(r"\bKey\s+([A-G](?:♯|♭|#|b)?\s+(?:Major|Minor))\b", text)
-    if m:
-        key_text = m.group(1)
-
-    result = {
-        "bpm": bpm,
-        "key": camelot,
-        "camelot": camelot,
-        "key_text": key_text,
-        "source_url": selected_url if (bpm or camelot) else None,
-    }
-    logger.info(
-        "[SONGDATA] Resultat spotify_id=%s BPM=%s Key=%s KeyText=%s URL=%s",
-        spotify_id, result.get("bpm"), result.get("key"), result.get("key_text"), result.get("source_url"),
-    )
-    _SONGDATA_CACHE[cache_key] = {"ts": now, "data": result}
-    return result
 
 
 def _get_songbpm_features(title, artist, spotify_id=None):
@@ -666,6 +472,14 @@ def _get_songbpm_features(title, artist, spotify_id=None):
         return {"bpm": None, "key": None, "source_url": None}
 
     search_queries = _song_title_search_queries(clean_title)
+    # If title-only queries fail, retry with title+artist as last resort
+    if clean_artist:
+        t_full = _normalize_search_text(clean_title)
+        a_simple = _normalize_search_text(_simplify_artist(clean_artist))
+        if t_full and a_simple:
+            ta_query = f"{t_full} {a_simple}"
+            if ta_query not in search_queries:
+                search_queries.append(ta_query)
     logger.info("[SONGBPM] Search queries: %s", search_queries)
 
     matched = None
@@ -1088,14 +902,9 @@ def get_playlist_tracks(playlist_id):
             logger.debug(f"[FALLBACK] Spotify no té features per '{meta[sid]['title']}', provant SongBPM")
             feature_data = _get_songbpm_features(meta[sid]["title"], meta[sid]["artist"], sid)
 
-        # Fallback 2: SongData
+        # Fallback 2: MusicBrainz
         if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] SongBPM no té features per '{meta[sid]['title']}', provant SongData")
-            feature_data = _get_songdata_features(meta[sid]["title"], meta[sid]["artist"], sid)
-
-        # Fallback 3: MusicBrainz
-        if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] SongData no té features per '{meta[sid]['title']}', provant MusicBrainz")
+            logger.debug(f"[FALLBACK] SongBPM no té features per '{meta[sid]['title']}', provant MusicBrainz")
             feature_data = _get_musicbrainz_features(meta[sid]["title"], meta[sid]["artist"])
 
         out.append({
@@ -1166,15 +975,7 @@ def get_audio_features_for_songs(song_ids_with_metadata):
                 )
 
                 if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
-                    logger.debug(f"[FALLBACK] SongBPM no té features, provant SongData")
-                    features_map[sid] = _get_songdata_features(
-                        meta[sid]["title"],
-                        meta[sid]["artist"],
-                        sid,
-                    )
-
-                if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
-                    logger.debug(f"[FALLBACK] SongData no té features, provant MusicBrainz")
+                    logger.debug(f"[FALLBACK] SongBPM no té features, provant MusicBrainz")
                     features_map[sid] = _get_musicbrainz_features(
                         meta[sid]["title"],
                         meta[sid]["artist"]

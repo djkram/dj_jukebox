@@ -8,7 +8,6 @@ from jukebox.spotify_api import (
     _pick_songbpm_match,
     _normalize_match_text,
     _songbpm_key_to_camelot,
-    _songdata_slug,
     _song_title_search_queries,
 )
 
@@ -74,12 +73,6 @@ class SpotifyApiHelpersTests(SimpleTestCase):
         self.assertEqual(_songbpm_key_to_camelot("F♯/G♭", "major"), "2B")
         self.assertEqual(_songbpm_key_to_camelot("F♯/G♭", "minor"), "11A")
         self.assertIsNone(_songbpm_key_to_camelot("F♯/G♭"))
-
-    def test_songdata_slug_uses_title_and_first_artist(self):
-        self.assertEqual(
-            _songdata_slug("Y.M.C.A.", "Village People, Other"),
-            "Y-M-C-A-by-Village-People",
-        )
 
     def test_song_title_search_queries_use_only_title_variants(self):
         self.assertEqual(

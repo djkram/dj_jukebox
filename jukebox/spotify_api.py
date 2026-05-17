@@ -524,10 +524,12 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         """Fetch Tunebat Search page, parse results, return matched fields or None."""
         global _TUNEBAT_RATE_LIMIT_UNTIL
         search_url = f"https://tunebat.com/Search?q={quote(search_query)}"
-        max_attempts = int(getattr(settings, "TUNEBAT_SEARCH_RETRIES", 2))
+        # Only retry on actual HTTP errors (4xx/5xx/network). A 200 with 0 results is a
+        # "no results" signal — return immediately so the caller tries the next query variant.
+        max_error_retries = int(getattr(settings, "TUNEBAT_SEARCH_RETRIES", 2))
         retry_pause = float(getattr(settings, "TUNEBAT_SEARCH_RETRY_PAUSE_SECONDS", 2.5))
 
-        for attempt in range(1, max_attempts + 1):
+        for attempt in range(1, max_error_retries + 1):
             now = time.time()
             if now < _TUNEBAT_RATE_LIMIT_UNTIL:
                 logger.warning(
@@ -536,7 +538,7 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
                 )
                 return None
 
-            logger.info("[TUNEBAT] Search intent %s/%s query='%s'", attempt, max_attempts, search_query)
+            logger.info("[TUNEBAT] Search intent %s/%s query='%s'", attempt, max_error_retries, search_query)
             try:
                 res = _fetch_with_throttle(fetcher, search_url, timeout=45)
                 status = getattr(res, "status", None)
@@ -545,20 +547,20 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
                 if status == 429:
                     _TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 30.0
                     logger.warning("[TUNEBAT] 429 a Search, cooldown 30s query='%s'", search_query)
-                    if attempt < max_attempts:
+                    if attempt < max_error_retries:
                         time.sleep(retry_pause * attempt)
                     continue
 
                 if status and status >= 400:
                     logger.warning("[TUNEBAT] Search status=%s query='%s'", status, search_query)
-                    if attempt < max_attempts:
+                    if attempt < max_error_retries:
                         time.sleep(retry_pause)
                     continue
 
                 html = res.html_content or ""
             except Exception as e:
                 logger.warning("[TUNEBAT] Search exception query='%s' intent=%s: %s", search_query, attempt, e)
-                if attempt < max_attempts:
+                if attempt < max_error_retries:
                     time.sleep(retry_pause)
                 continue
 
@@ -590,11 +592,22 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
                     "[TUNEBAT] __NEXT_DATA__ tenia %s tracks però cap match per '%s' - '%s'",
                     len(tracks), t_title, t_artist,
                 )
+                # Tracks loaded but none matched — no point retrying same query
+                return None
             else:
-                logger.info("[TUNEBAT] Search HTML (primers 1500 chars): %s", html[:1500])
-
-            if attempt < max_attempts:
-                time.sleep(retry_pause)
+                # 200 but no __NEXT_DATA__ tracks: could be "no results" (0 hits) or
+                # a transient empty render. Log HTML for Render debugging.
+                no_results = "no results found" in html.lower() or "0 tracks" in html.lower()
+                logger.info(
+                    "[TUNEBAT] Search 200 però sense tracks (no_results=%s) query='%s' HTML: %s",
+                    no_results, search_query, html[:1200],
+                )
+                if no_results:
+                    # Genuine empty result — skip remaining retries, try next query variant
+                    return None
+                # Possibly a transient render failure — retry with pause
+                if attempt < max_error_retries:
+                    time.sleep(retry_pause)
 
         return None
 
@@ -635,10 +648,13 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
 
     fetcher = Fetcher
 
-    q1 = _normalize_search_text(_simplify_title(clean_title))
-    q2 = _normalize_search_text(clean_title)
-    search_queries = list(dict.fromkeys(q for q in [q1, q2] if q))[:2]
-    logger.info("[TUNEBAT] Search queries (title-only): %s", search_queries)
+    t1 = _normalize_search_text(_simplify_title(clean_title))
+    t2 = _normalize_search_text(clean_title)
+    # Tunebat Search returns 0 results without quotes; quoted query finds results.
+    # Strategy: quoted first, unquoted as fallback (in case of temporary empty response).
+    raw_qs = [f'"{t1}"', f'"{t2}"', t1, t2]
+    search_queries = list(dict.fromkeys(q for q in raw_qs if q.strip('"')))[:3]
+    logger.info("[TUNEBAT] Search queries (title-only, quoted-first): %s", search_queries)
 
     matched = None
     for query in search_queries:

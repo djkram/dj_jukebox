@@ -353,6 +353,7 @@ def _search_getsongbpm(title, artist, api_key):
 
 def _get_getsongbpm_features(title, artist, spotify_id=None):
     import re
+    import json
     from urllib.parse import quote, urljoin
 
     global _TUNEBAT_RATE_LIMIT_UNTIL, _TUNEBAT_NEXT_REQUEST_AT
@@ -372,13 +373,11 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         _TUNEBAT_NEXT_REQUEST_AT = time.time() + 1.5
         return res
 
-    def _clean_query_text(text):
-        if not text:
-            return ""
-        # Treure cometes i apòstrofs que sovint empitjoren els resultats de Search
-        text = re.sub(r"[\"'`´‘’“”]", "", text)
-        text = re.sub(r"\s+", " ", text)
-        return text.strip()
+    def _to_float(value):
+        if value is None:
+            return None
+        m = re.search(r"-?\d+(?:\.\d+)?", str(value))
+        return float(m.group(0)) if m else None
 
     def _to_int(value):
         if value is None:
@@ -386,259 +385,290 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         m = re.search(r"-?\d+", str(value))
         return int(m.group(0)) if m else None
 
-    def _to_float(value):
-        if value is None:
-            return None
-        m = re.search(r"-?\d+(?:\.\d+)?", str(value))
-        return float(m.group(0)) if m else None
+    def _track_id(t):
+        return (
+            t.get("Id") or t.get("id") or
+            t.get("SpotifyId") or t.get("spotifyId") or
+            t.get("TrackId") or t.get("trackId") or ""
+        )
 
-    def _parse_metrics(info_html):
-        metrics = {}
+    def _track_name(t):
+        return t.get("Name") or t.get("name") or t.get("Title") or t.get("title") or ""
 
-        # Top cards (key/camelot/bpm/duration): <h3>value</h3><span>label</span>
-        for val, label in re.findall(
-            r'<h3[^>]*>\s*([^<]+?)\s*</h3>\s*<span[^>]*>\s*([^<]+?)\s*</span>',
-            info_html,
-            re.IGNORECASE,
-        ):
-            metrics[label.strip().lower()] = val.strip()
+    def _track_artists_str(t):
+        artists = (
+            t.get("ArtistNames") or t.get("artistNames") or
+            t.get("Artists") or t.get("artists") or []
+        )
+        if isinstance(artists, list):
+            parts = []
+            for a in artists:
+                if isinstance(a, dict):
+                    parts.append(a.get("Name") or a.get("name") or "")
+                elif isinstance(a, str):
+                    parts.append(a)
+            return ", ".join(p for p in parts if p)
+        return str(artists) if artists else ""
 
-        # Circular stats (popularity/energy/...): progress text + trailing label
-        for val, label in re.findall(
-            r'<span class="ant-progress-text"[^>]*title="([^"]+)"[^>]*>[^<]*</span>\s*</div>\s*</div>\s*<span[^>]*>\s*([^<]+?)\s*</span>',
-            info_html,
-            re.IGNORECASE,
-        ):
-            metrics[label.strip().lower()] = val.strip()
-
-        key_text = metrics.get("key")
-        camelot = metrics.get("camelot")
-        bpm = _to_float(metrics.get("bpm"))
-
+    def _extract_track_fields(t):
+        bpm = _to_float(
+            t.get("Bpm") or t.get("bpm") or t.get("Tempo") or t.get("tempo")
+        )
+        camelot = (
+            t.get("Camelot") or t.get("camelot") or
+            t.get("KeyCamelot") or t.get("keyCamelot")
+        )
+        key_text = (
+            t.get("Key") or t.get("key") or
+            t.get("KeyString") or t.get("keyString") or
+            t.get("ActualKey") or t.get("actualKey")
+        )
+        popularity = _to_int(t.get("Popularity") or t.get("popularity"))
+        key_camelot = camelot or (_camelot_from_key_string(str(key_text)) if key_text else None)
         return {
             "bpm": bpm,
-            "key": camelot,  # mantenim key en notació Camelot per compatibilitat existent
-            "key_text": key_text,
+            "key": key_camelot,
             "camelot": camelot,
-            "duration": metrics.get("duration"),
-            "popularity": _to_int(metrics.get("popularity")),
-            "energy": _to_int(metrics.get("energy")),
-            "danceability": _to_int(metrics.get("danceability")),
-            "happiness": _to_int(metrics.get("happiness")),
-            "acousticness": _to_int(metrics.get("acousticness")),
-            "instrumentalness": _to_int(metrics.get("instrumentalness")),
-            "liveness": _to_int(metrics.get("liveness")),
-            "speechiness": _to_int(metrics.get("speechiness")),
-            "loudness": _to_float(metrics.get("loudness")),
+            "key_text": str(key_text) if key_text else None,
+            "popularity": popularity,
         }
 
-    def _query_to_tunebat_info_url(fetcher, query, expected_spotify_id=None):
+    def _parse_next_data_tracks(html):
+        """Extract tracks list from __NEXT_DATA__ JSON embedded in page HTML."""
+        m = re.search(
+            r'<script[^>]+id=["\'"]__NEXT_DATA__["\'"][^>]*>\s*(\{.*?\})\s*</script>',
+            html, re.DOTALL | re.IGNORECASE,
+        )
+        if not m:
+            logger.info("[TUNEBAT] No __NEXT_DATA__ script tag trobat")
+            return []
+        try:
+            data = json.loads(m.group(1))
+        except json.JSONDecodeError as e:
+            logger.info("[TUNEBAT] Error parsejant __NEXT_DATA__: %s", e)
+            return []
+
+        page_props = data.get("props", {}).get("pageProps", {})
+
+        for key in ("tracks", "searchResults", "results", "items"):
+            val = page_props.get(key)
+            if isinstance(val, list) and val:
+                logger.info("[TUNEBAT] __NEXT_DATA__ tracks via pageProps.%s: %s", key, len(val))
+                return val
+
+        data_obj = page_props.get("data")
+        if isinstance(data_obj, dict):
+            for key in ("tracks", "results", "items"):
+                val = data_obj.get(key)
+                if isinstance(val, list) and val:
+                    logger.info("[TUNEBAT] __NEXT_DATA__ tracks via pageProps.data.%s: %s", key, len(val))
+                    return val
+
+        dehydrated = page_props.get("dehydratedState", {})
+        for q in (dehydrated.get("queries", []) if isinstance(dehydrated, dict) else []):
+            q_data = (q.get("state", {}).get("data", {}) if isinstance(q, dict) else {})
+            for key in ("tracks", "results", "items"):
+                val = q_data.get(key) if isinstance(q_data, dict) else None
+                if isinstance(val, list) and val:
+                    logger.info("[TUNEBAT] __NEXT_DATA__ tracks via dehydratedState query.%s: %s", key, len(val))
+                    return val
+
+        logger.info("[TUNEBAT] __NEXT_DATA__ present sense llista de tracks. Keys pageProps: %s", list(page_props.keys()))
+        return []
+
+    def _match_in_tracks(tracks, expected_spotify_id, t_title, t_artist):
+        """Find best matching track, return extracted fields dict or None."""
+        norm_title = _normalize_lookup(t_title)
+        norm_first_artist = _normalize_lookup((t_artist or "").split(",")[0].strip())
+
+        if expected_spotify_id:
+            for t in tracks:
+                if _track_id(t) == expected_spotify_id:
+                    fields = _extract_track_fields(t)
+                    if fields["bpm"] or fields["camelot"]:
+                        logger.info(
+                            "[TUNEBAT] Match per spotify_id=%s '%s' BPM=%s Key=%s Pop=%s",
+                            expected_spotify_id, _track_name(t), fields["bpm"], fields["key"], fields["popularity"],
+                        )
+                        return fields
+                    logger.info("[TUNEBAT] spotify_id=%s trobat però sense BPM/Key", expected_spotify_id)
+
+        best_title = None
+        for t in tracks:
+            if _normalize_lookup(_track_name(t)) != norm_title:
+                continue
+            fields = _extract_track_fields(t)
+            if not (fields["bpm"] or fields["camelot"]):
+                continue
+            t_artists = _normalize_lookup(_track_artists_str(t))
+            if norm_first_artist and (norm_first_artist in t_artists or t_artists.startswith(norm_first_artist)):
+                logger.info(
+                    "[TUNEBAT] Match per title+artist '%s' BPM=%s Key=%s Pop=%s",
+                    _track_name(t), fields["bpm"], fields["key"], fields["popularity"],
+                )
+                return fields
+            if best_title is None:
+                best_title = (t, fields)
+
+        if best_title:
+            t, fields = best_title
+            logger.info(
+                "[TUNEBAT] Match per title (primer) '%s' BPM=%s Key=%s Pop=%s",
+                _track_name(t), fields["bpm"], fields["key"], fields["popularity"],
+            )
+            return fields
+
+        return None
+
+    def _search_and_extract(fetcher, search_query, expected_spotify_id, t_title, t_artist):
+        """Fetch Tunebat Search page, parse results, return matched fields or None."""
         global _TUNEBAT_RATE_LIMIT_UNTIL
-        search_url = f"https://tunebat.com/Search?q={quote(query)}"
-        max_attempts = int(getattr(settings, "TUNEBAT_SEARCH_RETRIES", 3))
+        search_url = f"https://tunebat.com/Search?q={quote(search_query)}"
+        max_attempts = int(getattr(settings, "TUNEBAT_SEARCH_RETRIES", 2))
         retry_pause = float(getattr(settings, "TUNEBAT_SEARCH_RETRY_PAUSE_SECONDS", 2.5))
 
         for attempt in range(1, max_attempts + 1):
-            # Si estem en cooldown per bloqueig/rate-limit, no bloquegem la request HTTP.
             now = time.time()
             if now < _TUNEBAT_RATE_LIMIT_UNTIL:
-                wait_for = max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now)
                 logger.warning(
                     "[TUNEBAT] Cooldown actiu (%.1fs), saltant query '%s'",
-                    wait_for, query
+                    max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now), search_query,
                 )
                 return None
 
-            logger.info("[TUNEBAT] Search intent %s/%s query='%s' url=%s", attempt, max_attempts, query, search_url)
+            logger.info("[TUNEBAT] Search intent %s/%s query='%s'", attempt, max_attempts, search_query)
             try:
                 res = _fetch_with_throttle(fetcher, search_url, timeout=45)
                 status = getattr(res, "status", None)
-                logger.info("[TUNEBAT] Search response status=%s query='%s' intent=%s", status, query, attempt)
+                logger.info("[TUNEBAT] Search status=%s query='%s'", status, search_query)
 
                 if status == 429:
                     _TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 30.0
-                    logger.warning(
-                        "[TUNEBAT] 429 a Search, cooldown 30s. query='%s' intent=%s/%s",
-                        query, attempt, max_attempts
-                    )
+                    logger.warning("[TUNEBAT] 429 a Search, cooldown 30s query='%s'", search_query)
                     if attempt < max_attempts:
                         time.sleep(retry_pause * attempt)
                     continue
 
                 if status and status >= 400:
-                    logger.warning("[TUNEBAT] Search status=%s query='%s' intent=%s", status, query, attempt)
+                    logger.warning("[TUNEBAT] Search status=%s query='%s'", status, search_query)
                     if attempt < max_attempts:
                         time.sleep(retry_pause)
                     continue
 
                 html = res.html_content or ""
             except Exception as e:
-                logger.warning("[TUNEBAT] Search exception query='%s' intent=%s: %s", query, attempt, e)
+                logger.warning("[TUNEBAT] Search exception query='%s' intent=%s: %s", search_query, attempt, e)
                 if attempt < max_attempts:
                     time.sleep(retry_pause)
                 continue
 
-            # Accept relative and absolute URLs, both quote styles.
-            links = re.findall(r'href=[\'"]((?:https?://tunebat\.com)?/Info/[^\'"]+)[\'"]', html, re.IGNORECASE)
-            # Extra fallback: if href parser misses, try raw URL detection
-            if not links:
-                links = re.findall(r'(https?://tunebat\.com/Info/[^\s"\'<>]+)', html, re.IGNORECASE)
-            # Extra fallback: links escaped in JSON/html (\u002FInfo\u002F...)
-            if not links:
-                links = re.findall(r'\\u002FInfo\\u002F([^"\\]+)', html, re.IGNORECASE)
-                links = ["/Info/" + path for path in links]
-            # Extra fallback: qualsevol patró /Info/.../<spotify_id> incrustat al HTML
-            if not links and expected_spotify_id:
-                links = re.findall(
-                    rf'((?:https?://tunebat\.com)?/Info/[^\s"\'<>]*{re.escape(expected_spotify_id)}[^\s"\'<>]*)',
-                    html,
-                    re.IGNORECASE,
+            info_links = re.findall(
+                r'href=["\']([^"\']*?/Info/[^"\']+)["\']',
+                html, re.IGNORECASE,
+            )
+            if not info_links:
+                info_links = re.findall(r'(https?://tunebat\.com/Info/[^\s"\'<>]+)', html, re.IGNORECASE)
+            if not info_links:
+                escaped = re.findall(r'\\u002FInfo\\u002F([^"\\]+)', html, re.IGNORECASE)
+                info_links = ["/Info/" + p for p in escaped]
+
+            logger.info("[TUNEBAT] /Info links trobats: %s query='%s'", len(info_links), search_query)
+
+            tracks = _parse_next_data_tracks(html)
+            if tracks:
+                result = _match_in_tracks(tracks, expected_spotify_id, t_title, t_artist)
+                if result:
+                    if expected_spotify_id:
+                        for lnk in info_links:
+                            if lnk.rstrip("/").split("/")[-1] == expected_spotify_id:
+                                result["tunebat_url"] = urljoin("https://tunebat.com", lnk)
+                                break
+                    if not result.get("tunebat_url") and info_links:
+                        result["tunebat_url"] = urljoin("https://tunebat.com", info_links[0])
+                    return result
+                logger.info(
+                    "[TUNEBAT] __NEXT_DATA__ tenia %s tracks però cap match per '%s' - '%s'",
+                    len(tracks), t_title, t_artist,
                 )
+            else:
+                logger.info("[TUNEBAT] Search HTML (primers 1500 chars): %s", html[:1500])
 
-            if not links:
-                logger.info("[TUNEBAT] Search sense links /Info query='%s' intent=%s/%s", query, attempt, max_attempts)
-                if attempt < max_attempts:
-                    time.sleep(retry_pause)
-                continue
+            if attempt < max_attempts:
+                time.sleep(retry_pause)
 
-            logger.info("[TUNEBAT] Search links trobats=%s query='%s' intent=%s/%s", len(links), query, attempt, max_attempts)
-
-            # Si tenim spotify_id, prioritzar match exacte dins la URL /Info/.../<spotify_id>
-            if expected_spotify_id:
-                expected_spotify_id = expected_spotify_id.strip()
-                for link in links:
-                    link_id = link.rstrip("/").split("/")[-1]
-                    if link_id == expected_spotify_id:
-                        selected = urljoin("https://tunebat.com", link)
-                        logger.info("[TUNEBAT] Match exacte per spotify_id=%s => %s", expected_spotify_id, selected)
-                        return selected
-
-            selected = urljoin("https://tunebat.com", links[0])
-            logger.info("[TUNEBAT] Match per primer resultat => %s", selected)
-            return selected
-
-        logger.warning("[TUNEBAT] Search exhaurit per query='%s' (%s intents)", query, max_attempts)
         return None
 
-    logger.info(f"[TUNEBAT] Buscant via scraping: '{title}' - '{artist}'")
-    cache_key = (spotify_id or "", _clean_query_text(title).lower(), _clean_query_text(artist).lower())
+    # --- Main ---
+    logger.info("[TUNEBAT] Buscant via scraping: '%s' - '%s'", title, artist)
+
+    def _clean(text):
+        t = re.sub(r'[\u0022\u0027`\u00b4\u2018\u2019\u201c\u201d]', "", text or "")
+        return re.sub(r"\s+", " ", t).strip()
+
+    clean_title = _clean(title)
+    clean_artist = _clean(artist)
+    cache_key = (spotify_id or "", clean_title.lower(), clean_artist.lower())
+
     now = time.time()
     cached = _TUNEBAT_CACHE.get(cache_key)
     if cached and (now - cached["ts"] <= TUNEBAT_CACHE_TTL_SECONDS):
         return cached["data"]
+
     if now < _TUNEBAT_RATE_LIMIT_UNTIL:
-        wait_for = max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now)
-        logger.warning("[TUNEBAT] Cooldown actiu (%.1fs), saltant scraping per '%s' - '%s'", wait_for, title, artist)
+        logger.warning(
+            "[TUNEBAT] Cooldown actiu (%.1fs), saltant per '%s'",
+            max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now), title,
+        )
         result = {"bpm": None, "key": None, "tunebat_url": None}
         _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
         return result
-    first_artist = _clean_query_text(_simplify_artist(artist))
-    soft_first_artist = _normalize_search_text_soft(first_artist)
-    normalized_first_artist = _normalize_search_text(first_artist)
-    simplified_title = _clean_query_text(_simplify_title(title))
-    normalized_simplified_title = _normalize_search_text(simplified_title)
-    soft_simplified_title = _normalize_search_text_soft(simplified_title)
-    clean_title = _clean_query_text(title)
-    normalized_clean_title = _normalize_search_text(clean_title)
-    remix_hint = _clean_query_text(_extract_remix_hint(title))
-    normalized_remix_hint = _normalize_search_text(remix_hint)
-    # Cerca conservadora per evitar saturar Tunebat:
-    # 1) "Títol - PrimerArtista" (principal)
-    # 2) "TítolSimplificat - PrimerArtista" (fallback)
-    # 3) "TítolSimplificat - PistaRemix" (fallback curt útil en casos llargs)
-    raw_query_variants = [
-        f"{soft_simplified_title} - {soft_first_artist}",
-        f"{soft_simplified_title} - {normalized_first_artist}",
-        f"{soft_simplified_title} {soft_first_artist}",
-        f"{normalized_simplified_title} {normalized_first_artist}",
-        f"{normalized_simplified_title} - {normalized_first_artist}",
-        f"{normalized_simplified_title} - {normalized_remix_hint}" if normalized_remix_hint else "",
-        f"{normalized_clean_title} - {normalized_first_artist}",
-        f"{normalized_clean_title} {normalized_first_artist}",
-    ]
-    # Dedupe + límit estricte de variants
-    query_variants = []
-    seen = set()
-    for q in raw_query_variants:
-        q = re.sub(r"\s+", " ", q).strip()
-        if not q or q in seen:
-            continue
-        seen.add(q)
-        query_variants.append(q)
-    query_variants = query_variants[:6]
-    logger.debug("[TUNEBAT] Query variants (%s): %s", len(query_variants), query_variants)
 
     try:
         from scrapling import Fetcher
         try:
-            # Scrapling 0.4.x: configure requereix kwargs.
             Fetcher.configure(huge_tree=True)
         except Exception:
             pass
     except Exception as e:
-        logger.error(f"[TUNEBAT] Scrapling no disponible: {e}")
+        logger.error("[TUNEBAT] Scrapling no disponible: %s", e)
         return {"bpm": None, "key": None, "tunebat_url": None}
 
-    # IMPORTANT: no instanciar Fetcher() (API deprecada que genera warning).
     fetcher = Fetcher
-    info_url = None
-    for query in query_variants:
+
+    q1 = _normalize_search_text(_simplify_title(clean_title))
+    q2 = _normalize_search_text(clean_title)
+    search_queries = list(dict.fromkeys(q for q in [q1, q2] if q))[:2]
+    logger.info("[TUNEBAT] Search queries (title-only): %s", search_queries)
+
+    matched = None
+    for query in search_queries:
         try:
-            info_url = _query_to_tunebat_info_url(fetcher, query, spotify_id)
-            if info_url:
-                logger.debug(f"[TUNEBAT] Info URL trobada per query '{query}': {info_url}")
+            matched = _search_and_extract(fetcher, query, spotify_id, title, artist)
+            if matched:
                 break
         except Exception as e:
-            logger.debug(f"[TUNEBAT] Error cercant query '{query}': {e}")
+            logger.debug("[TUNEBAT] Error a _search_and_extract query='%s': %s", query, e)
 
-    if not info_url:
-        logger.warning(f"[TUNEBAT] ✗ Cap match a Search: '{title}' - '{artist}'")
+    if not matched:
+        logger.warning("[TUNEBAT] ✗ Cap match a Search per '%s' - '%s'", title, artist)
         result = {"bpm": None, "key": None, "tunebat_url": None}
         _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
         return result
 
-    try:
-        logger.info("[TUNEBAT] Carregant Info URL: %s", info_url)
-        info_res = _fetch_with_throttle(fetcher, info_url, timeout=45)
-        info_status = getattr(info_res, "status", None)
-        logger.info("[TUNEBAT] Info response status=%s url=%s", info_status, info_url)
-        if info_status == 429:
-            _TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 90.0
-            logger.warning("[TUNEBAT] 429 rate-limit a Info, activant cooldown 90s: %s", info_url)
-            result = {"bpm": None, "key": None, "tunebat_url": None}
-            _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
-            return result
-        if info_status == 403:
-            _TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 120.0
-            logger.warning("[TUNEBAT] 403 a Info, activant cooldown 120s: %s", info_url)
-            result = {"bpm": None, "key": None, "tunebat_url": None}
-            _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
-            return result
-        if info_status and info_status >= 400:
-            logger.warning("[TUNEBAT] Info status %s a %s", info_status, info_url)
-            result = {"bpm": None, "key": None, "tunebat_url": None}
-            _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
-            return result
-        info_html = info_res.html_content or ""
-        parsed = _parse_metrics(info_html)
-    except Exception as e:
-        logger.warning(f"[TUNEBAT] ✗ Error carregant/parsing Info page: {e}")
-        result = {"bpm": None, "key": None, "tunebat_url": None}
-        _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
-        return result
-
-    parsed["tunebat_url"] = info_url
+    result = {
+        "bpm": matched.get("bpm"),
+        "key": matched.get("key"),
+        "camelot": matched.get("camelot"),
+        "key_text": matched.get("key_text"),
+        "popularity": matched.get("popularity"),
+        "tunebat_url": matched.get("tunebat_url"),
+    }
     logger.info(
-        "[TUNEBAT] ✓ Resultat '%s': BPM=%s Key=%s Duration=%s Popularity=%s URL=%s",
-        title,
-        parsed.get("bpm"),
-        parsed.get("key"),
-        parsed.get("duration"),
-        parsed.get("popularity"),
-        info_url,
+        "[TUNEBAT] ✓ Resultat '%s': BPM=%s Key=%s Popularity=%s URL=%s",
+        title, result.get("bpm"), result.get("key"), result.get("popularity"), result.get("tunebat_url"),
     )
-    _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": parsed}
-    return parsed
+    _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
+    return result
 
 
 def _get_musicbrainz_features(title, artist):

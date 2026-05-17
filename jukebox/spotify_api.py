@@ -751,11 +751,18 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         logger.error("[TUNEBAT] Scrapling no disponible: %s", e)
         return {"bpm": None, "key": None, "tunebat_url": None}
 
-    # Search only with double-quoted simplified title, as user requested.
-    # Unquoted queries return 0 results on Tunebat; quoted returns up to 84.
-    t1 = _normalize_search_text(_simplify_title(clean_title))
-    search_queries = [f'"{t1}"']
-    logger.info("[TUNEBAT] Search query (titol entre cometes dobles): %s", search_queries)
+    # Search only with double-quoted title (no artist, no unquoted fallback).
+    # Full normalized title first (e.g. "Jamaican Bam Bam"), simplified second if
+    # it differs (e.g. "Jamaican" when title was "Jamaican (Bam Bam)").
+    t_full = _normalize_search_text(clean_title)
+    t_simple = _normalize_search_text(_simplify_title(clean_title))
+    seen = []
+    for q in [t_full, t_simple]:
+        qquoted = f'"{q}"'
+        if q and qquoted not in seen:
+            seen.append(qquoted)
+    search_queries = seen
+    logger.info("[TUNEBAT] Search queries (titol entre cometes dobles): %s", search_queries)
 
     matched = None
     try:

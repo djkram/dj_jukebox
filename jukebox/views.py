@@ -36,6 +36,7 @@ from .spotify_api import (
     search_spotify_tracks_public,
 )
 from .utils.spotify_helpers import get_spotify_reconnect_url
+from .spotify_permissions import user_can_connect_spotify
 from .votes import get_user_votes_left, get_user_party_coins, ensure_user_has_free_coins
 from django.utils import timezone
 from datetime import datetime
@@ -157,9 +158,24 @@ def register(request):
 def profile(request):
     user = request.user
     has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
+    has_google = SocialAccount.objects.filter(user=user, provider="google").exists()
+    is_dj = Party.objects.filter(djs=user).exists()
+    if user.is_staff or user.is_superuser:
+        profile_role = _("Admin")
+        profile_role_icon = "admin_panel_settings"
+    elif is_dj:
+        profile_role = _("DJ")
+        profile_role_icon = "graphic_eq"
+    else:
+        profile_role = _("Jukebox Member")
+        profile_role_icon = "person"
     return render(request, "jukebox/profile.html", {
         "user": user,
         "has_spotify": has_spotify,
+        "has_google": has_google,
+        "spotify_connect_enabled": user_can_connect_spotify(user),
+        "profile_role": profile_role,
+        "profile_role_icon": profile_role_icon,
     })
 
 def select_party(request):
@@ -319,7 +335,8 @@ def party_qr_code(request, party_id):
         return HttpResponse(status=403)
 
     # URL completa de la festa amb el codi
-    party_url = request.build_absolute_uri(f'/set-party/{party.id}/?code={party.code}')
+    party_path = reverse('set_party', args=[party.id])
+    party_url = request.build_absolute_uri(f'{party_path}?code={party.code}')
 
     # Generar QR code
     qr = qrcode.QRCode(

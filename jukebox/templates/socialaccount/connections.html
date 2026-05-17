@@ -32,11 +32,13 @@
         <h4 class="mb-3">Connecta un altre compte extern</h4>
         <ul class="list-inline">
             {% for provider in form.providers %}
-                <li class="list-inline-item mb-2">
-                    <a href="{% provider_login_url provider.id process='connect' %}" class="btn btn-success">
-                        <i class="fab fa-{{ provider.id|lower }}"></i> Connecta amb {{ provider.name }}
-                    </a>
-                </li>
+                {% if provider.id != "spotify" or spotify_connect_enabled %}
+                    <li class="list-inline-item mb-2">
+                        <a href="{% provider_login_url provider.id process='connect' %}" class="btn btn-success">
+                            <i class="fab fa-{{ provider.id|lower }}"></i> Connecta amb {{ provider.name }}
+                        </a>
+                    </li>
+                {% endif %}
             {% empty %}
                 <li>No hi ha més proveïdors disponibles.</li>
             {% endfor %}

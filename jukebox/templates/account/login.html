@@ -383,7 +383,15 @@
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">bolt</span>
-              {% trans "Entrada ràpida amb Spotify o Google" %}
+              {% if spotify_social_login_enabled and google_social_login_enabled %}
+                {% trans "Entrada ràpida amb Spotify o Google" %}
+              {% elif google_social_login_enabled %}
+                {% trans "Entrada ràpida amb Google" %}
+              {% elif spotify_social_login_enabled %}
+                {% trans "Entrada ràpida amb Spotify" %}
+              {% else %}
+                {% trans "Entrada ràpida i segura" %}
+              {% endif %}
             </li>
             <li class="login-hero-point">
               <span class="material-symbols-outlined">music_note</span>

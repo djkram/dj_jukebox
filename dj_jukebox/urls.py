@@ -19,10 +19,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
+from jukebox.socialaccount_adapters import spotify_oauth_callback, spotify_oauth_login
 
 # URLs sense prefix d'idioma (necessàries per al canvi d'idioma)
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    path('accounts/spotify/login/', spotify_oauth_login, name='spotify_login'),
+    path('accounts/spotify/login/callback/', spotify_oauth_callback, name='spotify_callback'),
     path('accounts/', include('allauth.urls')),
 ]
 

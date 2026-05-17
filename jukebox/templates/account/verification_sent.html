@@ -71,6 +71,43 @@
       padding-top: 1.5rem;
       border-top: 1px solid rgba(116,118,136,0.15);
     }
+    .verification-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+    .verification-resend-btn,
+    .verification-secondary-link {
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.2rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 200ms;
+    }
+    .verification-resend-btn {
+      background: #0040e0;
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,64,224,0.18);
+    }
+    .verification-resend-btn:hover {
+      background: #002ea8;
+      transform: translateY(-1px);
+    }
+    .verification-secondary-link {
+      background: #f1f4f7;
+      color: #0040e0;
+      display: inline-flex;
+      align-items: center;
+    }
+    .verification-secondary-link:hover {
+      color: #002ea8;
+      text-decoration: none;
+    }
   }
 </style>
 
@@ -91,6 +128,18 @@
       <p class="verification-text">
         No el trobes? Comprova també el <strong>correu brossa (spam)</strong>.
       </p>
+      <div class="verification-actions">
+        {% if email %}
+          <form method="post" action="{% url 'account_email' %}" class="m-0">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ email }}">
+            <button type="submit" name="action_send" class="verification-resend-btn">Reenvia el correu</button>
+          </form>
+        {% else %}
+          <a href="{% url 'account_email' %}" class="verification-resend-btn">Reenvia el correu</a>
+        {% endif %}
+        <a href="{% url 'account_login' %}" class="verification-secondary-link">Torna al login</a>
+      </div>
       <div class="verification-help">
         Si tens problemes, contacta amb nosaltres!
       </div>
@@ -120,6 +169,25 @@
     <p style="color: #434655; font-size: 0.92rem; line-height: 1.5; margin-bottom: 1.5rem;">
       No el trobes? Comprova també el <strong style="color: #191c1f;">correu brossa (spam)</strong>.
     </p>
+
+    <div class="d-flex flex-column gap-2 mb-3">
+      {% if email %}
+        <form method="post" action="{% url 'account_email' %}" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ email }}">
+          <button type="submit" name="action_send" class="w-100 rounded-xl font-bold text-white" style="background: #0040e0; border: none; box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.9rem; padding-top: 0.78rem; padding-bottom: 0.78rem;">
+            Reenvia el correu
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'account_email' %}" class="w-100 rounded-xl font-bold text-white text-decoration-none d-block" style="background: #0040e0; box-shadow: 0 8px 18px rgba(0, 64, 224, 0.2); font-size: 0.9rem; padding-top: 0.78rem; padding-bottom: 0.78rem;">
+          Reenvia el correu
+        </a>
+      {% endif %}
+      <a href="{% url 'account_login' %}" class="w-100 rounded-xl font-bold text-decoration-none d-block" style="background: #f1f4f7; color: #0040e0; font-size: 0.9rem; padding-top: 0.78rem; padding-bottom: 0.78rem;">
+        Torna al login
+      </a>
+    </div>
 
     <div class="pt-3" style="border-top: 1px solid rgba(196,197,216,0.3);">
       <p style="color: #747688; font-size: 0.78rem;">

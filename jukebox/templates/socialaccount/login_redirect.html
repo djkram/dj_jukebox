@@ -1,0 +1,21 @@
+{% extends "jukebox/admin_base.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <meta http-equiv="refresh" content="0;URL='{{ redirect_to }}'">
+{% endblock %}
+
+{% block page_title %}{% trans "Iniciant sessió" %}{% endblock %}
+
+{% block content %}
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 50vh;">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">{% trans "Carregant..." %}</span>
+            </div>
+            <p class="text-gray-700 mb-3">{% trans "Redirigint..." %}</p>
+            <a href="{{ redirect_to }}" class="btn btn-primary">{% trans "Continua" %}</a>
+        </div>
+    </div>
+{% endblock %}

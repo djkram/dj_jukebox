@@ -55,6 +55,7 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
 SPOTIFY_CLIENT_ID     = os.environ.get("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET")
+SPOTIFY_AUTH_FOR_ALL = env_bool("SPOTIFY_AUTH_FOR_ALL", default=False)
 
 # yt-dlp cookie authentication (needed to bypass YouTube bot detection)
 # YTDLP_COOKIES_B64: base64-encoded Netscape cookies.txt (for ephemeral filesystems like Render)
@@ -365,11 +366,16 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True  # Auto-connecta si l'ema
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #Email Conf
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = os.environ.get('GMAIL_USER')           # millor per seguretat
-EMAIL_HOST_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
-DEFAULT_FROM_EMAIL = 'DJ Jukebox <djkram@gmail.com>'
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend"
+    if IS_PRODUCTION
+    else "django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "465"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=False)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=True)
+EMAIL_HOST_USER = os.environ.get("GMAIL_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "DJ Jukebox <djkram@gmail.com>")

@@ -1,0 +1,41 @@
+{% extends "jukebox/admin_base.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+    {{ block.super }}
+    {% block allauth_extra_head %}{% endblock allauth_extra_head %}
+{% endblock extra_head %}
+
+{% block page_title %}
+    {% block head_title %}{% endblock head_title %}
+{% endblock page_title %}
+
+{% block content %}
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    {% block allauth_body %}
+                        {% block body %}
+                            {% block allauth_content %}
+                                {% block inner_content %}{% endblock inner_content %}
+                            {% endblock allauth_content %}
+                        {% endblock body %}
+                    {% endblock allauth_body %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_body %}{% endblock extra_body %}

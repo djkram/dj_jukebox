@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from .models import Party, Notification
+from .spotify_permissions import is_spotify_auth_for_all_enabled, user_can_connect_spotify
 from allauth.socialaccount.models import SocialAccount, SocialApp
 
 
@@ -63,7 +64,9 @@ def social_login_providers(request):
     for provider_id, config in getattr(settings, "SOCIALACCOUNT_PROVIDERS", {}).items():
         if any(a.get("client_id") for a in config.get("APPS", [])):
             configured_providers.add(provider_id)
+    spotify_configured = "spotify" in configured_providers
     return {
-        "spotify_social_login_enabled": "spotify" in configured_providers,
+        "spotify_social_login_enabled": spotify_configured and is_spotify_auth_for_all_enabled(),
+        "spotify_connect_enabled": spotify_configured and user_can_connect_spotify(request.user),
         "google_social_login_enabled": "google" in configured_providers,
     }

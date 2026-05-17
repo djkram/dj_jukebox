@@ -641,6 +641,94 @@
       font-size: 0.875rem;
     }
   }
+
+  .qr-scan-btn {
+    border: 1px solid rgba(0,64,224,0.16);
+    background: #eef3ff;
+    color: #0040e0;
+    border-radius: 0.85rem;
+    padding: 0.72rem 0.9rem;
+    font-weight: 800;
+    font-size: 0.86rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .qr-scan-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1060;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 18, 28, 0.72);
+  }
+  .qr-scan-modal.is-open {
+    display: flex;
+  }
+  .qr-scan-panel {
+    width: min(100%, 28rem);
+    background: #ffffff;
+    border-radius: 1.25rem;
+    padding: 1rem;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.26);
+  }
+  .qr-scan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+  .qr-scan-title {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #191c1f;
+    margin: 0;
+  }
+  .qr-scan-close {
+    border: 0;
+    background: #eef0f5;
+    color: #434655;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-scan-video-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: #0f121c;
+    aspect-ratio: 1 / 1;
+  }
+  .qr-scan-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .qr-scan-frame {
+    position: absolute;
+    inset: 18%;
+    border: 3px solid rgba(255,255,255,0.92);
+    border-radius: 1rem;
+    box-shadow: 0 0 0 999px rgba(0,0,0,0.25);
+    pointer-events: none;
+  }
+  .qr-scan-status {
+    color: #434655;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin: 0.85rem 0 0;
+    min-height: 1.2rem;
+  }
 </style>
 
 <!-- Desktop Layout -->
@@ -830,10 +918,10 @@
           <p class="mb-0" style="font-size: 0.75rem; color: #747688;">{% trans "Accedeix directament" %}</p>
         </div>
       </div>
-      <form method="post">
+      <form method="post" id="mobile-party-code-form">
         {% csrf_token %}
         <div class="input-group mb-2">
-          <input type="text" name="party_code" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
+          <input type="text" name="party_code" id="mobile-party-code-input" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
                  style="text-transform: uppercase; font-weight: 600;" maxlength="12" required>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-sign-in-alt"></i>
@@ -846,6 +934,10 @@
           </div>
         {% endif %}
       </form>
+      <button type="button" id="qr-scan-open" class="qr-scan-btn mt-2">
+        <i class="fas fa-qrcode"></i>
+        {% trans "Escanejar codi QR" %}
+      </button>
     </section>
 
     {% if parties %}
@@ -914,6 +1006,22 @@
   </main>
 </div>
 
+<div id="qr-scan-modal" class="qr-scan-modal" aria-hidden="true">
+  <div class="qr-scan-panel">
+    <div class="qr-scan-header">
+      <h3 class="qr-scan-title">{% trans "Escaneja el QR de la festa" %}</h3>
+      <button type="button" id="qr-scan-close" class="qr-scan-close" aria-label="{% trans 'Tanca' %}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="qr-scan-video-wrap">
+      <video id="qr-scan-video" class="qr-scan-video" muted playsinline></video>
+      <div class="qr-scan-frame"></div>
+    </div>
+    <p id="qr-scan-status" class="qr-scan-status">{% trans "Enfoca el codi QR dins el requadre." %}</p>
+  </div>
+</div>
+
 <style>
 .hover-shadow:hover {
     box-shadow: 0 4px 20px rgba(0,0,0,0.14), 0 1.5px 6px rgba(0,0,0,0.14) !important;
@@ -950,6 +1058,161 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       { timeout: 8000, maximumAge: 60000 }
     );
+  }
+
+  function normalizeLegacySetPartyUrl(url) {
+    var match = url.pathname.match(/\/set-party\/(\d+)\/?$/);
+    if (!match) return null;
+    return buildSetUrl(
+      match[1],
+      (url.searchParams.get('code') || '').trim().toUpperCase(),
+      url.searchParams.get('ulat'),
+      url.searchParams.get('ulng')
+    );
+  }
+
+  function handleScannedQr(rawValue) {
+    var value = (rawValue || '').trim();
+    if (!value) return false;
+
+    try {
+      var scannedUrl = new URL(value, window.location.origin);
+      var setUrl = normalizeLegacySetPartyUrl(scannedUrl);
+      if (setUrl) {
+        window.location.href = setUrl;
+        return true;
+      }
+      var codeParam = scannedUrl.searchParams.get('code');
+      if (codeParam) {
+        submitScannedCode(codeParam);
+        return true;
+      }
+    } catch (err) {
+      // Not a URL. Treat the QR content as a party code.
+    }
+
+    submitScannedCode(value);
+    return true;
+  }
+
+  function submitScannedCode(code) {
+    var input = document.getElementById('mobile-party-code-input');
+    var form = document.getElementById('mobile-party-code-form');
+    if (!input || !form) return;
+    input.value = (code || '').trim().toUpperCase();
+    form.submit();
+  }
+
+  var qrOpenBtn = document.getElementById('qr-scan-open');
+  var qrModal = document.getElementById('qr-scan-modal');
+  var qrCloseBtn = document.getElementById('qr-scan-close');
+  var qrVideo = document.getElementById('qr-scan-video');
+  var qrStatus = document.getElementById('qr-scan-status');
+  var qrStream = null;
+  var qrDetector = null;
+  var qrScanActive = false;
+  var qrScanFrame = null;
+
+  function setQrStatus(message) {
+    if (qrStatus) qrStatus.textContent = message;
+  }
+
+  function stopQrScanner() {
+    qrScanActive = false;
+    if (qrScanFrame) {
+      cancelAnimationFrame(qrScanFrame);
+      qrScanFrame = null;
+    }
+    if (qrStream) {
+      qrStream.getTracks().forEach(function(track) { track.stop(); });
+      qrStream = null;
+    }
+    if (qrVideo) {
+      qrVideo.pause();
+      qrVideo.srcObject = null;
+    }
+    if (qrModal) {
+      qrModal.classList.remove('is-open');
+      qrModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function scanQrFrame() {
+    if (!qrScanActive || !qrDetector || !qrVideo) return;
+    if (qrVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      qrDetector.detect(qrVideo).then(function(codes) {
+        if (!qrScanActive) return;
+        if (codes && codes.length) {
+          stopQrScanner();
+          handleScannedQr(codes[0].rawValue);
+          return;
+        }
+        qrScanFrame = requestAnimationFrame(scanQrFrame);
+      }).catch(function() {
+        if (qrScanActive) {
+          qrScanFrame = requestAnimationFrame(scanQrFrame);
+        }
+      });
+    } else {
+      qrScanFrame = requestAnimationFrame(scanQrFrame);
+    }
+  }
+
+  function startQrScanner() {
+    if (!qrModal || !qrVideo) return;
+    if (!window.isSecureContext) {
+      setQrStatus('{% trans "La càmera només funciona amb HTTPS o localhost." %}');
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setQrStatus('{% trans "Aquest navegador no permet obrir la càmera." %}');
+      return;
+    }
+    if (!('BarcodeDetector' in window)) {
+      setQrStatus('{% trans "Aquest navegador no pot llegir QR directament. Introdueix el codi manualment." %}');
+      return;
+    }
+
+    qrModal.classList.add('is-open');
+    qrModal.setAttribute('aria-hidden', 'false');
+    setQrStatus('{% trans "Dona permís a la càmera i enfoca el QR." %}');
+    qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 1280 }
+      },
+      audio: false
+    }).then(function(stream) {
+      qrStream = stream;
+      qrVideo.srcObject = stream;
+      return qrVideo.play();
+    }).then(function() {
+      qrScanActive = true;
+      setQrStatus('{% trans "Enfoca el codi QR dins el requadre." %}');
+      qrScanFrame = requestAnimationFrame(scanQrFrame);
+    }).catch(function() {
+      stopQrScanner();
+      setQrStatus('{% trans "No hem pogut obrir la càmera. Revisa els permisos del navegador." %}');
+      if (qrModal) {
+        qrModal.classList.add('is-open');
+        qrModal.setAttribute('aria-hidden', 'false');
+      }
+    });
+  }
+
+  if (qrOpenBtn) {
+    qrOpenBtn.addEventListener('click', startQrScanner);
+  }
+  if (qrCloseBtn) {
+    qrCloseBtn.addEventListener('click', stopQrScanner);
+  }
+  if (qrModal) {
+    qrModal.addEventListener('click', function(event) {
+      if (event.target === qrModal) stopQrScanner();
+    });
   }
 
   // ── Desktop: intercept links with data-geocheck ─────────────────────────

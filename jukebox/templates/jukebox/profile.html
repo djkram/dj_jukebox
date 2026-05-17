@@ -261,6 +261,33 @@
       color: #1DB954;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+    .profile-google-card {
+      background: linear-gradient(135deg, #4285F4 0%, #1a1f36 100%);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      color: white;
+      box-shadow: 0 4px 16px rgba(66,133,244,0.22);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-google-btn {
+      background: white;
+      color: #1a73e8;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 200ms;
+    }
+    .profile-google-btn:hover {
+      transform: scale(1.02);
+      color: #1558b0;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
 
     .profile-actions-list {
       display: flex;
@@ -375,8 +402,8 @@
       </div>
       <div class="profile-user-info">
         <span class="profile-user-badge">
-          <span class="material-symbols-outlined" style="font-size: 0.875rem;">star</span>
-          {% if user.credits > 50 %}{% trans "Membre Premium" %}{% else %}{% trans "Membre" %}{% endif %}
+          <span class="material-symbols-outlined" style="font-size: 0.875rem;">{{ profile_role_icon }}</span>
+          {{ profile_role }}
         </span>
         <h2 class="profile-user-name">{{ user_display_name|default:user.username }}</h2>
         <p class="profile-user-email">{{ user.email }}</p>
@@ -429,8 +456,9 @@
   </div>
 
   <div class="row g-4">
-    <!-- Left Column: Spotify -->
+    <!-- Left Column: Social integration -->
     <div class="col-lg-6">
+      {% if has_spotify or spotify_connect_enabled %}
       <div class="profile-spotify-card">
         <div class="profile-spotify-glow"></div>
         <div class="profile-spotify-content">
@@ -444,16 +472,18 @@
           <p class="profile-spotify-text">
             {% if has_spotify %}
               {% trans "El teu compte de Spotify està connectat i sincronitzat. Pots gestionar les connexions socials des del botó inferior." %}
-            {% else %}
+            {% elif spotify_connect_enabled %}
               {% trans "Connecta el teu compte de Spotify per sincronitzar les teves llistes i gaudir de la reproducció integrada." %}
+            {% else %}
+              {% trans "La connexió amb Spotify està limitada temporalment als DJs i administradors." %}
             {% endif %}
           </p>
-          {% if not has_spotify %}
+          {% if not has_spotify and spotify_connect_enabled %}
             <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="profile-spotify-btn">
               <i class="fab fa-spotify" style="font-size: 1.125rem;"></i>
               {% trans "Connectar Spotify" %}
             </a>
-          {% else %}
+          {% elif has_spotify %}
             <a href="{% url 'socialaccount_connections' %}" class="profile-spotify-btn">
               <span class="material-symbols-outlined" style="font-size: 1.125rem;">settings</span>
               {% trans "Gestionar connexions" %}
@@ -461,6 +491,38 @@
           {% endif %}
         </div>
       </div>
+      {% else %}
+      <div class="profile-google-card">
+        <div class="profile-spotify-glow"></div>
+        <div class="profile-spotify-content">
+          <div class="profile-spotify-header">
+            <div class="profile-spotify-logo">
+              <i class="fab fa-google" style="font-size: 1.35rem; color: white;"></i>
+            </div>
+            <span class="profile-spotify-status">{% if has_google %}{% trans "Connectat" %}{% else %}{% trans "Disponible" %}{% endif %}</span>
+          </div>
+          <h3 class="profile-spotify-title">{% trans "Integració Google" %}</h3>
+          <p class="profile-spotify-text">
+            {% if has_google %}
+              {% trans "El teu compte de Google està connectat. Pots gestionar les connexions socials des del botó inferior." %}
+            {% else %}
+              {% trans "Connecta el teu compte de Google per iniciar sessió ràpidament i mantenir el teu accés al compte." %}
+            {% endif %}
+          </p>
+          {% if has_google %}
+            <a href="{% url 'socialaccount_connections' %}" class="profile-google-btn">
+              <span class="material-symbols-outlined" style="font-size: 1.125rem;">settings</span>
+              {% trans "Gestionar connexions" %}
+            </a>
+          {% else %}
+            <a href="{% provider_login_url 'google' process='connect' next=request.get_full_path %}" class="profile-google-btn">
+              <i class="fab fa-google" style="font-size: 1.05rem;"></i>
+              {% trans "Connectar Google" %}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     <!-- Right Column: Actions -->
@@ -568,7 +630,7 @@
       </div>
       <div class="mt-3 text-center">
         <span class="d-block font-bold text-uppercase mb-1" style="color: #5e24e1; font-size: 0.75rem; letter-spacing: 0.15em; font-family: 'Plus Jakarta Sans', sans-serif;">
-          {% if user.credits > 50 %}{% trans "Membre Premium" %}{% else %}{% trans "Membre" %}{% endif %}
+          {{ profile_role }}
         </span>
         <h2 class="font-headline font-extrabold mb-0" style="font-size: 1.5rem; color: #191c1f; letter-spacing: -0.025em;">{{ user_display_name|default:user.username }}</h2>
         <p class="font-body mt-1 mb-0" style="color: #747688; font-size: 0.9rem;">{{ user.email }}</p>
@@ -577,6 +639,7 @@
 
     <!-- Connection Status Bento Card -->
     <section>
+      {% if has_spotify or spotify_connect_enabled %}
       <div class="rounded-xl p-3 d-flex flex-column gap-2 position-relative overflow-hidden" style="background: #f2f3f8;">
         <div class="d-flex align-items-center gap-3">
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 1.9rem; height: 1.9rem; background: #1DB954;">
@@ -591,12 +654,14 @@
           <p class="font-body mb-0" style="font-size: 0.78rem; color: #747688; line-height: 1.35;">
             {% if has_spotify %}
               {% trans "El teu compte de Spotify està connectat i sincronitzat." %}
-            {% else %}
+            {% elif spotify_connect_enabled %}
               {% trans "Connecta't per sincronitzar les teves llistes i compartir el teu ritme amb la festa." %}
+            {% else %}
+              {% trans "La connexió amb Spotify està limitada temporalment als DJs i administradors." %}
             {% endif %}
           </p>
         </div>
-        {% if not has_spotify %}
+        {% if not has_spotify and spotify_connect_enabled %}
           <a href="{% provider_login_url 'spotify' process='connect' next=request.get_full_path %}" class="text-white px-4 py-2 rounded-pill font-headline font-bold d-flex align-items-center justify-content-center gap-2 mt-1 text-decoration-none" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08); font-size: 0.9rem;">
             {% trans "Connectar Spotify" %}
             <i class="fas fa-external-link-alt" style="font-size: 1rem;"></i>
@@ -605,6 +670,35 @@
         <!-- Asymmetric Decorative Element -->
         <div class="position-absolute" style="top: -2.5rem; right: -2.5rem; width: 10rem; height: 10rem; background: rgba(0, 64, 224, 0.03); border-radius: 50%; filter: blur(3rem);"></div>
       </div>
+      {% else %}
+      <div class="rounded-xl p-3 d-flex flex-column gap-2 position-relative overflow-hidden" style="background: #f2f3f8;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 1.9rem; height: 1.9rem; background: #4285F4;">
+            <i class="fab fa-google text-white" style="font-size: 1rem;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 1rem;">{% trans "Estat Google" %}</span>
+        </div>
+        <div class="d-flex flex-column gap-1">
+          <p class="font-body font-medium mb-0" style="font-size: 0.95rem; color: #191c1f;">
+            {% if has_google %}{% trans "Connectat Actualment" %}{% else %}{% trans "Disponible" %}{% endif %}
+          </p>
+          <p class="font-body mb-0" style="font-size: 0.78rem; color: #747688; line-height: 1.35;">
+            {% if has_google %}
+              {% trans "El teu compte de Google està connectat." %}
+            {% else %}
+              {% trans "Connecta Google per iniciar sessió ràpidament." %}
+            {% endif %}
+          </p>
+        </div>
+        {% if not has_google %}
+          <a href="{% provider_login_url 'google' process='connect' next=request.get_full_path %}" class="text-white px-4 py-2 rounded-pill font-headline font-bold d-flex align-items-center justify-content-center gap-2 mt-1 text-decoration-none" style="background: linear-gradient(135deg, #4285F4 0%, #1a73e8 100%); box-shadow: 0 20px 40px -15px rgba(66, 133, 244, 0.18); font-size: 0.9rem;">
+            {% trans "Connectar Google" %}
+            <i class="fas fa-external-link-alt" style="font-size: 1rem;"></i>
+          </a>
+        {% endif %}
+        <div class="position-absolute" style="top: -2.5rem; right: -2.5rem; width: 10rem; height: 10rem; background: rgba(0, 64, 224, 0.03); border-radius: 50%; filter: blur(3rem);"></div>
+      </div>
+      {% endif %}
     </section>
 
     <!-- Settings List (No-Line Grid) -->

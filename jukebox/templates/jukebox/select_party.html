@@ -1016,6 +1016,7 @@
     </div>
     <div class="qr-scan-video-wrap">
       <video id="qr-scan-video" class="qr-scan-video" muted playsinline></video>
+      <canvas id="qr-scan-canvas" style="display:none;"></canvas>
       <div class="qr-scan-frame"></div>
     </div>
     <p id="qr-scan-status" class="qr-scan-status">{% trans "Enfoca el codi QR dins el requadre." %}</p>
@@ -1030,6 +1031,7 @@
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var setPartyBase = "{% url 'set_party' 0 %}".replace('/0/', '/');
@@ -1110,8 +1112,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var qrStatus = document.getElementById('qr-scan-status');
   var qrStream = null;
   var qrDetector = null;
+  var qrUseJsQr = false;
   var qrScanActive = false;
   var qrScanFrame = null;
+  var qrLastScanMs = 0;
+  var qrCanvas = document.getElementById('qr-scan-canvas');
 
   function setQrStatus(message) {
     if (qrStatus) qrStatus.textContent = message;
@@ -1138,8 +1143,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function scanQrFrame() {
-    if (!qrScanActive || !qrDetector || !qrVideo) return;
-    if (qrVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    if (!qrScanActive || !qrVideo) return;
+    if (qrVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+      qrScanFrame = requestAnimationFrame(scanQrFrame);
+      return;
+    }
+    if (qrDetector) {
+      // BarcodeDetector path (Chrome Android, desktop)
       qrDetector.detect(qrVideo).then(function(codes) {
         if (!qrScanActive) return;
         if (codes && codes.length) {
@@ -1149,10 +1159,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         qrScanFrame = requestAnimationFrame(scanQrFrame);
       }).catch(function() {
-        if (qrScanActive) {
-          qrScanFrame = requestAnimationFrame(scanQrFrame);
-        }
+        if (qrScanActive) qrScanFrame = requestAnimationFrame(scanQrFrame);
       });
+    } else if (qrUseJsQr && typeof jsQR !== 'undefined' && qrCanvas) {
+      // jsQR fallback path (Chrome iOS, Safari, Firefox)
+      var now = Date.now();
+      if (now - qrLastScanMs >= 120) {
+        qrLastScanMs = now;
+        var w = qrVideo.videoWidth, h = qrVideo.videoHeight;
+        if (w && h) {
+          qrCanvas.width = w;
+          qrCanvas.height = h;
+          var ctx = qrCanvas.getContext('2d');
+          ctx.drawImage(qrVideo, 0, 0, w, h);
+          var imageData = ctx.getImageData(0, 0, w, h);
+          var code = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
+          if (code) {
+            stopQrScanner();
+            handleScannedQr(code.data);
+            return;
+          }
+        }
+      }
+      qrScanFrame = requestAnimationFrame(scanQrFrame);
     } else {
       qrScanFrame = requestAnimationFrame(scanQrFrame);
     }
@@ -1168,7 +1197,10 @@ document.addEventListener('DOMContentLoaded', function() {
       setQrStatus('{% trans "Aquest navegador no permet obrir la càmera." %}');
       return;
     }
-    if (!('BarcodeDetector' in window)) {
+
+    var hasBarcodeDetector = ('BarcodeDetector' in window);
+    var hasJsQr = (typeof jsQR !== 'undefined');
+    if (!hasBarcodeDetector && !hasJsQr) {
       setQrStatus('{% trans "Aquest navegador no pot llegir QR directament. Introdueix el codi manualment." %}');
       return;
     }
@@ -1176,7 +1208,14 @@ document.addEventListener('DOMContentLoaded', function() {
     qrModal.classList.add('is-open');
     qrModal.setAttribute('aria-hidden', 'false');
     setQrStatus('{% trans "Dona permís a la càmera i enfoca el QR." %}');
-    qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+
+    if (hasBarcodeDetector) {
+      qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+      qrUseJsQr = false;
+    } else {
+      qrDetector = null;
+      qrUseJsQr = true;
+    }
 
     navigator.mediaDevices.getUserMedia({
       video: {

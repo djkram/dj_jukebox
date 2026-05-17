@@ -187,6 +187,9 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
             f"'{query}' (elapsed={elapsed:.1f}s, timeout={attempt_timeout:.0f}s)"
         )
 
+        # With cookies: use default web client (honours session cookies).
+        # Without cookies: android client bypasses sign-in for most videos.
+        player_args = [] if cookie_args else ['--extractor-args', 'youtube:player_client=android']
         cmd = [
             sys.executable, '-m', 'yt_dlp',
             '--no-playlist',
@@ -199,7 +202,8 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
             '--force-ipv4',
             '--no-part',
             '--force-overwrites',
-            '--extractor-args', 'youtube:player_client=android',
+            *player_args,
+            *cookie_args,
             f'ytsearch1:{query}',
         ]
         logger.info("[YT-DLP] CMD: %s", ' '.join(cmd))

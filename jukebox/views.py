@@ -793,8 +793,9 @@ def analyze_song_audio(request, party_id, song_id):
             logger.warning("[ANALYZE_AUDIO] ✗ FAIL song_id=%s sense dades (total %.1fs)", song.id, _time.time() - t0)
             return JsonResponse({
                 'success': False,
-                'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.'
-            }, status=500)
+                'error': 'No s\'ha pogut obtenir BPM i Key per aquesta cançó.',
+                'reason': 'no_audio_metadata',
+            }, status=200)
 
         if bpm:
             song.bpm = bpm

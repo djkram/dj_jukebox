@@ -157,6 +157,38 @@ class SongListViewTests(TestCase):
         self.assertFalse(Vote.objects.filter(user=self.user, song=song, party=self.party).exists())
 
 
+class AnalyzeSongAudioViewTests(TestCase):
+    """Tests per l'anàlisi manual de BPM/Key."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_superuser(username='admin', password='test')
+        self.party = Party.objects.create(
+            name='Test Party',
+            owner=self.user,
+            date=timezone.now(),
+        )
+        self.song = Song.objects.create(
+            party=self.party,
+            title='Unknown Song',
+            artist='Unknown Artist',
+            spotify_id='spotify123',
+        )
+
+    @patch('jukebox.views.analyze_song_from_temporary_mp3', return_value=None)
+    @patch('jukebox.views.analyze_from_preview_url', return_value=None)
+    @patch('jukebox.views._get_getsongbpm_features', return_value={'bpm': None, 'key': None, 'tunebat_url': None})
+    def test_analyze_song_without_metadata_is_not_server_error(self, mock_tunebat, mock_preview, mock_ytdlp):
+        self.client.login(username='admin', password='test')
+
+        response = self.client.post(reverse('analyze_song_audio', args=[self.party.id, self.song.id]))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['reason'], 'no_audio_metadata')
+
+
 class VoteViewTests(TestCase):
     """Tests per la funcionalitat de votació via POST a song_list"""
 

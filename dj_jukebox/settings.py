@@ -83,6 +83,7 @@ ANALYZE_YTDLP_PER_ATTEMPT_TIMEOUT = int(
 ANALYZE_YTDLP_MAX_WALL_SECONDS = int(
     os.environ.get('ANALYZE_YTDLP_MAX_WALL_SECONDS', '18' if _analysis_is_production else '60')
 )
+YTDLP_BOT_COOLDOWN_SECONDS = int(os.environ.get('YTDLP_BOT_COOLDOWN_SECONDS', '900'))
 ANALYZE_AUDIO_SECONDS = int(
     os.environ.get('ANALYZE_AUDIO_SECONDS', '20' if _analysis_is_production else '45')
 )

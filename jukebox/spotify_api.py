@@ -596,6 +596,12 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
             result = {"bpm": None, "key": None, "tunebat_url": None}
             _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
             return result
+        if info_status == 403:
+            _TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 120.0
+            logger.warning("[TUNEBAT] 403 a Info, activant cooldown 120s: %s", info_url)
+            result = {"bpm": None, "key": None, "tunebat_url": None}
+            _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
+            return result
         if info_status and info_status >= 400:
             logger.warning("[TUNEBAT] Info status %s a %s", info_status, info_url)
             result = {"bpm": None, "key": None, "tunebat_url": None}

@@ -11,6 +11,16 @@ import unicodedata
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
+_YTDLP_DISABLED_UNTIL = 0.0
+
+
+def _ytdlp_bot_cooldown_seconds():
+    return int(getattr(settings, "YTDLP_BOT_COOLDOWN_SECONDS", 900))
+
+
+def _is_ytdlp_bot_detection_error(stderr):
+    stderr = (stderr or "").lower()
+    return "sign in to confirm" in stderr and "not a bot" in stderr
 
 
 def _normalize_search_text(text):
@@ -117,9 +127,17 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
     Executa yt-dlp com a subprocess amb timeout dur per garantir que
     mai no excedeix el timeout de gunicorn.
     """
+    global _YTDLP_DISABLED_UNTIL
+
     import sys
     import time as _time
     import subprocess
+
+    now = _time.time()
+    if now < _YTDLP_DISABLED_UNTIL:
+        remaining = int(_YTDLP_DISABLED_UNTIL - now)
+        logger.warning("[YT-DLP] Fallback pausat per bot detection (%ss restants)", remaining)
+        raise RuntimeError("yt-dlp bot detection cooldown")
 
     if per_attempt_timeout is None:
         per_attempt_timeout = int(getattr(settings, "ANALYZE_YTDLP_PER_ATTEMPT_TIMEOUT", 8))
@@ -202,6 +220,11 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
                 stderr_short = (proc.stderr or '').strip()[-500:]
                 logger.warning(f"[YT-DLP] Intent {i+1}: FAIL exit={proc.returncode} ({dt:.1f}s): {stderr_short}")
                 last_error = RuntimeError(f"yt-dlp exit {proc.returncode}")
+                if _is_ytdlp_bot_detection_error(proc.stderr):
+                    cooldown = _ytdlp_bot_cooldown_seconds()
+                    _YTDLP_DISABLED_UNTIL = _time.time() + cooldown
+                    logger.warning("[YT-DLP] Bot detection detectat, pausant fallback %ss", cooldown)
+                    break
             else:
                 logger.info(f"[YT-DLP] Intent {i+1}: OK ({dt:.1f}s)")
 

@@ -1,9 +1,13 @@
 """
 Tests per Spotify API helpers
 """
+import time
+from unittest.mock import patch
+
 from django.test import SimpleTestCase
 
-from jukebox.spotify_api import _camelot_from_key_string, _pick_getsongbpm_match
+from jukebox import spotify_api
+from jukebox.spotify_api import _camelot_from_key_string, _get_getsongbpm_features, _pick_getsongbpm_match
 
 
 class SpotifyApiHelpersTests(SimpleTestCase):
@@ -62,3 +66,16 @@ class SpotifyApiHelpersTests(SimpleTestCase):
         match = _pick_getsongbpm_match([], "Song", "Artist")
 
         self.assertIsNone(match)
+
+    def test_tunebat_cooldown_returns_without_sleeping(self):
+        """El cooldown de Tunebat no ha de bloquejar una request HTTP."""
+        previous_until = spotify_api._TUNEBAT_RATE_LIMIT_UNTIL
+        spotify_api._TUNEBAT_RATE_LIMIT_UNTIL = time.time() + 60
+        try:
+            with patch("jukebox.spotify_api.time.sleep") as mock_sleep:
+                result = _get_getsongbpm_features("Cooldown Test Song", "Cooldown Artist", "cooldown-spotify-id")
+        finally:
+            spotify_api._TUNEBAT_RATE_LIMIT_UNTIL = previous_until
+
+        self.assertEqual(result, {"bpm": None, "key": None, "tunebat_url": None})
+        mock_sleep.assert_not_called()

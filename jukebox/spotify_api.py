@@ -433,15 +433,15 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         retry_pause = float(getattr(settings, "TUNEBAT_SEARCH_RETRY_PAUSE_SECONDS", 2.5))
 
         for attempt in range(1, max_attempts + 1):
-            # Si estem en cooldown per rate-limit, esperar i tornar-ho a intentar
+            # Si estem en cooldown per bloqueig/rate-limit, no bloquegem la request HTTP.
             now = time.time()
             if now < _TUNEBAT_RATE_LIMIT_UNTIL:
                 wait_for = max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now)
                 logger.warning(
-                    "[TUNEBAT] Cooldown actiu (%.1fs) abans de query '%s' (intent %s/%s)",
-                    wait_for, query, attempt, max_attempts
+                    "[TUNEBAT] Cooldown actiu (%.1fs), saltant query '%s'",
+                    wait_for, query
                 )
-                time.sleep(wait_for)
+                return None
 
             logger.info("[TUNEBAT] Search intent %s/%s query='%s' url=%s", attempt, max_attempts, query, search_url)
             try:
@@ -520,6 +520,12 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
     cached = _TUNEBAT_CACHE.get(cache_key)
     if cached and (now - cached["ts"] <= TUNEBAT_CACHE_TTL_SECONDS):
         return cached["data"]
+    if now < _TUNEBAT_RATE_LIMIT_UNTIL:
+        wait_for = max(0.0, _TUNEBAT_RATE_LIMIT_UNTIL - now)
+        logger.warning("[TUNEBAT] Cooldown actiu (%.1fs), saltant scraping per '%s' - '%s'", wait_for, title, artist)
+        result = {"bpm": None, "key": None, "tunebat_url": None}
+        _TUNEBAT_CACHE[cache_key] = {"ts": now, "data": result}
+        return result
     first_artist = _clean_query_text(_simplify_artist(artist))
     soft_first_artist = _normalize_search_text_soft(first_artist)
     normalized_first_artist = _normalize_search_text(first_artist)

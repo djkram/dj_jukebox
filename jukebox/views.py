@@ -688,9 +688,11 @@ def process_song_features(request, party_id):
         chunk_size, offset = 10, 0
 
     try:
-        # Obtenir cançons sense features
-        songs_to_process = party.songs.filter(bpm__isnull=True)[offset:offset+chunk_size]
-        total_pending = party.songs.filter(bpm__isnull=True).count()
+        pending_features_filter = Q(bpm__isnull=True) | Q(key__isnull=True)
+
+        # Obtenir cançons amb metadata incompleta
+        songs_to_process = party.songs.filter(pending_features_filter)[offset:offset+chunk_size]
+        total_pending = party.songs.filter(pending_features_filter).count()
 
         if not songs_to_process:
             return JsonResponse({
@@ -721,7 +723,7 @@ def process_song_features(request, party_id):
                 processed += 1
 
         # Recalcular total pending després de processar
-        total_pending_after = party.songs.filter(bpm__isnull=True).count()
+        total_pending_after = party.songs.filter(pending_features_filter).count()
 
         return JsonResponse({
             'success': True,
@@ -1759,7 +1761,7 @@ def toggle_auto_analyze(request, party_id):
     party.save(update_fields=['auto_analyze_audio'])
 
     # Comptar cançons pendents d'anàlisi
-    pending_count = Song.objects.filter(party=party, bpm__isnull=True).count()
+    pending_count = Song.objects.filter(party=party).filter(Q(bpm__isnull=True) | Q(key__isnull=True)).count()
 
     logger.info(
         "[AUTO_ANALYZE] party_id=%s enabled=%s pending=%s",

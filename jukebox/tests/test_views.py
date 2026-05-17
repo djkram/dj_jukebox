@@ -1107,6 +1107,44 @@ class ToggleViewTests(TestCase):
         self.party.refresh_from_db()
         self.assertTrue(self.party.auto_analyze_audio)
 
+    def test_toggle_auto_analyze_counts_songs_missing_key(self):
+        Song.objects.create(
+            party=self.party,
+            title='Missing Key',
+            artist='Artist',
+            spotify_id='missing-key',
+            bpm=128,
+            key=None,
+        )
+        self.client.login(username='admin', password='admin')
+
+        response = self.client.post(reverse('toggle_auto_analyze', args=[self.party.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['pending_songs'], 1)
+
+    @patch('jukebox.views.get_audio_features_for_songs')
+    def test_process_song_features_includes_songs_missing_key(self, mock_features):
+        Song.objects.create(
+            party=self.party,
+            title='Missing Key',
+            artist='Artist',
+            spotify_id='missing-key',
+            bpm=128,
+            key=None,
+        )
+        mock_features.return_value = {'missing-key': {'bpm': 128, 'key': '8A'}}
+        self.client.login(username='admin', password='admin')
+
+        response = self.client.post(reverse('process_song_features', args=[self.party.id]), {
+            'chunk_size': 10,
+            'offset': 0,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['processed'], 1)
+        mock_features.assert_called_once()
+
 
 class SavePartyLocationTests(TestCase):
     """Tests per la view save_party_location"""

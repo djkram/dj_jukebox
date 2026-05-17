@@ -1,6 +1,6 @@
 """
 Anàlisi d'àudio local per detectar BPM i Key utilitzant librosa.
-Utilitzat com a fallback quan les APIs de Spotify/GetSongBPM no tenen dades.
+Utilitzat com a fallback quan les APIs de Spotify/SongBPM no tenen dades.
 """
 import os
 import shutil

@@ -73,8 +73,9 @@ The application uses Django sessions to track which party a user is currently vi
 **Audio Features Fallback Chain:**
 When BPM or key data is missing, the system tries multiple sources in order:
 1. **Spotify Audio Features API** (primary source) - Most reliable and complete
-2. **GetSongBPM API** (secondary) - Specialized music metadata service with aggressive fuzzy matching (8 search strategies)
-3. **MusicBrainz** (tertiary) - Community-driven database, searches user-contributed tags for BPM/key data
+2. **SongBPM** (secondary) - Scraped metadata fallback for BPM/key when Spotify data is missing
+3. **SongData** (tertiary) - Direct Spotify-ID page scrape for BPM/key/Camelot
+4. **MusicBrainz** (final fallback) - Community-driven database, searches user-contributed tags for BPM/key data
 
 This cascading approach maximizes metadata coverage across different music catalogs.
 

@@ -70,7 +70,7 @@ Fase,ID,Test,Status,Prioritat,Severitat,Notes,Data
 1.6,PLAYER-10,Error token caducat,PENDING,Alta,High,,
 2.1,AUDIO-01,Botó Analitza apareix si null,PASS,Alta,High,Botó apareix si song.bpm is null or song.key is null,2026-03-18
 2.1,AUDIO-02,Spinner amb progrés 15-75%,PENDING,Alta,Low,,
-2.1,AUDIO-03,GetSongBPM actualitza DB,PASS,Alta,Critical,GetSongBPM integrat a views.analyze_song_audio,2026-03-18
+2.1,AUDIO-03,SongBPM actualitza DB,PASS,Alta,Critical,SongBPM integrat a views.analyze_song_audio,2026-03-18
 2.1,AUDIO-04,Fallback MP3 temporal,PASS,Alta,High,Fallback a analyze_song_from_temporary_mp3,2026-03-18
 2.1,AUDIO-05,yt-dlp + librosa funciona,PASS,Alta,High,yt-dlp + librosa 0.11.0 instal·lats,2026-03-18
 2.1,AUDIO-06,Detecció BPM librosa,PASS,Alta,High,librosa.beat.beat_track detecta BPM,2026-03-18
@@ -183,7 +183,7 @@ Fase,ID,Test,Status,Prioritat,Severitat,Notes,Data
 8.2,RACE-03,Dos admins recarreguen,PENDING,Baixa,Low,,
 8.2,RACE-04,Bulk analysis dues tabs,PENDING,Baixa,Low,,
 8.3,NET-01,Spotify API 500 gestió,PENDING,Baixa,High,,
-8.3,NET-02,GetSongBPM fora servei,PENDING,Baixa,High,,
+8.3,NET-02,SongBPM fora servei,PENDING,Baixa,High,,
 8.3,NET-03,YouTube sense resultats,PENDING,Baixa,Medium,,
 8.3,NET-04,Stripe webhook falla,PENDING,Baixa,High,,
 8.3,NET-05,Internet perduda,PENDING,Baixa,Medium,,

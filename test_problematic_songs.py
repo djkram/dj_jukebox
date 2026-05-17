@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dj_jukebox.settings')
 django.setup()
 
-from jukebox.spotify_api import _get_getsongbpm_features
+from jukebox.spotify_api import _get_songbpm_features
 
 # Només les 3 cançons problemàtiques
 test_songs = [
@@ -31,7 +31,7 @@ for title, artist in test_songs:
     print(f"Artista: {artist}")
     print('=' * 80)
 
-    features = _get_getsongbpm_features(title, artist)
+    features = _get_songbpm_features(title, artist)
 
     bpm = features.get('bpm')
     key = features.get('key')

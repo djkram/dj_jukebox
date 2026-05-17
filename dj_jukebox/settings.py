@@ -131,6 +131,16 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
+        'numba': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'llvmlite': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     },
 }
 

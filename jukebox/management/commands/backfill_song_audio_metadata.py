@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 
 from jukebox.models import Song
-from jukebox.spotify_api import _get_getsongbpm_features
+from jukebox.spotify_api import _get_songbpm_features
 
 
 class Command(BaseCommand):
-    help = "Fill missing BPM and key values using the GetSongBPM fallback API."
+    help = "Fill missing BPM and key values using the SongBPM fallback scraper."
 
     def add_arguments(self, parser):
         parser.add_argument("--party-id", type=int, help="Limit the backfill to one party.")
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         for song in queryset.iterator():
             checked += 1
-            features = _get_getsongbpm_features(song.title, song.artist, song.spotify_id)
+            features = _get_songbpm_features(song.title, song.artist, song.spotify_id)
             if features["bpm"] is None and not features["key"]:
                 continue
 

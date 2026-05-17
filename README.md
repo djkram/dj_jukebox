@@ -39,7 +39,8 @@ Una aplicació web interactiva que permet als DJs crear festes on els assistents
 - **Pagaments**: Stripe
 - **APIs externes**:
   - Spotify Web API (playlists, cerca, audio features)
-  - GetSongBPM (fallback per BPM/key amb cerca difusa agressiva)
+  - SongBPM (fallback per BPM/key via Scrapling)
+  - SongData (fallback per BPM/key via Scrapling i Spotify ID)
   - MusicBrainz (fallback secundari, base de dades col·laborativa)
 
 ## Instal·lació
@@ -178,31 +179,25 @@ L'aplicació utilitza un sistema de fallback en cascada per obtenir BPM i clau m
 - Proporciona BPM precís i clau musical en format Spotify (0-11)
 - Es converteix automàticament a notació Camelot per mescles harmòniques
 
-### 2. GetSongBPM API (Secundària)
+### 2. SongBPM (Secundària)
 - S'activa quan Spotify no té les dades
-- Utilitza 8 estratègies de cerca diferents:
-  - Títol i artista complets
-  - Títol simplificat (sense parèntesis/guions)
-  - Només primer artista
-  - Combinacions simplificades
-  - Només títol
-  - Sense accents ni diacrítics
-  - Cerca de noms alternatius en parèntesis
-- Requereix clau API: `GETSONGBPM_API_KEY` al fitxer `.env`
+- Cerca la cançó a songbpm.com amb Scrapling
+- Valida el millor resultat amb títol i artista
+- Converteix key + mode a notació Camelot quan la pàgina de detall ho permet
+- No requereix clau API
 
-### 3. MusicBrainz (Terciària)
+### 3. SongData (Terciària)
+- S'activa si SongBPM no troba dades
+- Usa URL directa per Spotify ID quan està disponible
+- Parseja BPM, key i Camelot de songdata.io
+- Té pauses pròpies per reduir risc de bloqueig
+
+### 4. MusicBrainz
 - Últim recurs quan les altres fallen
 - Base de dades col·laborativa gratuïta
 - Busca BPM i key als tags d'usuaris
 - No requereix API key
 - Menys fiable però útil per cançons obscures
-
-### Exemple de configuració
-
-```env
-# Opcional: Per millorar cobertura de metadades
-GETSONGBPM_API_KEY=la_teva_clau_api
-```
 
 Aquest sistema en cascada garanteix la màxima cobertura de metadades musicals per a tota mena de gèneres i èpoques.
 
@@ -315,7 +310,7 @@ Aquest projecte està sota llicència MIT. Consulta el fitxer `LICENSE` per a m�
 
 ## Crèdits
 
-- **Music data**: Powered by [GetSongBPM](https://getsongbpm.com) and Spotify
+- **Music data**: Spotify and local/external audio metadata providers
 - **UI Theme**: [SB Admin 2](https://startbootstrap.com/theme/sb-admin-2) by Start Bootstrap
 - **Icons**: [Font Awesome](https://fontawesome.com/)
 

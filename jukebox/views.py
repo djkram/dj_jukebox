@@ -25,7 +25,8 @@ from .notifications import (
 )
 from .spotify_api import (
     SpotifyAuthError,
-    _get_getsongbpm_features,
+    _get_songdata_features,
+    _get_songbpm_features,
     add_track_to_playlist,
     remove_track_from_playlist,
     get_user_playlists,
@@ -750,9 +751,10 @@ def process_song_features(request, party_id):
 def analyze_song_audio(request, party_id, song_id):
     """
     Intenta obtenir BPM i Key per aquest ordre:
-    1) Tunebat
-    2) Preview URL (si existeix)
-    3) MP3 temporal (yt-dlp + librosa)
+    1) SongBPM
+    2) SongData
+    3) Preview URL (si existeix)
+    4) MP3 temporal (yt-dlp + librosa)
     """
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):
@@ -764,14 +766,25 @@ def analyze_song_audio(request, party_id, song_id):
         t0 = _time.time()
         logger.info("[ANALYZE_AUDIO] ▶ START song_id=%s '%s' - '%s'", song.id, song.title, song.artist)
 
-        source = "tunebat"
-        result = _get_getsongbpm_features(song.title, song.artist, song.spotify_id)
+        source = "songbpm"
+        result = _get_songbpm_features(song.title, song.artist, song.spotify_id)
         t1 = _time.time()
 
         bpm = result.get('bpm') if result else None
         key = result.get('key') if result else None
-        tunebat_url = result.get('tunebat_url') if result else None
-        logger.info("[ANALYZE_AUDIO] Tunebat song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, tunebat_url, t1 - t0)
+        source_url = result.get('source_url') if result else None
+        logger.info("[ANALYZE_AUDIO] SongBPM song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, source_url, t1 - t0)
+
+        if not bpm and not key:
+            logger.info("[ANALYZE_AUDIO] Fallback SongData per song_id=%s", song.id)
+            result = _get_songdata_features(song.title, song.artist, song.spotify_id)
+            t_songdata = _time.time()
+            bpm = result.get('bpm') if result else None
+            key = result.get('key') if result else None
+            source_url = result.get('source_url') if result else None
+            logger.info("[ANALYZE_AUDIO] SongData song_id=%s → BPM=%s Key=%s URL=%s (%.1fs)", song.id, bpm, key, source_url, t_songdata - t1)
+            if bpm or key:
+                source = "songdata"
 
         if not bpm and not key and song.preview_url:
             logger.info("[ANALYZE_AUDIO] Fallback preview_url per song_id=%s", song.id)
@@ -804,7 +817,7 @@ def analyze_song_audio(request, party_id, song_id):
         if key:
             song.key = key
 
-        # Mètriques extra (Tunebat scraping)
+        # Mètriques extra de proveïdors externs quan estan disponibles.
         if result:
             song.key_text = result.get('key_text') or song.key_text
             song.duration = result.get('duration') or song.duration
@@ -820,14 +833,14 @@ def analyze_song_audio(request, party_id, song_id):
 
         song.save()
 
-        logger.info("[ANALYZE_AUDIO] ✓ OK song_id=%s via %s BPM=%s Key=%s TunebatURL=%s (total %.1fs)", song.id, source, bpm, key, tunebat_url, _time.time() - t0)
+        logger.info("[ANALYZE_AUDIO] ✓ OK song_id=%s via %s BPM=%s Key=%s SourceURL=%s (total %.1fs)", song.id, source, bpm, key, source_url, _time.time() - t0)
 
         return JsonResponse({
             'success': True,
             'bpm': bpm,
             'key': key,
             'source': source,
-            'tunebat_url': tunebat_url,
+            'source_url': source_url,
             'partial': not bpm or not key,
             'duration': song.duration,
             'popularity': song.popularity,
@@ -1503,7 +1516,7 @@ def blank(request):
     return render(request, 'jukebox/blank.html')
 
 def about(request):
-    """Pàgina pública amb informació i backlink per GetSongBPM"""
+    """Pàgina pública amb informació del projecte."""
     return render(request, 'jukebox/about.html')
 
 def page_404(request):

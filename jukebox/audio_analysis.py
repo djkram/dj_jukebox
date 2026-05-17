@@ -199,8 +199,7 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
             '--force-ipv4',
             '--no-part',
             '--force-overwrites',
-            '--extractor-args', 'youtube:player_client=android,web',
-            *cookie_args,
+            '--extractor-args', 'youtube:player_client=android',
             f'ytsearch1:{query}',
         ]
         logger.info("[YT-DLP] CMD: %s", ' '.join(cmd))

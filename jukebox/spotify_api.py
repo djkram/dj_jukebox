@@ -433,48 +433,141 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
             "popularity": popularity,
         }
 
-    def _parse_next_data_tracks(html):
-        """Extract tracks list from __NEXT_DATA__ JSON embedded in page HTML."""
+    def _parse_react_tracks(html):
+        """Extract track list from React SPA using multiple JSON strategies."""
+        # Strategy 1: __NEXT_DATA__ (Next.js — included for completeness)
         m = re.search(
-            r'<script[^>]+id=["\'"]__NEXT_DATA__["\'"][^>]*>\s*(\{.*?\})\s*</script>',
+            r'<script[^>]+id=["\']__NEXT_DATA__["\'][^>]*>\s*(\{.*?\})\s*</script>',
             html, re.DOTALL | re.IGNORECASE,
         )
-        if not m:
-            logger.info("[TUNEBAT] No __NEXT_DATA__ script tag trobat")
-            return []
-        try:
-            data = json.loads(m.group(1))
-        except json.JSONDecodeError as e:
-            logger.info("[TUNEBAT] Error parsejant __NEXT_DATA__: %s", e)
-            return []
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                page_props = data.get("props", {}).get("pageProps", {})
+                for key in ("tracks", "searchResults", "results", "items"):
+                    val = page_props.get(key)
+                    if isinstance(val, list) and val:
+                        logger.info("[TUNEBAT] __NEXT_DATA__ tracks via pageProps.%s: %s", key, len(val))
+                        return val
+                data_obj = page_props.get("data")
+                if isinstance(data_obj, dict):
+                    for key in ("tracks", "results", "items"):
+                        val = data_obj.get(key)
+                        if isinstance(val, list) and val:
+                            logger.info("[TUNEBAT] __NEXT_DATA__ tracks via data.%s: %s", key, len(val))
+                            return val
+            except Exception:
+                pass
 
-        page_props = data.get("props", {}).get("pageProps", {})
+        # Strategy 2: window state variables (React CRA / Vite)
+        for pat in [
+            r'window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]+?\});\s*',
+            r'window\.__APP_DATA__\s*=\s*(\{[\s\S]+?\});\s*',
+            r'window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]+?\});\s*',
+            r'window\.TRACK_DATA\s*=\s*(\[[\s\S]+?\]);\s*',
+        ]:
+            wm = re.search(pat, html)
+            if wm:
+                try:
+                    data = json.loads(wm.group(1))
+                    if isinstance(data, list):
+                        return data
+                    for key in ('tracks', 'results', 'searchResults', 'items'):
+                        val = data.get(key) if isinstance(data, dict) else None
+                        if isinstance(val, list) and val:
+                            return val
+                except Exception:
+                    pass
 
-        for key in ("tracks", "searchResults", "results", "items"):
-            val = page_props.get(key)
-            if isinstance(val, list) and val:
-                logger.info("[TUNEBAT] __NEXT_DATA__ tracks via pageProps.%s: %s", key, len(val))
-                return val
+        # Strategy 3: <script type="application/json"> tags
+        for sm in re.finditer(
+            r'<script[^>]+type=["\']application/json["\'][^>]*>([\s\S]+?)</script>',
+            html, re.IGNORECASE,
+        ):
+            try:
+                data = json.loads(sm.group(1))
+                if isinstance(data, list) and data:
+                    return data
+                if isinstance(data, dict):
+                    for key in ('tracks', 'results', 'searchResults', 'items'):
+                        val = data.get(key)
+                        if isinstance(val, list) and val:
+                            return val
+            except Exception:
+                pass
 
-        data_obj = page_props.get("data")
-        if isinstance(data_obj, dict):
-            for key in ("tracks", "results", "items"):
-                val = data_obj.get(key)
-                if isinstance(val, list) and val:
-                    logger.info("[TUNEBAT] __NEXT_DATA__ tracks via pageProps.data.%s: %s", key, len(val))
-                    return val
-
-        dehydrated = page_props.get("dehydratedState", {})
-        for q in (dehydrated.get("queries", []) if isinstance(dehydrated, dict) else []):
-            q_data = (q.get("state", {}).get("data", {}) if isinstance(q, dict) else {})
-            for key in ("tracks", "results", "items"):
-                val = q_data.get(key) if isinstance(q_data, dict) else None
-                if isinstance(val, list) and val:
-                    logger.info("[TUNEBAT] __NEXT_DATA__ tracks via dehydratedState query.%s: %s", key, len(val))
-                    return val
-
-        logger.info("[TUNEBAT] __NEXT_DATA__ present sense llista de tracks. Keys pageProps: %s", list(page_props.keys()))
         return []
+
+    def _parse_html_link_context(html, info_links, expected_spotify_id, t_title):
+        """Extract BPM/Camelot/Key from HTML text around the best /Info/ link.
+
+        Tunebat is a React CRA — track data lives in the rendered DOM, not in
+        a JSON script tag.  We find the link closest to our target song, grab
+        ~1700 chars of surrounding HTML, strip tags, and regex-extract the
+        Camelot notation and BPM from the plain text.
+        """
+        target_link = None
+        if expected_spotify_id:
+            for lnk in info_links:
+                if lnk.rstrip('/').split('/')[-1] == expected_spotify_id:
+                    target_link = lnk
+                    break
+        if not target_link:
+            target_link = info_links[0]
+
+        link_pos = html.find(target_link)
+        if link_pos < 0:
+            link_id = target_link.rstrip('/').split('/')[-1]
+            pm = re.search(re.escape(link_id), html)
+            link_pos = pm.start() if pm else -1
+
+        if link_pos < 0:
+            return None
+
+        ctx = html[max(0, link_pos - 200): link_pos + 1700]
+        text = re.sub(r'<[^>]+>', ' ', ctx)
+        text = re.sub(r'&[a-z]+;', ' ', text)
+        text = re.sub(r'\\[ntr]', ' ', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        logger.info("[TUNEBAT] Link context text (400): %s", text[:400])
+
+        # Camelot: 1-2 digits followed immediately by A or B (e.g. "8A", "11B")
+        camelot = None
+        cm = re.search(r'(?<![A-Za-z\d])(\d{1,2}[AB])(?![A-Za-z\d])', text)
+        if cm:
+            camelot = cm.group(1)
+
+        # BPM: standalone integer in 60-220 range
+        bpm = None
+        for nm in re.finditer(r'(?<!\d)(\d{2,3}(?:\.\d+)?)(?!\d)', text):
+            val = float(nm.group(1))
+            if 60.0 <= val <= 220.0:
+                bpm = val
+                break
+
+        # Key text: e.g. "A minor", "F# major"
+        key_text = None
+        km = re.search(r'\b([A-G][b#]?\s+(?:major|minor))\b', text, re.IGNORECASE)
+        if km:
+            key_text = km.group(1)
+
+        if not (camelot or bpm):
+            logger.info("[TUNEBAT] HTML context sense BPM/Camelot per '%s'", target_link)
+            return None
+
+        key_camelot = camelot or (_camelot_from_key_string(key_text) if key_text else None)
+        result = {
+            "bpm": bpm,
+            "key": key_camelot,
+            "camelot": camelot,
+            "key_text": key_text,
+            "tunebat_url": urljoin("https://tunebat.com", target_link),
+        }
+        logger.info(
+            "[TUNEBAT] HTML context BPM=%s Camelot=%s Key=%s URL=%s",
+            bpm, camelot, key_text, result["tunebat_url"],
+        )
+        return result
 
     def _match_in_tracks(tracks, expected_spotify_id, t_title, t_artist):
         """Find best matching track, return extracted fields dict or None."""
@@ -576,7 +669,25 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
 
             logger.info("[TUNEBAT] /Info links trobats: %s query='%s'", len(info_links), search_query)
 
-            tracks = _parse_next_data_tracks(html)
+            if not info_links:
+                # No results — log body HTML for debugging, maybe retry
+                no_results = "no results found" in html.lower() or "0 tracks" in html.lower()
+                body_start = html.lower().find('<body')
+                debug_html = html[body_start: body_start + 4000] if body_start >= 0 else html[2000:6000]
+                logger.info(
+                    "[TUNEBAT] 0 /Info links (no_results=%s) query='%s' body_HTML: %s",
+                    no_results, search_query, debug_html,
+                )
+                if no_results:
+                    return None
+                if attempt < max_error_retries:
+                    time.sleep(retry_pause)
+                continue
+
+            # /Info links found — do NOT retry this URL.
+            # Cloudflare treats a second request to the same search URL as a bot and returns 0 links.
+            # Strategy 1: JSON/React state extraction
+            tracks = _parse_react_tracks(html)
             if tracks:
                 result = _match_in_tracks(tracks, expected_spotify_id, t_title, t_artist)
                 if result:
@@ -589,25 +700,23 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
                         result["tunebat_url"] = urljoin("https://tunebat.com", info_links[0])
                     return result
                 logger.info(
-                    "[TUNEBAT] __NEXT_DATA__ tenia %s tracks però cap match per '%s' - '%s'",
+                    "[TUNEBAT] JSON tenia %s tracks però cap match per '%s' - '%s'",
                     len(tracks), t_title, t_artist,
                 )
-                # Tracks loaded but none matched — no point retrying same query
-                return None
-            else:
-                # 200 but no __NEXT_DATA__ tracks: could be "no results" (0 hits) or
-                # a transient empty render. Log HTML for Render debugging.
-                no_results = "no results found" in html.lower() or "0 tracks" in html.lower()
-                logger.info(
-                    "[TUNEBAT] Search 200 però sense tracks (no_results=%s) query='%s' HTML: %s",
-                    no_results, search_query, html[:1200],
-                )
-                if no_results:
-                    # Genuine empty result — skip remaining retries, try next query variant
-                    return None
-                # Possibly a transient render failure — retry with pause
-                if attempt < max_error_retries:
-                    time.sleep(retry_pause)
+
+            # Strategy 2: extract BPM/Camelot from HTML context around the /Info/ link
+            result = _parse_html_link_context(html, info_links, expected_spotify_id, t_title)
+            if result:
+                return result
+
+            # Both strategies failed — log body HTML so we can study the structure on Render
+            body_start = html.lower().find('<body')
+            debug_html = html[body_start: body_start + 6000] if body_start >= 0 else html[2000:8000]
+            logger.info(
+                "[TUNEBAT] Extracció fallida. links=%s query='%s' body_HTML: %s",
+                len(info_links), search_query, debug_html,
+            )
+            return None
 
         return None
 
@@ -642,13 +751,11 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
         logger.error("[TUNEBAT] Scrapling no disponible: %s", e)
         return {"bpm": None, "key": None, "tunebat_url": None}
 
+    # Search only with double-quoted simplified title, as user requested.
+    # Unquoted queries return 0 results on Tunebat; quoted returns up to 84.
     t1 = _normalize_search_text(_simplify_title(clean_title))
-    t2 = _normalize_search_text(clean_title)
-    # Tunebat needs quoted title: "Title" (%22Title%22) to return results.
-    # Unquoted is fallback for transient failures.
-    raw_qs = [f'"{t1}"', f'"{t2}"', t1, t2]
-    search_queries = list(dict.fromkeys(q for q in raw_qs if q.strip('"')))[:3]
-    logger.info("[TUNEBAT] Search queries (title-only, quoted-first): %s", search_queries)
+    search_queries = [f'"{t1}"']
+    logger.info("[TUNEBAT] Search query (titol entre cometes dobles): %s", search_queries)
 
     matched = None
     try:

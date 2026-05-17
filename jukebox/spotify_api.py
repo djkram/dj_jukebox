@@ -360,9 +360,15 @@ def _get_getsongbpm_features(title, artist, spotify_id=None):
     def _fetch_with_throttle(fetcher, url, timeout=45):
         global _TUNEBAT_NEXT_REQUEST_AT
         now = time.time()
-        if now < _TUNEBAT_NEXT_REQUEST_AT:
-            time.sleep(_TUNEBAT_NEXT_REQUEST_AT - now)
+        wait = max(0.0, _TUNEBAT_NEXT_REQUEST_AT - now)
+        if wait > 0:
+            logger.info("[SCRAPLING] Throttle %.1fs abans de GET %s", wait, url)
+            time.sleep(wait)
+        logger.info("[SCRAPLING] GET %s (timeout=%s)", url, timeout)
+        t0 = time.time()
         res = fetcher.get(url, timeout=timeout)
+        status = getattr(res, "status", "?")
+        logger.info("[SCRAPLING] GET done status=%s (%.1fs) %s", status, time.time() - t0, url)
         _TUNEBAT_NEXT_REQUEST_AT = time.time() + 1.5
         return res
 

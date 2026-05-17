@@ -111,12 +111,17 @@ def _get_ytdlp_cookie_args():
 
     cookies_file = getattr(settings, 'YTDLP_COOKIES_FILE', '') or ''
     if cookies_file and os.path.exists(cookies_file):
+        logger.info("[YT-DLP] Cookies via fitxer: %s", cookies_file)
         return ['--cookies', cookies_file]
+    if cookies_file:
+        logger.warning("[YT-DLP] YTDLP_COOKIES_FILE configurat però fitxer NO existeix: %s", cookies_file)
 
     cookies_browser = getattr(settings, 'YTDLP_COOKIES_FROM_BROWSER', '') or ''
     if cookies_browser:
+        logger.info("[YT-DLP] Cookies via browser: %s", cookies_browser)
         return ['--cookies-from-browser', cookies_browser]
 
+    logger.warning("[YT-DLP] Sense cookies configurades")
     return []
 
 
@@ -192,7 +197,6 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
         cmd = [
             sys.executable, '-m', 'yt_dlp',
             '--no-playlist',
-            '-q', '--no-warnings',
             '-o', output_template,
             '--format', 'bestaudio/best',
             '-x', '--audio-format', 'mp3', '--audio-quality', '128',
@@ -206,6 +210,7 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
             *cookie_args,
             f'ytsearch1:{query}',
         ]
+        logger.info("[YT-DLP] CMD: %s", ' '.join(cmd))
 
         t_iter = _time.time()
         try:
@@ -217,8 +222,13 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
             )
             dt = _time.time() - t_iter
             if proc.returncode != 0:
-                stderr_short = (proc.stderr or '').strip()[-500:]
-                logger.warning(f"[YT-DLP] Intent {i+1}: FAIL exit={proc.returncode} ({dt:.1f}s): {stderr_short}")
+                stderr_full = (proc.stderr or '').strip()
+                stdout_full = (proc.stdout or '').strip()
+                logger.warning(f"[YT-DLP] Intent {i+1}: FAIL exit={proc.returncode} ({dt:.1f}s)")
+                if stderr_full:
+                    logger.warning(f"[YT-DLP] stderr: {stderr_full}")
+                if stdout_full:
+                    logger.warning(f"[YT-DLP] stdout: {stdout_full}")
                 last_error = RuntimeError(f"yt-dlp exit {proc.returncode}")
                 if _is_ytdlp_bot_detection_error(proc.stderr):
                     cooldown = _ytdlp_bot_cooldown_seconds()
@@ -226,7 +236,10 @@ def download_temporary_song_audio(title, artist, per_attempt_timeout=None, max_w
                     logger.warning("[YT-DLP] Bot detection detectat, pausant fallback %ss", cooldown)
                     break
             else:
+                stdout_ok = (proc.stdout or '').strip()
                 logger.info(f"[YT-DLP] Intent {i+1}: OK ({dt:.1f}s)")
+                if stdout_ok:
+                    logger.info(f"[YT-DLP] stdout: {stdout_ok}")
 
         except subprocess.TimeoutExpired:
             logger.warning(f"[YT-DLP] Intent {i+1}: TIMEOUT ({attempt_timeout:.0f}s)")

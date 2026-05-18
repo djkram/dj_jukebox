@@ -1330,9 +1330,9 @@ def buy_votes(request):
             except (ValueError, TypeError):
                 return HttpResponse(status=400)
             package_prices = {
-                10: 2,
-                30: 5,
-                70: 10,
+                5: 1,
+                25: 5,
+                60: 10,
             }
             price_eur = package_prices.get(coins_to_buy)
 

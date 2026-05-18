@@ -452,13 +452,37 @@
   </div>
 </div>
 
-<!-- Vista Mòbil (NOU DISSENY TAILWIND) -->
+<!-- Vista Mòbil -->
 <div class="d-md-none" style="background: #f8f9fe; min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
   <main class="px-3 pt-2 pb-20 mx-auto" style="max-width: 27rem;">
-    <!-- Signup Form -->
-    <section class="mb-4">
-      <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">{% trans "Registra't" %}</h1>
+    <h1 class="font-headline font-extrabold text-center mb-3" style="font-size: 1.55rem; color: #191c1f; letter-spacing: -0.03em; line-height: 1;">{% trans "Registra't" %}</h1>
 
+    <!-- Social Signup (primer) -->
+    {% if spotify_social_login_enabled or google_social_login_enabled %}
+      <section class="space-y-2 mb-3">
+        {% if google_social_login_enabled %}
+          <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+            <i class="fab fa-google" style="font-size: 1rem;"></i>
+            {% trans "Registra't amb Google" %}
+          </a>
+        {% endif %}
+        {% if spotify_social_login_enabled %}
+          <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
+            <i class="fab fa-spotify" style="font-size: 1rem;"></i>
+            {% trans "Registra't amb Spotify" %}
+          </a>
+        {% endif %}
+      </section>
+
+      <div class="text-center mb-3" style="display:flex;align-items:center;gap:0.75rem;">
+        <div style="flex:1;height:1px;background:rgba(116,118,136,0.2);"></div>
+        <span style="color: #747688; font-size: 0.76rem;">{% trans "o registra't amb correu" %}</span>
+        <div style="flex:1;height:1px;background:rgba(116,118,136,0.2);"></div>
+      </div>
+    {% endif %}
+
+    <!-- Signup Form (segon) -->
+    <section class="mb-4">
       <form method="post" class="space-y-2">
         {% csrf_token %}
         {% for field in form %}
@@ -494,31 +518,8 @@
       </form>
     </section>
 
-    <!-- Social Signup -->
-    {% if spotify_social_login_enabled or google_social_login_enabled %}
-      <section class="space-y-2">
-        <div class="text-center mb-2">
-          <span style="color: #747688; font-size: 0.76rem;">{% trans "o registra't amb" %}</span>
-        </div>
-
-        {% if spotify_social_login_enabled %}
-          <a href="{% provider_login_url 'spotify' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #1DB954; color: white; box-shadow: 0 4px 10px rgba(29, 185, 84, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
-            <i class="fab fa-spotify" style="font-size: 1rem;"></i>
-            {% trans "Registra't amb Spotify" %}
-          </a>
-        {% endif %}
-
-        {% if google_social_login_enabled %}
-          <a href="{% provider_login_url 'google' %}" class="w-100 rounded-xl font-bold d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="background: #DB4437; color: white; box-shadow: 0 4px 10px rgba(219, 68, 55, 0.28); font-size: 0.88rem; padding-top: 0.7rem; padding-bottom: 0.7rem;">
-            <i class="fab fa-google" style="font-size: 1rem;"></i>
-            {% trans "Registra't amb Google" %}
-          </a>
-        {% endif %}
-      </section>
-    {% endif %}
-
     <!-- Login Link -->
-    <div class="text-center mt-4">
+    <div class="text-center mt-2">
       <p style="color: #747688; font-size: 0.78rem;">
         {% trans "Ja tens compte?" %} <a href="{% url 'account_login' %}" style="color: #0040e0; font-weight: 600; text-decoration: none;">{% trans "Fes login" %}</a>
       </p>

@@ -607,7 +607,7 @@
           <div class="coins-info-step-number">3</div>
           <div>
             <div class="coins-info-step-title">{% trans "Participa al Show" %}</div>
-            <div class="coins-info-step-text">{% if party.request_cost > 0 %}{% trans "Fes servir els Vots per promocionar cançons a la cua i els Coins per demanar cançons especials al DJ." %}{% else %}{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}{% endif %}</div>
+            <div class="coins-info-step-text">{% if party.allow_song_requests %}{% trans "Fes servir els Vots per promocionar cançons a la cua i els Coins per demanar cançons especials al DJ." %}{% else %}{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}{% endif %}</div>
           </div>
         </div>
 
@@ -865,7 +865,7 @@
           <div style="flex-shrink: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #0040e0; color: white; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">3</div>
           <div>
             <div style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">{% trans "Participa al Show" %}</div>
-            <div style="font-size: 0.82rem; color: #434655; line-height: 1.4;">{% if party.request_cost > 0 %}{% trans "Fes servir els Vots per promocionar cançons a la cua i els Coins per demanar cançons especials al DJ." %}{% else %}{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}{% endif %}</div>
+            <div style="font-size: 0.82rem; color: #434655; line-height: 1.4;">{% if party.allow_song_requests %}{% trans "Fes servir els Vots per promocionar cançons a la cua i els Coins per demanar cançons especials al DJ." %}{% else %}{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}{% endif %}</div>
           </div>
         </div>
       </div>

@@ -973,22 +973,6 @@ def get_playlist_tracks(playlist_id):
     out = []
     for sid in ids:
         feature_data = features_map.get(sid, {})
-
-        # Fallback 1: SongBPM
-        if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] Spotify no té features per '{meta[sid]['title']}', provant SongBPM")
-            feature_data = _get_songbpm_features(meta[sid]["title"], meta[sid]["artist"], sid)
-
-        # Fallback 2: AcousticBrainz
-        if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] SongBPM no té features per '{meta[sid]['title']}', provant AcousticBrainz")
-            feature_data = _get_acousticbrainz_features(meta[sid]["title"], meta[sid]["artist"])
-
-        # Fallback 3: MusicBrainz
-        if not feature_data.get("bpm") and not feature_data.get("key"):
-            logger.debug(f"[FALLBACK] AcousticBrainz no té features per '{meta[sid]['title']}', provant MusicBrainz")
-            feature_data = _get_musicbrainz_features(meta[sid]["title"], meta[sid]["artist"])
-
         out.append({
             "id": sid,
             "title": meta[sid]["title"],
@@ -1037,38 +1021,6 @@ def get_audio_features_for_songs(song_ids_with_metadata):
                     }
             except Exception as e:
                 logger.error(f"[SPOTIFY] ERROR al carregar audio features per chunk {idx+1}: {e}")
-                for sid in chunk:
-                    if sid not in features_map:
-                        features_map[sid] = _get_songbpm_features(
-                            meta[sid]["title"],
-                            meta[sid]["artist"],
-                            sid,
-                        )
-
-        for sid in ids:
-            if sid not in features_map or (
-                not features_map[sid].get("bpm") and not features_map[sid].get("key")
-            ):
-                logger.debug(f"[FALLBACK] Spotify no té features, provant SongBPM")
-                features_map[sid] = _get_songbpm_features(
-                    meta[sid]["title"],
-                    meta[sid]["artist"],
-                    sid,
-                )
-
-                if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
-                    logger.debug(f"[FALLBACK] SongBPM no té features, provant AcousticBrainz")
-                    features_map[sid] = _get_acousticbrainz_features(
-                        meta[sid]["title"],
-                        meta[sid]["artist"],
-                    )
-
-                if not features_map[sid].get("bpm") and not features_map[sid].get("key"):
-                    logger.debug(f"[FALLBACK] AcousticBrainz no té features, provant MusicBrainz")
-                    features_map[sid] = _get_musicbrainz_features(
-                        meta[sid]["title"],
-                        meta[sid]["artist"]
-                    )
 
         return features_map
     except Exception as e:

@@ -475,14 +475,14 @@
               </div>
             </div>
           </div>
-          <button type="button"
-                  class="backoffice-party-btn--delete-corner"
-                  data-delete-url="{% url 'delete_party' party.id %}"
-                  data-party-name="{{ party.name|escapejs }}"
-                  data-bs-toggle="modal"
-                  data-bs-target="#deletePartyModal">
-            <span class="material-symbols-outlined">delete</span>
-          </button>
+          <form method="post" action="{% url 'delete_party' party.id %}" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;">
+            {% csrf_token %}
+            <button type="submit"
+                    class="backoffice-party-btn--delete-corner"
+                    onclick="return confirm('Eliminar la festa «{{ party.name|escapejs }}»?\nAquesta acció és irreversible.')">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </form>
           <div class="backoffice-party-actions">
             <a href="{% url 'party_settings' party.id %}" class="backoffice-party-btn backoffice-party-btn--primary">
               Gestionar Festa
@@ -553,34 +553,4 @@
         {% endfor %}
     </div>
 
-<!-- Delete party confirmation modal (Bootstrap) -->
-<div class="modal fade" id="deletePartyModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
-    <div class="modal-content text-center p-3">
-      <div style="font-size:2.5rem;color:#d32f2f;margin-bottom:0.5rem;">
-        <span class="material-symbols-outlined" style="font-size:2.5rem;">delete_forever</span>
-      </div>
-      <h5 class="modal-title fw-bold mb-1">Eliminar festa?</h5>
-      <p class="text-muted" style="font-size:0.875rem;">
-        Estàs a punt d'eliminar <strong id="deletePartyName"></strong>.<br>
-        Aquesta acció és irreversible i eliminarà totes les cançons i vots associats.
-      </p>
-      <div class="d-flex gap-2 justify-content-center mt-2">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·lar</button>
-        <form id="deletePartyForm" method="post" action="">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Eliminar</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-document.getElementById('deletePartyModal').addEventListener('show.bs.modal', function(e) {
-  var btn = e.relatedTarget;
-  document.getElementById('deletePartyName').textContent = btn.dataset.partyName;
-  document.getElementById('deletePartyForm').action = btn.dataset.deleteUrl;
-});
-</script>
 {% endblock %}

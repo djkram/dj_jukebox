@@ -72,4 +72,36 @@ class Command(BaseCommand):
                 )
             )
 
+        # 3. Crear SocialApp de Google si no existeix
+        google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        google_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET")
+
+        if google_client_id and google_client_secret:
+            site = Site.objects.get(id=settings.SITE_ID)
+            app, created = SocialApp.objects.get_or_create(
+                provider="google",
+                defaults={
+                    "name": "Google",
+                    "client_id": google_client_id,
+                    "secret": google_client_secret,
+                },
+            )
+
+            if not created:
+                app.client_id = google_client_id
+                app.secret = google_client_secret
+                app.save()
+
+            if site not in app.sites.all():
+                app.sites.add(site)
+
+            status = "creat" if created else "actualitzat"
+            self.stdout.write(
+                self.style.SUCCESS(f"✓ SocialApp Google {status} i associat al site {site.domain}")
+            )
+        else:
+            self.stdout.write(
+                self.style.WARNING("⚠ GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET no configurats, SocialApp no creat")
+            )
+
         self.stdout.write(self.style.SUCCESS("\n✓ Setup de producció completat!"))

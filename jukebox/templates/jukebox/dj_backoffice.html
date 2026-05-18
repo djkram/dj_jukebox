@@ -314,6 +314,81 @@
       font-size: 0.875rem;
     }
   }
+  .backoffice-party-btn--primary {
+    background: #0040e0;
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .backoffice-party-btn--primary:hover {
+    background: #0033b3;
+    color: #fff;
+  }
+  .backoffice-party-btn--delete-corner {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    color: #bbb;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.4rem;
+    display: flex;
+    align-items: center;
+    transition: color 200ms, background 200ms;
+    font-size: 1.1rem;
+  }
+  .backoffice-party-btn--delete-corner .material-symbols-outlined {
+    font-size: 1.15rem;
+  }
+  .backoffice-party-btn--delete-corner:hover {
+    color: #d32f2f;
+    background: #fdecea;
+  }
+  /* Delete confirmation modal */
+  .delete-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .delete-modal-overlay.active { display: flex; }
+  .delete-modal {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    text-align: center;
+  }
+  .delete-modal-icon {
+    font-size: 2.5rem;
+    color: #d32f2f;
+    margin-bottom: 0.75rem;
+  }
+  .delete-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+    color: #181c1e;
+  }
+  .delete-modal-body {
+    font-size: 0.875rem;
+    color: #747687;
+    margin-bottom: 1.5rem;
+  }
+  .delete-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
 </style>
 
 <!-- Desktop Layout -->
@@ -399,13 +474,17 @@
               </div>
             </div>
           </div>
+          <button type="button"
+                  class="backoffice-party-btn--delete-corner"
+                  data-party-id="{{ party.id }}"
+                  data-party-name="{{ party.name|escapejs }}"
+                  onclick="openDeleteModal(this)">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
           <div class="backoffice-party-actions">
-            <div class="backoffice-party-buttons">
-              <a href="{% url 'party_settings' party.id %}" class="backoffice-party-btn">Modificar</a>
-            </div>
-            <a href="{% url 'party_settings' party.id %}" class="backoffice-party-link">
+            <a href="{% url 'party_settings' party.id %}" class="backoffice-party-btn backoffice-party-btn--primary">
               Gestionar Festa
-              <span class="material-symbols-outlined" style="font-size: 0.875rem;">arrow_forward</span>
+              <span class="material-symbols-outlined" style="font-size: 0.875rem; vertical-align: middle;">arrow_forward</span>
             </a>
           </div>
         </div>
@@ -472,4 +551,41 @@
         {% endfor %}
     </div>
 
+<!-- Delete party confirmation modal -->
+<div class="delete-modal-overlay" id="deletePartyModal">
+  <div class="delete-modal">
+    <div class="delete-modal-icon">
+      <span class="material-symbols-outlined">delete_forever</span>
+    </div>
+    <div class="delete-modal-title">Eliminar festa?</div>
+    <div class="delete-modal-body">
+      Estàs a punt d'eliminar <strong id="deletePartyName"></strong>.<br>
+      Aquesta acció és irreversible i eliminarà totes les cançons i vots associats.
+    </div>
+    <div class="delete-modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel·lar</button>
+      <form id="deletePartyForm" method="post" action="">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const DELETE_URL_TEMPLATE = '{% url "delete_party" 0 %}'.replace('/0/', '/{id}/');
+function openDeleteModal(btn) {
+  const partyId = btn.dataset.partyId;
+  const partyName = btn.dataset.partyName;
+  document.getElementById('deletePartyName').textContent = partyName;
+  document.getElementById('deletePartyForm').action = DELETE_URL_TEMPLATE.replace('{id}', partyId);
+  document.getElementById('deletePartyModal').classList.add('active');
+}
+function closeDeleteModal() {
+  document.getElementById('deletePartyModal').classList.remove('active');
+}
+document.getElementById('deletePartyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+</script>
 {% endblock %}

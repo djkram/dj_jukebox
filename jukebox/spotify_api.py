@@ -545,6 +545,10 @@ def _get_songbpm_features(title, artist, spotify_id=None):
                             spotify_id, best_card.get("spotify_id"), best_card.get("source_url"),
                         )
                     detail = _fetch_with_throttle(session, "get", best_card["source_url"], timeout=30)
+                    detail_status = getattr(detail, "status", None)
+                    if detail_status and detail_status >= 400:
+                        logger.warning("[SONGBPM] Detail HTTP %s, saltant al següent fallback: %s", detail_status, best_card["source_url"])
+                        continue
                     detail_html = getattr(detail, "html_content", None) or ""
                     detail_spotify_match = re.search(
                         r'https://open\.spotify\.com/track/([A-Za-z0-9]+)',

@@ -13,20 +13,21 @@ def calculate_votes_from_coins(coins: int) -> int:
     """
     Calculates votes obtained from a quantity of coins with bonuses.
 
-    Bonus tiers (minimum 5 coins):
+    Bonus tiers:
     - 20+ Coins → 3.0x (20 Coins = 60 Votes)
     - 10-19 Coins → 2.5x (10 Coins = 25 Votes)
-    - 5-9 Coins → 2.0x (5 Coins = 10 Votes)
+    - 5-9 Coins → 2.2x (5 Coins = 11 Votes)
+    - 1-4 Coins → 2.0x (1 Coin = 2 Votes)
 
     Args:
-        coins: Quantity of coins to convert (minimum 5)
+        coins: Quantity of coins to convert
 
     Returns:
         Number of votes obtained
 
     Example:
         >>> calculate_votes_from_coins(5)
-        10
+        11
         >>> calculate_votes_from_coins(10)
         25
         >>> calculate_votes_from_coins(20)
@@ -36,6 +37,8 @@ def calculate_votes_from_coins(coins: int) -> int:
         return int(coins * 3.0)
     elif coins >= 10:
         return int(coins * 2.5)
+    elif coins >= 5:
+        return int(coins * 2.2)
     else:
         return int(coins * 2.0)
 

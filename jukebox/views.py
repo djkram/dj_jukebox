@@ -305,7 +305,12 @@ def party_settings(request, party_id):
             )
             load_songs = not (has_playlist and is_ajax)
 
-            form.save(load_songs=load_songs)
+            try:
+                form.save(load_songs=load_songs)
+            except Exception:
+                logger.exception("[PARTY_SETTINGS] Error guardant party_id=%s user_id=%s FILES=%s",
+                                 party_id, request.user.id, list(request.FILES.keys()))
+                raise
 
             if is_ajax:
                 return JsonResponse({'success': True})

@@ -3357,4 +3357,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<script>
+(function () {
+  const SPINNER_HTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>';
+
+  function disableFormButtons(form, submitter) {
+    const formId = form.id;
+    // All submit buttons inside this form or referencing it via form= attribute
+    const btns = [
+      ...form.querySelectorAll('button[type="submit"]'),
+      ...document.querySelectorAll(`button[type="submit"][form="${formId}"]`),
+    ];
+    btns.forEach(btn => {
+      btn.disabled = true;
+      if (btn === submitter) {
+        btn.innerHTML = SPINNER_HTML + btn.innerHTML;
+      }
+    });
+  }
+
+  ['partySettingsForm', 'partySettingsFormMobile'].forEach(id => {
+    const form = document.getElementById(id);
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      disableFormButtons(form, e.submitter || null);
+    });
+  });
+})();
+</script>
 {% endblock %}

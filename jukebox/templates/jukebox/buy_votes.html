@@ -837,6 +837,52 @@
     </section>
     {% endif %}
 
+    <!-- Com funciona? (mobile) -->
+    <section style="background: #e5e8eb; border-radius: 1.25rem; padding: 1.25rem;">
+      <div style="width: 2.5rem; height: 2.5rem; background: white; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+        <span class="material-symbols-outlined" style="font-size: 1.4rem; color: #0040e0;">help_center</span>
+      </div>
+      <h3 style="font-family: 'Epilogue', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">{% trans "Com funciona?" %}</h3>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; gap: 0.75rem;">
+          <div style="flex-shrink: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #0040e0; color: white; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">1</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">{% trans "Adquireix Coins" %}</div>
+            <div style="font-size: 0.82rem; color: #434655; line-height: 1.4;">{% trans "Els Coins són la moneda principal. Pots comprar-los directament amb targeta via Stripe per carregar el teu moneder digital." %}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <div style="flex-shrink: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #0040e0; color: white; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">2</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">{% trans "Converteix a Vots" %}</div>
+            <div style="font-size: 0.82rem; color: #434655; line-height: 1.4;">{% trans "Utilitza el convertidor per transformar Coins en Vots. Com més Coins converteixis a la vegada, més vots extra rebràs com a bonus." %}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <div style="flex-shrink: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #0040e0; color: white; font-size: 0.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">3</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">{% trans "Participa al Show" %}</div>
+            <div style="font-size: 0.82rem; color: #434655; line-height: 1.4;">{% trans "Fes servir els Vots per promocionar cançons a la cua, demanar temes especials o votar en enquestes en temps real durant el set." %}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem; padding: 0.75rem; border-radius: 0.75rem; background: rgba(0,64,224,0.05); border: 1px solid rgba(0,64,224,0.1);">
+        <div style="font-size: 0.72rem; font-weight: 600; color: #0040e0; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+          <span class="material-symbols-outlined" style="font-size: 0.85rem;">security</span>
+          {% trans "Pagament segur garantit" %}
+        </div>
+        <div style="display: flex; gap: 0.4rem;">
+          <img alt="Stripe" style="height: 1.1rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 25'%3E%3Crect fill='%23635BFF' width='60' height='25' rx='3'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='11'%3EStripe%3C/text%3E%3C/svg%3E" />
+          <img alt="Visa" style="height: 1.1rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 25'%3E%3Crect fill='%231434CB' width='48' height='25' rx='3'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3EVISA%3C/text%3E%3C/svg%3E" />
+          <img alt="Mastercard" style="height: 1.1rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 25'%3E%3Crect fill='%23252525' width='48' height='25' rx='3'/%3E%3Ccircle fill='%23EB001B' cx='18' cy='12.5' r='8'/%3E%3Ccircle fill='%23F79E1B' cx='30' cy='12.5' r='8'/%3E%3Ccircle fill='%23FF5F00' cx='24' cy='12.5' r='5'/%3E%3C/svg%3E" />
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 {% endblock %}

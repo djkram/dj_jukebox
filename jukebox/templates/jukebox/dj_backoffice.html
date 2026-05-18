@@ -330,6 +330,7 @@
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
+    z-index: 10;
     background: transparent;
     border: none;
     color: #bbb;
@@ -476,9 +477,9 @@
           </div>
           <button type="button"
                   class="backoffice-party-btn--delete-corner"
-                  data-party-id="{{ party.id }}"
+                  data-delete-url="{% url 'delete_party' party.id %}"
                   data-party-name="{{ party.name|escapejs }}"
-                  onclick="openDeleteModal(this)">
+                  onclick="event.stopPropagation(); openDeleteModal(this)">
             <span class="material-symbols-outlined">delete</span>
           </button>
           <div class="backoffice-party-actions">
@@ -573,12 +574,9 @@
 </div>
 
 <script>
-const DELETE_URL_TEMPLATE = '{% url "delete_party" 0 %}'.replace('/0/', '/{id}/');
 function openDeleteModal(btn) {
-  const partyId = btn.dataset.partyId;
-  const partyName = btn.dataset.partyName;
-  document.getElementById('deletePartyName').textContent = partyName;
-  document.getElementById('deletePartyForm').action = DELETE_URL_TEMPLATE.replace('{id}', partyId);
+  document.getElementById('deletePartyName').textContent = btn.dataset.partyName;
+  document.getElementById('deletePartyForm').action = btn.dataset.deleteUrl;
   document.getElementById('deletePartyModal').classList.add('active');
 }
 function closeDeleteModal() {

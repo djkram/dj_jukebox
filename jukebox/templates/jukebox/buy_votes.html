@@ -840,7 +840,7 @@
     <!-- Com funciona? (mobile) -->
     <section style="background: #e5e8eb; border-radius: 1.25rem; padding: 1.25rem;">
       <div style="width: 2.5rem; height: 2.5rem; background: white; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
-        <span class="material-symbols-outlined" style="font-size: 1.4rem; color: #0040e0;">help_center</span>
+        <i class="fas fa-question" style="color: #0040e0; font-size: 1.1rem;"></i>
       </div>
       <h3 style="font-family: 'Epilogue', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">{% trans "Com funciona?" %}</h3>
 
@@ -882,6 +882,13 @@
         </div>
       </div>
     </section>
+
+    <!-- Tornar -->
+    <div class="text-center pb-2">
+      <a href="{% url 'song_list' %}" class="btn btn-outline-secondary" style="border-radius: 0.75rem; padding: 0.625rem 1.5rem; font-weight: 600; font-size: 0.875rem;">
+        <i class="fas fa-arrow-left me-1"></i> {% trans "Tornar" %}
+      </a>
+    </div>
 
   </main>
 </div>

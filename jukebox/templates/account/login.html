@@ -551,7 +551,7 @@
           {% else %}
             <div>
               <label for="{{ field.id_for_label }}" class="d-block font-semibold mb-1" style="color: #191c1f; font-size: 0.78rem;">{{ field.label }}</label>
-              <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" {% if field.value %}value="{{ field.value }}"{% endif %} class="w-100 px-3 rounded-xl border" style="border: 1px solid #c4c5d9; font-size: 0.92rem; background: white; padding-top: 0.68rem; padding-bottom: 0.68rem;" placeholder="{{ field.label }}">
+              <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" {% if field.value %}value="{{ field.value }}"{% endif %} class="w-100 px-3 rounded-xl border" style="border: 1px solid #c4c5d9; font-size: 0.92rem; background: white; padding-top: 0.68rem; padding-bottom: 0.68rem;" placeholder="{% if field.name == 'login' %}{% trans 'Email o usuari' %}{% else %}{{ field.label }}{% endif %}">
               {% if field.errors %}{% for error in field.errors %}<p class="text-danger mt-1 mb-0" style="font-size: 0.72rem; line-height: 1.25;">{{ error }}</p>{% endfor %}{% endif %}
             </div>
           {% endif %}

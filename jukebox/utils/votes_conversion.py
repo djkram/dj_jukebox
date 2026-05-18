@@ -13,22 +13,20 @@ def calculate_votes_from_coins(coins: int) -> int:
     """
     Calculates votes obtained from a quantity of coins with bonuses.
 
-    Bonus tiers:
-    - 20+ Coins → 3.0x (20 Coins = 60 Votes, +20 bonus)
-    - 10-19 Coins → 2.5x (10 Coins = 25 Votes, +5 bonus)
-    - 5-9 Coins → 2.2x (5 Coins = 11 Votes, +1 bonus)
-    - 3-4 Coins → 2.0x (3 Coins = 6 Votes)
-    - 1-2 Coins → 2.0x (1 Coin = 2 Votes)
+    Bonus tiers (minimum 5 coins):
+    - 20+ Coins → 3.0x (20 Coins = 60 Votes)
+    - 10-19 Coins → 2.5x (10 Coins = 25 Votes)
+    - 5-9 Coins → 2.0x (5 Coins = 10 Votes)
 
     Args:
-        coins: Quantity of coins to convert
+        coins: Quantity of coins to convert (minimum 5)
 
     Returns:
         Number of votes obtained
 
     Example:
-        >>> calculate_votes_from_coins(1)
-        2
+        >>> calculate_votes_from_coins(5)
+        10
         >>> calculate_votes_from_coins(10)
         25
         >>> calculate_votes_from_coins(20)
@@ -38,12 +36,8 @@ def calculate_votes_from_coins(coins: int) -> int:
         return int(coins * 3.0)
     elif coins >= 10:
         return int(coins * 2.5)
-    elif coins >= 5:
-        return int(coins * 2.2)
-    elif coins >= 3:
-        return int(coins * 2.0)
     else:
-        return coins * 2
+        return int(coins * 2.0)
 
 
 def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, str, int]:
@@ -76,8 +70,8 @@ def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, st
     User = get_user_model()
 
     # Validation
-    if coins_to_convert <= 0:
-        return False, "La quantitat ha de ser superior a 0", 0
+    if coins_to_convert < 5:
+        return False, "El mínim per convertir és 5 Coins", 0
 
     # Calculate votes with bonuses
     votes_to_add = calculate_votes_from_coins(coins_to_convert)
@@ -122,7 +116,7 @@ def get_conversion_preview(coins: int) -> dict:
     """
     votes = calculate_votes_from_coins(coins)
     multiplier = votes / coins if coins > 0 else 0
-    bonus_active = coins >= 3
+    bonus_active = coins >= 10
 
     return {
         'votes': votes,

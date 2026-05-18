@@ -387,6 +387,21 @@ def party_qr_code(request, party_id):
 @login_required
 @user_passes_test(is_dj_admin)
 @require_POST
+def delete_party(request, party_id):
+    party = get_object_or_404(Party, pk=party_id)
+    if err := _party_dj_check(request, party):
+        return err
+    # Clear selected party from session if it's the one being deleted
+    if request.session.get('selected_party_id') == party.id:
+        del request.session['selected_party_id']
+    party.delete()
+    messages.success(request, _("Festa eliminada correctament."))
+    return redirect('dj_backoffice')
+
+
+@login_required
+@user_passes_test(is_dj_admin)
+@require_POST
 def remove_playlist(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):

@@ -314,6 +314,82 @@
       font-size: 0.875rem;
     }
   }
+  .backoffice-party-btn--primary {
+    background: #0040e0;
+    color: #fff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .backoffice-party-btn--primary:hover {
+    background: #0033b3;
+    color: #fff;
+  }
+  .backoffice-party-btn--delete-corner {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    background: transparent;
+    border: none;
+    color: #bbb;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.4rem;
+    display: flex;
+    align-items: center;
+    transition: color 200ms, background 200ms;
+    font-size: 1.1rem;
+  }
+  .backoffice-party-btn--delete-corner .material-symbols-outlined {
+    font-size: 1.15rem;
+  }
+  .backoffice-party-btn--delete-corner:hover {
+    color: #d32f2f;
+    background: #fdecea;
+  }
+  /* Delete confirmation modal */
+  .delete-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .delete-modal-overlay.active { display: flex; }
+  .delete-modal {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    text-align: center;
+  }
+  .delete-modal-icon {
+    font-size: 2.5rem;
+    color: #d32f2f;
+    margin-bottom: 0.75rem;
+  }
+  .delete-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+    color: #181c1e;
+  }
+  .delete-modal-body {
+    font-size: 0.875rem;
+    color: #747687;
+    margin-bottom: 1.5rem;
+  }
+  .delete-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
 </style>
 
 <!-- Desktop Layout -->
@@ -399,13 +475,18 @@
               </div>
             </div>
           </div>
+          <form method="post" action="{% url 'delete_party' party.id %}" style="position:absolute;top:0.75rem;right:0.75rem;z-index:10;">
+            {% csrf_token %}
+            <button type="submit"
+                    class="backoffice-party-btn--delete-corner"
+                    onclick="return confirm('Eliminar la festa «{{ party.name|escapejs }}»?\nAquesta acció és irreversible.')">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </form>
           <div class="backoffice-party-actions">
-            <div class="backoffice-party-buttons">
-              <a href="{% url 'party_settings' party.id %}" class="backoffice-party-btn">Modificar</a>
-            </div>
-            <a href="{% url 'party_settings' party.id %}" class="backoffice-party-link">
+            <a href="{% url 'party_settings' party.id %}" class="backoffice-party-btn backoffice-party-btn--primary">
               Gestionar Festa
-              <span class="material-symbols-outlined" style="font-size: 0.875rem;">arrow_forward</span>
+              <span class="material-symbols-outlined" style="font-size: 0.875rem; vertical-align: middle;">arrow_forward</span>
             </a>
           </div>
         </div>

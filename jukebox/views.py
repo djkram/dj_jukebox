@@ -53,6 +53,7 @@ from .utils import (
     calculate_and_apply_badges,
     create_spotify_auth_error_response,
 )
+from .utils.badges import BadgeCalculator
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -953,6 +954,17 @@ def song_list(request):
         elif 'unvote_song_id' in request.POST and voting_enabled:
             song = get_object_or_404(Song, pk=request.POST['unvote_song_id'], party=party)
             Vote.objects.filter(user=user, song=song, party=party).delete()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                num_likes = song.vote.filter(party=party, vote_type='like').count()
+                num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+                calc = BadgeCalculator(party.songs)
+                badge_label, badge_bg, badge_text = calc.calculate_badge(num_likes, num_dislikes)
+                return JsonResponse({
+                    'success': True, 'song_id': song.id, 'user_vote': None,
+                    'num_likes': num_likes, 'badge_label': badge_label,
+                    'badge_bg': badge_bg, 'badge_text': badge_text,
+                    'votes_left': get_user_votes_left(user, party), 'credits': user.credits,
+                })
             return redirect('song_list')
 
         # Votar una cançó
@@ -962,6 +974,20 @@ def song_list(request):
 
             from jukebox.utils.vote_validation import validate_and_create_vote
             success, error_msg = validate_and_create_vote(user, song, party, vote_type)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                if success:
+                    num_likes = song.vote.filter(party=party, vote_type='like').count()
+                    num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+                    calc = BadgeCalculator(party.songs)
+                    badge_label, badge_bg, badge_text = calc.calculate_badge(num_likes, num_dislikes)
+                    return JsonResponse({
+                        'success': True, 'song_id': song.id, 'user_vote': vote_type,
+                        'num_likes': num_likes, 'badge_label': badge_label,
+                        'badge_bg': badge_bg, 'badge_text': badge_text,
+                        'votes_left': get_user_votes_left(user, party), 'credits': user.credits,
+                    })
+                else:
+                    return JsonResponse({'success': False, 'error': error_msg}, status=400)
             if not success and error_msg:
                 messages.warning(request, error_msg)
             return redirect('song_list')
@@ -1017,6 +1043,12 @@ def song_list(request):
     for index, song in enumerate(played_songs):
         song.display_order = songs_played - index
 
+    # Recomanacions intel·ligents (harmonia + BPM + vots)
+    from .recommendation import get_recommended_songs
+    recommended_songs = get_recommended_songs(party, limit=6) if party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE else []
+    if recommended_songs:
+        calculate_and_apply_badges(party, recommended_songs)
+
     # Obtenir context Spotify (token i has_spotify)
     spotify_context = get_spotify_context_for_view(user)
 
@@ -1044,6 +1076,7 @@ def song_list(request):
         "total_coins_spent": total_coins_spent,
         "voting_enabled": voting_enabled,
         "my_played_votes": my_played_votes,
+        "recommended_songs": recommended_songs,
     })
 
 
@@ -1654,7 +1687,7 @@ def song_swipe(request):
     votes_left = get_user_votes_left(user, party)
     credits = user.credits
     party_coins = get_user_party_coins(user, party)
-    total_likes = Vote.objects.filter(party=party).count()
+    user_likes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
     total_songs = party.songs.count()
 
     if request.method == 'POST':
@@ -1697,7 +1730,7 @@ def song_swipe(request):
         'party': party,
         'songs': songs,
         'votes_left': votes_left,
-        'total_likes': total_likes,
+        'user_likes_count': user_likes_count,
         'total_songs': total_songs,
         'swiped_count': swiped_count,
         'credits': credits,

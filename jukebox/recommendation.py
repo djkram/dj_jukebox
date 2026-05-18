@@ -2,7 +2,7 @@
 Sistema de recomanació de cançons per a DJs
 Té en compte harmonia (Camelot key), BPM i vots
 """
-from django.db.models import Count
+from django.db.models import Count, Q
 from .models import Song
 
 
@@ -64,10 +64,12 @@ def get_recommended_songs(party, limit=5, reference_song=None):
     Returns:
         QuerySet de Song amb score calculat
     """
-    # Obtenir totes les cançons no reproduïdes de la festa
+    # Obtenir cançons no reproduïdes amb almenys 1 vot positiu
     unplayed_songs = party.songs.filter(has_played=False).annotate(
-        num_votes=Count('vote')
-    )
+        num_votes=Count('vote'),
+        num_likes=Count('vote', filter=Q(vote__vote_type='like')),
+        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike')),
+    ).filter(num_likes__gt=0)
 
     if not unplayed_songs.exists():
         return unplayed_songs[:limit]

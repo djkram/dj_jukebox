@@ -2287,10 +2287,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="fw-bold" style="color: #858796; font-size: 0.9rem; line-height: 1;">{{ song.num_dislikes }}</span>
                 <span style="font-size: 0.65rem; line-height: 1;"><i class="fas fa-heart-broken"></i></span>
               </div>
+              {% if is_djjukebox_active %}
               <form method="post" action="{% url 'mark_song_played' song.id %}" class="m-0">
                 {% csrf_token %}
                 <button type="submit" class="sonic-btn-posada">LOAD</button>
               </form>
+              {% endif %}
             </div>
           </div>
         {% empty %}

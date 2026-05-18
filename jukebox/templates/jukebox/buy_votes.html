@@ -200,6 +200,11 @@
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      width: 100%;
+    }
+    button.coins-bonus-item:hover {
+      box-shadow: 0 6px 16px rgba(0,64,224,0.15);
+      transform: translateY(-2px);
     }
     .coins-bonus-from, .coins-bonus-to {
       display: flex;
@@ -408,7 +413,35 @@
         </div>
         <div class="coins-bonus-card">
           <div class="coins-bonus-grid">
-            <div class="coins-bonus-item">
+            {% if credits >= 5 %}
+            <form method="post" style="display: contents;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="convert_coins">
+              <input type="hidden" name="coins_to_convert" value="5">
+              <button type="submit" class="coins-bonus-item" style="border: none; background: #ffffff; cursor: pointer; text-align: left; transition: box-shadow 200ms, transform 200ms;">
+                <div class="coins-bonus-from">
+                  <div class="coins-bonus-icon primary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                  </div>
+                  <div>
+                    <div class="coins-bonus-amount">{% trans "5 Coins" %}</div>
+                    <div class="coins-bonus-label">{% trans "Conversió mínima" %}</div>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
+                <div class="coins-bonus-to">
+                  <div>
+                    <div class="coins-bonus-amount" style="color: #5e24e1;">{% trans "10 Vots" %}</div>
+                    <div class="coins-bonus-label">{% trans "×2.0" %}</div>
+                  </div>
+                  <div class="coins-bonus-icon tertiary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                  </div>
+                </div>
+              </button>
+            </form>
+            {% else %}
+            <div class="coins-bonus-item" style="opacity: 0.45;">
               <div class="coins-bonus-from">
                 <div class="coins-bonus-icon primary">
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
@@ -429,8 +462,37 @@
                 </div>
               </div>
             </div>
+            {% endif %}
 
-            <div class="coins-bonus-item">
+            {% if credits >= 10 %}
+            <form method="post" style="display: contents;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="convert_coins">
+              <input type="hidden" name="coins_to_convert" value="10">
+              <button type="submit" class="coins-bonus-item" style="border: none; background: #ffffff; cursor: pointer; text-align: left; transition: box-shadow 200ms, transform 200ms;">
+                <div class="coins-bonus-from">
+                  <div class="coins-bonus-icon primary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                  </div>
+                  <div>
+                    <div class="coins-bonus-amount">{% trans "10 Coins" %}</div>
+                    <div class="coins-bonus-label">{% trans "Bonus extra" %}</div>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
+                <div class="coins-bonus-to">
+                  <div>
+                    <div class="coins-bonus-amount" style="color: #5e24e1;">{% trans "25 Vots" %}</div>
+                    <div class="coins-bonus-label">{% trans "×2.5 Bonus" %}</div>
+                  </div>
+                  <div class="coins-bonus-icon tertiary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                  </div>
+                </div>
+              </button>
+            </form>
+            {% else %}
+            <div class="coins-bonus-item" style="opacity: 0.45;">
               <div class="coins-bonus-from">
                 <div class="coins-bonus-icon primary">
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
@@ -451,8 +513,37 @@
                 </div>
               </div>
             </div>
+            {% endif %}
 
-            <div class="coins-bonus-item">
+            {% if credits >= 20 %}
+            <form method="post" style="display: contents;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="convert_coins">
+              <input type="hidden" name="coins_to_convert" value="20">
+              <button type="submit" class="coins-bonus-item" style="border: none; background: #ffffff; cursor: pointer; text-align: left; transition: box-shadow 200ms, transform 200ms;">
+                <div class="coins-bonus-from">
+                  <div class="coins-bonus-icon primary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+                  </div>
+                  <div>
+                    <div class="coins-bonus-amount">{% trans "20 Coins" %}</div>
+                    <div class="coins-bonus-label">{% trans "Màxim bonus" %}</div>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined" style="color: #747687;">trending_flat</span>
+                <div class="coins-bonus-to">
+                  <div>
+                    <div class="coins-bonus-amount" style="color: #5e24e1;">{% trans "60 Vots" %}</div>
+                    <div class="coins-bonus-label">{% trans "×3.0 Bonus" %}</div>
+                  </div>
+                  <div class="coins-bonus-icon tertiary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                  </div>
+                </div>
+              </button>
+            </form>
+            {% else %}
+            <div class="coins-bonus-item" style="opacity: 0.45;">
               <div class="coins-bonus-from">
                 <div class="coins-bonus-icon primary">
                   <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
@@ -473,39 +564,8 @@
                 </div>
               </div>
             </div>
+            {% endif %}
           </div>
-
-          {% if credits >= 5 %}
-          <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(196,197,216,0.2);">
-            <div style="margin-bottom: 1rem; font-weight: 700; font-size: 0.875rem;">{% trans "Converteix els teus Coins ara:" %}</div>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              {% if credits >= 5 %}
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="convert_coins">
-                <input type="hidden" name="coins_to_convert" value="5">
-                <button type="submit" class="btn btn-sm" style="background: #0040e0; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none;">5 → 10</button>
-              </form>
-              {% endif %}
-              {% if credits >= 10 %}
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="convert_coins">
-                <input type="hidden" name="coins_to_convert" value="10">
-                <button type="submit" class="btn btn-sm" style="background: #5e24e1; color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none;">10 → 25 ⭐</button>
-              </form>
-              {% endif %}
-              {% if credits >= 20 %}
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="convert_coins">
-                <input type="hidden" name="coins_to_convert" value="20">
-                <button type="submit" class="btn btn-sm" style="background: linear-gradient(135deg, #0040e0, #5e24e1); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; border: none; box-shadow: 0 4px 8px rgba(0,64,224,0.3);">20 → 60 ⭐⭐</button>
-              </form>
-              {% endif %}
-            </div>
-          </div>
-          {% endif %}
         </div>
       </div>
     </div>

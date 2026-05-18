@@ -909,37 +909,6 @@
       <p class="font-medium" style="color: #434656; opacity: 0.8;">{% trans "Escull la teva festa i fes sentir les teves preferències." %}</p>
     </section>
 
-    <!-- Secció entrada de codi mòbil -->
-    <section class="mobile-card p-3">
-      <div class="d-flex align-items-center gap-2 mb-3">
-        <i class="fas fa-key" style="font-size: 1.5rem; color: #0040e0;"></i>
-        <div>
-          <h3 class="fw-bold mb-0" style="font-size: 1rem; color: #191c1f;">{% trans "Tens un codi?" %}</h3>
-          <p class="mb-0" style="font-size: 0.75rem; color: #747688;">{% trans "Accedeix directament" %}</p>
-        </div>
-      </div>
-      <form method="post" id="mobile-party-code-form">
-        {% csrf_token %}
-        <div class="input-group mb-2">
-          <input type="text" name="party_code" id="mobile-party-code-input" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
-                 style="text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;" maxlength="12" required>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-sign-in-alt"></i>
-          </button>
-        </div>
-        {% if code_error %}
-          <div class="alert alert-danger py-2 mb-0" style="font-size: 0.75rem;">
-            <i class="fas fa-exclamation-circle me-1"></i>
-            {{ code_error }}
-          </div>
-        {% endif %}
-      </form>
-      <button type="button" id="qr-scan-open" class="qr-scan-btn mt-2">
-        <i class="fas fa-qrcode"></i>
-        {% trans "Escanejar codi QR" %}
-      </button>
-    </section>
-
     {% if parties %}
       <!-- Party Grid -->
       <section>
@@ -979,6 +948,37 @@
         <p class="mb-0" style="color: #434656;">{% trans "Torna aviat per veure propers esdeveniments!" %}</p>
       </div>
     {% endif %}
+
+    <!-- Secció entrada de codi mòbil -->
+    <section class="mobile-card p-3">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="fas fa-key" style="font-size: 1.5rem; color: #0040e0;"></i>
+        <div>
+          <h3 class="fw-bold mb-0" style="font-size: 1rem; color: #191c1f;">{% trans "Tens un codi?" %}</h3>
+          <p class="mb-0" style="font-size: 0.75rem; color: #747688;">{% trans "Accedeix directament" %}</p>
+        </div>
+      </div>
+      <form method="post" id="mobile-party-code-form">
+        {% csrf_token %}
+        <div class="input-group mb-2">
+          <input type="text" name="party_code" id="mobile-party-code-input" class="form-control" placeholder="{% trans 'Codi de la festa' %}"
+                 style="text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;" maxlength="12" required>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i>
+          </button>
+        </div>
+        {% if code_error %}
+          <div class="alert alert-danger py-2 mb-0" style="font-size: 0.75rem;">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            {{ code_error }}
+          </div>
+        {% endif %}
+      </form>
+      <button type="button" id="qr-scan-open" class="qr-scan-btn mt-2">
+        <i class="fas fa-qrcode"></i>
+        {% trans "Escanejar codi QR" %}
+      </button>
+    </section>
 
     <!-- Secció màrqueting mòbil -->
     <section class="mobile-card p-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white;">

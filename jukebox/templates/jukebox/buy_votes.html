@@ -184,8 +184,9 @@
 
     .coins-bonus-card {
       background: #f1f4f7;
-      padding: 1.5rem;
+      padding: 1.5rem 1.5rem 2rem;
       border-radius: 1.5rem;
+      overflow: visible;
     }
     .coins-bonus-grid {
       display: grid;
@@ -201,6 +202,11 @@
       justify-content: space-between;
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       width: 100%;
+    }
+    button.coins-bonus-item {
+      height: auto;
+      overflow: visible;
+      align-self: stretch;
     }
     button.coins-bonus-item:hover {
       box-shadow: 0 6px 16px rgba(0,64,224,0.15);

@@ -591,7 +591,7 @@
           <div class="coins-info-step-number">1</div>
           <div>
             <div class="coins-info-step-title">{% trans "Adquireix Coins" %}</div>
-            <div class="coins-info-step-text">{% trans "Els Coins són la moneda principal. Pots comprar-los directament amb targeta o PayPal per carregar el teu moneder digital." %}</div>
+            <div class="coins-info-step-text">{% trans "Els Coins són la moneda principal. Pots comprar-los directament amb targeta via Stripe per carregar el teu moneder digital." %}</div>
           </div>
         </div>
 
@@ -616,9 +616,10 @@
             <span class="material-symbols-outlined" style="font-size: 0.875rem;">security</span>
             {% trans "Pagament segur garantit" %}
           </div>
-          <div style="display: flex; gap: 0.5rem; opacity: 0.5; filter: grayscale(1);">
-            <img alt="Visa" style="height: 1rem;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Crect fill='%231434CB' width='48' height='16' rx='2'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3EVISA%3C/text%3E%3C/svg%3E" />
-            <img alt="Mastercard" style="height: 1rem;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 16'%3E%3Crect fill='%23EB001B' width='20' height='16' x='10' rx='2'/%3E%3Crect fill='%23FF5F00' width='20' height='16' x='18' rx='2' opacity='0.8'/%3E%3C/svg%3E" />
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+            <img alt="Stripe" style="height: 1.25rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 25'%3E%3Crect fill='%23635BFF' width='60' height='25' rx='3'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='11'%3EStripe%3C/text%3E%3C/svg%3E" />
+            <img alt="Visa" style="height: 1.25rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 25'%3E%3Crect fill='%231434CB' width='48' height='25' rx='3'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3EVISA%3C/text%3E%3C/svg%3E" />
+            <img alt="Mastercard" style="height: 1.25rem; opacity: 0.6;" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 25'%3E%3Crect fill='%23252525' width='48' height='25' rx='3'/%3E%3Ccircle fill='%23EB001B' cx='18' cy='12.5' r='8'/%3E%3Ccircle fill='%23F79E1B' cx='30' cy='12.5' r='8'/%3E%3Ccircle fill='%23FF5F00' cx='24' cy='12.5' r='5'/%3E%3C/svg%3E" />
           </div>
         </div>
 

@@ -153,6 +153,8 @@ if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
 
 # Application definition
 
+CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -169,6 +171,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'jukebox',
 ]
+
+if CLOUDINARY_URL:
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 
 AUTH_USER_MODEL = 'jukebox.User'
 
@@ -279,9 +284,15 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+_default_storage = (
+    "cloudinary_storage.storage.MediaCloudinaryStorage"
+    if CLOUDINARY_URL
+    else "django.core.files.storage.FileSystemStorage"
+)
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": _default_storage,
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -292,7 +303,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'jukebox' / 'static',
 ]
 
-# Media files (User uploads)
+# Media files (User uploads) — used only when Cloudinary is NOT configured
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

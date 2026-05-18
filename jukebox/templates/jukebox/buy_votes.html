@@ -673,26 +673,24 @@
     <!-- Value Bundles (Bento Grid Style) -->
     <section class="mobile-group-stack">
       <!-- Pro Pack (Highlighted/Featured) — 5€ / 25 Coins -->
-      <div class="position-relative overflow-hidden p-3 d-flex flex-column justify-content-between" style="background: #2e5bff; color: #efefff; box-shadow: 0 20px 40px -10px rgba(0, 64, 224, 0.08); aspect-ratio: 16/6; border-radius: 1.1rem;">
-        <div class="position-absolute" style="top: -1.5rem; right: -1.5rem; width: 8rem; height: 8rem; background: rgba(0, 227, 253, 0.2); border-radius: 50%; filter: blur(3rem);"></div>
+      <div class="position-relative overflow-hidden d-flex align-items-center justify-content-between" style="background: #2e5bff; color: #efefff; padding: 0.85rem 1rem; border-radius: 1.1rem; gap: 0.75rem;">
+        <div class="position-absolute" style="top: -1rem; right: -1rem; width: 6rem; height: 6rem; background: rgba(0, 227, 253, 0.2); border-radius: 50%; filter: blur(2rem);"></div>
         <div style="position: relative; z-index: 1;">
-          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2" style="background: rgba(239, 239, 255, 0.2);">
-            <i class="fas fa-star" style="font-size: 0.75rem;"></i>
-            <span class="font-bold text-uppercase" style="font-size: 0.625rem; letter-spacing: 0.1em;">{% trans "MÉS POPULAR" %}</span>
+          <div class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill mb-1" style="background: rgba(239, 239, 255, 0.2);">
+            <i class="fas fa-star" style="font-size: 0.6rem;"></i>
+            <span class="font-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.08em;">{% trans "MÉS POPULAR" %}</span>
           </div>
-          <div class="d-flex align-items-end justify-content-between gap-3">
-            <div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.6rem; line-height: 1.05;">{% trans "Pack 25 Coins" %}</h3>
-              <p class="font-body mb-0" style="font-size: 0.8rem; opacity: 0.8;">{% trans "Millor preu" %}</p>
-            </div>
-            <span class="font-headline flex-shrink-0" style="font-size: 2.1rem; font-weight: 900; line-height: 1;">5€</span>
+          <div class="d-flex align-items-center gap-2">
+            <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem; line-height: 1.1;">{% trans "25 Coins" %}</h3>
+            <span class="font-headline" style="font-size: 1.4rem; font-weight: 900; line-height: 1;">5€</span>
           </div>
+          <p class="font-body mb-0" style="font-size: 0.72rem; opacity: 0.8;">{% trans "Millor preu" %}</p>
         </div>
-        <div class="d-flex justify-content-end" style="position: relative; z-index: 1;">
+        <div style="position: relative; z-index: 1; flex-shrink: 0;">
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="votes" value="25">
-            <button type="submit" class="px-4 py-2 rounded-pill font-bold shadow-lg" style="background: white; color: #0040e0; font-size: 0.82rem; border: none; transition: all 0.2s;">{% trans "Compra Ara" %}</button>
+            <button type="submit" class="px-3 py-2 rounded-pill font-bold" style="background: white; color: #0040e0; font-size: 0.78rem; border: none;">{% trans "Compra Ara" %}</button>
           </form>
         </div>
       </div>
@@ -701,47 +699,43 @@
       <div class="row g-2">
         <!-- Starter Pack 1€ -->
         <div class="col-6">
-          <div class="bg-white p-2 d-flex flex-column justify-content-between h-100" style="border: 1px solid rgba(196, 197, 217, 0.1); border-radius: 1.1rem;">
-            <div>
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center justify-content-center" style="width: 2.35rem; height: 2.35rem; background: #e7e8ed; border-radius: 0.8rem;">
-                  <i class="fas fa-coins" style="color: #0040e0; font-size: 1.05rem;"></i>
+          <div class="bg-white d-flex align-items-center justify-content-between h-100" style="padding: 0.6rem 0.75rem; border: 1px solid rgba(196, 197, 217, 0.15); border-radius: 1rem; gap: 0.5rem;">
+            <div style="min-width: 0;">
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 1.6rem; height: 1.6rem; background: #e7e8ed; border-radius: 0.5rem;">
+                  <i class="fas fa-coins" style="color: #0040e0; font-size: 0.75rem;"></i>
                 </div>
-                <span class="d-block font-headline font-bold mb-0" style="font-size: 1.3rem; color: #191c1f; line-height: 1;">1€</span>
+                <span style="font-size: 1rem; font-weight: 800; color: #191c1f;">1€</span>
               </div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">{% trans "5 Coins" %}</h3>
-              <p class="font-body" style="font-size: 0.75rem; color: #434656;">{% trans "Inicial" %}</p>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #191c1f;">{% trans "5 Coins" %}</div>
+              <div style="font-size: 0.68rem; color: #434656;">{% trans "Inicial" %}</div>
             </div>
-            <div class="mt-2 d-flex flex-column gap-2">
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="votes" value="5">
-                <button type="submit" class="w-100 py-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.72rem; border: none;">{% trans "Compra" %}</button>
-              </form>
-            </div>
+            <form method="post" style="flex-shrink: 0;">
+              {% csrf_token %}
+              <input type="hidden" name="votes" value="5">
+              <button type="submit" class="py-1 px-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.65rem; border: none; white-space: nowrap;">{% trans "Compra" %}</button>
+            </form>
           </div>
         </div>
 
         <!-- Expert Pack 10€ -->
         <div class="col-6">
-          <div class="bg-white p-2 d-flex flex-column justify-content-between h-100" style="border: 1px solid rgba(196, 197, 217, 0.1); border-radius: 1.1rem;">
-            <div>
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center justify-content-center" style="width: 2.35rem; height: 2.35rem; background: rgba(94, 36, 225, 0.1); color: #5e24e1; border-radius: 0.8rem;">
-                  <i class="fas fa-gem" style="font-size: 1.05rem;"></i>
+          <div class="bg-white d-flex align-items-center justify-content-between h-100" style="padding: 0.6rem 0.75rem; border: 1px solid rgba(196, 197, 217, 0.15); border-radius: 1rem; gap: 0.5rem;">
+            <div style="min-width: 0;">
+              <div class="d-flex align-items-center gap-1 mb-1">
+                <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width: 1.6rem; height: 1.6rem; background: rgba(94, 36, 225, 0.1); border-radius: 0.5rem;">
+                  <i class="fas fa-gem" style="color: #5e24e1; font-size: 0.75rem;"></i>
                 </div>
-                <span class="d-block font-headline font-bold mb-0" style="font-size: 1.3rem; color: #191c1f; line-height: 1;">10€</span>
+                <span style="font-size: 1rem; font-weight: 800; color: #191c1f;">10€</span>
               </div>
-              <h3 class="font-headline font-bold mb-1" style="font-size: 1.05rem; color: #191c1f;">{% trans "60 Coins" %}</h3>
-              <p class="font-body" style="font-size: 0.75rem; color: #434656;">{% trans "Expert Sessions" %}</p>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #191c1f;">{% trans "60 Coins" %}</div>
+              <div style="font-size: 0.68rem; color: #434656;">{% trans "Expert Sessions" %}</div>
             </div>
-            <div class="mt-2 d-flex flex-column gap-2">
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="votes" value="60">
-                <button type="submit" class="w-100 py-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.72rem; border: none;">{% trans "Compra" %}</button>
-              </form>
-            </div>
+            <form method="post" style="flex-shrink: 0;">
+              {% csrf_token %}
+              <input type="hidden" name="votes" value="60">
+              <button type="submit" class="py-1 px-2 rounded-pill font-bold" style="background: #e7e8ed; color: #191c1f; font-size: 0.65rem; border: none; white-space: nowrap;">{% trans "Compra" %}</button>
+            </form>
           </div>
         </div>
       </div>

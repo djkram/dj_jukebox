@@ -199,29 +199,22 @@ class BadgeCalculator:
             song.badge_text = text
 
 
-def calculate_and_apply_badges(party, songs_queryset):
+def calculate_and_apply_badges(party, songs_queryset, calculator=None):
     """
     Helper function to calculate and apply badges to a queryset.
 
-    Convenience function that creates BadgeCalculator and applies badges.
+    Pass a pre-created BadgeCalculator via `calculator` to avoid firing
+    a new DB query when calling this multiple times in the same request.
 
     Args:
         party: Party instance
         songs_queryset: QuerySet with num_likes and num_dislikes annotations
+        calculator: Optional pre-created BadgeCalculator instance
 
     Returns:
         QuerySet with badges applied (modifies in-place)
-
-    Example:
-        from jukebox.utils import get_pending_songs_ordered
-        from jukebox.utils import calculate_and_apply_badges
-
-        pending = get_pending_songs_ordered(party)
-        calculate_and_apply_badges(party, pending)
-
-        for song in pending:
-            print(f"{song.badge_label}: {song.title}")
     """
-    calculator = BadgeCalculator(party.songs)
+    if calculator is None:
+        calculator = BadgeCalculator(party.songs)
     calculator.apply_badges_to_songs(songs_queryset)
     return songs_queryset

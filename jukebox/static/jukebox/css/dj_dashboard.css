@@ -1,0 +1,1252 @@
+  .sonic-page-container {
+    padding-top: 0.5rem !important;
+  }
+
+  #dashboard-request-message:empty {
+    display: none !important;
+  }
+
+  #dashboard-request-message:not(:empty) {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Camelot Key Colors */
+  .camelot-key {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .camelot-1A, .camelot-1B { background-color: #FF6B35; } /* Orange */
+  .camelot-2A, .camelot-2B { background-color: #FFA500; } /* Dark Orange */
+  .camelot-3A, .camelot-3B { background-color: #FFD700; color: #333; } /* Yellow */
+  .camelot-4A, .camelot-4B { background-color: #90EE90; color: #333; } /* Light Green */
+  .camelot-5A, .camelot-5B { background-color: #32CD32; } /* Green */
+  .camelot-6A, .camelot-6B { background-color: #00CED1; } /* Cyan */
+  .camelot-7A, .camelot-7B { background-color: #4682B4; } /* Steel Blue */
+  .camelot-8A, .camelot-8B { background-color: #4169E1; } /* Royal Blue */
+  .camelot-9A, .camelot-9B { background-color: #9370DB; } /* Purple */
+  .camelot-10A, .camelot-10B { background-color: #FF69B4; } /* Pink */
+  .camelot-11A, .camelot-11B { background-color: #DC143C; } /* Crimson */
+  .camelot-12A, .camelot-12B { background-color: #FF4500; } /* Red-Orange */
+
+  /* Dashboard Reco Grid — tall-cropped image tiles with overlaid text */
+  .dashboard-reco-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .dashboard-reco-card {
+    position: relative;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    background: #1a1b2e;
+    min-width: 0;
+    /* 5:2 crop — very wide, short */
+    aspect-ratio: 5 / 2;
+    transition: transform 280ms ease;
+  }
+
+  .dashboard-reco-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  }
+
+  .dashboard-reco-img {
+    position: absolute;
+    inset: 0;
+  }
+
+  .dashboard-reco-img img,
+  .dashboard-reco-img > div {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 450ms ease;
+  }
+
+  .dashboard-reco-card:hover .dashboard-reco-img img {
+    transform: scale(1.08);
+  }
+
+  .dashboard-reco-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.45rem 0.55rem 0.4rem;
+    z-index: 2;
+  }
+
+  .sonic-reco-overlay {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .sonic-reco-overlay form {
+    pointer-events: auto;
+  }
+
+  .sonic-reco-play-btn {
+    padding: 0.18rem 0.55rem;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #1e1e24 0%, #111116 100%);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.22);
+    font-family: 'Courier New', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-shadow: 0 0 5px rgba(255,255,255,0.45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(0,0,0,0.7);
+    cursor: pointer;
+  }
+
+  .dashboard-history-order {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    background: #eef2ff;
+    color: #4f46e5;
+    flex-shrink: 0;
+  }
+
+  .dashboard-history-item-current {
+    background: rgba(139, 92, 246, 0.09);
+    border: 1px solid rgba(139, 92, 246, 0.28);
+  }
+
+  .dashboard-history-order.is-current {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    color: #ffffff;
+  }
+
+  .dashboard-now-playing-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(139, 92, 246, 0.14);
+    color: #7c3aed;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .mobile-list-card-current {
+    background: rgba(139, 92, 246, 0.09) !important;
+    border: 1px solid rgba(139, 92, 246, 0.22) !important;
+  }
+
+  .mobile-history-order-current {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+    color: #ffffff !important;
+  }
+
+  .dashboard-jukebox-bar {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .dashboard-status-card,
+  .dashboard-fader-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 0.55rem 0.9rem;
+    box-shadow: 0 4px 18px rgba(0, 64, 224, 0.06);
+    border: 1px solid rgba(116, 118, 136, 0.1);
+  }
+
+  .dashboard-status-card {
+    min-height: 9.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .dashboard-fader-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .dashboard-jukebox-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  .dashboard-jukebox-state.is-active {
+    background: rgba(28, 200, 138, 0.12);
+    color: #1cc88a;
+  }
+
+  .dashboard-jukebox-state.is-scheduled {
+    background: rgba(0, 64, 224, 0.1);
+    color: #0040e0;
+  }
+
+  .dashboard-jukebox-state.is-preview {
+    background: rgba(116, 118, 136, 0.12);
+    color: #5d6072;
+  }
+
+  .dashboard-jukebox-state.is-inactive {
+    background: rgba(186, 26, 26, 0.1);
+    color: #ba1a1a;
+  }
+
+  .dashboard-status-form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-status-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #747687;
+  }
+
+  .dashboard-status-help {
+    font-size: 0.78rem;
+    color: #747687;
+    margin-top: 0.3rem;
+  }
+
+  .dashboard-status-options {
+    display: none;
+  }
+
+  .dashboard-status-option {
+    display: none;
+  }
+
+  .dashboard-status-fader {
+    width: min(100%, 28rem);
+  }
+
+  .dashboard-fader-scale {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    padding: 0 1.15rem;
+    margin-top: 0.12rem;
+  }
+
+  .dashboard-fader-labels {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    padding: 0 1.15rem;
+    margin-bottom: 0.16rem;
+  }
+
+  .dashboard-fader-label {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #5d6072;
+    line-height: 1;
+  }
+
+  .dashboard-fader-label.is-selected {
+    color: #00d7f8;
+    text-shadow: 0 0 10px rgba(0, 215, 248, 0.35);
+  }
+
+  .dashboard-fader-scale-mark {
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: rgba(67, 70, 85, 0.58);
+    line-height: 1;
+  }
+
+  .dashboard-fader-scale-mark.is-selected {
+    color: #00d7f8;
+    text-shadow: 0 0 10px rgba(0, 215, 248, 0.35);
+  }
+
+  .dashboard-fader-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    min-height: 2.45rem;
+    padding: 0.3rem 0.7rem 0.3rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #d8dde4 0%, #eef2f6 42%, #f7fafd 100%);
+    border: 1px solid rgba(116, 118, 136, 0.2);
+    box-shadow: inset 0 2px 5px rgba(24, 28, 30, 0.08), 0 8px 18px rgba(0, 64, 224, 0.06);
+  }
+
+  .dashboard-fader-thumb {
+    position: absolute;
+    top: 0.78rem;
+    left: calc(0.7rem + (var(--step, 0) * ((100% - 1.4rem) / 4)) + (((100% - 1.4rem) / 4) - 2.6rem) / 2);
+    width: 2.6rem;
+    height: 1.15rem;
+    border-radius: 0.7rem;
+    background: linear-gradient(180deg, #ffffff 0%, #eef2f6 55%, #d9dee4 100%);
+    border: 1px solid rgba(116, 118, 136, 0.28);
+    box-shadow: 0 5px 14px rgba(24, 28, 30, 0.18), inset 0 1px 0 rgba(255,255,255,0.95);
+    transition: left 0.24s ease, transform 0.24s ease;
+    pointer-events: none;
+  }
+
+  .dashboard-fader-track.is-finished .dashboard-fader-thumb {
+    display: none;
+  }
+
+  .dashboard-fader-rail {
+    position: absolute;
+    left: 1.2rem;
+    right: 1.2rem;
+    top: 1.35rem;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(116, 118, 136, 0.2) 0%, rgba(116, 118, 136, 0.52) 50%, rgba(116, 118, 136, 0.2) 100%);
+    pointer-events: none;
+  }
+
+  .dashboard-fader-knob-lines {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+  }
+
+  .dashboard-fader-knob-lines span {
+    display: block;
+    width: 1.2rem;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(0, 64, 224, 0.7);
+  }
+
+  .dashboard-fader-knob-lines span:nth-child(2) {
+    opacity: 0.55;
+  }
+
+  .dashboard-fader-knob-lines span:nth-child(3) {
+    opacity: 0.35;
+  }
+
+  .dashboard-fader-segment {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dashboard-fader-button {
+    width: 100%;
+    min-height: 2.45rem;
+    border: none;
+    background: transparent;
+    color: transparent;
+    font-size: 0;
+    line-height: 0;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .dashboard-poweroff-button {
+    min-height: 2.35rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 999px;
+    background: #fff1f1;
+    color: #ba1a1a;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1199.98px) {
+    .dashboard-jukebox-bar {
+      grid-template-columns: 1fr;
+    }
+
+    .dashboard-status-card {
+      min-height: auto;
+    }
+
+    .dashboard-fader-card {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile {
+    min-height: 2.2rem;
+    padding: 0.25rem 0.45rem 0.25rem;
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-rail {
+    left: 0.85rem;
+    right: 0.85rem;
+    top: 1.18rem;
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-thumb {
+    top: 0.68rem;
+    width: 2.15rem;
+    height: 0.95rem;
+    left: calc(0.45rem + (var(--step, 0) * ((100% - 0.9rem) / 4)) + (((100% - 0.9rem) / 4) - 2.15rem) / 2);
+  }
+
+  .dashboard-fader-track.dashboard-fader-track-mobile .dashboard-fader-button {
+    min-height: 2.2rem;
+  }
+
+  .dashboard-fader-scale.dashboard-fader-scale-mobile {
+    padding: 0 0.8rem;
+    margin-top: 0.18rem;
+  }
+
+  .dashboard-fader-scale.dashboard-fader-scale-mobile .dashboard-fader-scale-mark {
+    font-size: 0.52rem;
+  }
+
+  .dashboard-fader-labels.dashboard-fader-labels-mobile {
+    padding: 0 0.8rem;
+    margin-bottom: 0.22rem;
+  }
+
+  .dashboard-fader-labels.dashboard-fader-labels-mobile .dashboard-fader-label {
+    font-size: 0.62rem;
+  }
+
+  /* ── Pioneer CDJ-3000 style ─────────────────────────────────────────────── */
+  .cassette-panel {
+    background: linear-gradient(180deg, #1a1a1e 0%, #111115 100%);
+    border-radius: 0.875rem;
+    padding: 1rem 1.1rem;
+    box-shadow:
+      0 16px 48px rgba(0,0,0,0.65),
+      inset 0 -1px 0 rgba(0,0,0,0.6);
+    border: 1px solid #0a0a0e;
+  }
+  /* Façana que tapa la part "introduïda" del pulsador OFF */
+  .cassette-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0.85rem;
+    width: 3.8rem;
+    height: 0.82rem;
+    background: linear-gradient(180deg, #1a1a1e 0%, #161618 100%);
+    border-radius: 0 0.875rem 0 0;
+    z-index: 22;
+    pointer-events: none;
+  }
+
+  .cassette-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  /* Button form — flex centering container */
+  .cassette-btn-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.28rem;
+  }
+
+  /* Tiny label below circular buttons */
+  .cassette-btn-sublabel {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.38rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #2e2e3a;
+    text-align: center;
+    line-height: 1.2;
+  }
+  /* LOAD label — gran i il·luminat quan no premut */
+  .cassette-btn-sublabel--load {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.82);
+    text-shadow: 0 0 6px rgba(255,255,255,0.7), 0 0 14px rgba(255,255,255,0.3);
+    letter-spacing: 0.18em;
+  }
+  /* Oculta el text quan el botó està actiu */
+  .load-is-active .cassette-btn-sublabel--load { display: none; }
+  @keyframes hint-pulse-white {
+    0%, 100% { color: rgba(255,255,255,0.38); text-shadow: 0 0 4px rgba(255,255,255,0.25); }
+    50%       { color: rgba(255,255,255,0.95); text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 22px rgba(255,255,255,0.3); }
+  }
+  .cassette-btn-sublabel--load.is-hint { animation: hint-pulse-white 2s ease-in-out infinite; }
+
+  /* ── Shared circular button base ── */
+  .cassette-btn-circ {
+    border-radius: 50%;
+    padding: 0;
+    min-height: unset;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    transition: all 0.1s ease;
+  }
+
+  /* ── CARREGAR — chrome/aluminum knob ── */
+  /* ── LOAD — gear/knurled knob ── */
+  /* 16-tooth gear: 32 alternating outer(49%)/inner(41%) points */
+  .cassette-btn-knob {
+    width: 3.8rem;
+    height: 3.8rem;
+    background: radial-gradient(circle at 34% 28%,
+      #6a6a72 0%, #3c3c46 28%, #1e1e28 58%, #0e0e14 100%);
+    border: none;
+    clip-path: polygon(
+      50%  1%, 58% 10%, 69%  5%, 73% 16%, 85% 15%, 84% 27%,
+      95% 31%, 90% 42%, 99% 50%, 90% 58%, 95% 69%, 84% 73%,
+      85% 85%, 73% 84%, 69% 95%, 58% 90%, 50% 99%, 42% 90%,
+      31% 95%, 27% 84%, 15% 85%, 16% 73%,  5% 69%, 10% 58%,
+       1% 50%, 10% 42%,  5% 31%, 16% 27%, 15% 15%, 27% 16%,
+      31%  5%, 42% 10%
+    );
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.9));
+    color: #585862;
+  }
+  .cassette-btn-knob:hover:not(.is-pressed) {
+    color: #909098;
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.85)) drop-shadow(0 0 5px rgba(180,180,200,0.4));
+  }
+  /* LOAD glow — dos wrappers:
+     knob-ring-wrap → anell circular extern (com CUE/PLAY)
+     knob-glow-wrap → drop-shadow que segueix la forma de l'engranatge interior */
+  .knob-ring-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+  .knob-ring-wrap.is-lit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 4px rgba(255,255,255,0.82),
+      0 0 0 8px rgba(255,255,255,0.22),
+      0 0 24px rgba(220,220,255,0.62),
+      0 0 50px rgba(200,200,240,0.2);
+  }
+  .knob-glow-wrap {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+  .knob-glow-wrap.is-lit {
+    filter:
+      drop-shadow(0 0 1px rgba(255,255,255,1.0))
+      drop-shadow(0 0 1px rgba(255,255,255,0.95))
+      drop-shadow(0 0 4px rgba(230,230,255,0.82))
+      drop-shadow(0 0 10px rgba(210,210,240,0.5));
+  }
+  .cassette-btn-knob.is-pressed {
+    background: radial-gradient(circle at 34% 28%,
+      #3c3c46 0%, #202028 30%, #141420 60%, #0c0c12 100%);
+    color: #d0d0de;
+  }
+  .cassette-btn-knob .cassette-btn-icon { font-size: 1.1rem; }
+
+  /* ── textura metall ratllat concèntric (base compartida CUE + PLAY) ── */
+  .cassette-btn-cue,
+  .cassette-btn-play {
+    background-image:
+      repeating-radial-gradient(
+        circle at center,
+        rgba(255,255,255,0.045) 0px,
+        rgba(255,255,255,0.045) 1px,
+        transparent               1px,
+        transparent               2.2px,
+        rgba(0,0,0,0.14)          2.2px,
+        rgba(0,0,0,0.14)          2.8px,
+        transparent               2.8px,
+        transparent               4.2px
+      );
+  }
+
+  /* ── CUE — pla, textura metall, anell taronja ── */
+  .cassette-btn-cue {
+    width: 4.2rem;
+    height: 4.2rem;
+    background-color: #1a1208;
+    border: 1px solid #3a2818;
+    box-shadow:
+      0 0 0 4px #241800,
+      0 0 0 6px #160e00,
+      0 2px 8px rgba(0,0,0,0.85);
+    color: #7a5520;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .cassette-btn-cue:hover:not(.is-pressed) {
+    color: #8a6020;
+    box-shadow:
+      0 0 0 4px rgba(255,160,0,0.28),
+      0 0 0 7px rgba(255,160,0,0.08),
+      0 2px 8px rgba(0,0,0,0.8);
+  }
+  .cassette-btn-cue.is-pressed {
+    background-color: #140e04;
+    border-color: rgba(255,160,0,0.18);
+    color: #ffa020;
+    box-shadow:
+      0 0 0 4px rgba(255,160,0,0.85),
+      0 0 0 8px rgba(255,160,0,0.25),
+      0 0 22px rgba(255,160,0,0.62),
+      0 0 46px rgba(255,160,0,0.2);
+  }
+
+  /* ── PLAY/PAUSE — pla, textura metall, anell verd ── */
+  .cassette-btn-play {
+    width: 4.4rem;
+    height: 4.4rem;
+    background-color: #0e120e;
+    border: 1px solid #253525;
+    box-shadow:
+      0 0 0 4px #0e1a0e,
+      0 0 0 6px #080e08,
+      0 2px 8px rgba(0,0,0,0.85);
+    color: #4a6a4a;
+  }
+  .cassette-btn-play:hover:not(.is-pressed) {
+    color: #3a6040;
+    box-shadow:
+      0 0 0 4px rgba(0,220,100,0.28),
+      0 0 0 7px rgba(0,220,100,0.08),
+      0 2px 8px rgba(0,0,0,0.8);
+  }
+  .cassette-btn-play.is-pressed {
+    background-color: #060e08;
+    border-color: rgba(0,232,122,0.15);
+    color: #00e87a;
+    box-shadow:
+      0 0 0 4px rgba(0,232,122,0.82),
+      0 0 0 8px rgba(0,232,122,0.22),
+      0 0 24px rgba(0,232,122,0.62),
+      0 0 50px rgba(0,232,122,0.2);
+  }
+  .cassette-btn-play .cassette-btn-icon { font-size: 1rem; letter-spacing: -0.05em; }
+
+  /* ── Hint: il·lumina el botó que cal prémer a continuació ── */
+  @keyframes hint-pulse-orange {
+    0%, 100% { color: rgba(255,160,0,0.55); text-shadow: 0 0 6px rgba(255,160,0,0.4); }
+    50%       { color: rgba(255,180,0,0.9);  text-shadow: 0 0 14px rgba(255,160,0,0.8), 0 0 28px rgba(255,140,0,0.3); }
+  }
+  @keyframes hint-pulse-green {
+    0%, 100% { color: rgba(0,220,100,0.55); text-shadow: 0 0 6px rgba(0,220,100,0.4); }
+    50%       { color: rgba(0,240,120,0.9);  text-shadow: 0 0 14px rgba(0,232,122,0.8), 0 0 28px rgba(0,200,100,0.3); }
+  }
+  .cassette-btn-cue.is-hint {
+    animation: hint-pulse-orange 2s ease-in-out infinite;
+  }
+  .cassette-btn-play.is-hint .cassette-btn-icon {
+    animation: hint-pulse-green 2s ease-in-out infinite;
+  }
+
+  /* ── NO PETICIONS — yellow toggle knob ── */
+  .cassette-btn-toggle {
+    width: 3.8rem;
+    height: 3.8rem;
+    background: radial-gradient(circle at 37% 30%,
+      #2e2c20 0%, #1a1a10 40%, #111108 100%);
+    border: 1px solid #26240e;
+    box-shadow:
+      0 0 0 4px #12100000,
+      0 0 0 6px #0e0c0000,
+      0 4px 16px rgba(0,0,0,0.9),
+      inset 0 1px 0 rgba(255,220,50,0.04),
+      inset 0 -1px 0 rgba(0,0,0,0.7);
+    color: #303020;
+  }
+  .cassette-btn-toggle:hover:not(.is-pressed) {
+    color: #585830;
+    box-shadow:
+      0 0 0 4px rgba(255,210,40,0.2),
+      0 0 0 7px rgba(255,210,40,0.06),
+      0 4px 16px rgba(0,0,0,0.84);
+  }
+  .cassette-btn-toggle.is-pressed {
+    background: radial-gradient(circle at 37% 30%,
+      #28260a 0%, #171608 40%, #0f0f04 100%);
+    border-color: rgba(255,210,40,0.15);
+    color: #ffd028;
+    box-shadow:
+      0 0 0 4px rgba(255,210,40,0.8),
+      0 0 0 8px rgba(255,210,40,0.22),
+      0 0 20px rgba(255,210,40,0.58),
+      0 0 42px rgba(255,210,40,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .cassette-btn-toggle .cassette-btn-icon { font-size: 1.05rem; }
+
+  /* ── APAGAR — pulsador rectangular CDJ que sobresurt del capdemunt ── */
+  .cassette-btn-form--stop {
+    position: absolute;
+    top: -0.65rem;
+    right: 1.2rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  /* Base rectangular: la part que s'enfonsa dins del panel */
+  .cassette-btn-form--stop::before {
+    content: '';
+    position: absolute;
+    top: 1.15rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3.4rem;
+    height: 0.8rem;
+    background: linear-gradient(180deg, #1e1e22 0%, #0e0e12 100%);
+    border-radius: 0 0 5px 5px;
+    border: 1px solid #0a0a0e;
+    border-top: none;
+    z-index: -1;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  }
+  /* Pulsador rectangular */
+  .cassette-btn-power {
+    width: 3.2rem;
+    height: 1.4rem;
+    border-radius: 5px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: linear-gradient(180deg,
+      #323236 0%, #1e1e22 50%, #141418 100%);
+    border: none;
+    box-shadow:
+      inset 0  1px 0   rgba(255,255,255,0.14),
+      inset 0 -1px 0   rgba(0,0,0,0.85),
+      inset  1px 0 0   rgba(255,255,255,0.07),
+      inset -1px 0 0   rgba(0,0,0,0.7),
+      0  1px 0   #0a0a0e,
+      0  3px 0   rgba(0,0,0,0.85),
+      0  5px 14px rgba(0,0,0,0.9);
+    color: rgba(200,200,205,0.65);
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    transition: box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
+  }
+  .cassette-btn-power:hover:not(.is-pressed) {
+    color: rgba(240,100,100,0.8);
+    box-shadow:
+      inset 0  1px 0   rgba(255,255,255,0.12),
+      inset 0 -1px 0   rgba(0,0,0,0.85),
+      inset  1px 0 0   rgba(255,255,255,0.06),
+      inset -1px 0 0   rgba(0,0,0,0.7),
+      0  1px 0   #0a0a0e,
+      0  3px 0   rgba(0,0,0,0.85),
+      0  5px 14px rgba(0,0,0,0.85),
+      0  0  10px rgba(255,40,40,0.2);
+  }
+  .cassette-btn-power:active,
+  .cassette-btn-power.is-pressed {
+    background: linear-gradient(180deg,
+      #200c0c 0%, #140606 50%, #0c0404 100%);
+    color: #ff4040;
+    transform: translateY(2px);
+    box-shadow:
+      inset 0  1px 0   rgba(255,255,255,0.04),
+      inset 0 -1px 0   rgba(0,0,0,0.9),
+      0  1px 0   rgba(40,0,0,0.9),
+      0  2px 6px rgba(0,0,0,0.8),
+      0  0  16px rgba(255,40,40,0.5),
+      0  0  36px rgba(255,40,40,0.2);
+  }
+  .cassette-btn-power .cassette-btn-icon { font-size: 0.85rem; }
+  /* Icona gravada a la superfície del panel, sota el pulsador */
+  .power-panel-icon {
+    position: absolute;
+    top: 1.55rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    line-height: 1;
+    color: rgba(160,160,165,0.45);
+    pointer-events: none;
+    user-select: none;
+  }
+  .cassette-btn-form--stop.is-active .power-panel-icon,
+  .cassette-btn-power.is-pressed ~ .power-panel-icon { color: rgba(255,80,80,0.7); }
+
+  /* Shared icon size override */
+  .cassette-btn-icon {
+    line-height: 1;
+    display: block;
+    color: inherit;
+    font-size: 1.05rem;
+  }
+
+  /* ── CDJ Display ─────────────────────────────────────────────────────────── */
+  .cassette-display {
+    background: #07070d;
+    border: 1px solid #18181f;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem 0.7rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      inset 0 3px 16px rgba(0,0,0,0.95),
+      inset 0 0 0 1px rgba(0,0,0,0.5);
+  }
+
+  /* Subtle blue screen vignette */
+  .cassette-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(30,60,180,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* State tokens */
+  .cassette-display              { --dc: #2a4060; --db: #8ac0e8; --dg: rgba(138,192,232,0.35); }
+  .cassette-display.lcd-visible  { --dc: #1a3a55; --db: #4a9ec0; --dg: rgba(74,158,192,0.35); }
+  .cassette-display.lcd-show     { --dc: #1a4a70; --db: #5bc8ff; --dg: rgba(91,200,255,0.4);  }
+  .cassette-display.lcd-requests { --dc: #3a2060; --db: #c878ff; --dg: rgba(200,120,255,0.4); }
+  .cassette-display.lcd-active   { --dc: #0a3a20; --db: #00e87a; --dg: rgba(0,232,122,0.45);  }
+  .cassette-display.lcd-finished { --dc: #3a1010; --db: #ff4444; --dg: rgba(255,68,68,0.4); }
+
+  .cassette-display-toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+  }
+
+  .cassette-display-party {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.52rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dc);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 68%;
+  }
+
+  .cassette-display-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: #ff8c00;
+    white-space: nowrap;
+    text-shadow: 0 0 6px rgba(255,140,0,0.5);
+  }
+
+  .cassette-display-status {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--db);
+    text-shadow: 0 0 10px var(--dg), 0 0 24px var(--dg);
+    line-height: 1.1;
+    margin-bottom: 0.1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .cassette-display-nextstep {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--db);
+    opacity: 0.65;
+    margin-bottom: 0.1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .cassette-display-chrono {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: #00e87a;
+    white-space: nowrap;
+    text-shadow: 0 0 6px rgba(0,232,122,0.6);
+  }
+
+  /* Waveform bars */
+  .cassette-display-wave {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 0.65rem;
+    margin-top: 0.3rem;
+    position: relative;
+    z-index: 1;
+  }
+  .cdj-bar {
+    flex: 1;
+    background: var(--dc);
+    border-radius: 1px 1px 0 0;
+    transition: background 0.3s;
+  }
+  /* Static waveform heights via nth-child */
+  .cdj-bar:nth-child(1)  { height: 45%; } .cdj-bar:nth-child(2)  { height: 70%; }
+  .cdj-bar:nth-child(3)  { height: 55%; } .cdj-bar:nth-child(4)  { height: 90%; }
+  .cdj-bar:nth-child(5)  { height: 30%; } .cdj-bar:nth-child(6)  { height: 75%; }
+  .cdj-bar:nth-child(7)  { height: 50%; } .cdj-bar:nth-child(8)  { height: 100%; }
+  .cdj-bar:nth-child(9)  { height: 40%; } .cdj-bar:nth-child(10) { height: 65%; }
+  .cdj-bar:nth-child(11) { height: 80%; } .cdj-bar:nth-child(12) { height: 35%; }
+  .cdj-bar:nth-child(13) { height: 95%; } .cdj-bar:nth-child(14) { height: 55%; }
+  .cdj-bar:nth-child(15) { height: 70%; } .cdj-bar:nth-child(16) { height: 40%; }
+  .cdj-bar:nth-child(17) { height: 85%; } .cdj-bar:nth-child(18) { height: 60%; }
+  .cdj-bar:nth-child(19) { height: 45%; } .cdj-bar:nth-child(20) { height: 75%; }
+  .cdj-bar:nth-child(21) { height: 30%; } .cdj-bar:nth-child(22) { height: 90%; }
+  .cdj-bar:nth-child(23) { height: 55%; } .cdj-bar:nth-child(24) { height: 70%; }
+
+  /* Active waveform pulses */
+  .cassette-display.lcd-active .cdj-bar { background: var(--db); opacity: 0.55; }
+  .cassette-display.lcd-active .cdj-bar:nth-child(even) { opacity: 0.25; }
+
+  /* Playhead line */
+  .cassette-display-wave::after {
+    content: '';
+    position: absolute;
+    left: 35%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255,140,0,0.7);
+    box-shadow: 0 0 4px rgba(255,140,0,0.5);
+  }
+
+  /* Blinking dot on active state */
+  .cassette-display.lcd-active .cassette-display-status::before {
+    content: '●';
+    font-size: 0.4em;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    color: var(--db);
+    animation: cdj-blink 1s step-end infinite;
+  }
+  @keyframes cdj-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── CDJ LED dots ─────────────────────────────────────────────────────────── */
+  .cassette-led-row {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-top: 0.7rem;
+  }
+
+  .cassette-led {
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 50%;
+    background: #1a1a20;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .cassette-led.led-on-gray    { background: #888; box-shadow: 0 0 4px #888; }
+  .cassette-led.led-on-blue    { background: #5bf; box-shadow: 0 0 5px #5bf, 0 0 2px #9df; }
+  .cassette-led.led-on-purple  { background: #c8f; box-shadow: 0 0 5px #c8f, 0 0 2px #eaf; }
+  .cassette-led.led-on-green   { background: #0e8; box-shadow: 0 0 5px #0e8, 0 0 2px #6fc; }
+  .cassette-led.led-on-red     { background: #f44; box-shadow: 0 0 5px #f44, 0 0 2px #f88; }
+  .cassette-led.led-on-orange  { background: #fa4; box-shadow: 0 0 5px #fa4, 0 0 2px #fc8; }
+
+  /* ── CDJ-3000 KPI 2×2 grid (right column inside display) ───────────────── */
+  .lcd-kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    flex-shrink: 0;
+    width: 6.5rem;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    padding-left: 0.5rem;
+    align-self: stretch;
+  }
+  .lcd-kpi-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.05rem 0.1rem;
+  }
+  .lcd-kpi-label {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--db);
+    opacity: 0.55;
+  }
+  .lcd-kpi-value {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--db);
+    line-height: 1;
+    text-shadow: 0 0 10px var(--dg);
+  }
+
+  /* ── Mobile KPI 4×2 grid inside LCD display ─────────────────────────────── */
+  .lcd-kpi-grid-mobile {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid rgba(100, 255, 180, 0.2);
+  }
+  .lcd-kpi-item-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.1rem;
+  }
+  .lcd-kpi-label-mobile {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--db);
+    opacity: 0.55;
+    white-space: nowrap;
+  }
+  .lcd-kpi-value-mobile {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--db);
+    line-height: 1;
+    text-shadow: 0 0 8px var(--dg);
+  }
+  .lcd-touch-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    justify-content: center;
+    align-self: stretch;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    padding-left: 0.45rem;
+    padding-right: 0.2rem;
+  }
+  .lcd-touch-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.22rem 0.45rem;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(57,255,140,0.25);
+    border-radius: 3px;
+    color: var(--db);
+    text-decoration: none;
+    font-family: 'Courier New', monospace;
+    font-size: 0.42rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: background 120ms, border-color 120ms, box-shadow 120ms;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .lcd-touch-btn:hover {
+    background: rgba(57,255,140,0.12);
+    border-color: rgba(57,255,140,0.6);
+    box-shadow: 0 0 6px rgba(57,255,140,0.3);
+    color: var(--db);
+    text-decoration: none;
+  }
+  .lcd-touch-btn:active {
+    background: rgba(57,255,140,0.22);
+    transform: scale(0.97);
+  }
+
+  /* ── Toggle switch (allow song requests) ── */
+  .req-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+  }
+  .requests-disabled-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #9ca3af;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    border: 1.5px dashed #e5e7eb;
+  }
+  .requests-disabled-state .material-symbols-outlined { font-size: 2.2rem; color: #d1d5db; }
+  .requests-disabled-state p { font-size: 0.85rem; margin: 0; line-height: 1.45; }
+  .requests-disabled-settings-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem; font-weight: 600;
+    color: #4b5563;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .requests-disabled-settings-btn:hover { background: #f3f4f6; border-color: #9ca3af; color: #1f2937; }
+  .req-toggle-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    user-select: none;
+  }
+  .req-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 2.6rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+  }
+  .req-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .req-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #d1d5db;
+    border-radius: 9999px;
+    transition: background 0.2s;
+  }
+  .req-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 1.05rem;
+    width: 1.05rem;
+    left: 0.18rem;
+    bottom: 0.18rem;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform 0.2s;
+  }
+  .req-toggle-switch input:checked + .req-toggle-slider {
+    background: #10b981;
+  }
+  .req-toggle-switch input:checked + .req-toggle-slider::before {
+    transform: translateX(1.2rem);
+  }
+  .req-toggle-switch input:disabled + .req-toggle-slider {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* ── POSADA — wavy organic button ── */
+  /* ── Botó LOAD de pista (estil CDJ simplificat) ── */
+  .sonic-btn-posada {
+    background: linear-gradient(180deg, #1e1e24 0%, #111116 100%);
+    color: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 0.25rem 0.75rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      0 2px 6px rgba(0,0,0,0.7);
+    text-shadow: 0 0 6px rgba(255,255,255,0.45);
+    transition: color 0.15s, text-shadow 0.15s, box-shadow 0.15s, transform 0.1s;
+  }
+  .sonic-btn-posada:hover {
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 18px rgba(255,255,255,0.3);
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.14),
+      0 2px 10px rgba(0,0,0,0.7);
+    transform: translateY(-1px);
+  }
+  .sonic-btn-posada:active {
+    transform: translateY(0);
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 1px 4px rgba(0,0,0,0.8);
+  }
+

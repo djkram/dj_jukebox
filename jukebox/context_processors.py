@@ -1,8 +1,21 @@
+from functools import lru_cache
+
 from django.conf import settings
 
 from .models import Party, Notification
 from .spotify_permissions import is_spotify_auth_for_all_enabled, user_can_connect_spotify
 from allauth.socialaccount.models import SocialAccount, SocialApp
+
+
+@lru_cache(maxsize=1)
+def _get_configured_providers():
+    db_providers = set(
+        SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list("provider", flat=True)
+    )
+    for provider_id, config in getattr(settings, "SOCIALACCOUNT_PROVIDERS", {}).items():
+        if any(a.get("client_id") for a in config.get("APPS", [])):
+            db_providers.add(provider_id)
+    return frozenset(db_providers)
 
 
 def selected_party(request):
@@ -56,14 +69,7 @@ def unread_notifications_count(request):
 
 
 def social_login_providers(request):
-    # Providers configurats via base de dades (SocialApp)
-    configured_providers = set(
-        SocialApp.objects.filter(sites__id=settings.SITE_ID).values_list("provider", flat=True)
-    )
-    # Providers configurats via settings (APPS dins SOCIALACCOUNT_PROVIDERS)
-    for provider_id, config in getattr(settings, "SOCIALACCOUNT_PROVIDERS", {}).items():
-        if any(a.get("client_id") for a in config.get("APPS", [])):
-            configured_providers.add(provider_id)
+    configured_providers = _get_configured_providers()
     spotify_configured = "spotify" in configured_providers
     return {
         "spotify_social_login_enabled": spotify_configured and is_spotify_auth_for_all_enabled(),

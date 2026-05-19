@@ -20,3 +20,5 @@ certs/
 # OS
 .DS_Store
 Thumbs.db
+node_modules/
+jukebox/templates/jukebox/dj_dashboard.html.bak

@@ -177,8 +177,9 @@ class AnalyzeSongAudioViewTests(TestCase):
 
     @patch('jukebox.views.analyze_song_from_temporary_mp3', return_value=None)
     @patch('jukebox.views.analyze_from_preview_url', return_value=None)
+    @patch('jukebox.views._get_acousticbrainz_features', return_value=None)
     @patch('jukebox.views._get_songbpm_features', return_value={'bpm': None, 'key': None, 'source_url': None})
-    def test_analyze_song_without_metadata_is_not_server_error(self, mock_songbpm, mock_preview, mock_ytdlp):
+    def test_analyze_song_without_metadata_is_not_server_error(self, mock_songbpm, mock_ab, mock_preview, mock_ytdlp):
         self.client.login(username='admin', password='test')
 
         response = self.client.post(reverse('analyze_song_audio', args=[self.party.id, self.song.id]))

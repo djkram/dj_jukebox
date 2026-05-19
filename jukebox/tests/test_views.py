@@ -23,7 +23,6 @@ class SelectPartyViewTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test')
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now()
         )
 
@@ -61,7 +60,6 @@ class SongListViewTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test', credits=50)
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=5,
             party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
@@ -165,7 +163,6 @@ class AnalyzeSongAudioViewTests(TestCase):
         self.user = User.objects.create_superuser(username='admin', password='test')
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
         )
         self.song = Song.objects.create(
@@ -198,7 +195,6 @@ class VoteViewTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test')
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=5,
             party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
@@ -261,7 +257,6 @@ class VoteViewTests(TestCase):
         """Test que no es pot votar sense vots disponibles"""
         party_no_votes = Party.objects.create(
             name='No Votes Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=0,
             party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
@@ -290,7 +285,6 @@ class VoteViewTests(TestCase):
         """Test que no es pot votar si la festa no té voting_enabled"""
         party_hidden = Party.objects.create(
             name='Hidden Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=5,
             party_status=Party.STATUS_HIDDEN,
@@ -327,7 +321,6 @@ class BuyVotesViewTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now()
         )
 
@@ -362,7 +355,6 @@ class SongRequestViewTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             song_request_cost=10
         )
@@ -407,7 +399,6 @@ class DJDashboardViewTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.superuser,
             date=timezone.now()
         )
 
@@ -488,7 +479,6 @@ class DJManagementAccessTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Managed Party',
-            owner=self.superuser,
             date=timezone.now()
         )
         self.song = Song.objects.create(
@@ -560,7 +550,6 @@ class SetPartyViewTests(TestCase):
         self.owner = User.objects.create_user(username='owner', password='test')
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.owner,
             date=timezone.now(),
         )
 
@@ -660,7 +649,6 @@ class DJPermissionTests(TestCase):
 
         self.party = Party.objects.create(
             name='DJ Party',
-            owner=self.superuser,
             date=timezone.now(),
             party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
         )
@@ -668,7 +656,6 @@ class DJPermissionTests(TestCase):
 
         self.other_party = Party.objects.create(
             name='Other Party',
-            owner=self.superuser,
             date=timezone.now(),
         )
 
@@ -736,7 +723,6 @@ class IsDjAdminTests(TestCase):
         self.regular_user = User.objects.create_user(username='user', password='test')
         self.party = Party.objects.create(
             name='Party',
-            owner=self.superuser,
             date=timezone.now(),
         )
         self.party.djs.add(self.dj_user)
@@ -767,7 +753,6 @@ class UpdatePartyStatusTests(TestCase):
 
         self.party = Party.objects.create(
             name='Status Party',
-            owner=self.superuser,
             date=timezone.now(),
             party_status=Party.STATUS_HIDDEN,
         )
@@ -837,7 +822,6 @@ class ManageSongRequestsTests(TestCase):
 
         self.party = Party.objects.create(
             name='Request Party',
-            owner=self.superuser,
             date=timezone.now(),
             song_request_cost=10,
         )
@@ -933,7 +917,6 @@ class RequestSongViewTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test', credits=50)
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             song_request_cost=10,
             allow_song_requests=True,
@@ -1054,7 +1037,6 @@ class ToggleViewTests(TestCase):
         self.superuser = User.objects.create_superuser(username='admin', password='admin')
         self.party = Party.objects.create(
             name='Toggle Party',
-            owner=self.superuser,
             date=timezone.now(),
             allow_song_requests=True,
             auto_sync_playlist=False,
@@ -1146,7 +1128,6 @@ class SavePartyLocationTests(TestCase):
         self.superuser = User.objects.create_superuser(username='admin', password='admin')
         self.party = Party.objects.create(
             name='Location Party',
-            owner=self.superuser,
             date=timezone.now(),
         )
 

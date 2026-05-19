@@ -22,7 +22,6 @@ class VotesBasicTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=5
         )
@@ -80,7 +79,6 @@ class VotesBasicTests(TestCase):
         """Test que els vots són independents per cada festa"""
         party2 = Party.objects.create(
             name='Party 2',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=3
         )

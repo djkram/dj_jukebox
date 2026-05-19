@@ -37,7 +37,7 @@ class Party(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, help_text=_("Creador de la festa (necessari per Spotify sync)"))
+    owners = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='owned_parties', blank=True, help_text=_("Usuaris amb rol d'owner de la festa"))
     playlist = models.ForeignKey(Playlist, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField()
     code = models.CharField(max_length=12, unique=True, editable=True, default='')

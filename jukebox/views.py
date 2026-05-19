@@ -300,17 +300,12 @@ def party_settings(request, party_id):
                 messages.success(request, _("DJs actualitzats correctament."))
             return redirect('party_settings', party_id=party.id)
 
-        # Path ràpid: actualitzar l'owner de la festa
+        # Path ràpid: actualitzar els owners de la festa
         if 'save_owner' in request.POST:
             if request.user.is_superuser:
-                owner_id = request.POST.get('owner')
-                if owner_id:
-                    try:
-                        party.owner = User.objects.get(pk=owner_id)
-                        party.save(update_fields=['owner'])
-                        messages.success(request, _("Owner de la festa actualitzat."))
-                    except User.DoesNotExist:
-                        messages.error(request, _("Usuari no trobat."))
+                owner_ids = request.POST.getlist('owners')
+                party.owners.set(owner_ids)
+                messages.success(request, _("Owners de la festa actualitzats."))
             return redirect('party_settings', party_id=party.id)
 
         form = PartySettingsForm(request.POST, request.FILES, instance=party, request=request)
@@ -357,6 +352,7 @@ def party_settings(request, party_id):
             return redirect(get_spotify_reconnect_url(request))
 
     all_users = User.objects.order_by('username') if request.user.is_superuser else []
+    owner_pks = set(party.owners.values_list('pk', flat=True)) if request.user.is_superuser else set()
 
     return render(request, 'jukebox/party_settings.html', {
         'party':     party,
@@ -367,6 +363,7 @@ def party_settings(request, party_id):
         'has_spotify': has_spotify,
         'only_owned': only_owned,
         'all_users': all_users,
+        'owner_pks': owner_pks,
     })
 
 

@@ -49,7 +49,6 @@ class PartyModelTests(TestCase):
         """Test que Party genera codi automàticament"""
         party = Party.objects.create(
             name='Test Party',
-            owner=self.owner,
             date=timezone.now()
         )
         self.assertIsNotNone(party.code)
@@ -59,15 +58,14 @@ class PartyModelTests(TestCase):
 
     def test_party_code_is_unique(self):
         """Test que cada party té un codi únic"""
-        party1 = Party.objects.create(name='Party 1', owner=self.owner, date=timezone.now())
-        party2 = Party.objects.create(name='Party 2', owner=self.owner, date=timezone.now())
+        party1 = Party.objects.create(name='Party 1', date=timezone.now())
+        party2 = Party.objects.create(name='Party 2', date=timezone.now())
         self.assertNotEqual(party1.code, party2.code)
 
     def test_party_default_values(self):
         """Test valors per defecte de Party"""
         party = Party.objects.create(
             name='Test Party',
-            owner=self.owner,
             date=timezone.now()
         )
         self.assertEqual(party.max_votes_per_user, 5)
@@ -80,7 +78,6 @@ class PartyModelTests(TestCase):
         """Test party amb playlist assignada"""
         party = Party.objects.create(
             name='Test Party',
-            owner=self.owner,
             playlist=self.playlist,
             date=timezone.now()
         )
@@ -88,7 +85,7 @@ class PartyModelTests(TestCase):
 
     def test_party_str(self):
         """Test __str__ de Party"""
-        party = Party.objects.create(name='My Party', owner=self.owner, date=timezone.now())
+        party = Party.objects.create(name='My Party', date=timezone.now())
         self.assertEqual(str(party), 'My Party')
 
 
@@ -123,7 +120,7 @@ class SongModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='user', password='test')
-        self.party = Party.objects.create(name='Party', owner=self.user, date=timezone.now())
+        self.party = Party.objects.create(name='Party', date=timezone.now())
 
     def test_song_creation(self):
         """Test crear cançó"""
@@ -166,7 +163,7 @@ class VoteModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='user', password='test')
-        self.party = Party.objects.create(name='Party', owner=self.user, date=timezone.now())
+        self.party = Party.objects.create(name='Party', date=timezone.now())
         self.song = Song.objects.create(
             party=self.party,
             title='Song',
@@ -214,7 +211,7 @@ class VotePackageModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='user', password='test')
-        self.party = Party.objects.create(name='Party', owner=self.user, date=timezone.now())
+        self.party = Party.objects.create(name='Party', date=timezone.now())
 
     def test_vote_package_creation(self):
         """Test crear paquet de vots"""
@@ -234,7 +231,7 @@ class PartyCoinsGrantModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='user', password='test')
-        self.party = Party.objects.create(name='Party', owner=self.user, date=timezone.now())
+        self.party = Party.objects.create(name='Party', date=timezone.now())
 
     def test_coins_grant_creation(self):
         """Test crear grant de coins"""
@@ -281,7 +278,7 @@ class SongRequestModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='user', password='test')
-        self.party = Party.objects.create(name='Party', owner=self.user, date=timezone.now())
+        self.party = Party.objects.create(name='Party', date=timezone.now())
 
     def test_song_request_creation(self):
         """Test crear petició de cançó"""

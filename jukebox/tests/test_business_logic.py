@@ -63,7 +63,6 @@ class ConvertCoinsToVotesTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test', credits=20)
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             max_votes_per_user=5,
         )
@@ -123,7 +122,6 @@ class EnsureFreeCoinsTests(TestCase):
         self.user = User.objects.create_user(username='user', password='test')
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.user,
             date=timezone.now(),
             free_coins_per_user=5,
         )

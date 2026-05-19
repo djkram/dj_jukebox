@@ -941,7 +941,7 @@
           <h3 class="settings-form-title">Owner de la festa</h3>
         </div>
         <div style="padding: 1.5rem;">
-          <p class="settings-help mb-2">Selecciona l'usuari que serà owner (pot configurar la festa).</p>
+          <p class="settings-help mb-2">Selecciona els usuaris que seran owners (poden configurar la festa). Pot estar buit.</p>
           <form method="post">
             {% csrf_token %}
             <input type="hidden" name="save_owner" value="1">
@@ -950,9 +950,9 @@
               <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
                 <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="owner_{{ u.pk }}">{{ u.username }}</label>
                 <div class="form-check form-switch mb-0 ms-2">
-                  <input class="form-check-input owner-radio" type="radio"
-                         name="owner" id="owner_{{ u.pk }}" value="{{ u.pk }}"
-                         {% if party.owner_id == u.pk %}checked{% endif %}
+                  <input class="form-check-input" type="checkbox"
+                         name="owners" id="owner_{{ u.pk }}" value="{{ u.pk }}"
+                         {% if u.pk in owner_pks %}checked{% endif %}
                          style="width:2.5rem;height:1.25rem;cursor:pointer;">
                 </div>
               </div>
@@ -963,7 +963,7 @@
             <div class="mt-3">
               <button type="submit" class="btn btn-primary w-100">
                 <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
-                Desa Owner
+                Desa Owners
               </button>
             </div>
           </form>
@@ -1712,7 +1712,7 @@
 
     <section class="mobile-card p-3">
       <span class="mobile-label">Owner de la festa</span>
-      <p class="help-text mb-2">Selecciona l'usuari que serà owner (pot configurar la festa).</p>
+      <p class="help-text mb-2">Selecciona els usuaris que seran owners (poden configurar la festa). Pot estar buit.</p>
       <form method="post">
         {% csrf_token %}
         <input type="hidden" name="save_owner" value="1">
@@ -1721,9 +1721,9 @@
           <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
             <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="owner_mob_{{ u.pk }}">{{ u.username }}</label>
             <div class="form-check form-switch mb-0 ms-2">
-              <input class="form-check-input" type="radio"
-                     name="owner" id="owner_mob_{{ u.pk }}" value="{{ u.pk }}"
-                     {% if party.owner_id == u.pk %}checked{% endif %}
+              <input class="form-check-input" type="checkbox"
+                     name="owners" id="owner_mob_{{ u.pk }}" value="{{ u.pk }}"
+                     {% if u.pk in owner_pks %}checked{% endif %}
                      style="width:2.5rem;height:1.25rem;cursor:pointer;">
             </div>
           </div>
@@ -1733,7 +1733,7 @@
         </div>
         <button type="submit" class="btn btn-primary w-100 mt-3">
           <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
-          Desa Owner
+          Desa Owners
         </button>
       </form>
     </section>
@@ -3317,11 +3317,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return map;
   }
-
-  // DJs checkboxes: associate with desktop form
-  document.querySelectorAll('[id^="id_djs_"]').forEach(function(cb) {
-    if (!cb.getAttribute('form')) cb.setAttribute('form', 'partySettingsForm');
-  });
 
   // ── Toggle restricció de proximitat (només mostra/amaga el radi) ───────
   function setupLocationToggle(toggleId, fieldsId, map) {

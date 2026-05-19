@@ -205,7 +205,6 @@ class AutoSyncTests(TestCase):
         )
         self.party = Party.objects.create(
             name='Test Party',
-            owner=self.superuser,
             playlist=self.playlist,
             date=timezone.now(),
             auto_sync_playlist=False

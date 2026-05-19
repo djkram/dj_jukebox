@@ -932,6 +932,44 @@
         </div>
       </div>
       {% endif %}
+
+      {# ── OWNER DE LA FESTA (només admin) ────────────────────────────────── #}
+      {% if request.user.is_superuser %}
+      <div class="settings-form-card mt-3">
+        <div class="settings-form-header">
+          <span class="material-symbols-outlined">star</span>
+          <h3 class="settings-form-title">Owner de la festa</h3>
+        </div>
+        <div style="padding: 1.5rem;">
+          <p class="settings-help mb-2">Selecciona l'usuari que serà owner (pot configurar la festa).</p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="save_owner" value="1">
+            <div style="max-height:200px;overflow-y:auto;border:1px solid #e0e3e6;border-radius:6px;padding:0.5rem;">
+              {% for u in all_users %}
+              <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
+                <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="owner_{{ u.pk }}">{{ u.username }}</label>
+                <div class="form-check form-switch mb-0 ms-2">
+                  <input class="form-check-input owner-radio" type="radio"
+                         name="owner" id="owner_{{ u.pk }}" value="{{ u.pk }}"
+                         {% if party.owner_id == u.pk %}checked{% endif %}
+                         style="width:2.5rem;height:1.25rem;cursor:pointer;">
+                </div>
+              </div>
+              {% empty %}
+              <span class="text-muted" style="font-size:0.85rem;">No hi ha usuaris registrats.</span>
+              {% endfor %}
+            </div>
+            <div class="mt-3">
+              <button type="submit" class="btn btn-primary w-100">
+                <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
+                Desa Owner
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     {# ── COL. DRETA: TAULA DE CANÇONS ───────────────────────────────────── #}
@@ -1668,6 +1706,34 @@
         <button type="submit" class="btn btn-primary w-100 mt-3">
           <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
           Desa DJs
+        </button>
+      </form>
+    </section>
+
+    <section class="mobile-card p-3">
+      <span class="mobile-label">Owner de la festa</span>
+      <p class="help-text mb-2">Selecciona l'usuari que serà owner (pot configurar la festa).</p>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="save_owner" value="1">
+        <div style="max-height:180px;overflow-y:auto;border:1px solid #e0e3e6;border-radius:6px;padding:0.5rem;">
+          {% for u in all_users %}
+          <div class="d-flex align-items-center justify-content-between px-2 py-2" style="border-bottom:1px solid #f0f0f0;">
+            <label style="font-size:0.88rem;color:#191c1f;margin:0;cursor:pointer;" for="owner_mob_{{ u.pk }}">{{ u.username }}</label>
+            <div class="form-check form-switch mb-0 ms-2">
+              <input class="form-check-input" type="radio"
+                     name="owner" id="owner_mob_{{ u.pk }}" value="{{ u.pk }}"
+                     {% if party.owner_id == u.pk %}checked{% endif %}
+                     style="width:2.5rem;height:1.25rem;cursor:pointer;">
+            </div>
+          </div>
+          {% empty %}
+          <span class="text-muted" style="font-size:0.85rem;">No hi ha usuaris registrats.</span>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">
+          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">save</span>
+          Desa Owner
         </button>
       </form>
     </section>

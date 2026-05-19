@@ -292,12 +292,25 @@ def party_settings(request, party_id):
 
     # Processament del formulari
     if request.method == 'POST':
-        # Path ràpid: actualitzar només els DJs (form dedicat a la secció DJs)
+        # Path ràpid: actualitzar només els DJs
         if 'save_djs' in request.POST:
             if request.user.is_superuser:
                 dj_ids = request.POST.getlist('djs')
                 party.djs.set(dj_ids)
                 messages.success(request, _("DJs actualitzats correctament."))
+            return redirect('party_settings', party_id=party.id)
+
+        # Path ràpid: actualitzar l'owner de la festa
+        if 'save_owner' in request.POST:
+            if request.user.is_superuser:
+                owner_id = request.POST.get('owner')
+                if owner_id:
+                    try:
+                        party.owner = User.objects.get(pk=owner_id)
+                        party.save(update_fields=['owner'])
+                        messages.success(request, _("Owner de la festa actualitzat."))
+                    except User.DoesNotExist:
+                        messages.error(request, _("Usuari no trobat."))
             return redirect('party_settings', party_id=party.id)
 
         form = PartySettingsForm(request.POST, request.FILES, instance=party, request=request)
@@ -343,6 +356,8 @@ def party_settings(request, party_id):
         except SpotifyAuthError:
             return redirect(get_spotify_reconnect_url(request))
 
+    all_users = User.objects.order_by('username') if request.user.is_superuser else []
+
     return render(request, 'jukebox/party_settings.html', {
         'party':     party,
         'form':      form,
@@ -351,6 +366,7 @@ def party_settings(request, party_id):
         'playlists': playlists,
         'has_spotify': has_spotify,
         'only_owned': only_owned,
+        'all_users': all_users,
     })
 
 

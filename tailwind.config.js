@@ -1,0 +1,56 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+    darkMode: "class",
+    content: [
+        "./jukebox/templates/**/*.html",
+    ],
+    theme: {
+        extend: {
+            colors: {
+                "brand-blue": "#0040e0",
+                "brand-blue-light": "#2e5bff",
+                "brand-cyan": "#00daf3",
+                "brand-purple": "#5e24e1",
+                "surface": "#f4f7fa",
+                "surface-container": "#eceef3",
+                "on-surface": "#191c1f",
+                "outline": "#747688",
+                "primary": "#0040e0",
+                "secondary": "#2e5bff",
+                "tertiary": "#5e24e1",
+                "background": "#f4f7fa",
+                "surface-bright": "#f4f7fa",
+                "surface-container-high": "#e5e8eb",
+                "surface-container-low": "#f1f4f7",
+                "surface-container-highest": "#e0e3e6",
+                "surface-container-lowest": "#ffffff",
+                "surface-variant": "#e0e3e6",
+                "on-surface-variant": "#434655",
+                "outline-variant": "#c4c5d8",
+                "primary-container": "#0040e0",
+                "secondary-container": "#2e5bff",
+                "tertiary-container": "#5e24e1",
+                "error": "#ba1a1a",
+                "error-container": "#ffdad6",
+                "on-primary": "#ffffff",
+                "on-secondary": "#ffffff",
+                "on-tertiary": "#ffffff",
+                "on-error": "#ffffff",
+                "accent-cyan": "#00e3fd",
+            },
+            fontFamily: {
+                "headline": ["Epilogue", "sans-serif"],
+                "body": ["Plus Jakarta Sans", "sans-serif"],
+            },
+            borderRadius: {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+            },
+        },
+    },
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('@tailwindcss/container-queries'),
+    ],
+}

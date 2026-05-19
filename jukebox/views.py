@@ -295,6 +295,14 @@ def party_settings(request, party_id):
 
     # Processament del formulari
     if request.method == 'POST':
+        # Path ràpid: actualitzar només els DJs (form dedicat a la secció DJs)
+        if 'save_djs' in request.POST:
+            if request.user.is_superuser:
+                dj_ids = request.POST.getlist('djs')
+                party.djs.set(dj_ids)
+                messages.success(request, _("DJs actualitzats correctament."))
+            return redirect('party_settings', party_id=party.id)
+
         form = PartySettingsForm(request.POST, request.FILES, instance=party, request=request)
         if form.is_valid():
             # Si es crida via AJAX i hi ha playlist, no carregar cançons

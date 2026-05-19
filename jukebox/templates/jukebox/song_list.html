@@ -1,4 +1,5 @@
 {% extends "jukebox/admin_base.html" %}
+{% load static %}
 {% load dict_filters %}
 {% load i18n %}
 {% block page_title %}
@@ -1815,12 +1816,12 @@
               </thead>
               <tbody>
                 {% for song in pending_songs %}
-                  <tr class="songs-table-row pending-song-row" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
+                  <tr class="songs-table-row pending-song-row" data-song-id="{{ song.id }}" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-spotify-id="{{ song.spotify_id }}">
                     <td class="songs-table-cell-first">
                       <div class="d-flex align-items-center gap-3">
                         <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                           {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
                               <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
@@ -2146,7 +2147,77 @@
               </div>
             </div>
           </div>
+
           <div class="songs-column-body">
+
+            <!-- Propers temes — desktop right column -->
+            {% if party.party_status == 'djjukebox_active' %}
+              {% if recommended_songs %}
+              <div style="margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                <div class="sl-col-listtitle" style="margin-bottom: 0.65rem;">
+                  <div class="cdj-col-led" style="background:#4f46e5;box-shadow:0 0 6px #4f46e5,0 0 12px rgba(79,70,229,0.4);"></div>
+                  <span class="sl-col-listlabel">PROPERS</span>
+                  <span class="sl-col-listname">Els més votats per sonar</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem;">
+                  {% for song in recommended_songs %}
+                    <div class="bg-white p-1 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                      <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
+                        {% if song.album_image_url %}
+                          <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
+                        {% else %}
+                          <div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-music" style="color:#747688;font-size:1rem;"></i></div>
+                        {% endif %}
+                        <div class="position-absolute d-flex flex-column" style="left:0.22rem;right:0.22rem;bottom:0.22rem;gap:0.16rem;">
+                          <div style="font-size:0.67rem;font-weight:700;color:#191c1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.02;background:#fff;padding:0.07rem 0.26rem;border-radius:3px;">{{ song.title }}</div>
+                          <div style="font-size:0.58rem;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1;background:#fff;padding:0.01rem 0.26rem;border-radius:3px;">{{ song.artist }}</div>
+                        </div>
+                      </div>
+                      <div class="mt-1 d-flex align-items-center justify-content-between" style="gap:0.2rem;">
+                        {% if song.badge_label %}<span class="badge" style="background-color:{{ song.badge_bg }};color:{{ song.badge_text }};font-size:0.7rem;padding:0.2rem 0.4rem;font-weight:700;">{{ song.badge_label }}</span>{% else %}<span></span>{% endif %}
+                        {% if song.num_likes > 0 %}<span style="font-size:0.8rem;color:#e74c3c;font-weight:800;">{{ song.num_likes }}<i class="fas fa-heart ms-1" style="font-size:0.65rem;"></i></span>{% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+            {% else %}
+              <div id="desktop-jukebox-inactive" style="margin-bottom:1.5rem;padding-bottom:1.5rem;text-align:center;border-bottom:1px solid rgba(0,0,0,0.08);">
+                <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
+                  <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:#4f46e5;font-size:1.1rem;"></i></div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Els temes més votats sonen primer. Ara és el moment d'explorar la Maleta i triar els teus favorits.</div>
+                  <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+                <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
+                  <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-vote-yea" style="color:#4f46e5;font-size:1.1rem;"></i></div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">La Sessió Jukebox no ha começat{% if party.jukebox_starts_at %} — arrenca el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Qui vota més, sona primer</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Quan el DJ encengui el Jukebox{% if party.jukebox_starts_at %} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}, la cua la decidiu vosaltres. Entra al Match i assegura't que els teus favorits hi siguin.</div>
+                  <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Troba el teu Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+                <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
+                  <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="color:#4f46e5;font-size:1.1rem;"></i></div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El Jukebox encara no és actiu{% if party.jukebox_starts_at %} — s'obre el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Quin tema és el teu?</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJ Jukebox posa els temes amb més vots. Explora la Maleta, fes el Match i vota'ls ara.</div>
+                  <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+                <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
+                  <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="color:#4f46e5;font-size:1.1rem;"></i></div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">La sessió Jukebox no ha arrencat{% if party.jukebox_starts_at %} — s'activa el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La cua de la nit és teva</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Al DJ Jukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
+                  <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+                <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
+                  <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-users" style="color:#4f46e5;font-size:1.1rem;"></i></div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJ Jukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
+                  <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes sentir la teva veu <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+              </div>
+              <script>(function(){var m=document.querySelectorAll('#desktop-jukebox-inactive .desktop-inactive-msg');if(m.length){m[Math.floor(Math.random()*m.length)].style.display='flex';}})();</script>
+            {% endif %}
+
             <div class="sl-col-listtitle">
               <div class="cdj-col-led" style="background:#1cc88a;box-shadow:0 0 6px #1cc88a,0 0 12px rgba(28,200,138,0.4);"></div>
               <span class="sl-col-listlabel">HISTORIAL</span>
@@ -2170,7 +2241,7 @@
                         <span class="songs-played-order">{{ song.display_order }}</span>
                         <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                           {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
                               <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
@@ -2523,6 +2594,7 @@
         <section>
           <div class="mobile-segmented">
             <button type="button" class="mobile-song-tab mobile-segmented-item is-active" data-mobile-tab="bag">{% trans "Maleta del DJ" %}</button>
+            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="recommended">{% trans "Propers temes" %}</button>
             <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="played">{% trans "El que ha sonat" %}</button>
           </div>
         </section>
@@ -2538,11 +2610,11 @@
 
           <div class="mobile-list-stack">
           {% for song in pending_songs %}
-            <div class="song-card mobile-bag-song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
+            <div class="song-card mobile-bag-song-card" data-song-id="{{ song.id }}" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
               <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                   {% else %}
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
                       <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
@@ -2664,7 +2736,7 @@
                 </div>
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                   {% else %}
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
                       <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
@@ -2700,8 +2772,157 @@
               </div>
             </div>
           {% empty %}
-            <div class="mobile-empty-state">{% trans "Encara no ha començat la festa." %}</div>
+            <div id="sonat-inactive-msgs" style="padding: 2rem 1.25rem; text-align: center;">
+
+              {% comment %}Missatge 0{% endcomment %}
+              <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-headphones" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Mentre la pista escalfa, les votacions estan obertes{% if party.jukebox_ends_at %} fins al {{ party.date|date:"d/m" }} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Vota els teus favorits i fes que sonin.</div>
+                <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+              {% comment %}Missatge 1{% endcomment %}
+              <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">La Sessió Jukebox no ha começat — res ha sonat encara</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Pots votar fins que acabi el Jukebox{% if party.jukebox_ends_at %} el {{ party.date|date:"d/m" }} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Explora la Maleta i tria els temes que vols sentir aquesta nit.</div>
+                <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Explora la Maleta <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+              {% comment %}Missatge 2{% endcomment %}
+              <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El Jukebox encara no és actiu{% if party.jukebox_starts_at %} — arrenca el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Qui vota ara, decideix el que sona</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Les votacions no es tanquen fins al final del Jukebox{% if party.jukebox_ends_at %} ({{ party.date|date:"d/m" }} · {{ party.jukebox_ends_at|time:"H:i" }}){% endif %}. Entra al Match i fes sentir la teva veu.</div>
+                <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+              {% comment %}Missatge 3{% endcomment %}
+              <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-users" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">La sessió Jukebox no ha arrencat{% if party.jukebox_starts_at %} — s'activa el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Troba el teu match musical</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Cada vot compta fins que acaba la festa{% if party.jukebox_ends_at %} el {{ party.date|date:"d/m" }} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Explora la Maleta del DJ i vota els temes que et fan moure.</div>
+                <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Explora la Maleta <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+              {% comment %}Missatge 4{% endcomment %}
+              <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-star" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La pista t'espera</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Tens temps de votar fins al {{ party.date|date:"d/m" }}{% if party.jukebox_ends_at %} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Al Match trobaràs els temes de la Maleta del DJ — deslitza i vota els teus favorits.</div>
+                <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+            </div>
+            <script>
+            (function() {
+              var msgs = document.querySelectorAll('#sonat-inactive-msgs .sonat-inactive-msg');
+              if (msgs.length) {
+                var idx = Math.floor(Math.random() * msgs.length);
+                msgs[idx].style.display = 'flex';
+              }
+            })();
+            </script>
           {% endfor %}
+        </section>
+
+        <section id="mobile-tab-recommended" class="d-none flex-column" style="padding: 0 0.25rem;">
+          {% if party.party_status == 'djjukebox_active' %}
+            <div style="padding: 0.75rem 0 0.4rem; font-size: 0.75rem; font-weight: 700; color: #a0a3b1; text-transform: uppercase; letter-spacing: 0.07em;">Els més votats per sonar</div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; padding: 0.5rem 0;">
+            {% for song in recommended_songs %}
+              <div>
+                <div class="bg-white p-1 h-100 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                  <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
+                    {% if song.album_image_url %}
+                      <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
+                    {% else %}
+                      <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-music" style="color: #747688; font-size: 1rem;"></i>
+                      </div>
+                    {% endif %}
+                    <div class="position-absolute d-flex flex-column" style="left: 0.22rem; right: 0.22rem; bottom: 0.22rem; gap: 0.16rem;">
+                      <div style="font-size: 0.67rem; font-weight: 700; color: #191c1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.02; background: #fff; padding: 0.07rem 0.26rem; border-radius: 3px;">{{ song.title }}</div>
+                      <div style="font-size: 0.58rem; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1; background: #fff; padding: 0.01rem 0.26rem; border-radius: 3px;">{{ song.artist }}</div>
+                    </div>
+                  </div>
+                  <div class="mt-1 d-flex align-items-center justify-content-between" style="gap: 0.2rem;">
+                    {% if song.badge_label %}<span class="badge" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.7rem; padding: 0.2rem 0.4rem; font-weight: 700;">{{ song.badge_label }}</span>{% else %}<span></span>{% endif %}
+                    {% if song.num_likes > 0 %}<span style="font-size: 0.8rem; color: #e74c3c; font-weight: 800;">{{ song.num_likes }}<i class="fas fa-heart ms-1" style="font-size: 0.65rem;"></i></span>{% endif %}
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="mobile-empty-state" style="grid-column: 1/-1;">{% trans "No hi ha recomanacions disponibles." %}</div>
+            {% endfor %}
+            </div>
+          {% else %}
+            <div id="jukebox-inactive-msgs" style="padding: 2rem 1.25rem; text-align: center;">
+
+              {% comment %}Missatge 0{% endcomment %}
+              <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Els temes més votats sonen primer. Ara és el moment d'explorar la Maleta i triar els teus favorits.</div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+                  <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Maleta del DJ <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                  <span style="color:#d1d5db;">·</span>
+                  <a href="{% url 'song_swipe' %}" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+              </div>
+
+              {% comment %}Missatge 1{% endcomment %}
+              <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-vote-yea" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">La Sessió Jukebox no ha começat{% if party.jukebox_starts_at %} — arrenca el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Qui vota més, sona primer</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Quan el DJ encengui el Jukebox{% if party.jukebox_starts_at %} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}, la cua la decidiu vosaltres. Entra al Match i assegura't que els teus favorits hi siguin.</div>
+                <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Troba el teu Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+              {% comment %}Missatge 2{% endcomment %}
+              <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El Jukebox encara no és actiu{% if party.jukebox_starts_at %} — s'obre el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Quin tema és el teu?</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJ Jukebox posa els temes amb més vots. Explora la Maleta, fes el Match amb els que t'agraden i vota'ls ara.</div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+                  <a href="{% url 'song_swipe' %}" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                  <span style="color:#d1d5db;">·</span>
+                  <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Maleta del DJ <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+              </div>
+
+              {% comment %}Missatge 3{% endcomment %}
+              <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">La sessió Jukebox no ha arrencat{% if party.jukebox_starts_at %} — s'activa el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La cua de la nit és teva</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Al DJ Jukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+                  <a href="{% url 'song_swipe' %}" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                  <span style="color:#d1d5db;">·</span>
+                  <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Maleta del DJ <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+                </div>
+              </div>
+
+              {% comment %}Missatge 4{% endcomment %}
+              <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
+                <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-users" style="color:#4f46e5;font-size:1.25rem;"></i></div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJ Jukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
+                <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes sentir la teva veu <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
+              </div>
+
+            </div>
+            <script>
+            (function() {
+              var msgs = document.querySelectorAll('#jukebox-inactive-msgs .jukebox-inactive-msg');
+              if (msgs.length) {
+                var idx = Math.floor(Math.random() * msgs.length);
+                msgs[idx].style.display = 'flex';
+              }
+            })();
+            </script>
+          {% endif %}
         </section>
 
         <!-- Error Message -->
@@ -2720,955 +2941,37 @@
 
 <!-- Preview LCD state (shared between Spotify block and polling) -->
 <script>
-window.slPreviewActive = false;
-window.slPreviewTitle  = '';
-window.slPreviewArtist = '';
-
-window.updateLcdForPreview = function(title, artist, isPlaying) {
-  var lcd        = document.getElementById('slLcd1');
-  var btn        = document.getElementById('slPreviewPlayBtn');
-  var st         = document.getElementById('slStatus1');
-  var detail     = document.getElementById('slDetail1');
-  var songBlock  = document.getElementById('slPreviewSongBlock');
-  var songTitle  = document.getElementById('slPreviewTitle');
-  var songArtist = document.getElementById('slPreviewArtist');
-  var ticker     = document.getElementById('slPreviewTicker');
-  var tickerInner= document.getElementById('slPreviewTickerInner');
-  // Mobile LCD elements (sl-lcd style)
-  var mLcd        = document.getElementById('slMobileLcd');
-  var mStatusText = document.getElementById('slMobileStatus1');
-  var mNextStep   = document.getElementById('slMobileDetail1');
-
-  var mSongBlock  = document.getElementById('slMobileNpBlock');
-  var mTicker     = document.getElementById('slMobileNpTicker');
-  var mTickerInner= document.getElementById('slMobileNpTickerInner');
-  var mBtns       = document.getElementById('slMobPreviewBtns');
-  var mIcon       = document.getElementById('slMobPreviewIcon');
-
-  function setMobTickerText(text) {
-    if (!mTickerInner || !mTicker) return;
-    mTickerInner.innerHTML = '';
-    var sp = document.createElement('span');
-    sp.className = 'sl-lcd-np-title';
-    sp.textContent = text;
-    mTickerInner.appendChild(sp);
-    mTickerInner.classList.remove('is-scrolling');
-    mTickerInner.style.removeProperty('--sl-scroll-px');
-    requestAnimationFrame(function() {
-      var ov = mTickerInner.scrollWidth - mTicker.offsetWidth;
-      if (ov > 6) {
-        mTickerInner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
-        mTickerInner.classList.add('is-scrolling');
-      }
-    });
-  }
-
-  if (title) {
-    window.slPreviewActive = true;
-    window.slPreviewTitle  = title;
-    window.slPreviewArtist = artist || '';
-
-    // Desktop LCD
-    if (isPlaying) {
-      if (st)     st.textContent     = '▶ PREESCOLTANT';
-      if (detail) detail.textContent = artist || '';
-      if (lcd)    lcd.classList.add('is-previewing');
-    } else {
-      if (st)     st.textContent     = '⏸ PREESCOLTA PAUSADA';
-      if (detail) detail.textContent = artist || '';
-      if (lcd)    lcd.classList.remove('is-previewing');
-    }
-    if (songTitle)  songTitle.textContent  = title;
-    if (songArtist) songArtist.textContent = artist || '';
-    if (songBlock)  songBlock.style.display = '';
-    if (btn) btn.classList.toggle('is-pressed', isPlaying);
-    if (ticker && tickerInner) {
-      tickerInner.classList.remove('is-scrolling');
-      tickerInner.style.removeProperty('--sl-scroll-px');
-      requestAnimationFrame(function() {
-        var ov = tickerInner.scrollWidth - ticker.offsetWidth;
-        if (ov > 6) {
-          tickerInner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
-          tickerInner.classList.add('is-scrolling');
-        }
-      });
-    }
-
-    // Mobile LCD — song section only
-    if (mSongBlock) mSongBlock.style.display = '';
-    if (mBtns)      mBtns.style.display = '';
-    if (mIcon)      mIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
-    if (isPlaying) {
-      if (mLcd) mLcd.classList.add('is-previewing');
-    } else {
-      if (mLcd) mLcd.classList.remove('is-previewing');
-    }
-
-    window._mobPreviewData = { title: title, artist: artist || '' };
-    if (window._mobPreviewInterval) clearInterval(window._mobPreviewInterval);
-    var label = isPlaying ? '▶ PREESCOLTANT' : '⏸ PREESCOLTA PAUSADA';
-    window._mobPreviewAlt = true;
-    setMobTickerText(label);
-    window._mobPreviewInterval = setInterval(function() {
-      window._mobPreviewAlt = !window._mobPreviewAlt;
-      var d = window._mobPreviewData;
-      if (window._mobPreviewAlt) {
-        setMobTickerText(label);
-      } else {
-        setMobTickerText(d.title + '  ·  ' + d.artist);
-      }
-    }, 3000);
-
-  } else {
-    window.slPreviewActive = false;
-    if (songBlock) songBlock.style.display = 'none';
-    if (tickerInner) { tickerInner.classList.remove('is-scrolling'); tickerInner.style.removeProperty('--sl-scroll-px'); }
-    if (lcd) lcd.classList.remove('is-previewing');
-    if (btn) btn.classList.remove('is-pressed');
-    if (mLcd) mLcd.classList.remove('is-previewing');
-    if (window._mobPreviewInterval) { clearInterval(window._mobPreviewInterval); window._mobPreviewInterval = null; }
-    if (mSongBlock) mSongBlock.style.display = 'none';
-    if (mBtns)      mBtns.style.display = 'none';
-    if (mTickerInner) { mTickerInner.classList.remove('is-scrolling'); mTickerInner.style.removeProperty('--sl-scroll-px'); }
-    if (window.slRestoreMobileLcd) window.slRestoreMobileLcd();
-    if (window.slRestoreLcd) window.slRestoreLcd();
+window.JukeboxConfig = {
+  partyId: {{ party.id }},
+  partyStatus: '{{ party.party_status }}',
+  jukeboxStartsAt: '{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:"H:i" }}{% endif %}',
+  jukeboxEndsAt: '{% if party.jukebox_ends_at %}{{ party.jukebox_ends_at|time:"H:i" }}{% endif %}',
+  partyDate: '{% if party.date %}{{ party.date|date:"d/m H:i" }}{% endif %}',
+  pollUrl: '{% url "party_status_api" %}',
+  csrfToken: '{{ csrf_token }}',
+  songsPlayed: {{ songs_played }},
+  nowPlaying: {
+    title: '{% if now_playing %}{{ now_playing.title|escapejs }}{% endif %}',
+    artist: '{% if now_playing %}{{ now_playing.artist|escapejs }}{% endif %}'
+  },
+  lastPlayed: {
+    title: '{% if played_songs %}{{ played_songs.0.title|escapejs }}{% endif %}',
+    artist: '{% if played_songs %}{{ played_songs.0.artist|escapejs }}{% endif %}'
+  },
+  i18n: {
+    spotifyNotReady: '{% trans "El reproductor de Spotify no està llest. Espera uns segons..." %}',
+    spotifyPremiumRequired: '{% trans "Necessites Spotify Premium per reproduir cançons completes" %}',
+    spotifySessionExpired: '{% trans "Sessió de Spotify caducada. Reconnecta el teu compte des del perfil." %}',
+    spotifyPlayError: '{% trans "Error reproduint la cançó. Torna-ho a provar." %}'
   }
 };
 </script>
+<script src="{% static 'jukebox/js/song_list.js' %}" defer></script>
 
 {% if has_spotify %}
 <!-- Spotify Web Playback SDK -->
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
-<script>
-// Function to show dismissible alerts
-function showSpotifyAlert(message, type = 'warning') {
-  const alertArea = document.getElementById('spotify-alert-area');
-  if (!alertArea) return;
-
-  const alertId = 'alert-' + Date.now();
-  const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle';
-
-  alertArea.innerHTML = `
-    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
-      <i class="fas ${iconClass} me-2"></i>
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  `;
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  setTimeout(() => {
-    const alert = document.getElementById(alertId);
-    if (alert) {
-      alert.classList.remove('show');
-      setTimeout(() => alertArea.innerHTML = '', 150);
-    }
-  }, 5000);
-}
-
-// Spotify Web Playback SDK Variables
-let spotifyPlayer = null;
-let spotifyDeviceId = null;
-let currentPlayingSpotifyId = null;
-let isCurrentlyPlaying = false;
-let SPOTIFY_TOKEN = null;
-let spotifySdkReady = false;
-let spotifyPlayerInitPromise = null;
-
-window.onSpotifyWebPlaybackSDKReady = () => {
-  spotifySdkReady = true;
-};
-
-function updateSpotifyButtons(track_id, isPlaying) {
-  document.querySelectorAll('.spotify-play-btn').forEach(btn => {
-    const btnSpotifyId = btn.dataset.spotifyId;
-    const icon = btn.querySelector('i, span.material-symbols-outlined');
-    const overlay = btn.closest('.play-overlay');
-
-    if (btnSpotifyId === track_id) {
-      if (isPlaying) {
-        if (icon.classList.contains('material-symbols-outlined')) {
-          icon.textContent = 'pause';
-        } else {
-          icon.classList.remove('fa-play');
-          icon.classList.add('fa-pause');
-        }
-      } else {
-        if (icon.classList.contains('material-symbols-outlined')) {
-          icon.textContent = 'play_arrow';
-        } else {
-          icon.classList.remove('fa-pause');
-          icon.classList.add('fa-play');
-        }
-      }
-      if (overlay) overlay.classList.add('is-playing');
-    } else {
-      if (icon.classList.contains('material-symbols-outlined')) {
-        icon.textContent = 'play_arrow';
-      } else {
-        icon.classList.remove('fa-pause');
-        icon.classList.add('fa-play');
-      }
-      if (overlay) overlay.classList.remove('is-playing');
-    }
-  });
-}
-
-function ensureSpotifyPlayer() {
-  if (spotifyPlayer && spotifyDeviceId) {
-    return Promise.resolve(spotifyPlayer);
-  }
-
-  if (!spotifySdkReady || !window.Spotify) {
-    showSpotifyAlert('{% trans "El reproductor de Spotify no està llest. Espera uns segons..." %}', 'info');
-    return Promise.reject(new Error('Spotify SDK not ready'));
-  }
-
-  if (spotifyPlayerInitPromise) {
-    return spotifyPlayerInitPromise;
-  }
-
-  spotifyPlayerInitPromise = new Promise((resolve, reject) => {
-    spotifyPlayer = new Spotify.Player({
-      name: 'DJ Jukebox Web Player',
-      getOAuthToken: cb => {
-        fetch('/api/spotify-token/')
-          .then(r => r.json())
-          .then(data => { SPOTIFY_TOKEN = data.token; cb(data.token); })
-          .catch(() => cb(null));
-      },
-      volume: 0.7
-    });
-
-    spotifyPlayer.addListener('ready', ({ device_id }) => {
-      console.log('[SPOTIFY] Player ready with Device ID:', device_id);
-      spotifyDeviceId = device_id;
-      resolve(spotifyPlayer);
-    });
-
-    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-      console.log('[SPOTIFY] Device ID has gone offline:', device_id);
-    });
-
-    spotifyPlayer.addListener('player_state_changed', state => {
-      if (!state) {
-        currentPlayingSpotifyId = null;
-        isCurrentlyPlaying = false;
-        updateSpotifyButtons(null, false);
-        window.updateLcdForPreview(null, null, false);
-        return;
-      }
-      if (window._spotifyStopped) return;
-
-      const isPlaying = !state.paused;
-      const track    = state.track_window.current_track;
-      const track_id = track.id;
-
-      currentPlayingSpotifyId = track_id;
-      isCurrentlyPlaying = isPlaying;
-      updateSpotifyButtons(track_id, isPlaying);
-      window.updateLcdForPreview(track.name, track.artists[0].name, isPlaying);
-    });
-
-    spotifyPlayer.connect().then(success => {
-      if (!success) {
-        reject(new Error('Spotify player connection failed'));
-      }
-    }).catch(reject);
-  }).catch(error => {
-    spotifyPlayerInitPromise = null;
-    throw error;
-  });
-
-  return spotifyPlayerInitPromise;
-}
-
-// Function to play a track using Spotify SDK
-function playSpotifyTrack(spotifyId) {
-  return ensureSpotifyPlayer().then(() => fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SPOTIFY_TOKEN}`
-    },
-  })).then(response => {
-    if (response.ok) {
-      console.log('[SPOTIFY] Playing track:', spotifyId);
-    } else if (response.status === 403) {
-      console.error('[SPOTIFY] Premium required');
-      showSpotifyAlert('{% trans "Necessites Spotify Premium per reproduir cançons completes" %}', 'warning');
-    } else if (response.status === 401) {
-      console.error('[SPOTIFY] Unauthorized');
-      showSpotifyAlert('{% trans "Sessió de Spotify caducada. Reconnecta el teu compte des del perfil." %}', 'danger');
-    } else {
-      console.error('[SPOTIFY] Error playing track:', response.status);
-      showSpotifyAlert('{% trans "Error reproduint la cançó. Torna-ho a provar." %}', 'danger');
-    }
-  });
-}
-
-// Setup play button and overlay listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // CDJ preview play/pause button (desktop)
-  var previewBtn = document.getElementById('slPreviewPlayBtn');
-  if (previewBtn) {
-    previewBtn.addEventListener('click', function() {
-      if (!spotifyPlayer) return;
-      if (isCurrentlyPlaying) {
-        spotifyPlayer.pause().catch(function() {});
-      } else {
-        spotifyPlayer.resume().catch(function() {});
-      }
-    });
-  }
-
-  // Mobile preview play/pause button
-  var mobPreviewBtn = document.getElementById('slMobPreviewBtn');
-  if (mobPreviewBtn) {
-    mobPreviewBtn.addEventListener('click', function() {
-      if (!spotifyPlayer) return;
-      if (isCurrentlyPlaying) {
-        spotifyPlayer.pause().catch(function() {});
-      } else {
-        spotifyPlayer.resume().catch(function() {});
-      }
-    });
-  }
-
-  // Mobile stop button
-  var mobStopBtn = document.getElementById('slMobStopBtn');
-  if (mobStopBtn) {
-    mobStopBtn.addEventListener('click', function() {
-      if (!spotifyPlayer) return;
-      window._spotifyStopped = true;
-      spotifyPlayer.pause().catch(function() {});
-      currentPlayingSpotifyId = null;
-      isCurrentlyPlaying = false;
-      updateSpotifyButtons(null, false);
-      window.updateLcdForPreview(null, null, false);
-    });
-  }
-
-  // Play button clicks
-  document.querySelectorAll('.spotify-play-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const spotifyId = this.dataset.spotifyId;
-      window._spotifyStopped = false;
-
-      if (currentPlayingSpotifyId === spotifyId) {
-        // Same track - toggle play/pause
-        if (isCurrentlyPlaying) {
-          // Currently playing, so pause
-          console.log('[SPOTIFY] Pausing track');
-          ensureSpotifyPlayer().then(() => spotifyPlayer.pause()).then(() => {
-            console.log('[SPOTIFY] Paused successfully');
-          }).catch(err => {
-            console.error('[SPOTIFY] Error pausing:', err);
-          });
-        } else {
-          // Currently paused, so resume
-          console.log('[SPOTIFY] Resuming track');
-          ensureSpotifyPlayer().then(() => spotifyPlayer.resume()).then(() => {
-            console.log('[SPOTIFY] Resumed successfully');
-          }).catch(err => {
-            console.error('[SPOTIFY] Error resuming:', err);
-          });
-        }
-      } else {
-        // Different track - play it
-        console.log('[SPOTIFY] Playing new track:', spotifyId);
-        playSpotifyTrack(spotifyId);
-      }
-    });
-  });
-
-  // Overlay clicks
-  document.querySelectorAll('.play-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const btn = this.querySelector('.spotify-play-btn');
-      if (btn) {
-        btn.click();
-      }
-    });
-  });
-
-  function cleanupSpotifyPlayback() {
-    if (spotifyPlayer) {
-      try {
-        spotifyPlayer.pause();
-      } catch (e) {
-        console.warn('[SPOTIFY] Error pausing player during cleanup:', e);
-      }
-      try {
-        spotifyPlayer.disconnect();
-      } catch (e) {
-        console.warn('[SPOTIFY] Error disconnecting player during cleanup:', e);
-      }
-    }
-    spotifyPlayer = null;
-    spotifyDeviceId = null;
-    spotifyPlayerInitPromise = null;
-    currentPlayingSpotifyId = null;
-    isCurrentlyPlaying = false;
-    updateSpotifyButtons(null, false);
-    window.updateLcdForPreview(null, null, false);
-  }
-
-  window.addEventListener('pagehide', cleanupSpotifyPlayback);
-  window.addEventListener('beforeunload', cleanupSpotifyPlayback);
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-      cleanupSpotifyPlayback();
-    }
-  });
-});
-</script>
 {% endif %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Activar tooltips de Bootstrap
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-  });
 
-  // Tabs mòbil per Maleta del DJ / El que ha sonat
-  var mobileTabButtons = document.querySelectorAll('[data-mobile-tab]');
-  var mobileTabBag = document.getElementById('mobile-tab-bag');
-  var mobileTabPlayed = document.getElementById('mobile-tab-played');
-
-  mobileTabButtons.forEach(function(button) {
-    button.addEventListener('click', function() {
-      var target = button.getAttribute('data-mobile-tab');
-
-      mobileTabButtons.forEach(function(btn) {
-        btn.classList.remove('is-active');
-      });
-      button.classList.add('is-active');
-
-      if (mobileTabBag && mobileTabPlayed) {
-        if (target === 'played') {
-          mobileTabBag.classList.add('d-none');
-          mobileTabBag.classList.remove('d-flex');
-          mobileTabPlayed.classList.remove('d-none');
-          mobileTabPlayed.classList.add('d-flex');
-        } else {
-          mobileTabPlayed.classList.add('d-none');
-          mobileTabPlayed.classList.remove('d-flex');
-          mobileTabBag.classList.remove('d-none');
-          mobileTabBag.classList.add('d-flex');
-        }
-      }
-    });
-  });
-
-  // Filtrat de cançons desktop - Pending songs
-  var searchPendingInput = document.getElementById('search-pending');
-  if (searchPendingInput) {
-    searchPendingInput.addEventListener('input', function() {
-      var q = searchPendingInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.pending-song-row');
-
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
-
-  // Filtrat de cançons desktop - Played songs
-  var searchPlayedInput = document.getElementById('search-played');
-  if (searchPlayedInput) {
-    searchPlayedInput.addEventListener('input', function() {
-      var q = searchPlayedInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.played-song-row');
-
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
-
-  var mobileInput = document.getElementById('mobile-song-search');
-  if (mobileInput) {
-    var noResultsBox = document.getElementById('mobile-bag-no-results');
-    var spotifySearchBtn = document.getElementById('mobile-bag-search-spotify-btn');
-
-    mobileInput.addEventListener('input', function() {
-      var q = mobileInput.value.trim().toLowerCase();
-      var rawQuery = mobileInput.value.trim();
-      var cards = document.querySelectorAll('.mobile-bag-song-card');
-      var visibleCount = 0;
-
-      cards.forEach(function(card) {
-        var title = card.getAttribute('data-song-title').toLowerCase();
-        var artist = card.getAttribute('data-song-artist').toLowerCase();
-        var isMatch = (title.includes(q) || artist.includes(q));
-        card.style.display = isMatch ? '' : 'none';
-        if (isMatch) visibleCount += 1;
-      });
-
-      if (noResultsBox) {
-        if (rawQuery && visibleCount === 0) {
-          noResultsBox.classList.remove('d-none');
-          if (spotifySearchBtn) {
-            spotifySearchBtn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
-          }
-        } else {
-          noResultsBox.classList.add('d-none');
-        }
-      }
-    });
-  }
-});
-
-// ── LCD clocks ────────────────────────────────────────────────────────────
-(function() {
-  function hhMM() {
-    var now = new Date();
-    return String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  }
-  function pad(n) { return String(n).padStart(2,'0'); }
-
-  // Left clock: always HH:MM
-  var el1 = document.getElementById('slClock1');
-  function tickLeft() { if (el1) el1.textContent = hhMM(); }
-  tickLeft();
-  setInterval(tickLeft, 1000);
-
-  // Right clock: chrono (elapsed since jukebox activated) when djjukebox_active, else HH:MM
-  var el2 = document.getElementById('slClock2');
-  var CHRONO_KEY = 'jukebox_chrono_{{ party.id }}';
-  var IS_ACTIVE  = '{{ party.party_status }}' === 'djjukebox_active';
-
-  if (IS_ACTIVE && el2) {
-    var stored = localStorage.getItem(CHRONO_KEY);
-    var startTs = stored ? parseInt(stored, 10) : Date.now();
-    if (!stored) localStorage.setItem(CHRONO_KEY, startTs);
-
-    el2.classList.add('is-chrono');
-    function tickChrono() {
-      var elapsed = Math.floor((Date.now() - startTs) / 1000);
-      var h = Math.floor(elapsed / 3600);
-      var m = Math.floor((elapsed % 3600) / 60);
-      var s = elapsed % 60;
-      el2.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
-    }
-    tickChrono();
-    setInterval(tickChrono, 1000);
-  } else {
-    if (el2) el2.classList.remove('is-chrono');
-    function tickRight() { if (el2) el2.textContent = hhMM(); }
-    tickRight();
-    setInterval(tickRight, 1000);
-    if (!IS_ACTIVE) localStorage.removeItem(CHRONO_KEY);
-  }
-  // Mobile clock (HH:MM) + chrono when jukebox active
-  var elMClock  = document.getElementById('slMobileClock');
-  var elMClock2 = document.getElementById('slMobileClock2');
-  function tickMobile() {
-    var t = hhMM();
-    if (elMClock)  elMClock.textContent = t;
-    if (elMClock2) elMClock2.textContent = t;
-  }
-  tickMobile();
-  setInterval(tickMobile, 1000);
-})();
-
-// ── Jukebox schedule countdown ────────────────────────────────────────────
-(function() {
-  var JB_START = '{% if party.jukebox_starts_at %}{{ party.jukebox_starts_at|time:"H:i" }}{% endif %}';
-  var JB_END   = '{% if party.jukebox_ends_at %}{{ party.jukebox_ends_at|time:"H:i" }}{% endif %}';
-  var IS_ACTIVE = '{{ party.party_status }}' === 'djjukebox_active';
-  var IS_DONE   = '{{ party.party_status }}' === 'finished';
-
-  function parseTime(str) {
-    if (!str) return null;
-    var p = str.split(':');
-    var now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(p[0],10), parseInt(p[1],10), 0);
-  }
-
-  function updateCountdown() {
-    var text;
-    if (IS_DONE) {
-      text = 'sessió acabada';
-    } else if (IS_ACTIVE) {
-      var endT = parseTime(JB_END);
-      if (endT) {
-        var left = Math.floor((endT - Date.now()) / 60000);
-        if (left > 0) { text = 'queden ' + left + ' min'; }
-      }
-      if (!text) text = 'en curs';
-    } else {
-      var startT = parseTime(JB_START);
-      if (!startT) {
-        text = 'horari no definit';
-      } else {
-        var diff = Math.floor((startT - Date.now()) / 60000);
-        if (diff <= 0) { text = 'en breu'; }
-        else { var h = Math.floor(diff / 60), m = diff % 60; text = 'falta ' + (h > 0 ? h + 'h ' : '') + m + ' min'; }
-      }
-    }
-    ['slJbCountdown'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = text;
-    });
-  }
-
-  updateCountdown();
-  setInterval(updateCountdown, 30000);
-})();
-
-// ── Party status polling ───────────────────────────────────────────────────
-(function() {
-  var POLL_URL = '{% url "party_status_api" %}';
-  var currentStatus = '{{ party.party_status }}';
-  var partyDate = '{% if party.date %}{{ party.date|date:"d/m H:i" }}{% endif %}';
-  var initialNowPlaying = '{% if now_playing %}{{ now_playing.title|escapejs }}{% endif %}';
-
-  var LCD_STATE_CLASSES = ['sl-lcd-visible','sl-lcd-show','sl-lcd-requests','sl-lcd-active','sl-lcd-finished'];
-
-  var STATUS_CLASS = {
-    party_visible:    'sl-lcd-visible',
-    show_party:       'sl-lcd-show',
-    requests_open:    'sl-lcd-requests',
-    djjukebox_active: 'sl-lcd-active',
-    finished:         'sl-lcd-finished',
-  };
-  // ── Left LCD: voting & playlist state ─────────────────────────────────────
-  // ── Left LCD: voting state ─────────────────────────────────────────────────
-  var STATUS_LABEL = {
-    party_visible:    'AVIAT',
-    show_party:       'EXPLORA',
-    requests_open:    'VOTA ARA',
-    djjukebox_active: 'VOTA!',
-    finished:         'ACABAT',
-  };
-  function detailText(status) {
-    if (status === 'party_visible')    return 'La llista s\'obrirà aviat · espera';
-    if (status === 'show_party')       return 'Vota els temes que vols sentir · jukebox no actiu';
-    if (status === 'requests_open')    return 'Els vots s\'acumulen · espera l\'activació';
-    if (status === 'djjukebox_active') return 'Com més vots té un tema, abans sona';
-    if (status === 'finished')         return 'Gràcies per participar!';
-    return '';
-  }
-
-  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
-  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
-  // ── Right LCD: jukebox mode state ─────────────────────────────────────────
-  var RIGHT_STATUS_LABEL = {
-    party_visible:    '○ STANDBY',
-    show_party:       '● CUE',
-    requests_open:    '● CUE',
-    djjukebox_active: '▶ PLAY',
-    finished:         '■ FI',
-  };
-  function rightDetailText(status) {
-    if (status === 'djjukebox_active') return 'Sessió jukebox activa · el DJ segueix els vots';
-    if (status === 'requests_open')    return 'Sessió pendent · els vots s\'acumulen';
-    if (status === 'show_party')       return 'Sessió pendent · el DJ decidirà quan activar';
-    if (status === 'party_visible')    return 'El DJ prepara la sessió';
-    if (status === 'finished')         return 'Sessió tancada';
-    return '—';
-  }
-
-  // Cache last known song data for LCD restore after preview
-  var lastSongData = {
-    nowPlaying:        initialNowPlaying || '',
-    nowPlayingArtist:  '{% if now_playing %}{{ now_playing.artist|escapejs }}{% endif %}',
-    lastPlayed:        '{% if played_songs %}{{ played_songs.0.title|escapejs }}{% endif %}',
-    lastPlayedArtist:  '{% if played_songs %}{{ played_songs.0.artist|escapejs }}{% endif %}',
-    songsPlayed:       {{ songs_played }},
-  };
-
-  // ── Status carousel: rota slides cada 5 s ──────────────────────────────
-  function initCarousel(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var slides = el.querySelectorAll('.sl-carousel-slide');
-    if (slides.length < 2) return;
-    var idx = 0;
-    setInterval(function() {
-      slides[idx].classList.remove('sl-slide-active');
-      idx = (idx + 1) % slides.length;
-      slides[idx].classList.add('sl-slide-active');
-    }, 5000);
-  }
-  initCarousel('slCarousel1');
-  initCarousel('slCarousel2');
-  initCarousel('slMobileCarousel');
-
-  // Mobile KPI + Times page alternation (synced)
-  (function() {
-    var kpiEl = document.getElementById('slMobKpiCarousel');
-    var timEl = document.getElementById('slMobTimesCarousel');
-    var kpiPages = kpiEl ? kpiEl.querySelectorAll('.mob-kpi-page') : [];
-    var timPages = timEl ? timEl.querySelectorAll('.mob-times-page') : [];
-    if (kpiPages.length < 2 && timPages.length < 2) return;
-    var idx = 0;
-    setInterval(function() {
-      if (kpiPages.length > 1) {
-        kpiPages[idx % kpiPages.length].classList.remove('mob-kpi-page-active');
-      }
-      if (timPages.length > 1) {
-        timPages[idx % timPages.length].classList.remove('mob-times-page-active');
-      }
-      idx = (idx + 1);
-      if (kpiPages.length > 1) {
-        kpiPages[idx % kpiPages.length].classList.add('mob-kpi-page-active');
-      }
-      if (timPages.length > 1) {
-        timPages[idx % timPages.length].classList.add('mob-times-page-active');
-      }
-    }, 5000);
-  })();
-
-  function updateKpiVisibility(status) {
-    document.querySelectorAll('[data-kpi-states]').forEach(function(item) {
-      var states = item.getAttribute('data-kpi-states').split(' ');
-      item.style.display = states.indexOf(status) !== -1 ? '' : 'none';
-    });
-  }
-
-  var MOBILE_STATUS_LABEL = {
-    party_visible: 'AVIAT', show_party: 'EXPLORA',
-    requests_open: 'VOTA ARA', djjukebox_active: 'VOTA!', finished: 'ACABAT',
-  };
-  var MOBILE_DETAIL = {
-    party_visible: 'La llista obrirà aviat. Prepara\'t per votar els temes que vols sentir.',
-    show_party: 'Explora la llista i vota els temes. El jukebox encara no és actiu, però els vots ja es comptabilitzen.',
-    requests_open: 'Vota els temes que vols sentir! Els vots s\'acumulen a la cua. Quan el DJ activi el jukebox, sonaran els més votats.',
-    djjukebox_active: 'El jukebox és actiu! Com més vots té un tema, abans sona. El DJ segueix la cua en directe.',
-    finished: 'La sessió ha acabat. Gràcies per participar i votar!',
-  };
-  window.slRestoreMobileLcd = function() {
-    var mst = document.getElementById('slMobileStatus1');
-    var mns = document.getElementById('slMobileDetail1');
-    if (mst) mst.textContent = MOBILE_STATUS_LABEL[currentStatus] || '';
-    if (mns) mns.textContent = MOBILE_DETAIL[currentStatus] || '';
-  };
-
-  // Mobile now-playing: show/hide block + set text immediately
-  function updateMobileNowPlaying(status) {
-    if (window.slPreviewActive) return;
-    var block  = document.getElementById('slMobileNpBlock');
-    var ticker = document.getElementById('slMobileNpTicker');
-    var inner  = document.getElementById('slMobileNpTickerInner');
-    if (!block) return;
-    if (status === 'djjukebox_active' && lastSongData.lastPlayed) {
-      block.style.display = '';
-      if (inner && ticker) {
-        inner.innerHTML = '';
-        var sp = document.createElement('span');
-        sp.className = 'sl-lcd-np-title';
-        sp.textContent = lastSongData.lastPlayed + '  ·  ' + (lastSongData.lastPlayedArtist || '');
-        inner.appendChild(sp);
-        inner.classList.remove('is-scrolling');
-        inner.style.removeProperty('--sl-scroll-px');
-        requestAnimationFrame(function() {
-          var ov = inner.scrollWidth - ticker.offsetWidth;
-          if (ov > 6) {
-            inner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
-            inner.classList.add('is-scrolling');
-          }
-        });
-      }
-    } else {
-      block.style.display = 'none';
-    }
-  }
-
-  // Standalone now-playing ticker alternation (decoupled from polling)
-  (function() {
-    var block  = document.getElementById('slMobileNpBlock');
-    var ticker = document.getElementById('slMobileNpTicker');
-    var inner  = document.getElementById('slMobileNpTickerInner');
-    if (!block || !ticker || !inner) return;
-    var ALT_TEXT = '▶ Sonant ara mateix a la sessió';
-    var showSong = true;
-
-    function setContent(text) {
-      inner.innerHTML = '';
-      var sp = document.createElement('span');
-      sp.className = 'sl-lcd-np-title';
-      sp.textContent = text;
-      inner.appendChild(sp);
-      inner.classList.remove('is-scrolling');
-      inner.style.removeProperty('--sl-scroll-px');
-      requestAnimationFrame(function() {
-        var ov = inner.scrollWidth - ticker.offsetWidth;
-        if (ov > 6) {
-          inner.style.setProperty('--sl-scroll-px', '-' + ov + 'px');
-          inner.classList.add('is-scrolling');
-        }
-      });
-    }
-
-    setInterval(function() {
-      if (window.slPreviewActive) return;
-      if (block.style.display === 'none') { showSong = true; return; }
-      showSong = !showSong;
-      if (showSong) {
-        var song = lastSongData.lastPlayed;
-        if (!song) return;
-        setContent(song + '  ·  ' + (lastSongData.lastPlayedArtist || ''));
-      } else {
-        setContent(ALT_TEXT);
-      }
-    }, 4000);
-  })();
-
-  function applyStatus(status, nowPlaying, lastPlayed, songsPlayed) {
-    // Desktop LCD color classes
-    document.querySelectorAll('.sl-lcd').forEach(function(lcd) {
-      LCD_STATE_CLASSES.forEach(function(c) { lcd.classList.remove(c); });
-      if (STATUS_CLASS[status]) lcd.classList.add(STATUS_CLASS[status]);
-    });
-
-    // Right LCD wave: animate when jukebox active
-    var lcd2 = document.getElementById('slLcd2');
-    if (lcd2) {
-      if (status === 'djjukebox_active') lcd2.classList.add('is-playing');
-      else lcd2.classList.remove('is-playing');
-    }
-
-    // Mobile LCD wave + now-playing
-    var mLcd = document.getElementById('slMobileLcd');
-    if (mLcd) {
-      if (status === 'djjukebox_active') mLcd.classList.add('is-playing');
-      else mLcd.classList.remove('is-playing');
-    }
-    updateMobileNowPlaying(status);
-
-    // Left LCD: voting info (skip if Spotify preview active)
-    if (!window.slPreviewActive) {
-      var st = document.getElementById('slStatus1');
-      var dt = document.getElementById('slDetail1');
-      if (st) st.textContent = STATUS_LABEL[status] || status;
-      if (dt) dt.textContent = detailText(status);
-      // Mobile status text
-      window.slRestoreMobileLcd();
-    }
-
-    // LED ticker: start scroll if text overflows container
-  function startTicker() {
-    var ticker = document.getElementById('slNpTicker');
-    var inner  = document.getElementById('slNpTickerInner');
-    if (!ticker || !inner) return;
-    inner.classList.remove('is-scrolling');
-    inner.style.removeProperty('--sl-scroll-px');
-    requestAnimationFrame(function() {
-      var overflow = inner.scrollWidth - ticker.offsetWidth;
-      if (overflow > 6) {
-        inner.style.setProperty('--sl-scroll-px', '-' + overflow + 'px');
-        inner.classList.add('is-scrolling');
-      }
-    });
-  }
-
-  // Right LCD: mode label + now-playing block or explanatory text
-    var rst   = document.getElementById('slLastTitle');
-    var rdt   = document.getElementById('slLastArtist');
-    var npBlock  = document.getElementById('slNowPlayingBlock');
-    var npTitle  = document.getElementById('slNowPlayingTitle');
-    var npArtist = document.getElementById('slNowPlayingArtist');
-    if (rst) rst.textContent = RIGHT_STATUS_LABEL[status] || status;
-    if (rdt) rdt.textContent = rightDetailText(status);
-    if (status === 'djjukebox_active') {
-      var songTitle  = lastSongData.lastPlayed;
-      var songArtist = lastSongData.lastPlayedArtist;
-      if (songTitle) {
-        if (npTitle)  npTitle.textContent  = songTitle;
-        if (npArtist) npArtist.textContent = songArtist || '';
-        if (npBlock) npBlock.style.display = '';
-        startTicker();
-      } else {
-        if (npBlock) npBlock.style.display = 'none';
-      }
-    } else {
-      if (npBlock) npBlock.style.display = 'none';
-    }
-
-    updateKpiVisibility(status);
-  }
-
-  // Expose for preview restore
-  window.slRestoreLcd = function() {
-    applyStatus(currentStatus, lastSongData.nowPlaying, lastSongData.lastPlayed, lastSongData.songsPlayed);
-  };
-  window.slCurrentStatus = currentStatus;
-
-  // Init on page load
-  updateKpiVisibility(currentStatus);
-  if (currentStatus === 'djjukebox_active') startTicker();
-  updateMobileNowPlaying(currentStatus);
-
-  function pollStatus() {
-    fetch(POLL_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        if (!data) return;
-
-        if (data.party_status !== currentStatus) {
-          window.location.reload();
-          return;
-        }
-
-        // Cache song data
-        lastSongData.nowPlaying       = data.now_playing_title   || '';
-        lastSongData.nowPlayingArtist = data.now_playing_artist  || '';
-        lastSongData.lastPlayed       = data.last_played_title   || '';
-        lastSongData.lastPlayedArtist = data.last_played_artist  || '';
-        lastSongData.songsPlayed      = data.songs_played        || 0;
-
-        applyStatus(data.party_status, lastSongData.nowPlaying, lastSongData.lastPlayed, lastSongData.songsPlayed);
-
-        // Update left KPIs
-        var el;
-        el = document.getElementById('slLTemes');    if (el) el.textContent = data.total_songs;
-        el = document.getElementById('slLUsuaris');  if (el) el.textContent = data.active_users;
-        el = document.getElementById('slLVotsMeus'); if (el) el.textContent = data.votes_left;
-        el = document.getElementById('slLCoins');    if (el) el.textContent = data.credits;
-        el = document.getElementById('slLVots');     if (el) el.textContent = data.total_votes;
-        el = document.getElementById('slLPosades');  if (el) el.textContent = data.songs_played;
-        el = document.getElementById('slLVotsF');    if (el) el.textContent = data.total_votes;
-
-        // Update right KPIs
-        el = document.getElementById('slRTemes');     if (el) el.textContent = data.total_songs;
-        el = document.getElementById('slRPosades');   if (el) el.textContent = data.songs_played;
-        el = document.getElementById('slRPeticions'); if (el) el.textContent = data.pending_requests_count;
-        el = document.getElementById('slRMyPlayed');  if (el) el.textContent = data.my_played_votes;
-
-        // Update mobile KPIs
-        el = document.getElementById('slMobVots');     if (el) el.textContent = data.votes_left;
-        el = document.getElementById('slMobCoins');    if (el) el.textContent = data.credits;
-        el = document.getElementById('slMobFets');     if (el) el.textContent = data.user_votes_count;
-        el = document.getElementById('slMobPosades');  if (el) el.textContent = data.songs_played;
-        el = document.getElementById('slMobTotal');    if (el) el.textContent = data.total_votes;
-        el = document.getElementById('slMobFetsF');    if (el) el.textContent = data.user_votes_count;
-        el = document.getElementById('slMobPosadesB'); if (el) el.textContent = data.songs_played;
-        el = document.getElementById('slMobRestants'); if (el) el.textContent = data.songs_remaining;
-        el = document.getElementById('slMobPeticions');if (el) el.textContent = data.pending_requests_count;
-        el = document.getElementById('slMobUsuarisB'); if (el) el.textContent = data.active_users;
-        el = document.getElementById('slMobMyPlayed'); if (el) el.textContent = data.my_played_votes;
-      })
-      .catch(function() {});
-  }
-
-  setInterval(pollStatus, 5000);
-})();
-</script>
 {% endblock %}

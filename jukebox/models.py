@@ -146,6 +146,9 @@ class Song(models.Model):
 
     class Meta:
         unique_together = [['party', 'spotify_id']]
+        indexes = [
+            models.Index(fields=['party', 'has_played']),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.artist}"
@@ -165,7 +168,12 @@ class Vote(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['user', 'song', 'party']  # Un usuari només pot votar una cançó un cop per festa
+        unique_together = ['user', 'song', 'party']
+        indexes = [
+            models.Index(fields=['party', 'vote_type']),
+            models.Index(fields=['party', 'user']),
+            models.Index(fields=['party', 'created_at']),
+        ]
 
 
 class VotePackage(models.Model):
@@ -211,6 +219,11 @@ class SongRequest(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
     processed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_requests')
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['party', 'status']),
+        ]
+
     def __str__(self):
         return f"{self.title} - {self.artist} ({self.status})"
 
@@ -235,6 +248,9 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"

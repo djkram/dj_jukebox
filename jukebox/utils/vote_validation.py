@@ -48,38 +48,28 @@ def create_vote_response(
     success: bool,
     error_msg: Optional[str],
     user,
+    song,
     party,
     response_type: str = 'redirect',
     redirect_url: str = 'song_list'
 ):
-    """
-    Creates HTTP response based on validation result.
-
-    Args:
-        success: If validation was successful
-        error_msg: Error message (if success=False)
-        user: User instance
-        party: Party instance
-        response_type: 'redirect' or 'json'
-        redirect_url: URL to redirect (if response_type='redirect')
-
-    Returns:
-        HttpResponse (redirect or JsonResponse)
-
-    Example:
-        return create_vote_response(
-            success, error, user, party,
-            response_type='json'
-        )
-    """
     from jukebox.votes import get_user_votes_left
 
     if response_type == 'json':
         if success:
+            from django.db.models import Count, Q
+            from jukebox.utils.badges import BadgeCalculator
+            user_likes_count = party.vote_set.filter(user=user, vote_type='like').count()
+            num_likes = song.vote.filter(party=party, vote_type='like').count()
+            num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+            calculator = BadgeCalculator(party.songs)
+            badge_label, badge_bg, badge_text = calculator.calculate_badge(num_likes, num_dislikes)
             return JsonResponse({
                 'success': True,
                 'votes_left': get_user_votes_left(user, party),
-                'credits': user.credits
+                'credits': user.credits,
+                'user_likes_count': user_likes_count,
+                'badge_label': badge_label,
             })
         else:
             return JsonResponse({
@@ -104,40 +94,5 @@ def handle_vote_action(
     response_type: str = 'redirect',
     redirect_url: str = 'song_list'
 ):
-    """
-    Complete handler for vote action (validation + response).
-
-    Convenience function that combines validation and response creation.
-
-    Args:
-        user: User instance
-        song: Song instance
-        party: Party instance
-        vote_type: Vote type
-        response_type: 'redirect' or 'json'
-        redirect_url: URL to redirect
-
-    Returns:
-        HttpResponse
-
-    Example:
-        # In song_swipe view (AJAX):
-        return handle_vote_action(
-            user, song, party, 'like',
-            response_type='json'
-        )
-
-        # In song_list view (form POST):
-        return handle_vote_action(
-            user, song, party, vote_type,
-            response_type='redirect',
-            redirect_url='song_list'
-        )
-    """
-    success, error_msg = validate_and_create_vote(
-        user, song, party, vote_type
-    )
-
-    return create_vote_response(
-        success, error_msg, user, party, response_type, redirect_url
-    )
+    success, error_msg = validate_and_create_vote(user, song, party, vote_type)
+    return create_vote_response(success, error_msg, user, song, party, response_type, redirect_url)

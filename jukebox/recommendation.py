@@ -2,8 +2,11 @@
 Sistema de recomanació de cançons per a DJs
 Té en compte harmonia (Camelot key), BPM i vots
 """
-from django.db.models import Count
+from django.core.cache import cache
+from django.db.models import Count, Q
 from .models import Song
+
+RECOMMENDATIONS_CACHE_TTL = 60  # seconds
 
 
 def get_compatible_camelot_keys(key):
@@ -46,6 +49,11 @@ def get_compatible_camelot_keys(key):
     return list(set(compatible))
 
 
+def invalidate_recommendations_cache(party_id):
+    """Invalida la cache de recomanacions per a una festa."""
+    cache.delete(f'recommended_songs_{party_id}')
+
+
 def get_recommended_songs(party, limit=5, reference_song=None):
     """
     Genera una llista de cançons recomanades per al DJ.
@@ -64,10 +72,18 @@ def get_recommended_songs(party, limit=5, reference_song=None):
     Returns:
         QuerySet de Song amb score calculat
     """
-    # Obtenir totes les cançons no reproduïdes de la festa
+    if reference_song is None:
+        cache_key = f'recommended_songs_{party.id}_{limit}'
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+    # Obtenir cançons no reproduïdes amb almenys 1 vot positiu
     unplayed_songs = party.songs.filter(has_played=False).annotate(
-        num_votes=Count('vote')
-    )
+        num_votes=Count('vote'),
+        num_likes=Count('vote', filter=Q(vote__vote_type='like')),
+        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike')),
+    ).filter(num_likes__gt=0)
 
     if not unplayed_songs.exists():
         return unplayed_songs[:limit]
@@ -134,5 +150,9 @@ def get_recommended_songs(party, limit=5, reference_song=None):
 
     # Ordenar per score i retornar top
     scored_songs.sort(key=lambda x: x.recommendation_score, reverse=True)
+    result = scored_songs[:limit]
 
-    return scored_songs[:limit]
+    if reference_song is None:
+        cache.set(cache_key, result, timeout=RECOMMENDATIONS_CACHE_TTL)
+
+    return result

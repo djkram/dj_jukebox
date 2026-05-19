@@ -53,6 +53,7 @@ from .utils import (
     calculate_and_apply_badges,
     create_spotify_auth_error_response,
 )
+from .utils.badges import BadgeCalculator
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -953,6 +954,17 @@ def song_list(request):
         elif 'unvote_song_id' in request.POST and voting_enabled:
             song = get_object_or_404(Song, pk=request.POST['unvote_song_id'], party=party)
             Vote.objects.filter(user=user, song=song, party=party).delete()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                num_likes = song.vote.filter(party=party, vote_type='like').count()
+                num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+                calc = BadgeCalculator(party.songs)
+                badge_label, badge_bg, badge_text = calc.calculate_badge(num_likes, num_dislikes)
+                return JsonResponse({
+                    'success': True, 'song_id': song.id, 'user_vote': None,
+                    'num_likes': num_likes, 'badge_label': badge_label,
+                    'badge_bg': badge_bg, 'badge_text': badge_text,
+                    'votes_left': get_user_votes_left(user, party), 'credits': user.credits,
+                })
             return redirect('song_list')
 
         # Votar una cançó
@@ -962,6 +974,20 @@ def song_list(request):
 
             from jukebox.utils.vote_validation import validate_and_create_vote
             success, error_msg = validate_and_create_vote(user, song, party, vote_type)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                if success:
+                    num_likes = song.vote.filter(party=party, vote_type='like').count()
+                    num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+                    calc = BadgeCalculator(party.songs)
+                    badge_label, badge_bg, badge_text = calc.calculate_badge(num_likes, num_dislikes)
+                    return JsonResponse({
+                        'success': True, 'song_id': song.id, 'user_vote': vote_type,
+                        'num_likes': num_likes, 'badge_label': badge_label,
+                        'badge_bg': badge_bg, 'badge_text': badge_text,
+                        'votes_left': get_user_votes_left(user, party), 'credits': user.credits,
+                    })
+                else:
+                    return JsonResponse({'success': False, 'error': error_msg}, status=400)
             if not success and error_msg:
                 messages.warning(request, error_msg)
             return redirect('song_list')
@@ -975,47 +1001,59 @@ def song_list(request):
     user_votes = Vote.objects.filter(user=user, party=party).select_related('song')
     user_votes_dict = {v.song_id: v.vote_type for v in user_votes}
 
-    # Estadístiques per a la vista
-    songs_played = party.songs.filter(has_played=True).count()
-    user_votes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
-    total_songs = party.songs.count()
-    total_votes = Vote.objects.filter(party=party, vote_type='like').count()
-    songs_remaining = total_songs - songs_played
+    # Estadístiques derivades de querysets ja carregats (0 queries addicionals)
+    songs_played = len(played_songs)
+    all_songs_list = list(pending_songs) + played_songs
+    total_songs = len(all_songs_list)
+    songs_remaining = len(list(pending_songs))
+    songs_with_votes = sum(
+        1 for s in all_songs_list
+        if (getattr(s, 'num_likes', 0) or 0) + (getattr(s, 'num_dislikes', 0) or 0) > 0
+    )
+    songs_with_votes_percentage = round((songs_with_votes / total_songs * 100) if total_songs > 0 else 0, 1)
 
-    # KPIs addicionals
+    # Cançó que està sonant (primera en la cua per vots, ja ordenada)
+    now_playing = pending_songs.first() if hasattr(pending_songs, 'first') else (list(pending_songs)[0] if pending_songs else None)
+
+    # KPIs amb aggregate combinat (1 query per Vote, 1 per SongRequest)
+    thirty_min_ago = timezone.now() - timezone.timedelta(minutes=30)
+    vote_stats = Vote.objects.filter(party=party).aggregate(
+        total_votes=Count('id', filter=Q(vote_type='like')),
+        user_votes_count=Count('id', filter=Q(user=user, vote_type='like')),
+        recent_votes=Count('id', filter=Q(created_at__gte=thirty_min_ago)),
+        my_played_votes=Count('id', filter=Q(user=user, vote_type='like', song__has_played=True)),
+    )
+    total_votes = vote_stats['total_votes'] or 0
+    user_votes_count = vote_stats['user_votes_count'] or 0
+    recent_votes = vote_stats['recent_votes'] or 0
+    my_played_votes = vote_stats['my_played_votes'] or 0
+
+    request_stats = SongRequest.objects.filter(party=party).aggregate(
+        pending_count=Count('id', filter=Q(status='pending')),
+        total_coins=Sum('coins_cost', filter=Q(status='accepted')),
+    )
+    pending_requests_count = request_stats['pending_count'] or 0
+    total_coins_spent = request_stats['total_coins'] or 0
+
+    # KPI actius (OR entre dues taules, es manté separat)
     active_users = User.objects.filter(
         Q(vote__party=party) | Q(songrequest__party=party)
     ).distinct().count()
 
-    thirty_min_ago = timezone.now() - timezone.timedelta(minutes=30)
-    recent_votes = Vote.objects.filter(party=party, created_at__gte=thirty_min_ago).count()
-
-    pending_requests_count = SongRequest.objects.filter(party=party, status='pending').count()
-
-    songs_with_votes = party.songs.annotate(vote_count=Count('vote')).filter(vote_count__gt=0).count()
-    songs_with_votes_percentage = round((songs_with_votes / total_songs * 100) if total_songs > 0 else 0, 1)
-
-    total_coins_spent = SongRequest.objects.filter(
-        party=party, status='accepted'
-    ).aggregate(total=Sum('coins_cost'))['total'] or 0
-
-    # Cançó que està sonant (la propera en la cua)
-    now_playing = party.songs.filter(has_played=False).annotate(
-        num_likes=Count('vote', filter=Q(vote__vote_type='like'))
-    ).order_by('-num_likes').first()
-
-    # Vots de l'usuari que ja han sonat
-    my_played_votes = Vote.objects.filter(
-        user=user, party=party, vote_type='like', song__has_played=True
-    ).count()
-
-    # Aplicar badges dinàmics a les cançons
-    calculate_and_apply_badges(party, pending_songs)
-    calculate_and_apply_badges(party, played_songs)
+    # Aplicar badges dinàmics a les cançons (una sola instancia compartida = 1 query)
+    badge_calc = BadgeCalculator(party.songs)
+    calculate_and_apply_badges(party, pending_songs, badge_calc)
+    calculate_and_apply_badges(party, played_songs, badge_calc)
 
     # Afegir display_order per cançons jugades
     for index, song in enumerate(played_songs):
         song.display_order = songs_played - index
+
+    # Recomanacions intel·ligents (harmonia + BPM + vots)
+    from .recommendation import get_recommended_songs
+    recommended_songs = get_recommended_songs(party, limit=6) if party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE else []
+    if recommended_songs:
+        calculate_and_apply_badges(party, recommended_songs, badge_calc)
 
     # Obtenir context Spotify (token i has_spotify)
     spotify_context = get_spotify_context_for_view(user)
@@ -1044,6 +1082,7 @@ def song_list(request):
         "total_coins_spent": total_coins_spent,
         "voting_enabled": voting_enabled,
         "my_played_votes": my_played_votes,
+        "recommended_songs": recommended_songs,
     })
 
 
@@ -1280,6 +1319,10 @@ def mark_song_played(request, song_id):
     song.save(update_fields=['has_played', 'played_at'])
 
     create_song_played_notification(song)
+
+    if song.party_id:
+        from .recommendation import invalidate_recommendations_cache
+        invalidate_recommendations_cache(song.party_id)
 
     return redirect('dj_dashboard')
 
@@ -1654,7 +1697,7 @@ def song_swipe(request):
     votes_left = get_user_votes_left(user, party)
     credits = user.credits
     party_coins = get_user_party_coins(user, party)
-    total_likes = Vote.objects.filter(party=party).count()
+    user_likes_count = Vote.objects.filter(user=user, party=party, vote_type='like').count()
     total_songs = party.songs.count()
 
     if request.method == 'POST':
@@ -1679,12 +1722,13 @@ def song_swipe(request):
         return JsonResponse({'success': False, 'error': _('Acció no vàlida')}, status=400)
 
     # Obtenir cançons que l'usuari encara no ha votat amb annotations
+    import random as _random
     voted_song_ids = Vote.objects.filter(user=user, party=party).values_list('song_id', flat=True)
     songs = list(
         get_annotated_party_songs(party)
         .exclude(id__in=voted_song_ids)
-        .order_by('?')
     )
+    _random.shuffle(songs)
     swiped_count = total_songs - len(songs)
 
     # Aplicar badges dinàmics
@@ -1697,7 +1741,7 @@ def song_swipe(request):
         'party': party,
         'songs': songs,
         'votes_left': votes_left,
-        'total_likes': total_likes,
+        'user_likes_count': user_likes_count,
         'total_songs': total_songs,
         'swiped_count': swiped_count,
         'credits': credits,

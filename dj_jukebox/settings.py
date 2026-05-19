@@ -274,6 +274,14 @@ LANGUAGE_COOKIE_HTTPONLY = env_bool("LANGUAGE_COOKIE_HTTPONLY", default=False)
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
+# Cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'dj-jukebox',
+    }
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

@@ -317,6 +317,14 @@ if RENDER_EXTERNAL_HOSTNAME:
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = env_bool("USE_X_FORWARDED_HOST", default=IS_PRODUCTION)
 
+# django-ipware: llegeix la IP real del client des del header que posa el proxy.
+# Necessari perquè allauth pugui fer rate limiting al signup/login en producció.
+IPWARE_META_PRECEDENCE_ORDER = (
+    'HTTP_X_FORWARDED_FOR',
+    'HTTP_X_REAL_IP',
+    'REMOTE_ADDR',
+)
+
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=IS_PRODUCTION)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=IS_PRODUCTION)
 SESSION_COOKIE_HTTPONLY = env_bool("SESSION_COOKIE_HTTPONLY", default=True)

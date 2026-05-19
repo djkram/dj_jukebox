@@ -284,12 +284,9 @@ def update_party_code(request, party_id):
 
 
 @login_required
-@user_passes_test(is_dj_admin)
+@user_passes_test(lambda u: u.is_superuser)
 def party_settings(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
-
-    if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
-        return redirect('song_list')
 
     has_spotify = SocialAccount.objects.filter(user=request.user, provider="spotify").exists()
 
@@ -592,7 +589,7 @@ def save_party_location(request, party_id):
 
 
 @login_required
-@user_passes_test(is_dj_admin)
+@user_passes_test(lambda u: u.is_superuser)
 def party_settings_search_tracks(request, party_id):
     party = get_object_or_404(Party, pk=party_id)
     if err := _party_dj_check(request, party):

@@ -1358,10 +1358,12 @@
 
               {# Touch shortcuts #}
               <div class="lcd-touch-btns">
+                {% if request.user.is_superuser %}
                 <a href="{% url 'party_settings' party.id %}" class="lcd-touch-btn">
                   <span class="material-symbols-outlined" style="font-size:0.75rem;">settings</span>
                   <span>CONFIG</span>
                 </a>
+                {% endif %}
                 <a href="{% url 'manage_song_requests' %}" class="lcd-touch-btn">
                   <span class="material-symbols-outlined" style="font-size:0.75rem;">queue_music</span>
                   <span>PETICIONS</span>
@@ -1593,10 +1595,12 @@
             <div class="requests-disabled-state">
                 <span class="material-symbols-outlined">block</span>
                 <p>Les peticions de cançons estan <strong>desactivades</strong> per a aquesta festa.<br>Activa l'interruptor de dalt o ves a la configuració per habilitar-les.</p>
+                {% if request.user.is_superuser %}
                 <a href="{% url 'party_settings' party.id %}" class="requests-disabled-settings-btn">
                     <span class="material-symbols-outlined" style="font-size: 1rem;">settings</span>
                     Ves a Configuració
                 </a>
+                {% endif %}
             </div>
             {% elif pending_requests or accepted_unplayed_requests %}
             <div class="sonic-space-y-3">
@@ -2085,7 +2089,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <section>
       <div class="mobile-segmented">
         <a href="{% url 'dj_dashboard' %}" class="mobile-segmented-item is-active">Dashboard</a>
+        {% if request.user.is_superuser %}
         <a href="{% url 'party_settings' party.id %}" class="mobile-segmented-item">Settings</a>
+        {% endif %}
       </div>
     </section>
 
@@ -2377,10 +2383,12 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="mobile-empty-state">
             <i class="fas fa-ban fa-2x mb-2"></i>
             <p class="mb-2">Les peticions estan desactivades</p>
+            {% if request.user.is_superuser %}
             <a href="{% url 'party_settings' party.id %}" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="display: inline-flex; gap: 0.35rem; align-items: center;">
               <span class="material-symbols-outlined" style="font-size: 1rem;">settings</span>
               Configuració
             </a>
+            {% endif %}
           </div>
         {% elif pending_requests or accepted_unplayed_requests %}
           {% for req in pending_requests %}

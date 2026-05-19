@@ -693,21 +693,12 @@ class DJPermissionTests(TestCase):
         response = self.client.get(reverse('manage_song_requests'))
         self.assertEqual(response.status_code, 200)
 
-    def test_party_settings_accessible_to_party_dj(self):
-        """DJ de la festa pot accedir a la configuració"""
-        # Assignar playlist per evitar que el form cridi get_user_playlists → Spotify
-        playlist = Playlist.objects.create(
-            spotify_id='pl-test-dj',
-            name='Test Playlist',
-            owner='admin'
-        )
-        self.party.playlist = playlist
-        self.party.save(update_fields=['playlist'])
-
+    def test_party_settings_blocked_to_party_dj(self):
+        """DJ de la festa NO pot accedir a la configuració (només superuser)"""
         self.client.login(username='dj', password='test')
 
         response = self.client.get(reverse('party_settings', args=[self.party.id]))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_dashboard_blocks_dj_of_other_party(self):
         """DJ d'una altra festa no pot accedir al dashboard d'aquesta"""

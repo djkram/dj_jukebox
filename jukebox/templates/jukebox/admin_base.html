@@ -1973,7 +1973,7 @@
                         <span>{% trans "Gestionar peticions" %}</span>
                     </a>
                 </li>
-                {% if selected_party %}
+                {% if selected_party and request.user.is_superuser %}
                 <li class="nav-item {% if request.resolver_match.url_name == 'party_settings' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'party_settings' selected_party.id %}">
                         <i class="fas fa-cog"></i>

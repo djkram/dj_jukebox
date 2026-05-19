@@ -275,8 +275,13 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Cache
+# FileBasedCache in production: shared across all gunicorn workers (needed for allauth rate limiting)
+# LocMemCache in development: no disk writes, fast
 CACHES = {
     'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache_djjukebox',
+    } if IS_PRODUCTION else {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'dj-jukebox',
     }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DJukebox | Política de Privacitat</title>
+    <link rel="icon" type="image/x-icon" href="https://app.djukebox.click/static/jukebox/img/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://app.djukebox.click/static/jukebox/img/apple-touch-icon.png">
+    <link rel="manifest" href="https://app.djukebox.click/static/manifest.json">
+    <meta name="theme-color" content="#2e5bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="DJukebox">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DJukebox">
+    <meta property="og:title" content="DJukebox — La teva festa, el teu control">
+    <meta property="og:description" content="Uneix-te a la festa i fes sentir les teves preferències musicals en temps real.">
+    <meta property="og:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { headline: ["Epilogue","sans-serif"], body: ["Plus Jakarta Sans","sans-serif"] } } }
+    }
+  </script>
+  <style>
+    .premium-bg {
+      background-color: #0a0c0d;
+      background-image: radial-gradient(circle at 0% 0%, rgba(0,64,224,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(94,36,225,0.1) 0%, transparent 50%);
+    }
+    h2 { font-family: "Epilogue", sans-serif; font-weight: 800; font-size: 1.25rem; color: #fff; margin-top: 2.5rem; margin-bottom: 0.75rem; }
+    p, li { color: rgba(255,255,255,0.55); line-height: 1.75; font-size: 0.95rem; }
+    ul { list-style: disc; padding-left: 1.5rem; margin-top: 0.5rem; }
+    li { margin-bottom: 0.4rem; }
+    a { color: #2e5bff; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.875rem; }
+    th { text-align: left; color: rgba(255,255,255,0.4); font-weight: 600; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    td { color: rgba(255,255,255,0.55); padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+  </style>
+</head>
+<body class="premium-bg font-body text-white min-h-screen">
+
+  <!-- Nav -->
+  <nav class="sticky top-0 z-50 bg-[#181c1e]/80 backdrop-blur-xl border-b border-white/5">
+    <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-4xl mx-auto">
+      <a href="index.html" class="text-xl font-black tracking-tighter text-[#2e5bff] font-headline">DJukebox</a>
+      <a href="index.html" class="text-white/50 hover:text-white text-sm transition-colors">← Tornar</a>
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-6 md:px-12 py-16 md:py-24">
+    <div class="mb-12">
+      <span class="text-[#2e5bff] text-xs font-bold uppercase tracking-widest font-headline">Legal</span>
+      <h1 class="font-headline text-4xl md:text-5xl font-black text-white tracking-tighter mt-3 mb-4">Política de Privacitat</h1>
+      <p class="text-white/40 text-sm">Última actualització: maig 2026 · Conforme al Reglament (UE) 2016/679 (RGPD)</p>
+    </div>
+
+    <div class="space-y-2">
+
+      <h2>1. Responsable del tractament</h2>
+      <p>El responsable del tractament de les teves dades personals és <strong class="text-white">DJukebox</strong>, contactable a <a href="mailto:info@djukebox.click">info@djukebox.click</a>.</p>
+
+      <h2>2. Dades que recollim</h2>
+      <table>
+        <thead>
+          <tr><th>Dada</th><th>Origen</th><th>Finalitat</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Nom i correu electrònic</td><td>Registre o OAuth Spotify</td><td>Gestió del compte</td></tr>
+          <tr><td>Foto de perfil</td><td>Spotify / Google</td><td>Identificació visual</td></tr>
+          <tr><td>Historial de vots i peticions</td><td>Ús de la plataforma</td><td>Funcionament del servei</td></tr>
+          <tr><td>Dades de pagament</td><td>Stripe (no emmagatzemades per nosaltres)</td><td>Processament de compres</td></tr>
+          <tr><td>Adreça IP i dades de sessió</td><td>Servidor</td><td>Seguretat i prevenció de frau</td></tr>
+        </tbody>
+      </table>
+
+      <h2>3. Base legal del tractament</h2>
+      <ul>
+        <li><strong class="text-white/80">Execució d'un contracte</strong>: per gestionar el teu compte i les transaccions.</li>
+        <li><strong class="text-white/80">Interès legítim</strong>: per garantir la seguretat de la plataforma i prevenir abusos.</li>
+        <li><strong class="text-white/80">Consentiment</strong>: per a comunicacions de màrqueting, que pots retirar en qualsevol moment.</li>
+      </ul>
+
+      <h2>4. Termini de conservació</h2>
+      <p>Conservem les teves dades mentre el teu compte estigui actiu. Si sol·licites la supressió, les eliminem en un termini màxim de 30 dies, excepte quan estiguem obligats a conservar-les per llei (p. ex., dades fiscals durant 5 anys).</p>
+
+      <h2>5. Tercers i transferències internacionals</h2>
+      <ul>
+        <li><strong class="text-white/80">Spotify</strong>: per autenticació i metadades musicals (Política de privacitat de Spotify).</li>
+        <li><strong class="text-white/80">Stripe</strong>: per al processament de pagaments (Política de privacitat de Stripe).</li>
+        <li><strong class="text-white/80">Render / OVH</strong>: allotjament dels servidors dins de la UE.</li>
+      </ul>
+      <p>No venem ni cedim les teves dades a tercers amb finalitats de màrqueting.</p>
+
+      <h2>6. Els teus drets (RGPD)</h2>
+      <p>Tens dret a:</p>
+      <ul>
+        <li><strong class="text-white/80">Accés</strong>: saber quines dades tenim sobre tu.</li>
+        <li><strong class="text-white/80">Rectificació</strong>: corregir dades inexactes.</li>
+        <li><strong class="text-white/80">Supressió</strong>: sol·licitar l'eliminació de les teves dades ("dret a l'oblit").</li>
+        <li><strong class="text-white/80">Portabilitat</strong>: rebre les teves dades en format estructurat.</li>
+        <li><strong class="text-white/80">Oposició i limitació</strong>: restringir o oposar-te a determinats tractaments.</li>
+      </ul>
+      <p>Per exercir qualsevol d'aquests drets, envia un correu a <a href="mailto:info@djukebox.click">info@djukebox.click</a>. Si consideres que els teus drets no han estat atesos, pots presentar una reclamació a l'<a href="https://www.aepd.es" target="_blank" rel="noopener">Agència Espanyola de Protecció de Dades (AEPD)</a>.</p>
+
+      <h2>7. Cookies</h2>
+      <p>Utilitzem cookies de sessió imprescindibles per al funcionament de la plataforma (identificació de sessió, festa seleccionada). No fem servir cookies de tercers ni de seguiment publicitari.</p>
+
+      <h2>8. Seguretat</h2>
+      <p>Apliquem mesures tècniques i organitzatives adequades per protegir les teves dades: connexions xifrades (HTTPS/TLS), accés restringit a la base de dades i revisions periòdiques de seguretat.</p>
+
+      <h2>9. Contacte</h2>
+      <p>Per a qualsevol consulta sobre privacitat: <a href="mailto:info@djukebox.click">info@djukebox.click</a></p>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 py-8 px-6 md:px-12 text-center text-xs text-white/25 font-body uppercase tracking-widest">
+    © 2026 DJukebox &nbsp;·&nbsp; <a href="termes.html" class="hover:text-white transition-colors">Termes</a> &nbsp;·&nbsp; <a href="contacte.html" class="hover:text-white transition-colors">Contacte</a>
+  </footer>
+
+</body>
+</html>

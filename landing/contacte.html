@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DJukebox | Contacte</title>
+    <link rel="icon" type="image/x-icon" href="https://app.djukebox.click/static/jukebox/img/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://app.djukebox.click/static/jukebox/img/apple-touch-icon.png">
+    <link rel="manifest" href="https://app.djukebox.click/static/manifest.json">
+    <meta name="theme-color" content="#2e5bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="DJukebox">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DJukebox">
+    <meta property="og:title" content="DJukebox — La teva festa, el teu control">
+    <meta property="og:description" content="Uneix-te a la festa i fes sentir les teves preferències musicals en temps real.">
+    <meta property="og:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { headline: ["Epilogue","sans-serif"], body: ["Plus Jakarta Sans","sans-serif"] } } }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .premium-bg {
+      background-color: #0a0c0d;
+      background-image: radial-gradient(circle at 0% 0%, rgba(0,64,224,0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(94,36,225,0.12) 0%, transparent 50%);
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(46,91,255,0.3); }
+      50%       { box-shadow: 0 0 40px rgba(0,227,253,0.4); }
+    }
+    .glow-btn { animation: glow 3s infinite ease-in-out; }
+  </style>
+</head>
+<body class="premium-bg font-body text-white min-h-screen flex flex-col">
+
+  <!-- Nav -->
+  <nav class="sticky top-0 z-50 bg-[#181c1e]/80 backdrop-blur-xl border-b border-white/5">
+    <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-4xl mx-auto">
+      <a href="index.html" class="text-xl font-black tracking-tighter text-[#2e5bff] font-headline">DJukebox</a>
+      <a href="index.html" class="text-white/50 hover:text-white text-sm transition-colors">← Tornar</a>
+    </div>
+  </nav>
+
+  <main class="flex-1 flex items-center justify-center px-6 py-16">
+    <div class="w-full max-w-2xl text-center">
+
+      <!-- Header -->
+      <div class="mb-12">
+        <span class="text-[#2e5bff] text-xs font-bold uppercase tracking-widest font-headline">Parlem</span>
+        <h1 class="font-headline text-4xl md:text-6xl font-black text-white tracking-tighter mt-3 mb-4 uppercase leading-none">
+          Posa't en<br/><span style="background:linear-gradient(135deg,#2e5bff,#00e3fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">contacte</span>
+        </h1>
+        <p class="text-white/50 text-lg max-w-md mx-auto leading-relaxed">
+          Vols incorporar DJukebox al teu local o event? Escriu-nos i t'expliquem tot el que necessites saber.
+        </p>
+      </div>
+
+      <!-- Contact card -->
+      <div class="bg-white/[0.04] border border-white/10 rounded-3xl p-8 md:p-12 mb-8 text-left space-y-8">
+
+        <!-- Email -->
+        <div class="flex items-start gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-[#0040e0]/20 border border-[#0040e0]/30 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[#00e3fd]">mail</span>
+          </div>
+          <div>
+            <p class="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Correu electrònic</p>
+            <a href="mailto:info@djukebox.click" class="text-white font-bold text-lg hover:text-[#00e3fd] transition-colors">info@djukebox.click</a>
+            <p class="text-white/40 text-sm mt-1">Resposta en menys de 24h en dies laborables.</p>
+          </div>
+        </div>
+
+        <div class="h-px bg-white/5"></div>
+
+        <!-- Response time -->
+        <div class="flex items-start gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-[#5e24e1]/20 border border-[#5e24e1]/30 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[#c8b0ff]">schedule</span>
+          </div>
+          <div>
+            <p class="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Temps de resposta</p>
+            <p class="text-white font-bold text-lg">Menys de 24 hores</p>
+            <p class="text-white/40 text-sm mt-1">De dilluns a divendres, de 9h a 18h (CET).</p>
+          </div>
+        </div>
+
+        <div class="h-px bg-white/5"></div>
+
+        <!-- For -->
+        <div class="flex items-start gap-5">
+          <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white/60">info</span>
+          </div>
+          <div>
+            <p class="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">Podem ajudar-te amb</p>
+            <ul class="space-y-1">
+              <li class="text-white/60 text-sm flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-[#2e5bff] inline-block"></span>Incorporar DJukebox al teu local o event</li>
+              <li class="text-white/60 text-sm flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-[#2e5bff] inline-block"></span>Dubtes sobre el funcionament de la plataforma</li>
+              <li class="text-white/60 text-sm flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-[#2e5bff] inline-block"></span>Incidències tècniques o del compte</li>
+              <li class="text-white/60 text-sm flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-[#2e5bff] inline-block"></span>Col·laboracions i partenariats</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA -->
+      <a href="mailto:info@djukebox.click?subject=Informació%20DJukebox" class="glow-btn inline-flex items-center gap-3 bg-white text-[#0a0c0d] px-10 py-4 rounded-full font-headline font-black text-lg hover:scale-105 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[#2e5bff]">send</span>
+        Envia un missatge
+      </a>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 py-8 px-6 md:px-12 text-center text-xs text-white/25 font-body uppercase tracking-widest">
+    © 2026 DJukebox &nbsp;·&nbsp; <a href="privacitat.html" class="hover:text-white transition-colors">Privacitat</a> &nbsp;·&nbsp; <a href="termes.html" class="hover:text-white transition-colors">Termes</a>
+  </footer>
+
+</body>
+</html>

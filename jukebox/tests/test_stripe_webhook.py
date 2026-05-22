@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-WEBHOOK_URL = '/stripe/webhook/'
+from django.urls import reverse
 
 
 def _make_stripe_event(session_id, user_id, party_id, coins):
@@ -49,7 +49,7 @@ class StripeWebhookTests(TestCase):
 
     def _post(self, body=b'payload', sig='sig_test'):
         return self.client.post(
-            WEBHOOK_URL,
+            reverse('stripe_webhook'),
             data=body,
             content_type='application/json',
             HTTP_STRIPE_SIGNATURE=sig,

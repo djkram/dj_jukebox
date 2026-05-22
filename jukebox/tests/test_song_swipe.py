@@ -41,7 +41,7 @@ class SongSwipeAccessTests(TestCase):
     def test_requires_login(self):
         response = self.client.get(reverse('song_swipe'))
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/accounts/', response['Location'])
+        self.assertIn('next=', response['Location'])
 
     def test_requires_selected_party(self):
         self.client.login(username='swiper', password='test')
@@ -168,13 +168,15 @@ class SongSwipePostTests(TestCase):
             ).exists()
         )
 
-    def test_post_skip_does_not_create_vote(self):
+    def test_post_skip_creates_skip_vote(self):
         self.client.post(
             reverse('song_swipe'),
             {'action': 'skip', 'song_id': self.song.id},
         )
-        self.assertFalse(
-            Vote.objects.filter(user=self.user, song=self.song, party=self.party).exists()
+        self.assertTrue(
+            Vote.objects.filter(
+                user=self.user, song=self.song, party=self.party, vote_type='skip'
+            ).exists()
         )
 
     def test_post_skip_returns_json(self):

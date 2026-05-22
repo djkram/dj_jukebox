@@ -1242,3 +1242,235 @@ class NotificationViewTests(TestCase):
             reverse('mark_notification_read', args=[self.notif.id])
         )
         self.assertEqual(response.status_code, 404)
+
+
+class UnmarkSongPlayedTests(TestCase):
+    """Tests per unmark_song_played — marcar cançó com a no jugada."""
+
+    def setUp(self):
+        self.client = Client()
+        self.dj = User.objects.create_user(
+            username='dj_unmark', password='test', is_superuser=True, is_staff=True
+        )
+        self.user = User.objects.create_user(username='user_unmark', password='test')
+        self.party = Party.objects.create(
+            name='Unmark Party',
+            date=timezone.now(),
+            party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
+        )
+        self.song = Song.objects.create(
+            party=self.party,
+            title='Played Song',
+            artist='Artist',
+            spotify_id='unmark1',
+            has_played=True,
+        )
+
+    def test_superuser_can_unmark(self):
+        self.client.login(username='dj_unmark', password='test')
+        response = self.client.post(reverse('unmark_song_played', args=[self.song.id]))
+        self.assertIn(response.status_code, (200, 302))
+        self.song.refresh_from_db()
+        self.assertFalse(self.song.has_played)
+
+    def test_regular_user_cannot_unmark(self):
+        self.client.login(username='user_unmark', password='test')
+        response = self.client.post(reverse('unmark_song_played', args=[self.song.id]))
+        self.assertEqual(response.status_code, 302)
+        self.song.refresh_from_db()
+        self.assertTrue(self.song.has_played)
+
+    def test_requires_login(self):
+        response = self.client.post(reverse('unmark_song_played', args=[self.song.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/', response['Location'])
+
+
+class PartyStatusApiTests(TestCase):
+    """Tests per party_status_api — endpoint JSON de polling."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='apiuser', password='test')
+        self.party = Party.objects.create(
+            name='API Party',
+            date=timezone.now(),
+            party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
+        )
+        self.song = Song.objects.create(
+            party=self.party, title='API Song', artist='A', spotify_id='api1'
+        )
+        self.client.login(username='apiuser', password='test')
+
+    def _set_party(self):
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse('party_status_api'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_no_party_selected_returns_400(self):
+        response = self.client.get(reverse('party_status_api'))
+        self.assertEqual(response.status_code, 400)
+
+    def test_returns_json_with_party_status(self):
+        self._set_party()
+        response = self.client.get(reverse('party_status_api'))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertIn('party_status', data)
+        self.assertEqual(data['party_status'], Party.STATUS_DJJUKEBOX_ACTIVE)
+
+    def test_returns_song_counts(self):
+        self._set_party()
+        response = self.client.get(reverse('party_status_api'))
+        data = json.loads(response.content)
+        self.assertIn('total_songs', data)
+        self.assertIn('songs_played', data)
+        self.assertIn('songs_remaining', data)
+        self.assertEqual(data['total_songs'], 1)
+
+    def test_returns_votes_left(self):
+        self._set_party()
+        response = self.client.get(reverse('party_status_api'))
+        data = json.loads(response.content)
+        self.assertIn('votes_left', data)
+
+    def test_now_playing_reflects_top_voted_song(self):
+        self._set_party()
+        Vote.objects.create(user=self.user, song=self.song, party=self.party, vote_type='like')
+        response = self.client.get(reverse('party_status_api'))
+        data = json.loads(response.content)
+        self.assertEqual(data['now_playing_title'], 'API Song')
+
+    def test_last_played_reflects_marked_song(self):
+        self._set_party()
+        self.song.has_played = True
+        self.song.save()
+        response = self.client.get(reverse('party_status_api'))
+        data = json.loads(response.content)
+        self.assertEqual(data['last_played_title'], 'API Song')
+
+
+class ManageSongRequestsAllowWithoutChargeTests(TestCase):
+    """Tests per l'opció allow_without_charge a manage_song_requests."""
+
+    def setUp(self):
+        self.client = Client()
+        self.dj = User.objects.create_user(
+            username='dj_awc', password='test', is_superuser=True, is_staff=True
+        )
+        self.user = User.objects.create_user(
+            username='user_awc', password='test', credits=0
+        )
+        self.party = Party.objects.create(
+            name='AWC Party',
+            date=timezone.now(),
+            party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
+            allow_song_requests=True,
+            song_request_cost=5,
+        )
+        self.song_request = SongRequest.objects.create(
+            user=self.user,
+            party=self.party,
+            title='Req Song',
+            artist='Artist',
+            spotify_id='awc1',
+            coins_cost=5,
+            status='pending',
+        )
+        self.client.login(username='dj_awc', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+    def test_accept_without_charge_when_user_has_no_credits(self):
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {
+                'request_id': self.song_request.id,
+                'action': 'accept',
+                'allow_without_charge': '1',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+
+    def test_accept_without_charge_does_not_deduct_credits(self):
+        self.client.post(
+            reverse('manage_song_requests'),
+            {
+                'request_id': self.song_request.id,
+                'action': 'accept',
+                'allow_without_charge': '1',
+            },
+        )
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.credits, 0)
+
+    def test_accept_without_charge_adds_song_to_party(self):
+        self.client.post(
+            reverse('manage_song_requests'),
+            {
+                'request_id': self.song_request.id,
+                'action': 'accept',
+                'allow_without_charge': '1',
+            },
+        )
+        from jukebox.models import Song
+        self.assertTrue(
+            Song.objects.filter(party=self.party, spotify_id='awc1').exists()
+        )
+
+    def test_accept_with_charge_fails_when_no_credits(self):
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {
+                'request_id': self.song_request.id,
+                'action': 'accept',
+                'allow_without_charge': '0',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertFalse(data['success'])
+
+    def test_invalid_action_returns_400(self):
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {
+                'request_id': self.song_request.id,
+                'action': 'invalid',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+
+
+class SongListPartyVisibleTests(TestCase):
+    """Tests per l'estat STATUS_PARTY_VISIBLE — mostra pantalla d'espera."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='vis_user', password='test')
+        self.party = Party.objects.create(
+            name='Visible Party',
+            date=timezone.now(),
+            party_status=Party.STATUS_PARTY_VISIBLE,
+        )
+        self.client.login(username='vis_user', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+    def test_shows_waiting_screen(self):
+        response = self.client.get(reverse('song_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context.get('playlist_not_ready'))
+
+    def test_songs_list_is_empty(self):
+        response = self.client.get(reverse('song_list'))
+        self.assertEqual(len(response.context.get('songs', [])), 0)

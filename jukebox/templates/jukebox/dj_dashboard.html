@@ -1792,11 +1792,13 @@ document.addEventListener('DOMContentLoaded', function() {
   var spotifyResultsTitle = document.getElementById('dashboard-spotify-results-title');
   var spotifyResultsList = document.getElementById('dashboard-spotify-results-list');
   var csrfToken = '{{ csrf_token }}';
+  var isJukeboxActive = {{ is_djjukebox_active|yesno:"true,false" }};
+  var markSongPlayedUrlBase = '{% url "mark_song_played" 0 %}';
 
   function submitLoadSong(songId) {
     var form = document.createElement('form');
     form.method = 'POST';
-    form.action = '/dj/mark_played/' + songId + '/';
+    form.action = markSongPlayedUrlBase.replace('/0/', '/' + songId + '/');
     var tokenInput = document.createElement('input');
     tokenInput.type = 'hidden';
     tokenInput.name = 'csrfmiddlewaretoken';
@@ -1839,13 +1841,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var buttonHtml = '';
       if (track.already_in_party) {
-        buttonHtml = existingSongId
+        buttonHtml = existingSongId && isJukeboxActive
           ? '<button type="button" class="sonic-btn-posada btn-load-existing" data-song-id="' + existingSongId + '">LOAD</button>'
           : '<span class="sonic-badge-success" style="padding:0.35rem 0.5rem;">Ja a la maleta</span>';
       } else {
-        buttonHtml = ''
-          + '<button type="button" class="sonic-btn sonic-btn-tertiary sonic-btn-sm btn-add-track">Afegir a la maleta</button>'
-          + '<button type="button" class="sonic-btn-posada btn-add-and-load">LOAD</button>';
+        buttonHtml = '<button type="button" class="sonic-btn sonic-btn-tertiary sonic-btn-sm btn-add-track">Afegir a la maleta</button>';
+        if (isJukeboxActive) {
+          buttonHtml += '<button type="button" class="sonic-btn-posada btn-add-and-load">LOAD</button>';
+        }
       }
 
       card.innerHTML = ''

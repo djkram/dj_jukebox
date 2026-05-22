@@ -857,7 +857,7 @@ function ensureSpotifyPlayer() {
 
   spotifyPlayerInitPromise = new Promise((resolve, reject) => {
     spotifyPlayer = new Spotify.Player({
-      name: 'DJ Jukebox Web Player',
+      name: 'DJukebox Web Player',
       getOAuthToken: cb => {
         fetch('/api/spotify-token/')
           .then(r => r.json())

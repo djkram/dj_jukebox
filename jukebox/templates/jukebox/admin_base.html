@@ -60,6 +60,28 @@
     </script>
 
     <title>DJukebox</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'jukebox/img/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'jukebox/img/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'jukebox/img/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'jukebox/img/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#2e5bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DJukebox">
+
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DJukebox">
+    <meta property="og:title" content="DJukebox — La teva festa, el teu control">
+    <meta property="og:description" content="Uneix-te a la festa i fes sentir les teves preferències musicals en temps real.">
+    <meta property="og:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://app.djukebox.click/static/jukebox/img/og-image.jpg">
 
     <!-- Tailwind CSS (compiled) -->
     <link href="{% static 'jukebox/css/tailwind.css' %}" rel="stylesheet">
@@ -1935,7 +1957,7 @@
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'main' %}">
                 <img
                     src="{% static 'jukebox/img/DJJukebox_logo.png' %}"
-                    alt="DJJukebox"
+                    alt="DJukebox"
                     class="sidebar-brand-logo"
                 >
                 <img
@@ -2163,7 +2185,7 @@
                                 <img src="{% static 'jukebox/img/DJJ_icon.png' %}" alt="DJJ" style="height: 32px; width: auto; display: block;">
                             </div>
                             <h1 class="headline-font font-bold text-lg text-on-surface mb-0">
-                                {{ selected_party.name|default:"DJ Jukebox" }}
+                                {{ selected_party.name|default:"DJukebox" }}
                             </h1>
                         </div>
 
@@ -2211,7 +2233,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; DJ Jukebox 2026</span>
+                        <span>Copyright &copy; DJukebox 2026</span>
                     </div>
                 </div>
             </footer>

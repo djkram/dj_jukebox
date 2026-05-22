@@ -1867,11 +1867,10 @@ document.addEventListener('DOMContentLoaded', function() {
     input.addEventListener('input', function() {
       var q = input.value.trim().toLowerCase();
       document.querySelectorAll('table tbody tr').forEach(function(row) {
-        var title = row.cells[1].textContent.toLowerCase();
-        var artist = row.cells[2].textContent.toLowerCase();
-        var bpm = row.cells[3].textContent.toLowerCase();
-        var key = row.cells[4].textContent.toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q) || bpm.includes(q) || key.includes(q)) ? '' : 'none';
+        var titleArtist = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+        var bpm = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+        var key = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+        row.style.display = (titleArtist.includes(q) || bpm.includes(q) || key.includes(q)) ? '' : 'none';
       });
     });
   }
@@ -3017,7 +3016,7 @@ let SPOTIFY_TOKEN = null;
 // Initialize Spotify Player
 window.onSpotifyWebPlaybackSDKReady = () => {
   spotifyPlayer = new Spotify.Player({
-    name: 'DJ Jukebox Web Player',
+    name: 'DJukebox Web Player',
     getOAuthToken: cb => {
       fetch('/api/spotify-token/')
         .then(r => r.json())

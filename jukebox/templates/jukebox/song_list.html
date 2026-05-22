@@ -2185,7 +2185,7 @@
               <div id="desktop-jukebox-inactive" style="margin-bottom:1.5rem;padding-bottom:1.5rem;text-align:center;border-bottom:1px solid rgba(0,0,0,0.08);">
                 <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
                   <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:#4f46e5;font-size:1.1rem;"></i></div>
-                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
                   <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Els temes més votats sonen primer. Ara és el moment d'explorar la Maleta i triar els teus favorits.</div>
                   <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                 </div>
@@ -2198,19 +2198,19 @@
                 <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
                   <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="color:#4f46e5;font-size:1.1rem;"></i></div>
                   <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El Jukebox encara no és actiu{% if party.jukebox_starts_at %} — s'obre el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Quin tema és el teu?</div>
-                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJ Jukebox posa els temes amb més vots. Explora la Maleta, fes el Match i vota'ls ara.</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJukebox posa els temes amb més vots. Explora la Maleta, fes el Match i vota'ls ara.</div>
                   <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                 </div>
                 <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
                   <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="color:#4f46e5;font-size:1.1rem;"></i></div>
                   <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">La sessió Jukebox no ha arrencat{% if party.jukebox_starts_at %} — s'activa el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La cua de la nit és teva</div>
-                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Al DJ Jukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">Al DJukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
                   <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                 </div>
                 <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
                   <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-users" style="color:#4f46e5;font-size:1.1rem;"></i></div>
-                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
-                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJ Jukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
+                  <div style="font-weight:700;font-size:0.95rem;color:#191c1f;line-height:1.3;">El DJukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
+                  <div style="font-size:0.8rem;color:#747688;line-height:1.5;max-width:380px;">El DJukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
                   <a href="{% url 'song_swipe' %}" style="margin-top:0.15rem;font-size:0.82rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes sentir la teva veu <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                 </div>
               </div>
@@ -2776,7 +2776,7 @@
               {% comment %}Missatge 0{% endcomment %}
               <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-headphones" style="color:#4f46e5;font-size:1.25rem;"></i></div>
-                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}</div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}</div>
                 <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Mentre la pista escalfa, les votacions estan obertes{% if party.jukebox_ends_at %} fins al {{ party.date|date:"d/m" }} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Vota els teus favorits i fes que sonin.</div>
                 <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
               </div>
@@ -2808,7 +2808,7 @@
               {% comment %}Missatge 4{% endcomment %}
               <div class="sonat-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-star" style="color:#4f46e5;font-size:1.25rem;"></i></div>
-                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La pista t'espera</div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La pista t'espera</div>
                 <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Tens temps de votar fins al {{ party.date|date:"d/m" }}{% if party.jukebox_ends_at %} a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}. Al Match trobaràs els temes de la Maleta del DJ — deslitza i vota els teus favorits.</div>
                 <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
               </div>
@@ -2862,7 +2862,7 @@
               {% comment %}Missatge 0{% endcomment %}
               <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:#4f46e5;font-size:1.25rem;"></i></div>
-                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJukebox encara no ha arrencat{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}</div>
                 <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Els temes més votats sonen primer. Ara és el moment d'explorar la Maleta i triar els teus favorits.</div>
                 <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
                   <a href="#" onclick="document.querySelector('[data-mobile-tab=bag]').click();return false;" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Maleta del DJ <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
@@ -2883,7 +2883,7 @@
               <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music" style="color:#4f46e5;font-size:1.25rem;"></i></div>
                 <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El Jukebox encara no és actiu{% if party.jukebox_starts_at %} — s'obre el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. Quin tema és el teu?</div>
-                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJ Jukebox posa els temes amb més vots. Explora la Maleta, fes el Match amb els que t'agraden i vota'ls ara.</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJukebox posa els temes amb més vots. Explora la Maleta, fes el Match amb els que t'agraden i vota'ls ara.</div>
                 <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
                   <a href="{% url 'song_swipe' %}" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                   <span style="color:#d1d5db;">·</span>
@@ -2895,7 +2895,7 @@
               <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="color:#4f46e5;font-size:1.25rem;"></i></div>
                 <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">La sessió Jukebox no ha arrencat{% if party.jukebox_starts_at %} — s'activa el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% endif %}. La cua de la nit és teva</div>
-                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Al DJ Jukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Al DJukebox els temes amb més vots lideren la pista. Passa els que t'agraden al Match i vota'ls abans que arrenqui.</div>
                 <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
                   <a href="{% url 'song_swipe' %}" style="font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Anar al Match <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
                   <span style="color:#d1d5db;">·</span>
@@ -2906,8 +2906,8 @@
               {% comment %}Missatge 4{% endcomment %}
               <div class="jukebox-inactive-msg" style="display:none; flex-direction:column; align-items:center; gap:0.75rem;">
                 <div style="width:3rem;height:3rem;border-radius:50%;background:#f0f4ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-users" style="color:#4f46e5;font-size:1.25rem;"></i></div>
-                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJ Jukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
-                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJ Jukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
+                <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El DJukebox no s'ha activat encara{% if party.jukebox_starts_at %} — comença el {{ party.date|date:"d/m" }} a les {{ party.jukebox_starts_at|time:"H:i" }}{% if party.jukebox_ends_at %} fins a les {{ party.jukebox_ends_at|time:"H:i" }}{% endif %}{% endif %}. Cada vot construeix la nit</div>
+                <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">El DJukebox posa el que vosaltres trieu. Vés al Match, troba el teu match musical i fes sentir la teva veu.</div>
                 <a href="{% url 'song_swipe' %}" style="margin-top:0.25rem;font-size:0.8rem;font-weight:600;color:#4f46e5;text-decoration:none;">Fes sentir la teva veu <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a>
               </div>
 
@@ -3151,7 +3151,7 @@ function ensureSpotifyPlayer() {
 
   spotifyPlayerInitPromise = new Promise((resolve, reject) => {
     spotifyPlayer = new Spotify.Player({
-      name: 'DJ Jukebox Web Player',
+      name: 'DJukebox Web Player',
       getOAuthToken: cb => {
         fetch('/api/spotify-token/')
           .then(r => r.json())
@@ -3780,23 +3780,7 @@ document.addEventListener('DOMContentLoaded', function() {
       window.slRestoreMobileLcd();
     }
 
-    // LED ticker: start scroll if text overflows container
-  function startTicker() {
-    var ticker = document.getElementById('slNpTicker');
-    var inner  = document.getElementById('slNpTickerInner');
-    if (!ticker || !inner) return;
-    inner.classList.remove('is-scrolling');
-    inner.style.removeProperty('--sl-scroll-px');
-    requestAnimationFrame(function() {
-      var overflow = inner.scrollWidth - ticker.offsetWidth;
-      if (overflow > 6) {
-        inner.style.setProperty('--sl-scroll-px', '-' + overflow + 'px');
-        inner.classList.add('is-scrolling');
-      }
-    });
-  }
-
-  // Right LCD: mode label + now-playing block or explanatory text
+    // Right LCD: mode label + now-playing block or explanatory text
     var rst   = document.getElementById('slLastTitle');
     var rdt   = document.getElementById('slLastArtist');
     var npBlock  = document.getElementById('slNowPlayingBlock');
@@ -3827,6 +3811,22 @@ document.addEventListener('DOMContentLoaded', function() {
     applyStatus(currentStatus, lastSongData.nowPlaying, lastSongData.lastPlayed, lastSongData.songsPlayed);
   };
   window.slCurrentStatus = currentStatus;
+
+  // LED ticker: start scroll if text overflows container
+  function startTicker() {
+    var ticker = document.getElementById('slNpTicker');
+    var inner  = document.getElementById('slNpTickerInner');
+    if (!ticker || !inner) return;
+    inner.classList.remove('is-scrolling');
+    inner.style.removeProperty('--sl-scroll-px');
+    requestAnimationFrame(function() {
+      var overflow = inner.scrollWidth - ticker.offsetWidth;
+      if (overflow > 6) {
+        inner.style.setProperty('--sl-scroll-px', '-' + overflow + 'px');
+        inner.classList.add('is-scrolling');
+      }
+    });
+  }
 
   // Init on page load
   updateKpiVisibility(currentStatus);

@@ -3,7 +3,6 @@ from django.urls import path, include, reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from .views import stripe_webhook
 from . import views
 
 urlpatterns = [
@@ -46,7 +45,6 @@ urlpatterns = [
     path('api/spotify-token/', views.api_spotify_token, name='api_spotify_token'),
     path('buy-coins/', views.buy_votes, name='buy_votes'),
     path('buy-coins/success/', views.buy_votes_success, name='buy_votes_success'),
-    path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),
 
 
     # RUTA per a la llista de cançons de la festa seleccionada

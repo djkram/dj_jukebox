@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from jukebox.socialaccount_adapters import spotify_oauth_callback, spotify_oauth_login
+from jukebox.views import stripe_webhook
 
 # URLs sense prefix d'idioma (necessàries per al canvi d'idioma)
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
     path('accounts/spotify/login/', spotify_oauth_login, name='spotify_login'),
     path('accounts/spotify/login/callback/', spotify_oauth_callback, name='spotify_callback'),
     path('accounts/', include('allauth.urls')),
+    path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),
 ]
 
 # URLs amb prefix d'idioma (ca/, en/, etc.)

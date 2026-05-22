@@ -545,6 +545,19 @@
       {% if songs %}
         <!-- Card Stack -->
         <div id="card-stack-desktop" class="swipe-card-stack">
+          <div id="no-votes-overlay-desktop" style="position:absolute;inset:0;z-index:50;display:{% if votes_left == 0 %}flex{% else %}none{% endif %};flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:2rem;text-align:center;">
+            <div style="width:4rem;height:4rem;border-radius:50%;background:rgba(246,194,62,0.15);border:2px solid rgba(246,194,62,0.5);display:flex;align-items:center;justify-content:center;">
+              <i class="fas fa-coins" style="font-size:1.6rem;color:#f6c23e;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.15rem;font-weight:800;color:white;letter-spacing:0.02em;margin-bottom:0.4rem;">Has fet servir tots els vots!</div>
+              <div id="no-votes-desc-desktop" style="font-size:0.85rem;color:rgba(255,255,255,0.7);line-height:1.5;">{% if credits > 0 %}Tens {{ credits }} Coins disponibles.<br>Converteix-los en més vots ara.{% else %}Compra Coins i converteix-los<br>en més vots al moment.{% endif %}</div>
+            </div>
+            <a id="no-votes-btn-desktop" href="{% url 'buy_votes' %}" style="display:inline-flex;align-items:center;gap:0.4rem;background:#f6c23e;color:#191c1f;font-weight:800;font-size:0.85rem;padding:0.65rem 1.6rem;border-radius:9999px;text-decoration:none;letter-spacing:0.03em;">
+              <i id="no-votes-icon-desktop" class="fas fa-{% if credits > 0 %}exchange-alt{% else %}shopping-cart{% endif %}"></i>
+              <span id="no-votes-label-desktop">{% if credits > 0 %}Aconsegueix vots{% else %}Compra Coins{% endif %}</span>
+            </a>
+          </div>
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
@@ -690,6 +703,19 @@
 
         <!-- Main Card -->
         <div id="card-stack" class="relative h-full w-full bg-white rounded-xl overflow-hidden flex flex-col mobile-swipe-stage-card" style="box-shadow: 0 20px 40px rgba(0,64,224,0.06);">
+          <div id="no-votes-overlay-mobile" style="position:absolute;inset:0;z-index:50;display:{% if votes_left == 0 %}flex{% else %}none{% endif %};flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:1.5rem;text-align:center;">
+            <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(246,194,62,0.15);border:2px solid rgba(246,194,62,0.5);display:flex;align-items:center;justify-content:center;">
+              <i class="fas fa-coins" style="font-size:1.4rem;color:#f6c23e;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:white;letter-spacing:0.02em;margin-bottom:0.35rem;">Has fet servir tots els vots!</div>
+              <div id="no-votes-desc-mobile" style="font-size:0.78rem;color:rgba(255,255,255,0.7);line-height:1.4;">{% if credits > 0 %}Tens {{ credits }} Coins disponibles.<br>Converteix-los en més vots ara.{% else %}Compra Coins i converteix-los<br>en més vots al moment.{% endif %}</div>
+            </div>
+            <a id="no-votes-btn-mobile" href="{% url 'buy_votes' %}" style="display:inline-flex;align-items:center;gap:0.4rem;background:#f6c23e;color:#191c1f;font-weight:800;font-size:0.82rem;padding:0.6rem 1.4rem;border-radius:9999px;text-decoration:none;letter-spacing:0.03em;">
+              <i id="no-votes-icon-mobile" class="fas fa-{% if credits > 0 %}exchange-alt{% else %}shopping-cart{% endif %}"></i>
+              <span id="no-votes-label-mobile">{% if credits > 0 %}Aconsegueix vots{% else %}Compra Coins{% endif %}</span>
+            </a>
+          </div>
           {% for song in songs %}
             <div class="swipe-card {% if not forloop.first %}d-none{% endif %}"
                  data-song-id="{{ song.id }}"
@@ -774,13 +800,6 @@
 
       <div id="message-area" class="text-center" style="min-height: 3.5rem; margin-top: 1rem; padding: 0 0.5rem;"></div>
 
-      {% if not has_spotify %}
-        <div class="alert alert-info mt-3 text-center" style="font-size: 0.875rem;">
-          <i class="fas fa-info-circle me-2"></i>
-          <strong>Consell:</strong> Connecta el teu compte de Spotify per reproduir cançons completes!
-          <a href="{% url 'profile' %}" class="alert-link">Connectar Spotify</a>
-        </div>
-      {% endif %}
 
       {% if votes_left == 0 %}
         <div class="alert alert-warning mt-3 text-center">
@@ -962,6 +981,26 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentIndex = 0;
   let lastAction = null; // { type: 'like'|'skip', songId: X, index: Y }
   const totalCards = cards.length;
+
+  function showNoVotesOverlay(votesLeft, credits) {
+    if (parseInt(votesLeft) > 0) return;
+    var hasCoins = parseInt(credits) > 0;
+    var descText = hasCoins
+      ? 'Tens ' + credits + ' Coins disponibles.<br>Converteix-los en més vots ara.'
+      : 'Compra Coins i converteix-los<br>en més vots al moment.';
+    var labelText = hasCoins ? 'Aconsegueix vots' : 'Compra Coins';
+    var iconClass = hasCoins ? 'fas fa-exchange-alt' : 'fas fa-shopping-cart';
+    ['mobile', 'desktop'].forEach(function(suffix) {
+      var overlay = document.getElementById('no-votes-overlay-' + suffix);
+      var desc = document.getElementById('no-votes-desc-' + suffix);
+      var label = document.getElementById('no-votes-label-' + suffix);
+      var icon = document.getElementById('no-votes-icon-' + suffix);
+      if (overlay) { overlay.style.display = 'flex'; }
+      if (desc) { desc.innerHTML = descText; }
+      if (label) { label.textContent = labelText; }
+      if (icon) { icon.className = iconClass; }
+    });
+  }
 
   function updateZeroStatCards(votesLeft, credits) {
     var votesCard = document.getElementById('votes-stat-card');
@@ -1437,6 +1476,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!data) return;
       if (data.success) {
         updateZeroStatCards(data.votes_left, data.credits);
+        showNoVotesOverlay(data.votes_left, data.credits);
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
@@ -1487,6 +1527,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!data) return;
       if (data.success) {
         updateZeroStatCards(data.votes_left, data.credits);
+        showNoVotesOverlay(data.votes_left, data.credits);
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         const userLikesCount = document.getElementById('user-likes-count');

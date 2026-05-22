@@ -537,6 +537,7 @@
       </div>
 
       <!-- Call to Action / Featured Card -->
+      {% if selected_party and selected_party.allow_song_requests %}
       <div class="p-3 position-relative overflow-hidden" style="border-radius: 12px; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06);">
         <div class="position-relative d-flex align-items-center justify-content-between" style="z-index: 10;">
           <div>
@@ -549,6 +550,20 @@
           </a>
         </div>
       </div>
+      {% else %}
+      <div class="p-3 position-relative overflow-hidden" style="border-radius: 12px; background: linear-gradient(135deg, #6c3fc5 0%, #9b59f5 100%); color: white; box-shadow: 0 20px 25px -5px rgba(108, 63, 197, 0.15), 0 8px 10px -6px rgba(108, 63, 197, 0.1);">
+        <div class="position-relative d-flex align-items-center justify-content-between" style="z-index: 10;">
+          <div>
+            <h3 class="fw-bold mb-1" style="font-size: 1rem;">{% trans "Busca Match ✦" %}</h3>
+            <p class="mb-0" style="color: rgba(239, 239, 255, 0.8); font-size: 0.7rem;">{% trans "Troba el tema que connecta amb tu." %}</p>
+          </div>
+          <a href="{% url 'song_swipe' %}" class="btn fw-bold d-inline-flex align-items-center" style="background: white; color: #6c3fc5; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; text-decoration: none; gap: 0.25rem;">
+            <i class="fas fa-heart"></i>
+            {% trans "Match" %}
+          </a>
+        </div>
+      </div>
+      {% endif %}
 
     {% else %}
       <div class="bg-white rounded-3 shadow-sm text-center p-4">
@@ -564,9 +579,15 @@
           <a href="{% url 'song_list' %}" class="btn btn-primary btn-sm">
             <i class="fas fa-music me-2"></i>{% trans "Vota cançons" %}
           </a>
+          {% if selected_party and selected_party.allow_song_requests %}
           <a href="{% url 'request_song' %}" class="btn btn-outline-primary btn-sm">
             <i class="fas fa-plus me-2"></i>{% trans "Demana cançó" %}
           </a>
+          {% else %}
+          <a href="{% url 'song_swipe' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-heart me-2"></i>{% trans "Busca Match" %}
+          </a>
+          {% endif %}
         </div>
       </div>
     {% endif %}

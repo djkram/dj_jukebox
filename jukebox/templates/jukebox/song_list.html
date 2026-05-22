@@ -1579,6 +1579,21 @@
     color: inherit;
     opacity: 0.75;
   }
+  @keyframes hc-pulse {
+    0%   { box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 0 rgba(200,120,255,0.0), 0 0 0 0 rgba(200,120,255,0.0); border-color: #2a2a2e; }
+    40%  { box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03), 0 0 8px 2px rgba(200,120,255,0.5), 0 0 18px 4px rgba(200,120,255,0.25); border-color: rgba(200,120,255,0.7); }
+    100% { box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 0 rgba(200,120,255,0.0), 0 0 0 0 rgba(200,120,255,0.0); border-color: #2a2a2e; }
+  }
+  .mob-cdj-panel .mob-hotcue-btn--pulse {
+    animation: hc-pulse 2s ease-in-out infinite;
+  }
+  .mob-cdj-panel .mob-hotcue-btn--pulse .material-symbols-outlined {
+    opacity: 1;
+    color: #c878ff;
+  }
+  .mob-cdj-panel .mob-hotcue-btn--pulse span:last-child {
+    color: #c878ff;
+  }
 </style>
 <div class="container-fluid d-none d-md-block" style="max-width: 1400px;">
   <!-- Songs Grid - Two Columns -->
@@ -1604,8 +1619,14 @@
                 <div class="sl-lcd-section sl-lcd-section-status">
                   <div class="sl-status-carousel" id="slCarousel1">
 
-                    <!-- Slide 1: estat principal + explicació -->
+                    <!-- Slide 1: nom de la festa + benvinguda -->
                     <div class="sl-carousel-slide sl-slide-active">
+                      <div class="sl-lcd-status">{{ party.name }}</div>
+                      <div class="sl-lcd-detail">Vota els temes que vols sentir i pugen a la cua.</div>
+                    </div>
+
+                    <!-- Slide 2: estat principal + explicació -->
+                    <div class="sl-carousel-slide">
                       <div id="slStatus1" class="sl-lcd-status">
                         {% if party.party_status == 'party_visible' %}AVIAT
                         {% elif party.party_status == 'show_party' %}EXPLORA
@@ -1624,7 +1645,7 @@
                       </div>
                     </div>
 
-                    <!-- Slide 2: stats de l'usuari -->
+                    <!-- Slide 3: stats de l'usuari -->
                     <div class="sl-carousel-slide">
                       {% if party.party_status == 'party_visible' %}
                         <div class="sl-lcd-status">{{ total_songs }} TEMES</div>
@@ -1644,14 +1665,14 @@
                       {% endif %}
                     </div>
 
-                    <!-- Slide 3: crida a l'acció / propera etapa -->
+                    <!-- Slide 4: crida a l'acció / propera etapa -->
                     <div class="sl-carousel-slide">
                       {% if party.party_status == 'party_visible' %}
                         <div class="sl-lcd-status">PREPARA'T</div>
                         <div class="sl-lcd-detail">Obre la llista, tria els temes que t'aguden i estàs a punt quan comenci la votació.</div>
                       {% elif party.party_status == 'show_party' %}
-                        <div class="sl-lcd-status">JB PENDENT</div>
-                        <div class="sl-lcd-detail">Vota ara per acumular posicions a la cua. Quan el DJ premi PLAY, el jukebox seguirà els més votats.</div>
+                        <div class="sl-lcd-status">JUKEBOX EN ESPERA</div>
+                        <div class="sl-lcd-detail">{% if party.jukebox_starts_at %}Comença a les {{ party.jukebox_starts_at|time:"H:i" }}. Vota ara per pujar a la cua.{% else %}Vota ara per acumular posicions a la cua.{% endif %}</div>
                       {% elif party.party_status == 'requests_open' %}
                         <div class="sl-lcd-status">{{ user_votes_count }} FETS ♥</div>
                         <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. L'activació del jukebox és imminent. Segueix votant per pujar a la cua!</div>
@@ -1664,11 +1685,13 @@
                       {% endif %}
                     </div>
 
-                    <!-- Slide 4: nom de la festa + explicació de la maleta -->
+                    <!-- Slide 5: promoció Busca Match -->
+                    {% if party.party_status == 'show_party' or party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
                     <div class="sl-carousel-slide">
-                      <div class="sl-lcd-status">{{ party.name }}</div>
-                      <div class="sl-lcd-detail">Aquesta és la maleta de temes que el DJ té disponibles per posar. Vota els que vols sentir i pugen a la cua.</div>
+                      <div class="sl-lcd-status">BUSCA MATCH ✦</div>
+                      <div class="sl-lcd-detail">Troba el tema que connecta amb tu. Fes swipe i vota d'un cop d'ull.</div>
                     </div>
+                    {% endif %}
 
                   </div>
                   <!-- Columna fixa: rellotge + horari de la festa -->
@@ -1718,14 +1741,22 @@
               </div>
               <!-- KPIs columna dreta -->
               <div class="sl-kpi-col">
+                <div class="sl-kpi-item">
+                  <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                  <span class="sl-kpi-value" id="slLTemes">{{ total_songs }}</span>
+                </div>
                 {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
-                  <div class="sl-kpi-item">
-                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
-                    <span class="sl-kpi-value" id="slLTemes">{{ total_songs }}</span>
-                  </div>
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                     <span class="sl-kpi-value" id="slLUsuaris">{{ active_users }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                    <span class="sl-kpi-value">{{ votes_left }}</span>
+                  </div>
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">Coins</span>
+                    <span class="sl-kpi-value" style="color:#f6c23e;text-shadow:0 0 10px rgba(246,194,62,0.5);">{{ credits }}</span>
                   </div>
                 {% elif party.party_status == 'requests_open' %}
                   <div class="sl-kpi-item">
@@ -1741,8 +1772,8 @@
                     <span class="sl-kpi-value" id="slLFets">{{ user_votes_count }}</span>
                   </div>
                   <div class="sl-kpi-item">
-                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
-                    <span class="sl-kpi-value">{{ total_songs }}</span>
+                    <span class="sl-kpi-label">{% trans "Total" %}</span>
+                    <span class="sl-kpi-value">{{ total_votes }}</span>
                   </div>
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
@@ -1765,6 +1796,12 @@
                     <span class="sl-kpi-label">{% trans "Total" %}</span>
                     <span class="sl-kpi-value" id="slLVots">{{ total_votes }}</span>
                   </div>
+                  {% if party.allow_song_requests %}
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Peticions" %}</span>
+                    <span class="sl-kpi-value">{{ pending_requests_count }}</span>
+                  </div>
+                  {% endif %}
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                     <span class="sl-kpi-value">{{ active_users }}</span>
@@ -2073,14 +2110,22 @@
                 </div>
                 <!-- KPIs columna dreta -->
                 <div class="sl-kpi-col">
+                  <div class="sl-kpi-item">
+                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                    <span class="sl-kpi-value" id="slRTemes">{{ total_songs }}</span>
+                  </div>
                   {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
-                    <div class="sl-kpi-item">
-                      <span class="sl-kpi-label">{% trans "Temes" %}</span>
-                      <span class="sl-kpi-value" id="slRTemes">{{ total_songs }}</span>
-                    </div>
                     <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                       <span class="sl-kpi-value">{{ active_users }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                      <span class="sl-kpi-value">{{ votes_left }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">Coins</span>
+                      <span class="sl-kpi-value" style="color:#f6c23e;text-shadow:0 0 8px rgba(246,194,62,0.5);">{{ credits }}</span>
                     </div>
                     {% if party.jukebox_starts_at %}
                     <div class="sl-kpi-item">
@@ -2090,13 +2135,27 @@
                     {% endif %}
                   {% elif party.party_status == 'requests_open' %}
                     <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Vots" %}</span>
+                      <span class="sl-kpi-value" style="{% if votes_left == 0 %}color:#ff4444;text-shadow:0 0 10px rgba(255,68,68,0.5);{% endif %}">{{ votes_left }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">Coins</span>
+                      <span class="sl-kpi-value" style="color:#f6c23e;text-shadow:0 0 8px rgba(246,194,62,0.5);">{{ credits }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Total" %}</span>
+                      <span class="sl-kpi-value">{{ total_votes }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Posades" %}</span>
                       <span class="sl-kpi-value" id="slRPosades">{{ songs_played }}</span>
                     </div>
+                    {% if party.allow_song_requests %}
                     <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Peticions" %}</span>
                       <span class="sl-kpi-value" id="slRPeticions">{{ pending_requests_count }}</span>
                     </div>
+                    {% endif %}
                     <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                       <span class="sl-kpi-value">{{ active_users }}</span>
@@ -2117,9 +2176,23 @@
                       <span class="sl-kpi-value">{{ songs_remaining }}</span>
                     </div>
                     <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Total" %}</span>
+                      <span class="sl-kpi-value">{{ total_votes }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Fets" %} ♥</span>
+                      <span class="sl-kpi-value">{{ user_votes_count }}</span>
+                    </div>
+                    <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Els meus ♥" %}</span>
                       <span class="sl-kpi-value" id="slRMyPlayed" style="color:#1cc88a;text-shadow:0 0 10px rgba(28,200,138,0.5);">{{ my_played_votes }}</span>
                     </div>
+                    {% if party.allow_song_requests %}
+                    <div class="sl-kpi-item">
+                      <span class="sl-kpi-label">{% trans "Peticions" %}</span>
+                      <span class="sl-kpi-value">{{ pending_requests_count }}</span>
+                    </div>
+                    {% endif %}
                     <div class="sl-kpi-item">
                       <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                       <span class="sl-kpi-value">{{ active_users }}</span>
@@ -2315,7 +2388,14 @@
                 <div class="sl-lcd-section sl-lcd-section-status">
                   <div class="sl-status-carousel" id="slMobileCarousel">
 
+                    <!-- Slide 1: nom de la festa + benvinguda -->
                     <div class="sl-carousel-slide sl-slide-active">
+                      <div class="sl-lcd-status">{{ party.name }}</div>
+                      <div class="sl-lcd-detail">Vota els temes que vols sentir i pugen a la cua.</div>
+                    </div>
+
+                    <!-- Slide 2: estat principal + explicació -->
+                    <div class="sl-carousel-slide">
                       <div id="slMobileStatus1" class="sl-lcd-status">
                         {% if party.party_status == 'party_visible' %}AVIAT
                         {% elif party.party_status == 'show_party' %}EXPLORA
@@ -2334,6 +2414,7 @@
                       </div>
                     </div>
 
+                    <!-- Slide 3: stats de l'usuari -->
                     <div class="sl-carousel-slide">
                       {% if party.party_status == 'party_visible' %}
                         <div class="sl-lcd-status">{{ total_songs }} TEMES</div>
@@ -2353,13 +2434,14 @@
                       {% endif %}
                     </div>
 
+                    <!-- Slide 4: crida a l'acció / propera etapa -->
                     <div class="sl-carousel-slide">
                       {% if party.party_status == 'party_visible' %}
                         <div class="sl-lcd-status">PREPARA'T</div>
                         <div class="sl-lcd-detail">Obre la llista, tria els temes que t'agraden i estàs a punt quan comenci la votació.</div>
                       {% elif party.party_status == 'show_party' %}
-                        <div class="sl-lcd-status">JB PENDENT</div>
-                        <div class="sl-lcd-detail">Vota ara per acumular posicions a la cua. Quan el DJ premi PLAY, el jukebox seguirà els més votats.</div>
+                        <div class="sl-lcd-status">JUKEBOX EN ESPERA</div>
+                        <div class="sl-lcd-detail">{% if party.jukebox_starts_at %}Comença a les {{ party.jukebox_starts_at|time:"H:i" }}. Vota ara per pujar a la cua.{% else %}Vota ara per acumular posicions a la cua.{% endif %}</div>
                       {% elif party.party_status == 'requests_open' %}
                         <div class="sl-lcd-status">{{ user_votes_count }} FETS ♥</div>
                         <div class="sl-lcd-detail">Has votat {{ user_votes_count }} tema{% if user_votes_count != 1 %}es{% endif %}. L'activació del jukebox és imminent. Segueix votant per pujar a la cua!</div>
@@ -2372,10 +2454,13 @@
                       {% endif %}
                     </div>
 
+                    <!-- Slide 5: promoció Busca Match -->
+                    {% if party.party_status == 'show_party' or party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
                     <div class="sl-carousel-slide">
-                      <div class="sl-lcd-status">{{ party.name }}</div>
-                      <div class="sl-lcd-detail">Aquesta és la maleta de temes que el DJ té disponibles per posar. Vota els que vols sentir i pugen a la cua.</div>
+                      <div class="sl-lcd-status">BUSCA MATCH ✦</div>
+                      <div class="sl-lcd-detail">Troba el tema que connecta amb tu. Fes swipe i vota d'un cop d'ull.</div>
                     </div>
+                    {% endif %}
 
                   </div><!-- /slMobileCarousel -->
 
@@ -2464,11 +2549,11 @@
               <div class="sl-kpi-col mob-kpi-carousel" id="slMobKpiCarousel">
                 {# Pàgina A — KPIs LCD1 (maleta) #}
                 <div class="mob-kpi-page mob-kpi-page-active">
+                <div class="sl-kpi-item">
+                  <span class="sl-kpi-label">{% trans "Temes" %}</span>
+                  <span class="sl-kpi-value">{{ total_songs }}</span>
+                </div>
                 {% if party.party_status == 'party_visible' or party.party_status == 'show_party' %}
-                  <div class="sl-kpi-item">
-                    <span class="sl-kpi-label">{% trans "Temes" %}</span>
-                    <span class="sl-kpi-value">{{ total_songs }}</span>
-                  </div>
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                     <span class="sl-kpi-value">{{ active_users }}</span>
@@ -2519,10 +2604,12 @@
                     <span class="sl-kpi-label">{% trans "Posades" %}</span>
                     <span class="sl-kpi-value" id="slMobPosadesB">{{ songs_played }}</span>
                   </div>
+                  {% if party.allow_song_requests %}
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Peticions" %}</span>
                     <span class="sl-kpi-value" id="slMobPeticions">{{ pending_requests_count }}</span>
                   </div>
+                  {% endif %}
                   <div class="sl-kpi-item">
                     <span class="sl-kpi-label">{% trans "Usuaris" %}</span>
                     <span class="sl-kpi-value" id="slMobUsuarisB">{{ active_users }}</span>
@@ -2560,7 +2647,11 @@
           <div class="mob-hotcue-wrap">
             <div class="mob-hotcue-label"><span>HOT CUE</span></div>
             <div class="mob-hotcue-bar">
-              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn" style="--hc-color:#c878ff;">
+              {% if party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
+              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn mob-hotcue-btn--pulse" style="--hc-color:#c878ff;">
+              {% else %}
+              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn" style="--hc-color:#3a2540;">
+              {% endif %}
                 <span class="material-symbols-outlined">swipe</span>
                 <span>Match</span>
               </a>

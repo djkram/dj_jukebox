@@ -1945,7 +1945,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// ── LCD clocks ────────────────────────────────────────────────────────────
+// ── LCD clocks (single merged timer) ────────────────────────────────────
 (function() {
   function hhMM() {
     var now = new Date();
@@ -1953,49 +1953,50 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function pad(n) { return String(n).padStart(2,'0'); }
 
-  // Left clock: always HH:MM
-  var el1 = document.getElementById('slClock1');
-  function tickLeft() { if (el1) el1.textContent = hhMM(); }
-  tickLeft();
-  setInterval(tickLeft, 1000);
+  var el1      = document.getElementById('slClock1');
+  var el2      = document.getElementById('slClock2');
+  var elMClock  = document.getElementById('slMobileClock');
+  var elMClock2 = document.getElementById('slMobileClock2');
 
-  // Right clock: chrono (elapsed since jukebox activated) when djjukebox_active, else HH:MM
-  var el2 = document.getElementById('slClock2');
   var CHRONO_KEY = 'jukebox_chrono_{{ party.id }}';
   var IS_ACTIVE  = '{{ party.party_status }}' === 'djjukebox_active';
+  var startTs    = null;
 
   if (IS_ACTIVE && el2) {
     var stored = localStorage.getItem(CHRONO_KEY);
-    var startTs = stored ? parseInt(stored, 10) : Date.now();
+    startTs = stored ? parseInt(stored, 10) : Date.now();
     if (!stored) localStorage.setItem(CHRONO_KEY, startTs);
-
     el2.classList.add('is-chrono');
-    function tickChrono() {
-      var elapsed = Math.floor((Date.now() - startTs) / 1000);
-      var h = Math.floor(elapsed / 3600);
-      var m = Math.floor((elapsed % 3600) / 60);
-      var s = elapsed % 60;
-      el2.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
-    }
-    tickChrono();
-    setInterval(tickChrono, 1000);
   } else {
     if (el2) el2.classList.remove('is-chrono');
-    function tickRight() { if (el2) el2.textContent = hhMM(); }
-    tickRight();
-    setInterval(tickRight, 1000);
     if (!IS_ACTIVE) localStorage.removeItem(CHRONO_KEY);
   }
-  // Mobile clock (HH:MM) + chrono when jukebox active
-  var elMClock  = document.getElementById('slMobileClock');
-  var elMClock2 = document.getElementById('slMobileClock2');
-  function tickMobile() {
+
+  function tick() {
     var t = hhMM();
-    if (elMClock)  elMClock.textContent = t;
+    if (el1) el1.textContent = t;
+    if (elMClock)  elMClock.textContent  = t;
     if (elMClock2) elMClock2.textContent = t;
+    if (IS_ACTIVE && el2 && startTs) {
+      var elapsed = Math.floor((Date.now() - startTs) / 1000);
+      el2.textContent = pad(Math.floor(elapsed/3600)) + ':' + pad(Math.floor((elapsed%3600)/60)) + ':' + pad(elapsed%60);
+    } else if (el2) {
+      el2.textContent = t;
+    }
   }
-  tickMobile();
-  setInterval(tickMobile, 1000);
+
+  tick();
+  var _clockTimer = setInterval(tick, 1000);
+
+  // Pause timer when page is hidden, resume on visibility
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      clearInterval(_clockTimer);
+    } else {
+      tick();
+      _clockTimer = setInterval(tick, 1000);
+    }
+  });
 })();
 
 // ── Jukebox schedule countdown ────────────────────────────────────────────
@@ -2379,7 +2380,16 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(function() {});
   }
 
-  setInterval(pollStatus, 5000);
+  var _pollTimer = setInterval(pollStatus, 5000);
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      clearInterval(_pollTimer);
+    } else {
+      pollStatus();
+      _pollTimer = setInterval(pollStatus, 5000);
+    }
+  });
 })();
 </script>
 

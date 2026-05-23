@@ -1,212 +1,141 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
 
 ## Project Overview
 
-DJ Jukebox is a Django web application that allows DJs to create party events where attendees can vote on songs from Spotify playlists. Users authenticate via django-allauth (including Spotify OAuth), purchase vote credits via Stripe, and vote on songs during events.
+DJ Jukebox is a Django web application where DJs create party events and attendees vote on songs from Spotify playlists. Users authenticate via Spotify OAuth, purchase vote credits via Stripe, and vote/request songs during events.
+
+**Domains:**
+- `djukebox.click` — Static landing pages (`landing/`)
+- `app.djukebox.click` — Django app
 
 ## Development Setup
 
-### Running the Development Server
 ```bash
-python manage.py runserver
-```
-
-### Database Migrations
-```bash
-python manage.py makemigrations
+python manage.py runserver       # Dev server
+python manage.py makemigrations  # After model changes
 python manage.py migrate
-```
-
-### Create Superuser (for DJ backoffice access)
-```bash
-python manage.py createsuperuser
-```
-
-### Running Tests
-```bash
-python manage.py test jukebox
-```
-
-### Accessing Django Shell
-```bash
+python manage.py createsuperuser # DJ backoffice access
+python manage.py test jukebox    # Run tests
 python manage.py shell
 ```
 
-## Environment Variables
+## Environment Variables (`.env`)
 
-The project uses python-dotenv to load environment variables from a `.env` file. Required variables:
-
-- `STRIPE_PUBLIC_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe payment integration
-- `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` - Spotify API credentials
-- `GMAIL_USER`, `GMAIL_APP_PASSWORD` - Email sending for account verification
+- `STRIPE_PUBLIC_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`
+- `GMAIL_USER`, `GMAIL_APP_PASSWORD`
 
 ## Architecture
 
-### Data Model Relationships
+### Data Models
 
-- **User** (custom AbstractUser): Has `credits` field for purchased votes
-- **Party**: Events with associated playlists, voting limits (`max_votes_per_user`), unique join codes, song request cost (`request_cost`)
-- **Playlist**: Spotify playlists linked to parties (one-to-one via Party.playlist)
-- **Song**: Tracks from playlists with metadata (BPM, Camelot key), vote counts, played status
-- **Vote**: Many-to-many relationship tracking user votes per song per party
-- **VotePackage**: Records of purchased vote credits via Stripe
-- **SongRequest**: User requests for songs not in playlist (status: pending/accepted/rejected, includes coins_cost)
-- **Notification**: System notifications for users (type: song_accepted/song_played/coins_purchased/coins_received, with is_read flag)
+- **User** (custom AbstractUser): `credits` field stores global Coins
+- **Party**: `max_votes_per_user`, `request_cost`, unique join code, optional cover image, location radius
+- **Playlist**: one-to-one with Party, linked Spotify playlist
+- **Song**: title, artist, BPM, Camelot key, vote count, played status
+- **Vote**: user × song × party (many-to-many)
+- **VotePackage**: records of coin→vote conversions per party
+- **SongRequest**: status `pending/accepted/rejected`, `coins_cost`
+- **Notification**: types `song_accepted/song_played/coins_purchased/coins_received`, `is_read`
 
 ### Session-Based Party Selection
 
-The application uses Django sessions to track which party a user is currently viewing:
-- `request.session['selected_party_id']` stores the active party
-- Users select a party via `/select-party/` before accessing song lists
-- Context processor `jukebox.context_processors.selected_party` makes `selected_party` available in all templates
+`request.session['selected_party_id']` — set via `/select-party/`, made available globally via `jukebox.context_processors.selected_party`.
 
-### Spotify Integration (jukebox/spotify_api.py)
+### Coins & Votes (`jukebox/votes.py`)
 
-- Retrieves user OAuth tokens via `allauth.socialaccount.models.SocialToken`
-- `get_user_playlists()`: Fetches user's Spotify playlists
-- `get_playlist_tracks()`: Retrieves tracks with audio features (BPM, key)
-- Converts Spotify key/mode to Camelot notation (e.g., "8B", "5A") for DJ harmonic mixing
-- Chunks audio feature requests (50 tracks per call) to handle API limits
+Two-currency system:
+- **Coins** (`User.credits`): global, purchased via Stripe, used to convert to votes or request songs
+- **Votes**: party-specific = `max_votes_per_user` base + VotePackage purchased votes − used votes
 
-**Audio Features Fallback Chain:**
-When BPM or key data is missing, the system tries multiple sources in order:
-1. **Spotify Audio Features API** (primary source) - Most reliable and complete
-2. **SongBPM** (secondary) - Scraped metadata fallback for BPM/key when Spotify data is missing
-3. **SongData** (tertiary) - Direct Spotify-ID page scrape for BPM/key/Camelot
-4. **MusicBrainz** (final fallback) - Community-driven database, searches user-contributed tags for BPM/key data
+Conversion rates (coins → votes): 1→2, 2→4, 3→6, 5→11, 10→25, 20→60
 
-This cascading approach maximizes metadata coverage across different music catalogs.
+### Spotify Integration (`jukebox/spotify_api.py`)
 
-### Coins and Vote System (jukebox/votes.py)
+OAuth tokens via `allauth.socialaccount.models.SocialToken`. BPM/key fallback chain:
+1. Spotify Audio Features API (primary)
+2. SongBPM scrape (secondary)
+3. SongData scrape (tertiary)
+4. MusicBrainz (final fallback)
 
-The application uses a dual-currency system:
+### Notifications (`jukebox/notifications.py`)
 
-**Coins (Global Currency):**
-- Users purchase Coins via Stripe at `/buy-coins/`
-- Coins persist globally across all parties
-- Used for: converting to votes, requesting songs
-- Stored in `User.credits` field
-
-**Votes (Party-Specific):**
-- Each party has `max_votes_per_user` base limit
-- Users convert Coins to Votes with bonus tiers (e.g., 5 Coins → 11 Votes)
-- `get_user_votes_left()` calculates: base + purchased - used votes
-- Each vote on a song consumes 1 vote from party-specific pool
-- Cannot vote if party votes exhausted (must convert more Coins)
-
-**Conversion Rates (with bonuses):**
-- 1 Coin → 2 Votes
-- 2 Coins → 4 Votes
-- 3 Coins → 6 Votes
-- 5 Coins → 11 Votes (+1 bonus)
-- 10 Coins → 25 Votes (+5 bonus)
-- 20 Coins → 60 Votes (+20 bonus)
+Bell icon in TopBar with unread badge. Navigates to `/notifications/` (not a dropdown). Visiting auto-marks all as read. Count provided globally via `jukebox.context_processors.unread_notifications_count`.
 
 ### Payment Flow
 
-1. User initiates purchase at `/buy-coins/`
-2. Stripe Checkout session created with party/coins metadata
-3. On success, Stripe webhook (`/stripe/webhook/`) adds coins to `User.credits`
-4. Coins are global; votes are party-specific (determined by max_votes_per_user + VotePackage converted from coins)
+`/buy-coins/` → Stripe Checkout → webhook at `/stripe/webhook/` (CSRF exempt) → adds coins to `User.credits`.
 
-### Forms with Dynamic Spotify Data (jukebox/forms.py)
+### Song Requests
 
-`PartySettingsForm` dynamically loads Spotify playlists:
-- On form initialization, fetches user's playlists if no playlist currently assigned
-- On save, creates/links `Playlist` object and imports all tracks as `Song` objects
-- Retrieves BPM and Camelot key for each track via Spotify audio features API
-
-### Notification System (jukebox/notifications.py)
-
-The application features a complete notification system that alerts users about important events:
-
-**Data Model:**
-- `Notification` model with fields: user, type, title, message, song, song_request, amount, is_read, created_at
-- Type choices: `song_accepted`, `song_played`, `coins_purchased`, `coins_received`
-
-**Notification Creation:**
-- `create_song_accepted_notification()`: When DJ accepts a song request
-- `create_song_played_notification()`: When a voted song is played (notifies all voters)
-- `create_coins_purchased_notification()`: When user purchases coins via Stripe
-- `create_coins_received_notification()`: When user receives coins (gifts, promos)
-
-**UI Integration:**
-- Bell icon in TopBar shows unread notification count in red badge
-- Clicking bell navigates to `/notifications/` page (not a dropdown)
-- Visiting notifications page auto-marks all as read
-- Context processor `jukebox.context_processors.unread_notifications_count` provides global count
-
-**User Experience:**
-- No browser `alert()` popups anywhere in the application
-- Bootstrap dismissible alerts display in-page messages
-- Messages auto-hide after 5 seconds with smooth fade
-- Auto-scroll to top when message appears
-- Pages reload after AJAX operations to update badge counts
-
-### Song Request System
-
-Users can request songs not in the party playlist:
-- Search Spotify tracks via `/songs/request/`
-- Requests cost coins (configurable per party via `request_cost` field)
-- DJ reviews requests at `/dj/manage-requests/`
-- On acceptance: coins charged, song added to party, user notified
-- On rejection: no charge, user can re-request different song
-- `SongRequest` model tracks: user, party, song details, status (pending/accepted/rejected), coins_cost
+`/songs/request/` → Spotify search → costs coins → DJ reviews at `/dj/manage-requests/` → accept (charge + add song + notify) or reject (no charge).
 
 ### Authentication
 
-- Uses django-allauth with Spotify social auth provider
-- Email verification is mandatory (`ACCOUNT_EMAIL_VERIFICATION = "mandatory"`)
-- Spotify scopes: user-read-email, user-read-private, playlist-read-private, playlist-read-collaborative
-- Login redirects handled via `LOGIN_REDIRECT_URL` and `ACCOUNT_SIGNUP_REDIRECT_URL`
+django-allauth with Spotify OAuth. Email verification mandatory. Spotify scopes: `user-read-email`, `user-read-private`, `playlist-read-private`, `playlist-read-collaborative`.
 
-## Key URL Patterns
+## Internationalisation (i18n)
 
-- `/` - Main entry (redirects to party selection if no party in session)
-- `/select-party/` - Choose active party
-- `/songs/` - Song list for selected party (voting interface)
-- `/songs/swipe/` - Busca Match voting interface (swipe like/next)
-- `/songs/request/` - Request new songs via Spotify search
-- `/notifications/` - View all notifications (auto-marks as read)
-- `/party/<id>/settings/` - Party configuration (DJ/admin only)
-- `/dj/` - DJ backoffice (superuser only)
-- `/dj/dashboard/` - DJ dashboard with song stats (superuser only)
-- `/dj/manage-requests/` - Manage song requests (superuser only)
-- `/buy-coins/` - Purchase coins (virtual currency)
-- `/stripe/webhook/` - Stripe webhook endpoint (CSRF exempt)
-- `/accounts/` - django-allauth auth URLs
-- `/admin/` - Django admin site
-
-## DJ/Superuser Features
-
-- Create parties via `/dj/` backoffice
-- Link Spotify playlists to parties in party settings
-- View all songs with vote counts and BPM/key metadata
-- Mark songs as played via dashboard (triggers notifications to voters)
-- Manage song requests at `/dj/manage-requests/`:
-  - Accept requests: charges user coins, adds song to party, creates notification
-  - Reject requests: no charge, user can request another song
-- Access requires `@user_passes_test(lambda u: u.is_superuser)`
-
-## Database
-
-- SQLite (`db.sqlite3`) in development
-- Custom user model: `AUTH_USER_MODEL = 'jukebox.User'`
+- Default language: **Català** (`ca`), also English (`en`)
+- URLs prefixed: `/ca/...` and `/en/...` (via `i18n_patterns`, `prefix_default_language=True`)
+- Language stored in cookie `django_language` (1 year expiry)
+- Translation files: `locale/ca|en/LC_MESSAGES/django.po` and `jukebox/locale/ca|en/`
+- Templates use `{% load i18n %}` + `{% trans %}` / `{% blocktrans %}`
 
 ## Static Files
 
-- Static files located in `jukebox/static/`
-- Includes FontAwesome vendor files
-- `STATIC_URL = '/static/'`
+- Served by **WhiteNoise** (`CompressedManifestStaticFilesStorage`) — gzip/brotli + content-hash
+- CSS files in `jukebox/static/jukebox/css/`:
+  - `base.css` — shared admin/app styles (extracted from admin_base.html)
+  - `song_list.css`, `song_swipe.css`, `select_party.css`, `dj_dashboard.css` — page-specific
+  - `app.css` — global app overrides
+
+## Key URL Patterns
+
+- `/<lang>/` — party selection (main entry)
+- `/<lang>/select-party/` — choose active party
+- `/<lang>/songs/` — song list + voting interface
+- `/<lang>/songs/swipe/` — Busca Match swipe interface
+- `/<lang>/songs/request/` — request songs via Spotify search
+- `/<lang>/notifications/` — notifications (auto-marks read)
+- `/<lang>/party/<id>/settings/` — party config (DJ only)
+- `/<lang>/dj/` — DJ backoffice (superuser only)
+- `/<lang>/dj/dashboard/` — song stats + mark played
+- `/<lang>/dj/manage-requests/` — manage song requests
+- `/<lang>/buy-coins/` — purchase coins
+- `/stripe/webhook/` — Stripe webhook (no lang prefix, CSRF exempt)
+- `/accounts/` — django-allauth
+- `/admin/` — Django admin
+
+## Frontend Design System
+
+The app uses a **custom "Sonic" design system** built on Bootstrap 4:
+- `admin_base.html` is the base template for all app pages
+- TopBar, BottomBar (mobile), sidebar navigation
+- No `alert()` popups — Bootstrap dismissible alerts, auto-hide 5 s with fade
+- AJAX operations reload the page to keep badge counts fresh
+
+**Landing pages** (`landing/`) use **Tailwind CSS** (CDN) with Epilogue + Plus Jakarta Sans fonts. Separate from the Django app — pure static HTML.
+
+## DJ/Superuser Features
+
+Access gated by `@user_passes_test(lambda u: u.is_superuser)`:
+- Create parties, link Spotify playlists, import songs with BPM/Camelot key
+- Dashboard: view vote counts, mark songs as played (notifies all voters)
+- Manage song requests: accept (charge coins, add song, notify) or reject
+
+## Context Processors
+
+All templates receive: `selected_party`, `user_avatar_url`, `unread_notifications_count`
+
+## Database
+
+SQLite (`db.sqlite3`) in development. `AUTH_USER_MODEL = 'jukebox.User'`
 
 ## Notes
 
-- The `acousticbrainz_api.py` module exists but is not actively used (AcousticBrainz service is deprecated)
-- Current implementation uses Spotify's audio features API for BPM and key detection
-- Templates use bootstrap-based admin theme (SB Admin 2)
-- Logging is configured to DEBUG level in development
-- **No browser alert() popups**: All user feedback uses Bootstrap dismissible alerts that auto-hide
-- **Real-time updates**: AJAX operations reload pages to update notification badges and UI state
-- Context processors provide global template variables: `selected_party`, `user_avatar_url`, `unread_notifications_count`
+- `acousticbrainz_api.py` exists but is unused (service deprecated)
+- `design/` folder contains reference designs (Stitch exports) — not served
+- `docs/archive/` contains old plan and setup documents

@@ -1283,7 +1283,7 @@ class UnmarkSongPlayedTests(TestCase):
     def test_requires_login(self):
         response = self.client.post(reverse('unmark_song_played', args=[self.song.id]))
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/accounts/', response['Location'])
+        self.assertIn('next=', response['Location'])
 
 
 class PartyStatusApiTests(TestCase):
@@ -1478,15 +1478,15 @@ class SongListPartyVisibleTests(TestCase):
 
 class RegisterViewTests(TestCase):
     """
-    Tests per la vista de registre manual (register).
+    Tests per el flux de registre via allauth (account_signup).
 
-    Usa django-allauth SignupForm: requereix email, username, password1, password2.
-    EMAIL_BACKEND sobreescrit a locmem per evitar enviaments reals.
+    La vista custom register() és codi mort — la URL /register/ redirigeix
+    a account_signup gestionat per allauth.
     """
 
     def setUp(self):
         self.client = Client()
-        self.url = reverse('register')
+        self.signup_url = reverse('account_signup')
         self.valid_data = {
             'email': 'new@test.com',
             'username': 'newuser',
@@ -1494,53 +1494,42 @@ class RegisterViewTests(TestCase):
             'password2': 'StrongPass123!',
         }
 
-    def test_get_returns_200_with_form(self):
-        response = self.client.get(self.url)
+    def test_register_redirect_points_to_allauth_signup(self):
+        response = self.client.get('/ca/register/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('signup', response['Location'])
+
+    def test_signup_get_returns_200(self):
+        response = self.client.get(self.signup_url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('form', response.context)
 
-    @patch('jukebox.views.SignupForm.save')
-    def test_post_valid_redirects_to_login(self, mock_save):
-        mock_save.return_value = None
-        response = self.client.post(self.url, self.valid_data)
-        self.assertRedirects(response, reverse('login'), fetch_redirect_response=False)
-
-    @patch('jukebox.views.SignupForm.save')
-    def test_post_valid_calls_form_save_with_request(self, mock_save):
-        mock_save.return_value = None
-        self.client.post(self.url, self.valid_data)
-        mock_save.assert_called_once()
-
-    def test_post_password_mismatch_stays_on_page(self):
+    def test_signup_post_password_mismatch_stays_on_page(self):
         data = {**self.valid_data, 'password2': 'DifferentPass123!'}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.signup_url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['form'].errors)
 
-    def test_post_missing_email_stays_on_page(self):
+    def test_signup_post_missing_email_stays_on_page(self):
         data = {**self.valid_data, 'email': ''}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.signup_url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('email', response.context['form'].errors)
 
-    def test_post_duplicate_username_shows_error(self):
+    def test_signup_post_duplicate_username_stays_on_page(self):
         User.objects.create_user(username='newuser', password='test', email='existing@test.com')
-        response = self.client.post(self.url, self.valid_data)
+        response = self.client.post(self.signup_url, self.valid_data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['form'].errors)
 
-    def test_form_fields_have_form_control_class(self):
-        response = self.client.get(self.url)
-        form = response.context['form']
-        for field in form.fields.values():
-            self.assertEqual(field.widget.attrs.get('class'), 'form-control')
+    def test_signup_post_valid_creates_user(self):
+        from django.core import mail
+        self.client.post(self.signup_url, self.valid_data)
+        self.assertTrue(User.objects.filter(username='newuser').exists())
 
-    def test_authenticated_user_can_still_access(self):
-        """La vista no redirigeix usuaris ja autenticats (no té login_required)."""
-        User.objects.create_user(username='existing', password='test')
-        self.client.login(username='existing', password='test')
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+    def test_signup_post_valid_creates_email_address_record(self):
+        """Allauth crea un EmailAddress pendent de verificació."""
+        from allauth.account.models import EmailAddress
+        self.client.post(self.signup_url, self.valid_data)
+        self.assertTrue(
+            EmailAddress.objects.filter(email='new@test.com', verified=False).exists()
+        )
 
 
 class ProfileViewTests(TestCase):
@@ -1548,11 +1537,23 @@ class ProfileViewTests(TestCase):
     Tests per la vista de perfil d'usuari.
 
     Comprova: accés, rol, detecció de comptes socials.
+    El template usa {% provider_login_url %} que requereix SocialApp a la BD.
     """
 
     def setUp(self):
+        from allauth.socialaccount.models import SocialApp
+        from django.contrib.sites.models import Site
         self.client = Client()
         self.url = reverse('profile')
+        site = Site.objects.get_current()
+        for provider in ('spotify', 'google'):
+            app = SocialApp.objects.create(
+                provider=provider,
+                name=provider.capitalize(),
+                client_id='test_id',
+                secret='test_secret',
+            )
+            app.sites.add(site)
 
     def test_requires_login(self):
         response = self.client.get(self.url)

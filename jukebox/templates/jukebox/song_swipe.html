@@ -79,7 +79,7 @@
                 <!-- Image with Actions -->
                 <div class="swipe-card-image-container">
                   {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="swipe-card-image">
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="swipe-card-image" loading="lazy">
                   {% else %}
                     <div class="swipe-card-placeholder">
                       <span class="material-symbols-outlined">music_note</span>
@@ -255,7 +255,7 @@
                 {% endif %}
 
                 {% if song.album_image_url %}
-                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}" style="width:100%;height:100%;object-fit:cover;object-position:center 24%;">
+                  <img src="{{ song.album_image_url }}" alt="{{ song.title }}" style="width:100%;height:100%;object-fit:cover;object-position:center 24%;" loading="lazy">
                 {% else %}
                   <div style="width:100%;height:100%;background:#2a2a3d;display:flex;align-items:center;justify-content:center;">
                     <i class="fas fa-music fa-5x text-white"></i>

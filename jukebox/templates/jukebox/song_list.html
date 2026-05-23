@@ -269,7 +269,7 @@
                       <div class="d-flex align-items-center gap-3">
                         <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                           {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
                               <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
@@ -648,7 +648,7 @@
                     <div class="bg-white p-1 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                       <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
                         {% if song.album_image_url %}
-                          <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                          <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                         {% else %}
                           <div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-music" style="color:#747688;font-size:1rem;"></i></div>
                         {% endif %}
@@ -725,7 +725,7 @@
                         <span class="songs-played-order">{{ song.display_order }}</span>
                         <div class="position-relative album-cover-container" style="width: 48px; height: 48px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                           {% if song.album_image_url %}
-                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                            <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                           {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e0e3e6;">
                               <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
@@ -1116,7 +1116,7 @@
               <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                   {% else %}
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
                       <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
@@ -1229,7 +1229,7 @@
                 </div>
                 <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
                   {% if song.album_image_url %}
-                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                    <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                   {% else %}
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
                       <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
@@ -1329,7 +1329,7 @@
                 <div class="bg-white p-1 h-100 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                   <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
                     {% if song.album_image_url %}
-                      <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
+                      <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                     {% else %}
                       <div class="w-100 h-100 d-flex align-items-center justify-content-center">
                         <i class="fas fa-music" style="color: #747688; font-size: 1rem;"></i>

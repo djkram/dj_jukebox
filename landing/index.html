@@ -8,8 +8,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="https://app.djukebox.click/static/jukebox/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://app.djukebox.click/static/jukebox/img/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="https://app.djukebox.click/static/jukebox/img/apple-touch-icon.png">
-    <link rel="manifest" href="https://app.djukebox.click/static/manifest.json">
     <meta name="theme-color" content="#2e5bff">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="DJukebox">
     <meta property="og:type" content="website">
@@ -69,14 +69,14 @@
     }
   </style>
 </head>
-<body class="premium-bg font-body text-white h-dvh flex flex-col overflow-hidden">
+<body class="premium-bg font-body text-white md:h-dvh flex flex-col md:overflow-hidden overflow-y-auto">
 
   <!-- Ambient orbs -->
   <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0040e0]/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
   <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5e24e1]/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
 
   <!-- Main content -->
-  <main class="flex-1 flex items-center justify-center px-6 py-6 md:py-10 overflow-hidden">
+  <main class="flex-1 flex items-center justify-center px-6 py-6 md:py-10 md:overflow-hidden">
     <div class="w-full max-w-5xl text-center">
 
       <!-- Header -->

@@ -1474,3 +1474,273 @@ class SongListPartyVisibleTests(TestCase):
     def test_songs_list_is_empty(self):
         response = self.client.get(reverse('song_list'))
         self.assertEqual(len(response.context.get('songs', [])), 0)
+
+
+class RegisterViewTests(TestCase):
+    """
+    Tests per la vista de registre manual (register).
+
+    Usa django-allauth SignupForm: requereix email, username, password1, password2.
+    EMAIL_BACKEND sobreescrit a locmem per evitar enviaments reals.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('register')
+        self.valid_data = {
+            'email': 'new@test.com',
+            'username': 'newuser',
+            'password1': 'StrongPass123!',
+            'password2': 'StrongPass123!',
+        }
+
+    def test_get_returns_200_with_form(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+
+    @patch('jukebox.views.SignupForm.save')
+    def test_post_valid_redirects_to_login(self, mock_save):
+        mock_save.return_value = None
+        response = self.client.post(self.url, self.valid_data)
+        self.assertRedirects(response, reverse('login'), fetch_redirect_response=False)
+
+    @patch('jukebox.views.SignupForm.save')
+    def test_post_valid_calls_form_save_with_request(self, mock_save):
+        mock_save.return_value = None
+        self.client.post(self.url, self.valid_data)
+        mock_save.assert_called_once()
+
+    def test_post_password_mismatch_stays_on_page(self):
+        data = {**self.valid_data, 'password2': 'DifferentPass123!'}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)
+
+    def test_post_missing_email_stays_on_page(self):
+        data = {**self.valid_data, 'email': ''}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('email', response.context['form'].errors)
+
+    def test_post_duplicate_username_shows_error(self):
+        User.objects.create_user(username='newuser', password='test', email='existing@test.com')
+        response = self.client.post(self.url, self.valid_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)
+
+    def test_form_fields_have_form_control_class(self):
+        response = self.client.get(self.url)
+        form = response.context['form']
+        for field in form.fields.values():
+            self.assertEqual(field.widget.attrs.get('class'), 'form-control')
+
+    def test_authenticated_user_can_still_access(self):
+        """La vista no redirigeix usuaris ja autenticats (no té login_required)."""
+        User.objects.create_user(username='existing', password='test')
+        self.client.login(username='existing', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+
+class ProfileViewTests(TestCase):
+    """
+    Tests per la vista de perfil d'usuari.
+
+    Comprova: accés, rol, detecció de comptes socials.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('profile')
+
+    def test_requires_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('next=', response['Location'])
+
+    def test_regular_user_gets_member_role(self):
+        user = User.objects.create_user(username='member', password='test')
+        self.client.login(username='member', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Jukebox Member', response.context['profile_role'])
+
+    def test_dj_user_gets_dj_role(self):
+        dj = User.objects.create_user(username='dj', password='test')
+        party = Party.objects.create(name='DJ Party', date=timezone.now())
+        party.djs.add(dj)
+        self.client.login(username='dj', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('DJ', response.context['profile_role'])
+
+    def test_superuser_gets_admin_role(self):
+        admin = User.objects.create_superuser(username='admin', password='test', email='a@a.com')
+        self.client.login(username='admin', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Admin', response.context['profile_role'])
+
+    def test_staff_user_gets_admin_role(self):
+        staff = User.objects.create_user(username='staff', password='test', is_staff=True)
+        self.client.login(username='staff', password='test')
+        response = self.client.get(self.url)
+        self.assertIn('Admin', response.context['profile_role'])
+
+    def test_context_has_spotify_false_without_social_account(self):
+        user = User.objects.create_user(username='nospot', password='test')
+        self.client.login(username='nospot', password='test')
+        response = self.client.get(self.url)
+        self.assertFalse(response.context['has_spotify'])
+
+    def test_context_has_google_false_without_social_account(self):
+        user = User.objects.create_user(username='nogoog', password='test')
+        self.client.login(username='nogoog', password='test')
+        response = self.client.get(self.url)
+        self.assertFalse(response.context['has_google'])
+
+    def test_context_exposes_user(self):
+        user = User.objects.create_user(username='ctxuser', password='test')
+        self.client.login(username='ctxuser', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['user'], user)
+
+
+class NotificationsListViewTests(TestCase):
+    """
+    Tests per la vista de llista de notificacions (notifications GET).
+
+    Cobreix: accés, context, aïllament entre usuaris, límit de 50.
+    Els tests de mark-read ja existeixen a NotificationViewTests.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('notifications')
+        self.user = User.objects.create_user(username='notifuser', password='test')
+        self.other = User.objects.create_user(username='othernotif', password='test')
+
+    def _make_notification(self, user, is_read=False, n=1):
+        created = []
+        for i in range(n):
+            created.append(Notification.objects.create(
+                user=user,
+                type='coins_purchased',
+                title=f'Notif {i}',
+                message='msg',
+                is_read=is_read,
+            ))
+        return created
+
+    def test_requires_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('next=', response['Location'])
+
+    def test_get_returns_200(self):
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_context_has_notifications_key(self):
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertIn('notifications', response.context)
+
+    def test_shows_own_notifications(self):
+        self._make_notification(self.user, n=3)
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(len(response.context['notifications']), 3)
+
+    def test_does_not_show_other_users_notifications(self):
+        self._make_notification(self.other, n=5)
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(len(response.context['notifications']), 0)
+
+    def test_max_50_notifications_returned(self):
+        self._make_notification(self.user, n=60)
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertLessEqual(len(response.context['notifications']), 50)
+
+    def test_unread_notifications_marked_read_on_visit(self):
+        notifs = self._make_notification(self.user, is_read=False, n=3)
+        self.client.login(username='notifuser', password='test')
+        self.client.get(self.url)
+        for n in notifs:
+            n.refresh_from_db()
+            self.assertTrue(n.is_read)
+
+    def test_already_read_notifications_unaffected(self):
+        notifs = self._make_notification(self.user, is_read=True, n=2)
+        self.client.login(username='notifuser', password='test')
+        self.client.get(self.url)
+        for n in notifs:
+            n.refresh_from_db()
+            self.assertTrue(n.is_read)
+
+    def test_empty_state_returns_200(self):
+        self.client.login(username='notifuser', password='test')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['notifications']), 0)
+
+
+class ManageSongRequestsNotificationTests(TestCase):
+    """
+    Verifica que acceptar/rebutjar una petició crea (o no) notificació.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.superuser = User.objects.create_user(
+            username='djsuper', password='test', is_superuser=True, is_staff=True
+        )
+        self.requester = User.objects.create_user(
+            username='requester', password='test', credits=20
+        )
+        self.party = Party.objects.create(
+            name='Notif Party',
+            date=timezone.now(),
+            party_status=Party.STATUS_DJJUKEBOX_ACTIVE,
+            allow_song_requests=True,
+            song_request_cost=5,
+        )
+        self.song_request = SongRequest.objects.create(
+            user=self.requester,
+            party=self.party,
+            title='Test Song',
+            artist='Test Artist',
+            spotify_id='notiftestid',
+            coins_cost=5,
+            status='pending',
+        )
+        self.client.login(username='djsuper', password='test')
+        session = self.client.session
+        session['selected_party_id'] = self.party.id
+        session.save()
+
+    def test_accept_creates_notification_for_requester(self):
+        self.client.post(reverse('manage_song_requests'), {
+            'request_id': self.song_request.id,
+            'action': 'accept',
+            'allow_without_charge': '1',
+        })
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.requester,
+                type='song_accepted',
+            ).exists()
+        )
+
+    def test_reject_does_not_create_notification(self):
+        self.client.post(reverse('manage_song_requests'), {
+            'request_id': self.song_request.id,
+            'action': 'reject',
+        })
+        self.assertFalse(
+            Notification.objects.filter(user=self.requester).exists()
+        )

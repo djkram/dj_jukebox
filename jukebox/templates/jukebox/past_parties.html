@@ -1,0 +1,123 @@
+{% extends "jukebox/admin_base.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}{% trans "Festes Passades" %}{% endblock %}
+{% block extra_head %}<link href="{% static 'jukebox/css/select_party.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+
+<!-- Desktop Layout -->
+<div class="container-fluid mt-4 d-none d-md-block" style="max-width: 1400px;">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'select_party' %}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+      <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span>
+      {% trans "Tornar" %}
+    </a>
+    <h1 class="mb-0" style="font-size: 1.5rem; font-weight: 700; color: #191c1f;">
+      <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 0.3rem; font-size: 1.5rem; color: #747688;">history</span>
+      {% trans "Festes Passades" %}
+    </h1>
+  </div>
+
+  {% if parties %}
+    <div class="select-parties-wrap">
+    <div class="select-parties-grid">
+      {% for party in parties %}
+        <a href="{% url 'set_party' party.id %}" class="select-party-card" style="text-decoration: none; opacity: 0.9;">
+          <div class="select-party-image">
+            {% if party.cover_image %}
+              <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              <div class="select-party-image-placeholder">
+                <span class="material-symbols-outlined">music_note</span>
+              </div>
+            {% endif %}
+            <div class="select-party-badge" style="background: rgba(100,100,100,0.92);">
+              <span class="material-symbols-outlined" style="font-size: 0.75rem;">check_circle</span>
+              {% trans "FINALITZADA" %}
+            </div>
+          </div>
+          <div class="select-party-content">
+            <h3 class="select-party-name">{{ party.name }}</h3>
+            <div class="select-party-meta">
+              <div class="select-party-meta-item">
+                <span class="material-symbols-outlined">calendar_today</span>
+                <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}—{% endif %}</span>
+              </div>
+              <div class="select-party-meta-item">
+                <span class="material-symbols-outlined">queue_music</span>
+                <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist" %}{% endif %}</span>
+              </div>
+            </div>
+            <button class="select-party-button" style="margin-top: 1rem; background: #434656;">
+              {% trans "Veure" %}
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+    </div>
+  {% else %}
+    <div class="select-empty">
+      <span class="material-symbols-outlined">history</span>
+      <div class="select-empty-title">{% trans "Cap festa passada" %}</div>
+      <p class="select-empty-text">{% trans "Aquí apareixeran les festes que ja han finalitzat." %}</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Vista Mòbil -->
+<div class="mobile-page-shell d-md-none" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #191c1f;">
+  <main class="mobile-page-content mobile-page-content--tight mobile-page-stack" style="max-width: 32rem;">
+
+    <!-- Header -->
+    <section class="d-flex align-items-center gap-2 mb-2">
+      <a href="{% url 'select_party' %}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+        <i class="fas fa-arrow-left"></i>
+        {% trans "Tornar" %}
+      </a>
+      <h2 class="fw-bold mb-0" style="font-size: 1.1rem; color: #191c1f;">
+        <i class="fas fa-history me-1" style="color: #747688;"></i>
+        {% trans "Festes Passades" %}
+      </h2>
+    </section>
+
+    {% if parties %}
+      <section>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {% for party in parties %}
+            <a href="{% url 'set_party' party.id %}" class="text-decoration-none">
+              <div class="position-relative overflow-hidden text-white shadow-xl" style="height: 90px; border-radius: 1rem; background: linear-gradient(135deg, #4a4a4a 0%, #6b6b6b 100%);">
+                {% if party.cover_image %}
+                  <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.5;">
+                {% endif %}
+                <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.65), rgba(0,0,0,0.2));"></div>
+                <div class="position-relative d-flex flex-column justify-content-center h-100 px-4" style="z-index: 10;">
+                  <div class="d-inline-flex align-items-center gap-1 mb-1" style="color: #d0d0d0; font-size: 0.65rem; font-weight: 700;">
+                    <i class="fas fa-check-circle" style="font-size: 0.6rem;"></i> {% trans "Finalitzada" %}
+                  </div>
+                  <h4 class="font-bold mb-0" style="font-size: 1.05rem; line-height: 1.2;">{{ party.name }}</h4>
+                  <p class="mb-0" style="font-size: 0.75rem; opacity: 0.85; margin-top: 0.2rem;">
+                    {% if party.date %}{{ party.date|date:"M d, Y • H:i" }}{% else %}—{% endif %}
+                  </p>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-history mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>
+        <h4 class="fw-bold mb-2" style="color: #191c1f;">{% trans "Cap festa passada" %}</h4>
+        <p class="mb-0" style="color: #434656;">{% trans "Aquí apareixeran les festes que ja han finalitzat." %}</p>
+      </div>
+    {% endif %}
+
+  </main>
+</div>
+
+{% endblock %}

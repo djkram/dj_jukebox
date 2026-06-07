@@ -200,6 +200,19 @@ class BadgeApplyToSongsTests(TestCase):
             self.assertTrue(hasattr(song, 'badge_bg'))
             self.assertTrue(hasattr(song, 'badge_text'))
 
+    def test_skip_votes_count_as_negative_votes(self):
+        from jukebox.utils.query_helpers import get_annotated_party_songs
+        Vote.objects.create(
+            user=self.users[3],
+            song=self.songs[1],
+            party=self.party,
+            vote_type='skip',
+        )
+
+        song = get_annotated_party_songs(self.party).get(pk=self.songs[1].pk)
+
+        self.assertEqual(song.num_dislikes, 1)
+
     def test_badge_label_is_non_empty_string(self):
         from jukebox.utils.query_helpers import get_annotated_party_songs
         songs_qs = get_annotated_party_songs(self.party)

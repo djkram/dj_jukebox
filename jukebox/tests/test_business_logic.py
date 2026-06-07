@@ -10,7 +10,12 @@ from django.utils import timezone
 
 from jukebox.models import Party, VotePackage, PartyCoinsGrant
 from jukebox.utils.votes_conversion import calculate_votes_from_coins, convert_coins_to_votes
-from jukebox.votes import ensure_user_has_free_coins, get_user_party_coins
+from jukebox.votes import (
+    ensure_user_has_free_coins,
+    get_user_party_coins,
+    get_user_available_coins,
+    sync_party_free_coins_for_existing_users,
+)
 from jukebox.views import _haversine_km
 
 User = get_user_model()
@@ -114,6 +119,62 @@ class ConvertCoinsToVotesTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.credits, 0)
 
+    def test_conversion_uses_party_free_coins_first(self):
+        self.user.credits = 0
+        self.user.save(update_fields=['credits'])
+        PartyCoinsGrant.objects.create(
+            user=self.user,
+            party=self.party,
+            coins_granted=5,
+            reason='free_coins',
+        )
+
+        success, error, votes = convert_coins_to_votes(self.user, self.party, 5)
+
+        self.assertTrue(success)
+        self.assertEqual(error, "")
+        self.assertEqual(votes, 11)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.credits, 0)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 0)
+
+    def test_conversion_combines_party_and_global_coins(self):
+        self.user.credits = 3
+        self.user.save(update_fields=['credits'])
+        PartyCoinsGrant.objects.create(
+            user=self.user,
+            party=self.party,
+            coins_granted=2,
+            reason='free_coins',
+        )
+
+        success, _, votes = convert_coins_to_votes(self.user, self.party, 5)
+
+        self.assertTrue(success)
+        self.assertEqual(votes, 11)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.credits, 0)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 0)
+
+    def test_insufficient_combined_coins_fails(self):
+        self.user.credits = 2
+        self.user.save(update_fields=['credits'])
+        PartyCoinsGrant.objects.create(
+            user=self.user,
+            party=self.party,
+            coins_granted=2,
+            reason='free_coins',
+        )
+
+        success, error, votes = convert_coins_to_votes(self.user, self.party, 5)
+
+        self.assertFalse(success)
+        self.assertNotEqual(error, "")
+        self.assertEqual(votes, 0)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.credits, 2)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 2)
+
 
 class EnsureFreeCoinsTests(TestCase):
     """Tests per ensure_user_has_free_coins"""
@@ -152,6 +213,51 @@ class EnsureFreeCoinsTests(TestCase):
 
         total = get_user_party_coins(self.user, self.party)
         self.assertEqual(total, 8)
+
+    def test_does_not_remove_coins_if_party_decreases_free_coins(self):
+        ensure_user_has_free_coins(self.user, self.party)
+
+        self.party.free_coins_per_user = 2
+        self.party.save()
+
+        diff2 = ensure_user_has_free_coins(self.user, self.party)
+        self.assertEqual(diff2, 0)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 5)
+
+    def test_available_coins_include_party_free_coins(self):
+        self.user.credits = 7
+        self.user.save(update_fields=['credits'])
+        ensure_user_has_free_coins(self.user, self.party)
+
+        self.assertEqual(get_user_available_coins(self.user, self.party), 12)
+
+    def test_sync_existing_users_when_party_increases_free_coins(self):
+        ensure_user_has_free_coins(self.user, self.party)
+
+        self.party.free_coins_per_user = 9
+        self.party.save(update_fields=['free_coins_per_user'])
+
+        updated = sync_party_free_coins_for_existing_users(
+            self.party,
+            previous_free_coins=5,
+        )
+
+        self.assertEqual(updated, 1)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 9)
+
+    def test_sync_does_not_remove_existing_users_when_party_decreases_free_coins(self):
+        ensure_user_has_free_coins(self.user, self.party)
+
+        self.party.free_coins_per_user = 3
+        self.party.save(update_fields=['free_coins_per_user'])
+
+        updated = sync_party_free_coins_for_existing_users(
+            self.party,
+            previous_free_coins=5,
+        )
+
+        self.assertEqual(updated, 0)
+        self.assertEqual(get_user_party_coins(self.user, self.party), 5)
 
     def test_zero_free_coins_gives_nothing(self):
         self.party.free_coins_per_user = 0

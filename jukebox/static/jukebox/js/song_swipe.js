@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const undoBtn = document.getElementById('undo-btn');
 
   let currentIndex = 0;
-  let lastAction = null; // { type: 'like'|'skip', songId: X, index: Y }
+  let lastAction = null; // { type: 'like'|'dislike', songId: X, index: Y }
   const totalCards = cards.length;
 
   function updateZeroStatCards(votesLeft, credits) {
@@ -549,28 +549,54 @@ document.addEventListener('DOMContentLoaded', function() {
     undoBtn.addEventListener('click', function() {
       if (!lastAction) return;
 
-      // Tornar a l'índex anterior
-      currentIndex = lastAction.index;
+      const actionToUndo = lastAction;
+      fetch(window.JukeboxSwipeConfig.swipeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': window.JukeboxSwipeConfig.csrfToken
+        },
+        body: new URLSearchParams({
+          action: 'undo',
+          song_id: actionToUndo.songId
+        })
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (!data.success) {
+          showMessage(data.error || 'No s\'ha pogut desfer l\'acció', false);
+          return;
+        }
 
-      // Mostrar la carta anterior
-      const card = lastAction.card;
-      card.classList.remove('d-none');
-      card.style.zIndex = currentIndex + 10;
-      card.style.transform = '';
-      card.style.opacity = '1';
+        updateZeroStatCards(data.votes_left, data.credits);
+        const votesCountDesktop = document.getElementById('votes-count-desktop');
+        const creditsCountDesktop = document.getElementById('credits-count-desktop');
+        const userLikesCount = document.getElementById('user-likes-count');
+        if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
+        if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
+        if (userLikesCount && data.user_likes_count !== undefined) userLikesCount.textContent = data.user_likes_count;
 
-      // Ocultar la següent carta si existeix
-      if (cards[currentIndex + 1]) {
-        cards[currentIndex + 1].classList.add('d-none');
-      }
+        currentIndex = actionToUndo.index;
 
-      // Actualitzar progrés
-      updateProgress();
+        const card = actionToUndo.card;
+        card.classList.remove('d-none');
+        card.style.zIndex = currentIndex + 10;
+        card.style.transform = '';
+        card.style.opacity = '1';
 
-      // Ocultar botó undo
-      undoBtn.style.display = 'none';
-      showMessage('Acció desfeta', true);
-      lastAction = null;
+        if (cards[currentIndex + 1]) {
+          cards[currentIndex + 1].classList.add('d-none');
+        }
+
+        updateProgress();
+
+        undoBtn.style.display = 'none';
+        showMessage('Acció desfeta', true);
+        lastAction = null;
+      })
+      .catch(function() {
+        showMessage('No s\'ha pogut desfer l\'acció', false);
+      });
     });
   }
 
@@ -598,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'X-CSRFToken': window.JukeboxSwipeConfig.csrfToken
       },
       body: new URLSearchParams({
-        action: 'skip',
+        action: 'dislike',
         song_id: songId
       })
     })
@@ -618,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
         if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
         showVoteMessage('dislike', data.badge_label || '');
-        animateCardOut('left', songId, 'skip');
+        animateCardOut('left', songId, 'dislike');
         setTimeout(() => { disableCurrentButtons(false); }, 350);
       } else {
         showMessage(data.error || 'Error al saltar la cançó', false);

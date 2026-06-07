@@ -53,87 +53,101 @@
       </div>
   </section>
 
-  {% if parties %}
-    <!-- Grid de festes públiques -->
-    <div class="select-parties-wrap">
-    <div class="select-parties-grid">
-      {% for party in parties %}
-        <div class="select-party-card" style="cursor: default;">
-          <div class="select-party-image">
-            {% if party.cover_image %}
-              <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-            {% else %}
-              <div class="select-party-image-placeholder">
-                <span class="material-symbols-outlined">music_note</span>
-              </div>
-            {% endif %}
-            {% if selected_party and party.id == selected_party.id %}
-              <div class="select-party-badge">
-                <span class="select-party-badge-dot"></span>
-                {% trans "EN DIRECTE" %}
-              </div>
-            {% elif party.require_join_code %}
-              <div class="select-party-badge" style="background: rgba(231,76,60,0.95);">
-                <span class="material-symbols-outlined" style="font-size: 0.75rem;">lock</span>
-                {% trans "REQUEREIX CODI" %}
-              </div>
-            {% endif %}
-          </div>
-          <div class="select-party-content">
-            <h3 class="select-party-name">{{ party.name }}</h3>
-            <div class="select-party-meta">
-              <div class="select-party-meta-item">
-                <span class="material-symbols-outlined">calendar_today</span>
-                <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}{% trans "Data per confirmar" %}{% endif %}</span>
-              </div>
-              <div class="select-party-meta-item">
-                <span class="material-symbols-outlined">queue_music</span>
-                <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
-              </div>
+  <!-- Grid de festes públiques -->
+  <div class="select-parties-wrap">
+  <div class="select-parties-grid">
+    {% for party in parties %}
+      <div class="select-party-card" style="cursor: default;">
+        <div class="select-party-image">
+          {% if party.cover_image %}
+            <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+            <div class="select-party-image-placeholder">
+              <span class="material-symbols-outlined">music_note</span>
             </div>
+          {% endif %}
+          {% if selected_party and party.id == selected_party.id %}
+            <div class="select-party-badge">
+              <span class="select-party-badge-dot"></span>
+              {% trans "EN DIRECTE" %}
+            </div>
+          {% elif party.require_join_code %}
+            <div class="select-party-badge" style="background: rgba(231,76,60,0.95);">
+              <span class="material-symbols-outlined" style="font-size: 0.75rem;">lock</span>
+              {% trans "REQUEREIX CODI" %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="select-party-content">
+          <h3 class="select-party-name">{{ party.name }}</h3>
+          <div class="select-party-meta">
+            <div class="select-party-meta-item">
+              <span class="material-symbols-outlined">calendar_today</span>
+              <span>{% if party.date %}{{ party.date|date:"d/m/Y H:i" }}{% else %}{% trans "Data per confirmar" %}{% endif %}</span>
+            </div>
+            <div class="select-party-meta-item">
+              <span class="material-symbols-outlined">queue_music</span>
+              <span>{% if party.playlist %}{{ party.playlist.name }}{% else %}{% trans "Sense playlist assignada" %}{% endif %}</span>
+            </div>
+          </div>
 
-            {% if party.require_join_code %}
-              <!-- Formulari amb codi -->
-              <form method="get" action="{% url 'set_party' party.id %}" style="margin-top: 1rem;"
-                    {% if party.location_radius_km %}data-geocheck-form="true" data-party-id="{{ party.id }}"{% endif %}>
-                <div style="display: flex; gap: 0.5rem;">
-                  <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
-                         style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
-                  <button type="submit" class="select-party-button" style="flex-shrink: 0; margin: 0;">
-                    {% trans "Entrar" %}
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                  </button>
-                </div>
-              </form>
-            {% elif selected_party and party.id == selected_party.id %}
-              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
-                 {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
-                <button class="select-party-button">
-                  {% trans "Entrar a la sessió" %}
-                  <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </a>
-            {% else %}
-              <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
-                 {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
-                <button class="select-party-button">
+          {% if party.require_join_code %}
+            <!-- Formulari amb codi -->
+            <form method="get" action="{% url 'set_party' party.id %}" style="margin-top: 1rem;"
+                  {% if party.location_radius_km %}data-geocheck-form="true" data-party-id="{{ party.id }}"{% endif %}>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" name="code" placeholder="{% trans 'Codi d\'entrada' %}" required
+                       style="flex: 1; padding: 0.75rem; border: 1px solid #e0e3e6; border-radius: 0.5rem; font-size: 0.875rem; text-transform: uppercase;">
+                <button type="submit" class="select-party-button" style="flex-shrink: 0; margin: 0;">
                   {% trans "Entrar" %}
                   <span class="material-symbols-outlined">arrow_forward</span>
                 </button>
-              </a>
-            {% endif %}
+              </div>
+            </form>
+          {% elif selected_party and party.id == selected_party.id %}
+            <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
+               {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
+              <button class="select-party-button">
+                {% trans "Entrar a la sessió" %}
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </a>
+          {% else %}
+            <a href="{% url 'set_party' party.id %}" style="text-decoration: none;"
+               {% if party.location_radius_km %}data-geocheck="true" data-party-id="{{ party.id }}" data-set-url="{% url 'set_party' party.id %}"{% endif %}>
+              <button class="select-party-button">
+                {% trans "Entrar" %}
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <!-- Caixa festes passades (sempre al final del grid) -->
+    <a href="{% url 'past_parties' %}" class="select-party-card select-party-card--past" style="text-decoration: none;">
+      <div class="select-party-image" style="background: linear-gradient(135deg, #1a1a2e 0%, #2c2c3e 100%);">
+        <div class="select-party-image-placeholder" style="color: rgba(255,255,255,0.35);">
+          <span class="material-symbols-outlined">history</span>
+        </div>
+      </div>
+      <div class="select-party-content">
+        <h3 class="select-party-name">{% trans "Festes Passades" %}</h3>
+        <div class="select-party-meta">
+          <div class="select-party-meta-item">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span>{% trans "Esdeveniments anteriors" %}</span>
           </div>
         </div>
-      {% endfor %}
-    </div>
-    </div>
-  {% else %}
-    <div class="select-empty">
-      <span class="material-symbols-outlined">event_busy</span>
-      <div class="select-empty-title">{% trans "No hi ha festes disponibles" %}</div>
-      <p class="select-empty-text">{% trans "Crea una nova festa al backoffice per començar" %}</p>
-    </div>
-  {% endif %}
+        <button class="select-party-button" style="margin-top: 1rem; background: #434656;">
+          {% trans "Veure-les" %}
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </a>
+  </div>
+  </div>
 
   <!-- Caixa inferior -->
   <section class="select-promo-section select-promo-section--slim select-promo-bottom select-promo-marketing">
@@ -186,45 +200,37 @@
       <p class="font-medium" style="color: #434656; opacity: 0.8;">{% trans "Escull la teva festa i fes sentir les teves preferències." %}</p>
     </section>
 
-    {% if parties %}
-      <!-- Party Grid -->
-      <section>
-        <h3 class="font-headline font-bold mb-3" style="font-size: 1.25rem;">{% trans "Festes Disponibles" %}</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          {% for party in parties %}
-            <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card"
-               {% if party.require_join_code %}data-requires-code="true"{% endif %}
-               {% if party.location_radius_km %}data-requires-location="true"{% endif %}
-               data-party-id="{{ party.id }}"
-               data-set-url="{% url 'set_party' party.id %}">
-              <div class="position-relative overflow-hidden text-white shadow-xl" style="height: 90px; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
-                {% if party.cover_image %}
-                  <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+    <!-- Party Grid -->
+    <section>
+      <h3 class="font-headline font-bold mb-3" style="font-size: 1.25rem;">{% trans "Festes Disponibles" %}</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for party in parties %}
+          <a href="{% url 'set_party' party.id %}" class="text-decoration-none mobile-party-card"
+             {% if party.require_join_code %}data-requires-code="true"{% endif %}
+             {% if party.location_radius_km %}data-requires-location="true"{% endif %}
+             data-party-id="{{ party.id }}"
+             data-set-url="{% url 'set_party' party.id %}">
+            <div class="position-relative overflow-hidden text-white shadow-xl" style="height: 90px; border-radius: 1rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
+              {% if party.cover_image %}
+                <img src="{{ party.cover_image.url }}" alt="{{ party.name }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+              {% endif %}
+              <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.1));"></div>
+              <div class="position-relative d-flex flex-column justify-content-center h-100 px-4" style="z-index: 10;">
+                {% if party.require_join_code %}
+                  <div class="d-inline-flex align-items-center gap-1 mb-1" style="color: #ffb3b3; font-size: 0.65rem; font-weight: 700;">
+                    <i class="fas fa-lock" style="font-size: 0.6rem;"></i> {% trans "Requereix codi" %}
+                  </div>
                 {% endif %}
-                <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.55), rgba(0,0,0,0.1));"></div>
-                <div class="position-relative d-flex flex-column justify-content-center h-100 px-4" style="z-index: 10;">
-                  {% if party.require_join_code %}
-                    <div class="d-inline-flex align-items-center gap-1 mb-1" style="color: #ffb3b3; font-size: 0.65rem; font-weight: 700;">
-                      <i class="fas fa-lock" style="font-size: 0.6rem;"></i> {% trans "Requereix codi" %}
-                    </div>
-                  {% endif %}
-                  <h4 class="font-bold mb-0" style="font-size: 1.05rem; line-height: 1.2;">{{ party.name }}</h4>
-                  <p class="mb-0" style="font-size: 0.75rem; opacity: 0.85; margin-top: 0.2rem;">
-                    {% if party.date %}{{ party.date|date:"M d • H:i" }}{% else %}{% trans "Pròximament" %}{% endif %}
-                  </p>
-                </div>
+                <h4 class="font-bold mb-0" style="font-size: 1.05rem; line-height: 1.2;">{{ party.name }}</h4>
+                <p class="mb-0" style="font-size: 0.75rem; opacity: 0.85; margin-top: 0.2rem;">
+                  {% if party.date %}{{ party.date|date:"M d • H:i" }}{% else %}{% trans "Pròximament" %}{% endif %}
+                </p>
               </div>
-            </a>
-          {% endfor %}
-        </div>
-      </section>
-    {% else %}
-      <div class="text-center py-5">
-        <i class="fas fa-calendar-times mb-3" style="font-size: 3rem; color: #747688; opacity: 0.5;"></i>
-        <h4 class="fw-bold mb-2" style="color: #191c1f;">{% trans "No hi ha festes disponibles" %}</h4>
-        <p class="mb-0" style="color: #434656;">{% trans "Torna aviat per veure propers esdeveniments!" %}</p>
+            </div>
+          </a>
+        {% endfor %}
       </div>
-    {% endif %}
+    </section>
 
     <!-- Secció entrada de codi mòbil -->
     <section class="mobile-card p-3">
@@ -256,6 +262,21 @@
         {% trans "Escanejar codi QR" %}
       </button>
     </section>
+
+    <!-- Caixa festes passades mòbil -->
+    <a href="{% url 'past_parties' %}" class="text-decoration-none">
+      <div class="position-relative overflow-hidden text-white shadow-xl" style="height: 90px; border-radius: 1rem; background: linear-gradient(135deg, #1a1a2e 0%, #2c2c3e 100%);">
+        <div class="position-absolute" style="top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.1));"></div>
+        <div class="position-relative d-flex align-items-center h-100 px-4" style="z-index: 10; gap: 0.75rem;">
+          <i class="fas fa-history" style="font-size: 1.5rem; opacity: 0.7;"></i>
+          <div>
+            <h4 class="font-bold mb-0" style="font-size: 1.05rem; line-height: 1.2;">{% trans "Festes Passades" %}</h4>
+            <p class="mb-0" style="font-size: 0.75rem; opacity: 0.75; margin-top: 0.2rem;">{% trans "Veure esdeveniments anteriors" %}</p>
+          </div>
+          <i class="fas fa-arrow-right ms-auto" style="opacity: 0.6;"></i>
+        </div>
+      </div>
+    </a>
 
     <!-- Secció màrqueting mòbil -->
     <section class="mobile-card p-4" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white;">

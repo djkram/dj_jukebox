@@ -5,6 +5,7 @@ Té en compte harmonia (Camelot key), BPM i vots
 from django.core.cache import cache
 from django.db.models import Count, Q
 from .models import Song
+from .utils.vote_types import negative_vote_q
 
 RECOMMENDATIONS_CACHE_TTL = 60  # seconds
 
@@ -82,7 +83,7 @@ def get_recommended_songs(party, limit=5, reference_song=None):
     unplayed_songs = party.songs.filter(has_played=False).annotate(
         num_votes=Count('vote'),
         num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike')),
+        num_dislikes=Count('vote', filter=negative_vote_q()),
     ).filter(num_likes__gt=0)
 
     if not unplayed_songs.exists():
@@ -90,7 +91,7 @@ def get_recommended_songs(party, limit=5, reference_song=None):
 
     # Si no hi ha cançó de referència, buscar l'última reproduïda
     if not reference_song:
-        last_played = party.songs.filter(has_played=True).order_by('-id').first()
+        last_played = party.songs.filter(has_played=True).order_by('-played_at', '-id').first()
         reference_song = last_played
 
     # Si encara no hi ha referència, usar la més votada

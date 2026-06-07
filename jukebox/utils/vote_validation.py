@@ -9,6 +9,7 @@ from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
+from .vote_types import VALID_VOTE_TYPES, NEGATIVE_VOTE_TYPES, normalize_vote_type
 
 
 def validate_and_create_vote(
@@ -22,6 +23,10 @@ def validate_and_create_vote(
     """
     from jukebox.models import Vote
     from jukebox.votes import get_user_votes_left
+
+    vote_type = normalize_vote_type(vote_type)
+    if vote_type not in VALID_VOTE_TYPES:
+        return False, _("Tipus de vot no vàlid")
 
     try:
         with transaction.atomic():
@@ -61,7 +66,7 @@ def create_vote_response(
             from jukebox.utils.badges import BadgeCalculator
             user_likes_count = party.vote_set.filter(user=user, vote_type='like').count()
             num_likes = song.vote.filter(party=party, vote_type='like').count()
-            num_dislikes = song.vote.filter(party=party, vote_type='dislike').count()
+            num_dislikes = song.vote.filter(party=party, vote_type__in=NEGATIVE_VOTE_TYPES).count()
             calculator = BadgeCalculator(party.songs)
             badge_label, badge_bg, badge_text = calculator.calculate_badge(num_likes, num_dislikes)
             return JsonResponse({

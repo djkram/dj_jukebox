@@ -342,6 +342,21 @@ def _song_title_search_queries(title):
     return seen
 
 
+def _is_songbpm_title_artist_match(card, title, artist):
+    expected_title = _normalize_match_text(title)
+    expected_simple_title = _normalize_match_text(_simplify_title(title))
+    card_title = _normalize_match_text(card.get("title"))
+    card_simple_title = _normalize_match_text(_simplify_title(card.get("title") or ""))
+    expected_artist = _normalize_match_text(_simplify_artist(artist))
+    card_artist = _normalize_match_text(_simplify_artist(card.get("artist") or ""))
+    title_matches = (
+        card_title == expected_title or
+        (expected_simple_title and card_title == expected_simple_title) or
+        (expected_simple_title and card_simple_title == expected_simple_title)
+    )
+    return bool(title_matches and expected_artist and card_artist == expected_artist)
+
+
 def _get_songbpm_features(title, artist, spotify_id=None):
     import re
     from html import unescape
@@ -440,11 +455,7 @@ def _get_songbpm_features(title, artist, spotify_id=None):
         return score
 
     def _is_exact_title_artist_match(card):
-        expected_title = _normalize_match_text(title)
-        card_title = _normalize_match_text(card.get("title"))
-        expected_artist = _normalize_match_text(_simplify_artist(artist))
-        card_artist = _normalize_match_text(_simplify_artist(card.get("artist") or ""))
-        return bool(expected_title and expected_artist and card_title == expected_title and card_artist == expected_artist)
+        return _is_songbpm_title_artist_match(card, title, artist)
 
     def _parse_detail_mode(html, key_text):
         text = _strip_html(html)

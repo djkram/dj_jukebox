@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DJJukebox | La Teva Festa, El teu Control</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "surface-container-low": "#f1f4f7",
+                "on-surface": "#181c1e",
+                "surface-bright": "#f7fafd",
+                "on-tertiary-fixed-variant": "#4f00d0",
+                "on-tertiary-fixed": "#20005f",
+                "on-error-container": "#93000a",
+                "tertiary-container": "#5e24e1",
+                "on-error": "#ffffff",
+                "on-primary-container": "#bdc7ff",
+                "outline": "#747687",
+                "error-container": "#ffdad6",
+                "surface-tint": "#1b4ce9",
+                "tertiary-fixed-dim": "#cdbdff",
+                "primary": "#002ea8",
+                "surface-dim": "#d7dadd",
+                "on-secondary-fixed-variant": "#0035be",
+                "tertiary-fixed": "#e7deff",
+                "on-tertiary-container": "#d0c2ff",
+                "secondary-fixed": "#dde1ff",
+                "on-primary": "#ffffff",
+                "secondary-container": "#2e5bff",
+                "surface-container-high": "#e5e8eb",
+                "on-primary-fixed-variant": "#0035be",
+                "inverse-surface": "#2d3133",
+                "surface": "#f7fafd",
+                "on-surface-variant": "#434655",
+                "inverse-primary": "#b8c3ff",
+                "on-secondary": "#ffffff",
+                "on-tertiary": "#ffffff",
+                "outline-variant": "#c4c5d8",
+                "primary-fixed": "#dde1ff",
+                "error": "#ba1a1a",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed": "#001356",
+                "surface-container-highest": "#e0e3e6",
+                "secondary-fixed-dim": "#b8c3ff",
+                "on-secondary-fixed": "#001356",
+                "primary-container": "#0040e0",
+                "tertiary": "#4500b9",
+                "on-background": "#181c1e",
+                "surface-variant": "#e0e3e6",
+                "surface-container": "#ebeef1",
+                "on-secondary-container": "#efefff",
+                "primary-fixed-dim": "#b8c3ff",
+                "background": "#0a0c0d",
+                "secondary": "#0040e0",
+                "inverse-on-surface": "#eef1f4"
+              },
+              fontFamily: {
+                "headline": ["Epilogue"],
+                "body": ["Plus Jakarta Sans"],
+                "label": ["Plus Jakarta Sans"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #2e5bff 0%, #00e3fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-panel {
+            backdrop-filter: blur(24px);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .premium-bg {
+            background-color: #0a0c0d;
+            background-image: radial-gradient(circle at 0% 0%, rgba(0, 64, 224, 0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 100% 100%, rgba(94, 36, 225, 0.15) 0%, transparent 50%);
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(46, 91, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 227, 253, 0.5); }
+        }
+        .glow-button {
+            animation: glow 3s infinite ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 227, 253, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-white h-full overflow-hidden premium-bg">
+<main class="relative h-full w-full flex items-center justify-center overflow-hidden">
+<!-- Ambient Blur Elements -->
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0040e0]/10 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5e24e1]/10 blur-[120px] rounded-full"></div>
+<!-- Content Canvas -->
+<div class="relative z-10 w-full max-w-6xl px-6 text-center">
+<div class="mb-12">
+<div class="text-3xl font-black text-[#2e5bff] font-headline tracking-tighter italic mb-8">DJJukebox</div>
+<h1 class="font-headline text-5xl md:text-7xl font-black text-white tracking-tighter mb-4 leading-none uppercase">
+                LA TEVA FESTA,<br/><span class="text-gradient">EL TEU CONTROL.</span>
+</h1>
+<p class="text-white/60 text-lg md:text-xl font-medium max-w-2xl mx-auto">
+                Uneix-te a la Festa i fes sentir les teves preferències.
+            </p>
+</div>
+<!-- Two Square Cards Section -->
+<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+<!-- Left Card: Primary User Journey -->
+<button class="glass-panel card-hover group p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col items-center justify-center text-center space-y-6">
+<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2e5bff] to-[#00e3fd] flex items-center justify-center shadow-[0_0_30px_rgba(46,91,255,0.4)] group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-white" data-icon="celebration">celebration</span>
+</div>
+<div class="space-y-2">
+<h2 class="text-3xl font-black font-headline uppercase tracking-tight">Seleccionar festa</h2>
+<p class="text-white/40 font-medium">Troba la teva celebració i comença a demanar música.</p>
+</div>
+<div class="flex items-center gap-2 text-[#00e3fd] font-bold group-hover:translate-x-2 transition-transform">
+<span>Comença ara</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</button>
+<!-- Right Card: Owner/DJ Journey -->
+<button class="glass-panel card-hover group p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col items-center justify-center text-center space-y-6">
+<div class="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-[#00e3fd]/30 transition-colors">
+<span class="material-symbols-outlined text-4xl text-[#00e3fd]" data-icon="add_circle">add_circle</span>
+</div>
+<div class="space-y-2">
+<h2 class="text-3xl font-black font-headline uppercase tracking-tight">Afageix la teva festa</h2>
+<p class="text-white/40 font-medium leading-relaxed">Publica la teva festa a DJJukebox i activa una experiència única pels convidats.</p>
+</div>
+<div class="flex items-center gap-2 text-white/60 font-bold group-hover:text-white transition-colors">
+<span>Configura el teu local</span>
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</div>
+</button>
+</div>
+<!-- Integrated Sales Footer CTA -->
+<div class="flex flex-col items-center gap-6">
+<div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+<button class="glow-button group relative inline-flex items-center gap-4 bg-white text-[#0a0c0d] px-12 py-5 rounded-full font-headline font-black text-xl hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-2xl text-[#2e5bff]" data-icon="bolt">bolt</span>
+<span>Contracta DJJukebox ara</span>
+<span class="material-symbols-outlined group-hover:rotate-12 transition-transform text-2xl" data-icon="rocket_launch">rocket_launch</span>
+<div class="absolute -inset-1 bg-gradient-to-r from-[#2e5bff] to-[#00e3fd] rounded-full blur opacity-0 group-hover:opacity-20 transition-opacity"></div>
+</button>
+</div>
+</div>
+<!-- Ambient UI Elements -->
+<div class="absolute bottom-12 left-12 hidden lg:block">
+<div class="flex items-center gap-4 text-white/20 text-[10px] font-bold tracking-[0.2em] uppercase">
+<span class="material-symbols-outlined text-sm" data-icon="graphic_eq">graphic_eq</span>
+<span>Live in Barcelona</span>
+</div>
+</div>
+<div class="absolute bottom-12 right-12 hidden lg:block">
+<div class="flex items-center gap-6">
+<div class="text-right">
+<p class="text-white/30 text-[9px] uppercase tracking-[0.2em] font-bold mb-1">Now Playing</p>
+<p class="text-white font-bold text-sm">Midnight City — M83</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-white/5 backdrop-blur flex items-center justify-center border border-white/10 group cursor-pointer hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white text-2xl group-hover:scale-110 transition-transform" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Shell -->
+<footer class="fixed bottom-0 w-full flex flex-col md:flex-row justify-between items-center px-12 py-6 text-[9px] uppercase tracking-[0.2em] font-bold font-body text-white/30 pointer-events-none">
+<div class="pointer-events-auto">© 2024 DJJukebox. Creat per a l'escena nocturna.</div>
+<div class="flex gap-8 pointer-events-auto mt-4 md:mt-0">
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Privacitat</a>
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Termes</a>
+<a class="hover:text-[#00e3fd] transition-colors" href="#">Suport</a>
+</div>
+</footer>
+</body></html>

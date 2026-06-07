@@ -6,7 +6,6 @@ Applies volume-based bonuses to incentivize bulk purchases.
 """
 from typing import Tuple
 from django.db import transaction
-from django.db.models import F
 
 
 def calculate_votes_from_coins(coins: int) -> int:
@@ -48,7 +47,7 @@ def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, st
     Converts Coins to Votes with validation and database registration.
 
     Creates a VotePackage record to track the conversion and deducts
-    the coins from the user's global credits.
+    the coins from party free coins first, then global user credits.
 
     Args:
         user: User instance
@@ -69,8 +68,7 @@ def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, st
             print(f"Error: {error}")
     """
     from jukebox.models import VotePackage
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+    from jukebox.votes import spend_user_coins_for_party
 
     # Validation
     if coins_to_convert < 5:
@@ -80,11 +78,13 @@ def convert_coins_to_votes(user, party, coins_to_convert: int) -> Tuple[bool, st
     votes_to_add = calculate_votes_from_coins(coins_to_convert)
 
     with transaction.atomic():
-        updated = User.objects.filter(
-            pk=user.pk, credits__gte=coins_to_convert
-        ).update(credits=F('credits') - coins_to_convert)
-
-        if not updated:
+        spent = spend_user_coins_for_party(
+            user,
+            party,
+            coins_to_convert,
+            reason='coins_converted_to_votes',
+        )
+        if not spent:
             return False, f"No tens prous Coins", 0
 
         VotePackage.objects.create(

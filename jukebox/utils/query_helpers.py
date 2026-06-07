@@ -5,6 +5,7 @@ Provides functions to annotate songs with vote counts and retrieve
 commonly used querysets with consistent ordering.
 """
 from django.db.models import Count, Q
+from .vote_types import negative_vote_q
 
 
 def annotate_songs_with_votes(queryset):
@@ -27,7 +28,7 @@ def annotate_songs_with_votes(queryset):
     """
     return queryset.annotate(
         num_likes=Count('vote', filter=Q(vote__vote_type='like')),
-        num_dislikes=Count('vote', filter=Q(vote__vote_type='dislike'))
+        num_dislikes=Count('vote', filter=negative_vote_q())
     )
 
 
@@ -79,7 +80,7 @@ def get_pending_songs_ordered(party):
 
 def get_played_songs_ordered(party):
     """
-    Gets played songs ordered by ID (most recent first).
+    Gets played songs ordered by the time they were loaded (most recent first).
 
     Returns a list (not QuerySet) for compatibility with existing code
     that expects a list for reverse enumeration.
@@ -99,5 +100,5 @@ def get_played_songs_ordered(party):
         get_annotated_party_songs(
             party,
             played_filter=True
-        ).order_by('-id')
+        ).order_by('-played_at', '-id')
     )

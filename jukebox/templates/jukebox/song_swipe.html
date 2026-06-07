@@ -57,7 +57,7 @@
       {% if songs %}
         <!-- Card Stack -->
         <div id="card-stack-desktop" class="swipe-card-stack">
-          <div id="no-votes-overlay-desktop" style="position:absolute;inset:0;z-index:50;display:{% if votes_left == 0 %}flex{% else %}none{% endif %};flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:2rem;text-align:center;">
+          <div id="no-votes-overlay-desktop" style="position:absolute;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:2rem;text-align:center;">
             <div style="width:4rem;height:4rem;border-radius:50%;background:rgba(246,194,62,0.15);border:2px solid rgba(246,194,62,0.5);display:flex;align-items:center;justify-content:center;">
               <i class="fas fa-coins" style="font-size:1.6rem;color:#f6c23e;"></i>
             </div>
@@ -88,14 +88,16 @@
 
                   <!-- Action Buttons -->
                   <div class="swipe-card-actions">
-                    <button class="btn-skip-card swipe-action-btn swipe-btn-skip">
-                      <span class="material-symbols-outlined">close</span>
+                    <button class="btn-dislike-card swipe-action-btn swipe-btn-play" title="No m'agrada">
+                      <i class="fas fa-heart-broken"></i>
                     </button>
-                    <button id="play-preview-btn-desktop" class="swipe-action-btn swipe-btn-play">
-                      <span class="material-symbols-outlined">play_arrow</span>
+                    <button class="btn-next-card swipe-action-btn swipe-btn-skip" title="Skip">
+                      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">
+                        <path d="M17.7 6.3A8 8 0 1 0 19.6 14h-2.1a6 6 0 1 1-1.2-6.3L13 11h8V3l-3.3 3.3z" fill="currentColor"/>
+                      </svg>
                     </button>
-                    <button class="btn-like-card swipe-action-btn swipe-btn-like">
-                      <span class="material-symbols-outlined">favorite</span>
+                    <button class="btn-like-card swipe-action-btn swipe-btn-like" title="M'agrada">
+                      <i class="fas fa-heart"></i>
                     </button>
                   </div>
                 </div>
@@ -215,7 +217,7 @@
 
         <!-- Main Card -->
         <div id="card-stack" class="relative h-full w-full bg-white rounded-xl overflow-hidden flex flex-col mobile-swipe-stage-card" style="box-shadow: 0 20px 40px rgba(0,64,224,0.06);">
-          <div id="no-votes-overlay-mobile" style="position:absolute;inset:0;z-index:50;display:{% if votes_left == 0 %}flex{% else %}none{% endif %};flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:1.5rem;text-align:center;">
+          <div id="no-votes-overlay-mobile" style="position:absolute;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);border-radius:inherit;padding:1.5rem;text-align:center;">
             <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(246,194,62,0.15);border:2px solid rgba(246,194,62,0.5);display:flex;align-items:center;justify-content:center;">
               <i class="fas fa-coins" style="font-size:1.4rem;color:#f6c23e;"></i>
             </div>
@@ -239,17 +241,16 @@
               <div style="position: absolute; inset: 0; overflow: hidden; border-radius: inherit;">
                 {% if forloop.first %}
                 <div id="swipe-hint-wrapper" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:10;pointer-events:none;">
-                  <div id="swipe-hint" style="display:flex;flex-direction:column;align-items:center;gap:0.4rem;background:rgba(0,0,0,0.45);padding:0.7rem 1.3rem;border-radius:1.5rem;backdrop-filter:blur(8px);white-space:nowrap;">
-                    <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                      <span style="color:rgba(255,90,90,0.95);font-size:1.3rem;font-weight:900;line-height:1;">−</span>
-                      <svg width="110" height="46" viewBox="0 0 140 56" fill="none">
+                  <div id="swipe-hint" style="display:grid;grid-template-columns:1.65rem 7.5rem 1.65rem;align-items:center;justify-items:center;background:rgba(0,0,0,0.54);padding:0.72rem 1.05rem;border-radius:1.25rem;backdrop-filter:blur(8px);">
+                    <svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" style="display:block;color:rgba(231,232,237,0.96);grid-column:1;grid-row:1;">
+                      <path d="M17.7 6.3A8 8 0 1 0 19.6 14h-2.1a6 6 0 1 1-1.2-6.3L13 11h8V3l-3.3 3.3z" fill="currentColor"/>
+                    </svg>
+                    <svg width="120" height="46" viewBox="0 0 140 56" fill="none" aria-hidden="true" style="grid-column:2;grid-row:1;display:block;">
                         <path d="M20 36 C55 12, 85 12, 120 36" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
                         <path d="M20 27 L10 36 L20 45" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M120 27 L130 36 L120 45" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
-                      <span style="color:rgba(80,220,120,0.95);font-size:1.3rem;font-weight:900;line-height:1;">+</span>
-                    </div>
-                    <span style="font-size:0.58rem;color:rgba(255,255,255,0.85);font-weight:700;letter-spacing:0.12em;">LLISCA PER VOTAR</span>
+                    <i class="fas fa-heart" style="color:rgba(80,220,120,0.96);font-size:1.15rem;grid-column:3;grid-row:1;"></i>
                   </div>
                 </div>
                 {% endif %}
@@ -290,20 +291,28 @@
 
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center justify-center gap-4 w-full mobile-swipe-actions">
-        <!-- Skip Button -->
-        <button id="mobile-skip-btn" class="btn-skip-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 3.4rem; height: 3.4rem; background: #e7e8ed; color: #191c1f; border: none;">
-          <i class="fas fa-times" style="font-size: 1.45rem;"></i>
-        </button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:4.4rem;">
+          <button id="mobile-dislike-btn" class="btn-dislike-card flex items-center justify-center rounded-circle transition-transform" style="width: 4rem; height: 4rem; border: 2px solid rgba(185, 28, 28, 0.18); background: #fff5f5; color: #b91c1c;" title="No m'agrada">
+            <i class="fas fa-heart-broken" style="font-size: 1.45rem;"></i>
+          </button>
+          <span style="font-size:0.7rem;font-weight:800;color:#b91c1c;line-height:1;">No m'agrada</span>
+        </div>
 
-        <!-- Play/Preview Toggle (Small) -->
-        <button id="play-preview-btn" class="flex items-center justify-center rounded-circle transition-colors" style="width: 2.6rem; height: 2.6rem; border: 2px solid rgba(0, 64, 224, 0.2); background: transparent; color: #0040e0;">
-          <i class="fas fa-play" style="font-size: 0.9rem;"></i>
-        </button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:4.4rem;">
+          <button id="mobile-next-btn" class="btn-next-card flex items-center justify-center rounded-circle shadow-md transition-transform" style="width: 4rem; height: 4rem; background: #e7e8ed; color: #191c1f; border: none;" title="Skip">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">
+              <path d="M17.7 6.3A8 8 0 1 0 19.6 14h-2.1a6 6 0 1 1-1.2-6.3L13 11h8V3l-3.3 3.3z" fill="currentColor"/>
+            </svg>
+          </button>
+          <span style="font-size:0.7rem;font-weight:800;color:#5f6272;line-height:1;">Skip</span>
+        </div>
 
-        <!-- Like Button -->
-        <button id="mobile-like-btn" class="btn-like-card flex items-center justify-center rounded-circle transition-transform" style="width: 4.2rem; height: 4.2rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(0,64,224,0.3);">
-          <i class="fas fa-heart" style="font-size: 2rem;"></i>
-        </button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:4.4rem;">
+          <button id="mobile-like-btn" class="btn-like-card flex items-center justify-center rounded-circle transition-transform" style="width: 4rem; height: 4rem; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%); color: white; border: none; box-shadow: 0 10px 30px rgba(0,64,224,0.3);" title="M'agrada">
+            <i class="fas fa-heart" style="font-size: 1.75rem;"></i>
+          </button>
+          <span style="font-size:0.7rem;font-weight:800;color:#0040e0;line-height:1;">M'agrada</span>
+        </div>
       </div>
 
       <div id="message-area" class="text-center" style="min-height: 3.5rem; margin-top: 1rem; padding: 0 0.5rem;"></div>
@@ -337,14 +346,6 @@
   </main>
 </div>
 
-<!-- Audio Element for preview (shared between desktop and mobile) -->
-<audio id="preview-audio" preload="none"></audio>
-
-{% if has_spotify %}
-<!-- Spotify Web Playback SDK -->
-<script src="https://sdk.scdn.co/spotify-player.js"></script>
-{% endif %}
-
 <script>
 function escapeHtml(str) {
   return String(str == null ? '' : str)
@@ -354,121 +355,6 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
-{% if has_spotify %}
-// Spotify Web Playback SDK Variables
-let spotifyPlayer = null;
-let spotifyDeviceId = null;
-let SPOTIFY_TOKEN = null;
-const HAS_SPOTIFY_PLAYER = true;
-let spotifySdkReady = false;
-let spotifyPlayerInitPromise = null;
-
-window.onSpotifyWebPlaybackSDKReady = () => {
-  spotifySdkReady = true;
-};
-
-function ensureSpotifyPlayer() {
-  if (spotifyPlayer && spotifyDeviceId) {
-    return Promise.resolve(spotifyPlayer);
-  }
-
-  if (!spotifySdkReady || !window.Spotify) {
-    showMessage('El reproductor de Spotify no està llest. Espera uns segons...', false);
-    return Promise.reject(new Error('Spotify SDK not ready'));
-  }
-
-  if (spotifyPlayerInitPromise) {
-    return spotifyPlayerInitPromise;
-  }
-
-  spotifyPlayerInitPromise = new Promise((resolve, reject) => {
-    spotifyPlayer = new Spotify.Player({
-      name: 'DJukebox Web Player',
-      getOAuthToken: cb => {
-        fetch('/api/spotify-token/')
-          .then(r => r.json())
-          .then(data => { SPOTIFY_TOKEN = data.token; cb(data.token); })
-          .catch(() => cb(null));
-      },
-      volume: 0.7
-    });
-
-    spotifyPlayer.addListener('ready', ({ device_id }) => {
-      console.log('[SPOTIFY] Player ready with Device ID:', device_id);
-      spotifyDeviceId = device_id;
-
-      fetch('https://api.spotify.com/v1/me/player', {
-        headers: { 'Authorization': `Bearer ${SPOTIFY_TOKEN}` }
-      }).then(response => {
-        if (response.status === 401) {
-          console.warn('[SPOTIFY] Token invalid - user needs to reconnect');
-          showMessage('⚠️ Reconnecta el teu compte de Spotify des del perfil per activar la reproducció completa', false);
-        }
-      });
-
-      resolve(spotifyPlayer);
-    });
-
-    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-      console.log('[SPOTIFY] Device ID has gone offline:', device_id);
-    });
-
-    spotifyPlayer.addListener('player_state_changed', state => {
-      if (!state) return;
-
-      isPlaying = !state.paused;
-      updatePlayButton();
-    });
-
-    spotifyPlayer.connect().then(success => {
-      if (!success) {
-        reject(new Error('Spotify player connection failed'));
-      }
-    }).catch(reject);
-  }).catch(error => {
-    spotifyPlayerInitPromise = null;
-    throw error;
-  });
-
-  return spotifyPlayerInitPromise;
-}
-
-// Function to play a track using Spotify SDK
-function playSpotifyTrack(spotifyId) {
-  return ensureSpotifyPlayer().then(() => fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ uris: [`spotify:track:${spotifyId}`] }),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SPOTIFY_TOKEN}`
-    },
-  })).then(response => {
-    if (response.ok) {
-      console.log('[SPOTIFY] Playing track:', spotifyId);
-      return response;
-    } else if (response.status === 403) {
-      console.error('[SPOTIFY] Premium required:', response.status);
-      showMessage('Necessites Spotify Premium per reproduir cançons completes', false);
-      throw new Error('Premium required');
-    } else if (response.status === 401) {
-      console.error('[SPOTIFY] Unauthorized:', response.status);
-      showMessage('Sessió de Spotify caducada. Torna a connectar el teu compte.', false);
-      throw new Error('Unauthorized');
-    } else {
-      console.error('[SPOTIFY] Error playing track:', response.status);
-      showMessage('Error reproduint la cançó. Torna-ho a provar.', false);
-      throw new Error('Playback error');
-    }
-  }).catch(error => {
-    console.error('[SPOTIFY] Fetch error:', error);
-    throw error;
-  });
-}
-
-{% else %}
-const HAS_SPOTIFY_PLAYER = false;
-{% endif %}
 
 document.addEventListener('DOMContentLoaded', function() {
   // Detectar si és mòbil o desktop
@@ -487,28 +373,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const undoBtn = document.getElementById('undo-btn');
 
   let currentIndex = 0;
-  let lastAction = null; // { type: 'like'|'skip', songId: X, index: Y }
+  let lastAction = null; // { type: 'like'|'dislike'|'next', songId: X, index: Y }
   const totalCards = cards.length;
-
-  function showNoVotesOverlay(votesLeft, credits) {
-    if (parseInt(votesLeft) > 0) return;
-    var hasCoins = parseInt(credits) > 0;
-    var descText = hasCoins
-      ? 'Tens ' + credits + ' Coins disponibles.<br>Converteix-los en més vots ara.'
-      : 'Compra Coins i converteix-los<br>en més vots al moment.';
-    var labelText = hasCoins ? 'Aconsegueix vots' : 'Compra Coins';
-    var iconClass = hasCoins ? 'fas fa-exchange-alt' : 'fas fa-shopping-cart';
-    ['mobile', 'desktop'].forEach(function(suffix) {
-      var overlay = document.getElementById('no-votes-overlay-' + suffix);
-      var desc = document.getElementById('no-votes-desc-' + suffix);
-      var label = document.getElementById('no-votes-label-' + suffix);
-      var icon = document.getElementById('no-votes-icon-' + suffix);
-      if (overlay) { overlay.style.display = 'flex'; }
-      if (desc) { desc.innerHTML = descText; }
-      if (label) { label.textContent = labelText; }
-      if (icon) { icon.className = iconClass; }
-    });
-  }
 
   function updateZeroStatCards(votesLeft, credits) {
     var votesCard = document.getElementById('votes-stat-card');
@@ -568,186 +434,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (remainingCount) remainingCount.textContent = remaining;
   }
 
-  // Audio Management (Spotify SDK or Preview)
-  const audioElement = document.getElementById('preview-audio');
-  const playBtn = document.getElementById(isMobile ? 'play-preview-btn' : 'play-preview-btn-desktop');
-  let isPlaying = false;
-  let currentSpotifyId = null;
-
-  function updatePlayButton() {
-    if (!playBtn) return;
-    const iIcon = playBtn.querySelector('i');
-    if (iIcon) {
-      if (isPlaying) {
-        iIcon.classList.remove('fa-play');
-        iIcon.classList.add('fa-pause');
-      } else {
-        iIcon.classList.remove('fa-pause');
-        iIcon.classList.add('fa-play');
-      }
-      return;
-    }
-    const spanIcon = playBtn.querySelector('.material-symbols-outlined');
-    if (spanIcon) {
-      spanIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
-    }
-  }
-
-  function loadCurrentPreview() {
-    if (currentIndex >= cards.length) return;
-
-    const currentCard = cards[currentIndex];
-    const previewUrl = currentCard.dataset.previewUrl;
-    currentSpotifyId = currentCard.dataset.spotifyId || null;
-
-    // If user has Spotify SDK, always show play button
-    if (HAS_SPOTIFY_PLAYER) {
-      if (playBtn) {
-        playBtn.style.display = '';
-        playBtn.style.opacity = '1';
-        playBtn.disabled = false;
-      }
-    } else {
-      // Fallback to preview URLs
-      if (audioElement && previewUrl) {
-        audioElement.src = previewUrl;
-        audioElement.load();
-        if (playBtn) {
-          playBtn.style.display = '';
-          playBtn.style.opacity = '1';
-          playBtn.disabled = false;
-        }
-      } else {
-        // No preview available
-        if (playBtn) {
-          playBtn.style.display = 'none';
-        }
-      }
-    }
-  }
-
-  function stopAudio() {
-    if (HAS_SPOTIFY_PLAYER && spotifyPlayer) {
-      spotifyPlayer.pause().then(() => {
-        isPlaying = false;
-        updatePlayButton();
-      });
-    } else if (audioElement) {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      audioElement.removeAttribute('src');
-      audioElement.load();
-      isPlaying = false;
-      updatePlayButton();
-    }
-  }
-
-  function cleanupPlaybackSession() {
-    if (HAS_SPOTIFY_PLAYER && spotifyPlayer) {
-      try {
-        spotifyPlayer.pause();
-      } catch (e) {
-        console.warn('[SPOTIFY] Error pausing player during cleanup:', e);
-      }
-      try {
-        spotifyPlayer.disconnect();
-      } catch (e) {
-        console.warn('[SPOTIFY] Error disconnecting player during cleanup:', e);
-      }
-    }
-    spotifyPlayer = null;
-    spotifyDeviceId = null;
-    spotifyPlayerInitPromise = null;
-
-    if (audioElement) {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      audioElement.removeAttribute('src');
-      audioElement.load();
-    }
-
-    isPlaying = false;
-    updatePlayButton();
-  }
-
-  function getCurrentSongSpotifyId() {
-    if (currentIndex >= cards.length) return null;
-    const currentCard = cards[currentIndex];
-    // Get spotify_id from data attribute
-    return currentCard.dataset.spotifyId || null;
-  }
-
-  if (playBtn) {
-    playBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-
-      if (currentIndex >= cards.length) return;
-
-      if (HAS_SPOTIFY_PLAYER) {
-        // Use Spotify Web Playback SDK
-        const spotifyId = getCurrentSongSpotifyId();
-        if (!spotifyId) {
-          showMessage('Error: No s\'ha pogut obtenir l\'ID de Spotify', false);
-          return;
-        }
-
-        if (isPlaying) {
-          ensureSpotifyPlayer().then(() => spotifyPlayer.pause()).then(() => {
-            isPlaying = false;
-            updatePlayButton();
-          });
-        } else {
-          playSpotifyTrack(spotifyId).then(() => {
-            isPlaying = true;
-            updatePlayButton();
-          }).catch(() => {
-            isPlaying = false;
-            updatePlayButton();
-          });
-        }
-      } else {
-        // Fallback: Use preview URLs
-        const currentCard = cards[currentIndex];
-        const previewUrl = currentCard.dataset.previewUrl;
-
-        if (!previewUrl) {
-          showMessage('Preview no disponible per aquesta cançó', false);
-          return;
-        }
-
-        if (isPlaying) {
-          audioElement.pause();
-          isPlaying = false;
-        } else {
-          audioElement.play().catch(err => {
-            console.error('Error playing audio:', err);
-            showMessage('Error reproduint preview', false);
-          });
-          isPlaying = true;
-        }
-        updatePlayButton();
-      }
-    });
-
-    // Preview audio events (only for non-Spotify users)
-    if (!HAS_SPOTIFY_PLAYER && audioElement) {
-      audioElement.addEventListener('ended', function() {
-        isPlaying = false;
-        updatePlayButton();
-      });
-
-      audioElement.addEventListener('pause', function() {
-        isPlaying = false;
-        updatePlayButton();
-      });
-
-      audioElement.addEventListener('play', function() {
-        isPlaying = true;
-        updatePlayButton();
-      });
-    }
-  }
-
   // Inicialitzar cartes: primera visible, resta ocultes
   cards.forEach((card, index) => {
     if (index === 0) {
@@ -764,27 +450,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Load preview for first card
-  loadCurrentPreview();
   updateProgress();
-
-  window.addEventListener('pagehide', cleanupPlaybackSession);
-  window.addEventListener('beforeunload', cleanupPlaybackSession);
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-      cleanupPlaybackSession();
-    }
-  });
 
   // Afegir event listeners als botons (fora de cada carta en mòbil, dins en desktop)
   if (isMobile) {
-    const btnSkip = document.getElementById('mobile-skip-btn');
+    const btnNext = document.getElementById('mobile-next-btn');
+    const btnDislike = document.getElementById('mobile-dislike-btn');
     const btnLike = document.getElementById('mobile-like-btn');
 
-    if (btnSkip) {
-      btnSkip.addEventListener('click', function(e) {
+    if (btnNext) {
+      btnNext.addEventListener('click', function(e) {
         e.stopPropagation();
-        handleSkip();
+        handleNext();
+      });
+    }
+
+    if (btnDislike) {
+      btnDislike.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleDislike();
       });
     }
 
@@ -797,13 +481,21 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     // Desktop: botons dins de cada carta
     cards.forEach((card) => {
-      const btnSkip = card.querySelector('.btn-skip-card');
+      const btnNext = card.querySelector('.btn-next-card');
+      const btnDislike = card.querySelector('.btn-dislike-card');
       const btnLike = card.querySelector('.btn-like-card');
 
-      if (btnSkip) {
-        btnSkip.addEventListener('click', function(e) {
+      if (btnNext) {
+        btnNext.addEventListener('click', function(e) {
           e.stopPropagation();
-          handleSkip();
+          handleNext();
+        });
+      }
+
+      if (btnDislike) {
+        btnDislike.addEventListener('click', function(e) {
+          e.stopPropagation();
+          handleDislike();
         });
       }
 
@@ -834,10 +526,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => { messageArea.innerHTML = ''; }, 3000);
   }
 
+  function showNextMessage() {
+    messageArea.innerHTML = '<div style="font-size:0.85rem; padding:0.5rem 0.75rem; border-radius:8px; background:#f8fafc; color:#334155; border:1px solid #e2e8f0;">Cançó passada</div>';
+    setTimeout(() => { messageArea.innerHTML = ''; }, 2000);
+  }
+
   function nextCard() {
     if (currentIndex >= cards.length) {
       // No més cançons
-      stopAudio();
       const cardStack = document.getElementById(isMobile ? 'card-stack' : 'card-stack-desktop');
       if (cardStack) {
         cardStack.innerHTML = `
@@ -865,17 +561,16 @@ document.addEventListener('DOMContentLoaded', function() {
     nextCardElement.style.zIndex = currentIndex + 10;
     nextCardElement.style.transform = '';
     nextCardElement.style.opacity = '1';
-
-    // Load preview for next card
-    loadCurrentPreview();
   }
 
   function animateCardOut(direction, songId, actionType) {
     const card = cards[currentIndex];
-    const transform = direction === 'left' ? 'translateX(-150%) rotate(-30deg)' : 'translateX(150%) rotate(30deg)';
-
-    // Stop audio when card goes out
-    stopAudio();
+    var transform = 'translateX(150%) rotate(30deg)';
+    if (direction === 'left') {
+      transform = 'translateX(-150%) rotate(-30deg)';
+    } else if (direction === 'down') {
+      transform = 'translateY(150%) rotate(0deg)';
+    }
 
     // Guardar acció per undo
     lastAction = {
@@ -920,46 +615,72 @@ document.addEventListener('DOMContentLoaded', function() {
     undoBtn.addEventListener('click', function() {
       if (!lastAction) return;
 
-      // Tornar a l'índex anterior
-      currentIndex = lastAction.index;
+      const actionToUndo = lastAction;
+      fetch('{% url "song_swipe" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new URLSearchParams({
+          action: 'undo',
+          song_id: actionToUndo.songId
+        })
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (!data.success) {
+          showMessage(data.error || 'No s\'ha pogut desfer l\'acció', false);
+          return;
+        }
 
-      // Mostrar la carta anterior
-      const card = lastAction.card;
-      card.classList.remove('d-none');
-      card.style.zIndex = currentIndex + 10;
-      card.style.transform = '';
-      card.style.opacity = '1';
+        updateZeroStatCards(data.votes_left, data.credits);
+        const votesCountDesktop = document.getElementById('votes-count-desktop');
+        const creditsCountDesktop = document.getElementById('credits-count-desktop');
+        const userLikesCount = document.getElementById('user-likes-count');
+        if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
+        if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
+        if (userLikesCount && data.user_likes_count !== undefined) userLikesCount.textContent = data.user_likes_count;
 
-      // Ocultar la següent carta si existeix
-      if (cards[currentIndex + 1]) {
-        cards[currentIndex + 1].classList.add('d-none');
-      }
+        currentIndex = actionToUndo.index;
 
-      // Actualitzar progrés
-      updateProgress();
+        const card = actionToUndo.card;
+        card.classList.remove('d-none');
+        card.style.zIndex = currentIndex + 10;
+        card.style.transform = '';
+        card.style.opacity = '1';
 
-      // Ocultar botó undo
-      undoBtn.style.display = 'none';
-      showMessage('Acció desfeta', true);
-      lastAction = null;
+        if (cards[currentIndex + 1]) {
+          cards[currentIndex + 1].classList.add('d-none');
+        }
+
+        updateProgress();
+
+        undoBtn.style.display = 'none';
+        showMessage('Acció desfeta', true);
+        lastAction = null;
+      })
+      .catch(function() {
+        showMessage('No s\'ha pogut desfer l\'acció', false);
+      });
     });
   }
 
   function disableCurrentButtons(disabled) {
     const currentCard = cards[currentIndex];
-    if (!currentCard) return;
-    const btnSkip = currentCard.querySelector('.btn-skip-card');
-    const btnLike = currentCard.querySelector('.btn-like-card');
-    if (btnSkip) btnSkip.disabled = disabled;
+    const btnNext = currentCard ? currentCard.querySelector('.btn-next-card') : document.getElementById('mobile-next-btn');
+    const btnDislike = currentCard ? currentCard.querySelector('.btn-dislike-card') : document.getElementById('mobile-dislike-btn');
+    const btnLike = currentCard ? currentCard.querySelector('.btn-like-card') : document.getElementById('mobile-like-btn');
+    if (btnNext) btnNext.disabled = disabled;
+    if (btnDislike) btnDislike.disabled = disabled;
     if (btnLike) btnLike.disabled = disabled;
   }
 
-  function handleSkip() {
+  function handleNext() {
     if (currentIndex >= cards.length) return;
 
     const songId = cards[currentIndex].dataset.songId;
 
-    // Deshabilitar botons mentre processa
     disableCurrentButtons(true);
 
     fetch('{% url "song_swipe" %}', {
@@ -969,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'X-CSRFToken': '{{ csrf_token }}'
       },
       body: new URLSearchParams({
-        action: 'skip',
+        action: 'next',
         song_id: songId
       })
     })
@@ -984,22 +705,71 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!data) return;
       if (data.success) {
         updateZeroStatCards(data.votes_left, data.credits);
-        showNoVotesOverlay(data.votes_left, data.credits);
+        const votesCountDesktop = document.getElementById('votes-count-desktop');
+        const creditsCountDesktop = document.getElementById('credits-count-desktop');
+        const userLikesCount = document.getElementById('user-likes-count');
+        if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
+        if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
+        if (userLikesCount && data.user_likes_count !== undefined) userLikesCount.textContent = data.user_likes_count;
+        showNextMessage();
+        animateCardOut('left', songId, 'next');
+        setTimeout(() => { disableCurrentButtons(false); }, 350);
+      } else {
+        showMessage(data.error || 'Error al passar la cançó', false);
+        disableCurrentButtons(false);
+      }
+    })
+    .catch(function(error) {
+      console.error('Next error:', error);
+      showMessage('No s\'ha pogut passar · comprova la connexió', false);
+      disableCurrentButtons(false);
+    });
+  }
+
+  function handleDislike() {
+    if (currentIndex >= cards.length) return;
+
+    const songId = cards[currentIndex].dataset.songId;
+
+    disableCurrentButtons(true);
+
+    fetch('{% url "song_swipe" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: new URLSearchParams({
+        action: 'dislike',
+        song_id: songId
+      })
+    })
+    .then(function(response) {
+      if (response.redirected || !response.headers.get('content-type')?.includes('application/json')) {
+        window.location.reload();
+        return null;
+      }
+      return response.json();
+    })
+    .then(function(data) {
+      if (!data) return;
+      if (data.success) {
+        updateZeroStatCards(data.votes_left, data.credits);
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         if (votesCountDesktop) votesCountDesktop.textContent = data.votes_left;
         if (creditsCountDesktop) creditsCountDesktop.textContent = data.credits;
         showVoteMessage('dislike', data.badge_label || '');
-        animateCardOut('left', songId, 'skip');
+        animateCardOut('down', songId, 'dislike');
         setTimeout(() => { disableCurrentButtons(false); }, 350);
       } else {
-        showMessage(data.error || 'Error al saltar la cançó', false);
+        showMessage(data.error || 'Error al votar negatiu', false);
         disableCurrentButtons(false);
       }
     })
     .catch(function(error) {
-      console.error('Skip error:', error);
-      showMessage('No s\'ha pogut saltar · comprova la connexió', false);
+      console.error('Dislike error:', error);
+      showMessage('No s\'ha pogut votar · comprova la connexió', false);
       disableCurrentButtons(false);
     });
   }
@@ -1035,7 +805,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!data) return;
       if (data.success) {
         updateZeroStatCards(data.votes_left, data.credits);
-        showNoVotesOverlay(data.votes_left, data.credits);
         const votesCountDesktop = document.getElementById('votes-count-desktop');
         const creditsCountDesktop = document.getElementById('credits-count-desktop');
         const userLikesCount = document.getElementById('user-likes-count');
@@ -1080,12 +849,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const diffX = touchCurrentX - touchStartX;
     const diffY = touchCurrentY - touchStartY;
 
-    // Només fer swipe si el moviment és més horitzontal que vertical
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
       e.preventDefault();
 
       const card = cards[currentIndex];
-      const rotation = diffX / 20; // Rotació proporcional al desplaçament
+      const rotation = diffX / 20;
       const opacity = 1 - Math.abs(diffX) / 400;
 
       card.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
@@ -1097,20 +865,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!isDragging || currentIndex >= cards.length) return;
 
     const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchEndX - touchStartX;
+    const diffX = touchEndX - touchStartX;
 
     isDragging = false;
 
     const card = cards[currentIndex];
 
-    // Si el desplaçament és suficient (> 100px), fer swipe
-    if (Math.abs(diff) > 100) {
-      if (diff > 0) {
+    if (Math.abs(diffX) > 100) {
+      if (diffX > 0) {
         // Swipe a la dreta = Like
         handleLike();
       } else {
         // Swipe a l'esquerra = Skip
-        handleSkip();
+        handleNext();
       }
     } else {
       // Si no, tornar la carta a la posició original
@@ -1155,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (diffX > 0) {
         handleLike();
       } else {
-        handleSkip();
+        handleNext();
       }
     } else {
       card.style.transform = '';

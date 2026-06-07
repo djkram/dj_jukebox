@@ -467,6 +467,23 @@
       font-size: 0.72rem;
       font-weight: 600;
     }
+    .select-promo-past-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .select-promo-past-link:hover {
+      color: #fff;
+    }
+    .select-promo-past-link .material-symbols-outlined {
+      font-size: 1rem;
+    }
     .select-promo-section--slim .select-promo-stats {
       gap: 0.65rem;
     }

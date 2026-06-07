@@ -31,6 +31,104 @@ def get_user_party_coins(user, party):
     return max(0, total_granted)
 
 
+def get_user_available_coins(user, party):
+    """
+    Retorna els coins totals disponibles en el context d'una festa:
+    coins globals de l'usuari + coins gratuïts/ajustos d'aquesta festa.
+    """
+    return user.credits + get_user_party_coins(user, party)
+
+
+def apply_party_coin_adjustment(user, party, amount, reason):
+    """
+    Aplica un ajust acumulat de coins de festa per usuari/party/reason.
+    amount pot ser positiu o negatiu.
+    """
+    grant, _ = PartyCoinsGrant.objects.select_for_update().get_or_create(
+        user=user,
+        party=party,
+        reason=reason,
+        defaults={'coins_granted': 0},
+    )
+    grant.coins_granted = F('coins_granted') + amount
+    grant.save(update_fields=['coins_granted'])
+
+
+def spend_user_coins_for_party(user, party, amount, reason='coins_spent'):
+    """
+    Gasta coins en el context d'una festa.
+    Consumeix primer els coins gratuïts de festa i després els globals.
+    """
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    if amount <= 0:
+        return True
+
+    with transaction.atomic():
+        user = User.objects.select_for_update().get(pk=user.pk)
+        party_coins = get_user_party_coins(user, party)
+        if user.credits + party_coins < amount:
+            return False
+
+        party_spend = min(party_coins, amount)
+        global_spend = amount - party_spend
+
+        if party_spend:
+            apply_party_coin_adjustment(user, party, -party_spend, reason)
+        if global_spend:
+            User.objects.filter(pk=user.pk).update(credits=F('credits') - global_spend)
+
+    user.refresh_from_db(fields=['credits'])
+    return True
+
+
+def sync_party_free_coins_for_existing_users(party, previous_free_coins=0):
+    """
+    Quan l'admin puja els coins gratuïts de la festa, actualitza els usuaris
+    que ja han interactuat amb aquesta festa. No retira coins si el valor baixa.
+    """
+    from jukebox.models import SongRequest, SongSwipeSkip
+
+    expected = party.free_coins_per_user
+    if expected <= previous_free_coins:
+        return 0
+
+    user_ids = set()
+    user_ids.update(Vote.objects.filter(party=party).values_list('user_id', flat=True))
+    user_ids.update(VotePackage.objects.filter(party=party).values_list('user_id', flat=True))
+    user_ids.update(PartyCoinsGrant.objects.filter(party=party).values_list('user_id', flat=True))
+    user_ids.update(SongRequest.objects.filter(party=party).values_list('user_id', flat=True))
+    user_ids.update(SongSwipeSkip.objects.filter(party=party).values_list('user_id', flat=True))
+    user_ids.discard(None)
+
+    updated = 0
+    with transaction.atomic():
+        existing = PartyCoinsGrant.objects.select_for_update().filter(
+            party=party,
+            reason='free_coins',
+            user_id__in=user_ids,
+        )
+        updated += existing.filter(coins_granted__lt=expected).update(coins_granted=expected)
+
+        existing_user_ids = set(existing.values_list('user_id', flat=True))
+        missing_user_ids = user_ids - existing_user_ids
+        grants = [
+            PartyCoinsGrant(
+                user_id=user_id,
+                party=party,
+                coins_granted=expected,
+                reason='free_coins',
+            )
+            for user_id in missing_user_ids
+        ]
+        if grants:
+            PartyCoinsGrant.objects.bulk_create(grants, ignore_conflicts=True)
+            updated += len(grants)
+
+    return updated
+
+
 def ensure_user_has_free_coins(user, party):
     """
     S'assegura que l'usuari tingui els coins gratuïts de la festa.
@@ -49,9 +147,12 @@ def ensure_user_has_free_coins(user, party):
                 user=user, party=party, reason='free_coins'
             )
             diff = expected - grant.coins_granted
-            if diff != 0:
+            if diff > 0:
                 grant.coins_granted = expected
                 grant.save(update_fields=['coins_granted'])
+                return diff
+            if diff < 0:
+                return 0
             return diff
         except PartyCoinsGrant.DoesNotExist:
             try:

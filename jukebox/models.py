@@ -176,6 +176,20 @@ class Vote(models.Model):
         ]
 
 
+class SongSwipeSkip(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, related_name='swipe_skips', on_delete=models.CASCADE)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'song', 'party']
+        indexes = [
+            models.Index(fields=['party', 'user']),
+            models.Index(fields=['party', 'created_at']),
+        ]
+
+
 class VotePackage(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     party = models.ForeignKey(Party, on_delete=models.CASCADE)

@@ -31,6 +31,12 @@ from .vote_validation import (
     create_vote_response,
     handle_vote_action,
 )
+from .vote_types import (
+    NEGATIVE_VOTE_TYPES,
+    VALID_VOTE_TYPES,
+    negative_vote_q,
+    normalize_vote_type,
+)
 from .badges import (
     BadgeCalculator,
     calculate_and_apply_badges,
@@ -55,6 +61,10 @@ __all__ = [
     'validate_and_create_vote',
     'create_vote_response',
     'handle_vote_action',
+    'NEGATIVE_VOTE_TYPES',
+    'VALID_VOTE_TYPES',
+    'negative_vote_q',
+    'normalize_vote_type',
     # Badges
     'BadgeCalculator',
     'calculate_and_apply_badges',

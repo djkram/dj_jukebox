@@ -326,7 +326,7 @@
                             <button class="songs-vote-btn songs-vote-btn-locked" disabled aria-label="{% trans 'Vot negatiu no seleccionat' %}">
                               <span class="material-symbols-outlined">keyboard_arrow_down</span>
                             </button>
-                          {% elif user_votes_dict|get_item:song.id == 'dislike' %}
+                          {% elif user_votes_dict|get_item:song.id == 'dislike' or user_votes_dict|get_item:song.id == 'skip' %}
                             <button class="songs-vote-btn songs-vote-btn-locked" disabled aria-label="{% trans 'Vot positiu no seleccionat' %}">
                               <span class="material-symbols-outlined">keyboard_arrow_up</span>
                             </button>

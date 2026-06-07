@@ -539,6 +539,7 @@ class DJManagementAccessTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.song.refresh_from_db()
         self.assertTrue(self.song.has_played)
+        self.assertIsNotNone(self.song.played_at)
 
 
 class SetPartyViewTests(TestCase):
@@ -1268,10 +1269,14 @@ class UnmarkSongPlayedTests(TestCase):
 
     def test_superuser_can_unmark(self):
         self.client.login(username='dj_unmark', password='test')
+        self.song.played_at = timezone.now()
+        self.song.save(update_fields=['played_at'])
+
         response = self.client.post(reverse('unmark_song_played', args=[self.song.id]))
         self.assertIn(response.status_code, (200, 302))
         self.song.refresh_from_db()
         self.assertFalse(self.song.has_played)
+        self.assertIsNone(self.song.played_at)
 
     def test_regular_user_cannot_unmark(self):
         self.client.login(username='user_unmark', password='test')
@@ -1349,7 +1354,28 @@ class PartyStatusApiTests(TestCase):
     def test_last_played_reflects_marked_song(self):
         self._set_party()
         self.song.has_played = True
-        self.song.save()
+        self.song.played_at = timezone.now()
+        self.song.save(update_fields=['has_played', 'played_at'])
+        response = self.client.get(reverse('party_status_api'))
+        data = json.loads(response.content)
+        self.assertEqual(data['last_played_title'], 'API Song')
+
+    def test_last_played_uses_played_at_not_song_id(self):
+        self._set_party()
+        newer_song = Song.objects.create(
+            party=self.party, title='Higher ID Old Load', artist='B', spotify_id='api2'
+        )
+        older_time = timezone.now() - timezone.timedelta(minutes=5)
+        later_time = timezone.now()
+
+        newer_song.has_played = True
+        newer_song.played_at = older_time
+        newer_song.save(update_fields=['has_played', 'played_at'])
+
+        self.song.has_played = True
+        self.song.played_at = later_time
+        self.song.save(update_fields=['has_played', 'played_at'])
+
         response = self.client.get(reverse('party_status_api'))
         data = json.loads(response.content)
         self.assertEqual(data['last_played_title'], 'API Song')

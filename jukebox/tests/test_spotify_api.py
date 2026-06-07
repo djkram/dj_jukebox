@@ -7,6 +7,7 @@ from jukebox.spotify_api import (
     _camelot_from_key_string,
     _pick_songbpm_match,
     _normalize_match_text,
+    _is_songbpm_title_artist_match,
     _songbpm_key_to_camelot,
     _song_title_search_queries,
 )
@@ -86,3 +87,17 @@ class SpotifyApiHelpersTests(SimpleTestCase):
             "barbra streisand radio edit",
         )
         self.assertEqual(_normalize_match_text("D♭ Major"), "d major")
+
+    def test_songbpm_title_artist_match_accepts_simplified_from_soundtrack_title(self):
+        card = {
+            "title": "Ghostbusters",
+            "artist": "Ray Parker Jr.",
+        }
+
+        self.assertTrue(
+            _is_songbpm_title_artist_match(
+                card,
+                'Ghostbusters - From "Ghostbusters"',
+                "Ray Parker Jr.",
+            )
+        )

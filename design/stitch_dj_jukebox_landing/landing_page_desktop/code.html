@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DJJukebox | Porta la teva festa al següent nivell</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#1b4ce9",
+              "on-secondary-fixed": "#001356",
+              "error": "#ba1a1a",
+              "surface-container-high": "#e5e8eb",
+              "surface-container": "#ebeef1",
+              "on-surface-variant": "#434655",
+              "surface-dim": "#d7dadd",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f1f4f7",
+              "secondary-fixed-dim": "#b8c3ff",
+              "outline-variant": "#c4c5d8",
+              "surface-variant": "#e0e3e6",
+              "on-tertiary-container": "#d0c2ff",
+              "on-error-container": "#93000a",
+              "surface": "#f7fafd",
+              "on-primary-fixed-variant": "#0035be",
+              "background": "#f7fafd",
+              "secondary-fixed": "#dde1ff",
+              "primary-container": "#0040e0",
+              "on-secondary-fixed-variant": "#0035be",
+              "outline": "#747687",
+              "on-primary": "#ffffff",
+              "inverse-on-surface": "#eef1f4",
+              "tertiary-fixed": "#e7deff",
+              "primary-fixed": "#dde1ff",
+              "primary-fixed-dim": "#b8c3ff",
+              "on-surface": "#181c1e",
+              "error-container": "#ffdad6",
+              "surface-container-highest": "#e0e3e6",
+              "inverse-primary": "#b8c3ff",
+              "tertiary-container": "#5e24e1",
+              "surface-bright": "#f7fafd",
+              "on-primary-container": "#bdc7ff",
+              "secondary-container": "#2e5bff",
+              "on-background": "#181c1e",
+              "tertiary-fixed-dim": "#cdbdff",
+              "secondary": "#0040e0",
+              "inverse-surface": "#2d3133",
+              "on-tertiary-fixed": "#20005f",
+              "on-secondary-container": "#efefff",
+              "on-tertiary-fixed-variant": "#4f00d0",
+              "on-primary-fixed": "#001356",
+              "tertiary": "#4500b9",
+              "primary": "#002ea8",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-secondary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .glass-effect { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); }
+      .text-gradient { background: linear-gradient(135deg, #2e5bff 0%, #00e3fd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .sonic-shadow { box-shadow: 0 24px 40px rgba(0, 64, 224, 0.06); }
+      .sidebar-gradient { background: linear-gradient(180deg, #002ea8 0%, #0040e0 100%); }
+    </style>
+</head>
+<body class="bg-[#0a0c0d] font-body text-surface-container-lowest antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#181c1e]/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,64,224,0.05)]">
+<div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black tracking-tighter text-[#2e5bff] font-headline">DJJukebox</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-[#00e3fd] border-b-2 border-[#0040e0] font-['Epilogue'] tracking-tight font-bold" href="#home">Inici</a>
+<a class="text-[#f7fafd] opacity-70 hover:opacity-100 hover:text-[#0040e0] transition-all duration-200 font-['Epilogue'] tracking-tight font-bold" href="#com-funciona">Com Funciona</a>
+<a class="text-[#f7fafd] opacity-70 hover:opacity-100 hover:text-[#0040e0] transition-all duration-200 font-['Epilogue'] tracking-tight font-bold" href="#avantatges">Avantatges</a>
+<a class="text-[#f7fafd] opacity-70 hover:opacity-100 hover:text-[#0040e0] transition-all duration-200 font-['Epilogue'] tracking-tight font-bold" href="#funcions">Funcions</a>
+</div>
+<div class="flex gap-4 items-center">
+<button class="hidden lg:block text-[#f7fafd] opacity-80 hover:opacity-100 font-bold px-4 py-2">Contacte</button>
+<button class="bg-[#0040e0] text-white px-6 py-2 rounded-xl font-bold font-headline scale-95 active:scale-90 transition-transform">Accés DJ</button>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 overflow-hidden min-h-screen flex flex-col justify-center" id="home">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0040e0]/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5e24e1]/20 blur-[120px] rounded-full"></div>
+<div class="container mx-auto px-6 relative z-10">
+<div class="max-w-4xl mx-auto text-center mb-16">
+<h1 class="font-headline text-5xl md:text-7xl lg:text-8xl mb-6 leading-tight tracking-tighter">
+                    Porta la teva festa al <span class="text-gradient">següent nivell</span>
+</h1>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mx-auto mb-10 opacity-90 leading-relaxed">
+                    La plataforma que connecta el DJ amb el seu públic en temps real. Transforma l'energia de la pista amb interacció directa.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button class="bg-gradient-to-r from-secondary-container to-primary-container px-10 py-5 rounded-full font-headline text-lg font-bold shadow-[0_0_30px_rgba(46,91,255,0.4)] hover:scale-105 transition-all">
+                        Activa la teva festa
+                    </button>
+<button class="bg-surface-container-highest/10 backdrop-blur-md px-10 py-5 rounded-full font-headline text-lg font-bold hover:bg-surface-container-highest/20 transition-all border border-white/10">
+                        Com funciona
+                    </button>
+</div>
+</div>
+<!-- Mockups -->
+<div class="relative max-w-6xl mx-auto mt-12 group">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+<!-- DJ Dashboard Mockup -->
+<div class="md:col-span-8 relative rounded-2xl overflow-hidden sonic-shadow border border-white/5">
+<img alt="DJ Dashboard" class="w-full object-cover aspect-[16/9]" data-alt="Modern DJ dashboard interface on a large screen in a dark studio, displaying waveforms, song requests, and colorful music metadata indicators" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4SnBV85r3mj1vcDYv4EPiW7-DPpyLxoJhbOdOuJTgITUhHjBNi8DeOu-8IyXv8MwOCZCbx_bbhKuWG93Zp9quzehiDjJnuSrIslE1mxrtlCyDy1qKU9Jwao9ffchAnbVCfiD6w-HSxouzF_LdBNpJwFe2YxMoqbEtziI85Z-4dHNzuuUD-Yx93NXXYLkiIlTVXQEonNVBX8V5IadDgTI-7nVWn6APiC5izLx17eSVZaD0CJLn4qcJ3WDL9xQGapcMc82--WhzelnW"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#0a0c0d] via-transparent to-transparent opacity-60"></div>
+</div>
+<!-- User Mobile Mockup -->
+<div class="md:col-span-4 relative rounded-3xl overflow-hidden sonic-shadow border border-white/10 scale-105 shadow-2xl -mt-12 md:mt-0">
+<img alt="User Mobile Interface" class="w-full object-cover aspect-[9/19]" data-alt="Smartphone screen showing a music voting app with artist photos and like buttons, held by a person in a colorful neon club environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1ZBdoLsMuKnO6J3SjmDVAAtdD7P8t_zG2_rC3iMwYROQoknT-6slaPEyzYwLvyvZs8A_3sjv6G0hlb48vGF5ZKcsjI2rNukRJah4TpSPHxWx05DPJuvfULK0A8Sx12JNfhoxWzRE6KfqqqOPZL9u0IJzD6GkGouuuN-QlBp8SyFg8-h7s-gKBlaJGYUKcnvw0eqD_49q1EcVDPVeahQ-HWs-Qf9Omz55vke7HxTpxaclADjPVT3FBA1hZlLniJKOeECmtC6SG4kJ1"/>
+<div class="absolute inset-0 bg-gradient-to-b from-[#5e24e1]/20 to-transparent"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Com funciona Section -->
+<section class="py-32 bg-surface-container-low/5" id="com-funciona">
+<div class="container mx-auto px-6">
+<div class="flex flex-col items-center mb-20 text-center">
+<span class="text-[#00e3fd] font-bold tracking-widest uppercase text-sm mb-4">Metodologia</span>
+<h2 class="font-headline text-4xl md:text-5xl">Com funciona</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto relative">
+<!-- Connector Line -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-y-1/2 z-0"></div>
+<div class="relative z-10 flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-highest/10 flex items-center justify-center mb-8 border border-white/5 group-hover:bg-[#0040e0]/20 transition-all duration-300">
+<span class="material-symbols-outlined text-4xl text-[#00e3fd]">how_to_vote</span>
+</div>
+<h3 class="font-headline text-xl mb-4">El públic vota i demana</h3>
+<p class="text-on-surface-variant leading-relaxed">Sorpren els teus fans. Mitjançant un codi QR, el públic pot triar estils o votar les pròximes cançons.</p>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-highest/10 flex items-center justify-center mb-8 border border-white/5 group-hover:bg-[#5e24e1]/20 transition-all duration-300">
+<span class="material-symbols-outlined text-4xl text-white">dashboard</span>
+</div>
+<h3 class="font-headline text-xl mb-4">El DJ rep tot al dashboard</h3>
+<p class="text-on-surface-variant leading-relaxed">Gestiona les peticions de forma organitzada. BPMs, claus musicals i popularitat, tot en una vista.</p>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-2xl bg-surface-container-highest/10 flex items-center justify-center mb-8 border border-white/5 group-hover:bg-[#00e3fd]/20 transition-all duration-300">
+<span class="material-symbols-outlined text-4xl text-[#2e5bff]">celebration</span>
+</div>
+<h3 class="font-headline text-xl mb-4">La festa és un èxit</h3>
+<p class="text-on-surface-variant leading-relaxed">Connexió instantània. Una pista activa que sent que forma part de l'espectacle.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Beneficis per a DJs -->
+<section class="py-32 relative" id="avantatges">
+<div class="container mx-auto px-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div>
+<h2 class="font-headline text-5xl md:text-6xl mb-8 leading-tight">Control total, <br/><span class="text-[#2e5bff]">interacció màxima.</span></h2>
+<p class="text-xl text-on-surface-variant mb-12 max-w-lg">Transforma una sessió unidireccional en un diàleg vibrant. Els millors clubs ja no només punxen música, creen experiències.</p>
+<div class="space-y-6">
+<div class="flex items-start gap-4 p-6 rounded-2xl bg-surface-container-low/10 border border-white/5 hover:border-[#0040e0]/30 transition-colors">
+<span class="material-symbols-outlined text-[#00e3fd]">bolt</span>
+<div>
+<h4 class="font-bold text-lg mb-1">Més engagement</h4>
+<p class="text-on-surface-variant">El públic passa més temps a la pista interactuant amb el seu mòbil i el DJ.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-6 rounded-2xl bg-surface-container-low/10 border border-white/5 hover:border-[#0040e0]/30 transition-colors">
+<span class="material-symbols-outlined text-[#00e3fd]">analytics</span>
+<div>
+<h4 class="font-bold text-lg mb-1">Lectura de la pista</h4>
+<p class="text-on-surface-variant">Dades reals sobre què vol la gent en cada moment. Elimina les conjectures.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-6 rounded-2xl bg-surface-container-low/10 border border-white/5 hover:border-[#0040e0]/30 transition-colors">
+<span class="material-symbols-outlined text-[#00e3fd]">star</span>
+<div>
+<h4 class="font-bold text-lg mb-1">Diferenciació</h4>
+<p class="text-on-surface-variant">Ofereix un servei tecnològic premium que et posiciona al top dels line-ups.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="aspect-square rounded-3xl overflow-hidden sidebar-gradient p-1">
+<div class="w-full h-full rounded-[1.25rem] overflow-hidden bg-[#0a0c0d] relative">
+<img alt="DJ Experience" class="w-full h-full object-cover opacity-60" data-alt="Over-the-shoulder shot of a DJ performing at a massive festival stage with thousands of people and dramatic stage lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJD9j963PJYAahF0BV1-cI-HUC2GZgy3ddZNQtl7_u6SDhTxNeXSRZyvwrpT6Bh0PO9bVKlEeJGmEIouB6eK2TLq_m_AAz3EobowoRWDJKUNV37D3us5SI1XctRB2Dq9zK1Ft2el8qH_d7SNnP-I8YIguQyYn67rz22PMubPhPVUV7CrPza_Rys9wljOkEzS7Ey3UJuDQXSW9rv_uPOphzgNxF7S7q0rCFU0j65Giriwco87-dFqTbzSyfaqRMQ3yVlv8yt9pbMJ1E"/>
+<div class="absolute bottom-8 left-8 right-8 p-6 glass-effect rounded-2xl border border-white/10">
+<div class="flex justify-between items-center mb-4">
+<span class="text-sm font-bold uppercase tracking-widest text-[#00e3fd]">Live Performance</span>
+<span class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+<span class="text-xs uppercase font-bold">En Directe</span>
+</span>
+</div>
+<div class="text-2xl font-headline italic">"La millor eina que he incorporat a la meva maleta en els últims 5 anys."</div>
+<div class="mt-4 font-bold text-on-surface-variant">— Marc Planagumà Valls</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Funcionalitats (Bento Grid) -->
+<section class="py-32 bg-surface-container-low/5" id="funcions">
+<div class="container mx-auto px-6">
+<h2 class="font-headline text-4xl md:text-5xl text-center mb-20">Funcionalitats d'elit</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-7xl mx-auto">
+<!-- Bento Card 1 -->
+<div class="md:col-span-2 lg:col-span-3 h-80 rounded-3xl bg-surface-container-highest/5 p-8 border border-white/5 flex flex-col justify-between hover:bg-surface-container-highest/10 transition-all">
+<div>
+<span class="material-symbols-outlined text-[#00e3fd] text-4xl mb-6">ballot</span>
+<h3 class="font-headline text-2xl mb-4">Votacions en temps real</h3>
+<p class="text-on-surface-variant">Llança enquestes a l'instant per decidir l'estil del següent set o la cançó final.</p>
+</div>
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-[#0a0c0d] bg-gray-600"></div>
+<div class="w-10 h-10 rounded-full border-2 border-[#0a0c0d] bg-gray-500"></div>
+<div class="w-10 h-10 rounded-full border-2 border-[#0a0c0d] bg-gray-400"></div>
+<div class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-[#0a0c0d] bg-primary text-[10px] font-bold">+120</div>
+</div>
+</div>
+<!-- Bento Card 2 -->
+<div class="md:col-span-2 lg:col-span-3 h-80 rounded-3xl sidebar-gradient p-8 flex flex-col justify-between shadow-xl">
+<div>
+<span class="material-symbols-outlined text-white text-4xl mb-6">queue_music</span>
+<h3 class="font-headline text-2xl mb-4">Peticions Moderades</h3>
+<p class="text-white/80">Rep peticions del públic amb filtres automàtics d'estil i títols. Tu tens el filtre final.</p>
+</div>
+<div class="flex items-center gap-2 bg-white/10 p-3 rounded-xl backdrop-blur-sm border border-white/10">
+<div class="w-2 h-2 rounded-full bg-green-400"></div>
+<span class="text-xs font-bold uppercase tracking-tighter">Nova Petició: Fisherman (Maceo Plex Remix)</span>
+</div>
+</div>
+<!-- Bento Card 3 -->
+<div class="md:col-span-2 lg:col-span-2 h-80 rounded-3xl bg-surface-container-highest/5 p-8 border border-white/5 flex flex-col items-center justify-center text-center group">
+<span class="material-symbols-outlined text-[#5e24e1] text-5xl mb-6 group-hover:scale-110 transition-transform">swipe</span>
+<h3 class="font-headline text-xl mb-4">Swipe &amp; Match</h3>
+<p class="text-on-surface-variant text-sm">Gamifica l'experiència. Els fans fan swipe per trobar el tema que volen que soni.</p>
+</div>
+<!-- Bento Card 4 -->
+<div class="md:col-span-2 lg:col-span-2 h-80 rounded-3xl bg-surface-container-highest/5 p-8 border border-white/5 flex flex-col justify-end relative overflow-hidden group">
+<img alt="DJ Bag" class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-opacity" data-alt="Close-up of high-end DJ equipment, mixing desk with glowing buttons and faders in a dark club setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoDy5eeZRx4Vrg58mQBl6EIOu8xJk6xGunMeBhdgq3NOI1l2R4s_sLDAiLSQEUODL8Qj34Aib5TSrllhzJSdMCaz4UEFqOfoKQskFal3qwYu6YW27tbmS6peVrTPbVg2i-NbuEQ7T9o0krxlFWNAa4qtzuMxTEL72asrVMJ7aRbu0FVUEWTN9rQl3xEzkb53mEzBOO6fZgwmptLMa84JE2KtL8qHK5iS9zgi8BvPn4OakI5w-6OyvODfuzO6-AFhSyqqzLhCa0CyCu"/>
+<div class="relative z-10">
+<span class="material-symbols-outlined text-[#00e3fd] text-4xl mb-4">work</span>
+<h3 class="font-headline text-xl mb-2">Maleta del DJ</h3>
+<p class="text-on-surface-variant text-sm">Sincronitza el teu catàleg per a una gestió ràpida de les votacions.</p>
+</div>
+</div>
+<!-- Bento Card 5 -->
+<div class="md:col-span-4 lg:col-span-2 h-80 rounded-3xl bg-surface-container-highest/5 p-8 border border-white/5 flex flex-col justify-between border-t-[#5e24e1] border-t-4">
+<div>
+<h3 class="font-headline text-xl mb-4">Dashboard en Directe</h3>
+<p class="text-on-surface-variant text-sm">Monitoritza el ritme de la festa. Control de peticions i visualització de dades de la pista.</p>
+</div>
+<div class="space-y-2">
+<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-[#00e3fd] w-3/4"></div>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-[#5e24e1] w-1/2"></div>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-[#2e5bff] w-5/6"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Secció Promotors -->
+<section class="py-32 overflow-hidden relative">
+<div class="container mx-auto px-6 relative z-10">
+<div class="bg-gradient-to-br from-surface-container-high/5 to-surface-container-low/10 rounded-[3rem] p-12 md:p-20 border border-white/5 flex flex-col lg:flex-row gap-16 items-center">
+<div class="lg:w-1/2">
+<h2 class="font-headline text-4xl md:text-5xl mb-8 leading-tight">Ideal per a clubs, festivals i esdeveniments privats.</h2>
+<p class="text-xl text-on-surface-variant mb-10">Dóna als teus patrocinadors noves oportunitats de visibilitat digital a través de la web del públic i monetitza millor cada sessió.</p>
+<div class="flex flex-wrap gap-10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#00e3fd]">verified</span>
+<span class="font-bold">Clubs Nocturns</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#00e3fd]">verified</span>
+<span class="font-bold">Festivals</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#00e3fd]">verified</span>
+<span class="font-bold">Events Corporatius</span>
+</div>
+</div>
+</div>
+<div class="lg:w-1/2 relative">
+<div class="grid grid-cols-2 gap-4">
+<img alt="Festival" class="rounded-2xl w-full h-48 object-cover" data-alt="Low angle shot of a massive crowd at a music festival raising their hands under colorful laser lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFMoScPaiPnM1_VTi_MYiSl5UqlJ1VKs7D5NVtJhr3s_G_-12XQGXYAkHxE0OyuiyQcGZdIeq7RE71jHc3t2qnDBeKDq6u6cQOJJeiEijvojTZu19iZx1QNzB5Mcbzz5mgfWdqgoJ2Wjcvnj7iGlIcA8pGE-Gthf7cdtjFdaC5YIfCC7uPoCZlKD1oYf71VTUAj2urT9uXTFAm-XxFw4q8XsTqmGMK2W0VvShhTFH8q1dv36HDwUi4ofUZFOBi_eKhg5dwb8kZMg86"/>
+<img alt="Private Event" class="rounded-2xl w-full h-48 object-cover mt-8" data-alt="Elegant rooftop party at night with people talking and holding drinks, with city lights in the background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtUjVyvggIBRnfh8lVLMlifqJY8kU62DP-Fi_6zOZCiD4hKVbixqEW-N6Z1zAsoOXihUdqB0zySdx2Ipi2Q93R9Swp6xziRwRuPqI4wF5uL6AEn8iIoewRIBwqo1HTNUnEsjXLfRJQyZK9adAzzk39LDyjECvwgWr0S68E51Uven63gm3x_YT6jLeM2FbAfZVWB0NcpKDQcppGyvSffC8e7eR2nojLVzD1KExKt47s18R_OaVxH06ZC0CK53UNAl5kWdOfpi-coqQQ"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Final -->
+<section class="py-32 relative text-center">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#0040e0]/10 blur-[150px] -z-10 rounded-full"></div>
+<div class="container mx-auto px-6">
+<h2 class="font-headline text-5xl md:text-7xl mb-8 tracking-tighter">Llest per fer història?</h2>
+<p class="text-2xl text-on-surface-variant mb-12 max-w-3xl mx-auto">Activa la teva primera sessió i sent el canvi en la primera cançó.</p>
+<button class="bg-[#00e3fd] text-[#0a0c0d] px-16 py-6 rounded-full font-headline text-2xl font-black shadow-[0_0_50px_rgba(0,227,253,0.3)] hover:scale-110 active:scale-95 transition-all">
+                Reserva una demo
+            </button>
+<p class="mt-8 text-on-surface-variant font-medium">Sense targeta de crèdit. Configuració en 5 minuts.</p>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-[#0a0c0d] border-t border-white/5 py-16 px-12">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-screen-2xl mx-auto">
+<div class="col-span-2 md:col-span-1">
+<div class="font-['Epilogue'] font-bold text-[#0040e0] text-2xl mb-6">DJJukebox</div>
+<p class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 leading-relaxed">La revolució de la interacció a la pista de ball. Fent que cada beat compti.</p>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-sm uppercase tracking-widest text-[#f7fafd]">Producte</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Funcions</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Preus</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">FAQ</a>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-sm uppercase tracking-widest text-[#f7fafd]">Empresa</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Privacitat</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Termes</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Suport</a>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-sm uppercase tracking-widest text-[#f7fafd]">Xarxes</h4>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Instagram</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">LinkedIn</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60 hover:text-[#5e24e1] transition-colors" href="#">Twitter</a>
+</div>
+</div>
+<div class="max-w-screen-2xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-['Plus_Jakarta_Sans'] text-sm text-[#f7fafd]/60">© 2024 DJJukebox. Creat per a l'escena electrònica.</p>
+<div class="flex gap-6">
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#0040e0] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">language</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#0040e0] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">share</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

@@ -8,6 +8,7 @@ Provides dynamic badge labels, colors and classification based on:
 """
 from typing import Tuple
 from django.db.models import Count, Q
+from .vote_types import negative_vote_q
 
 
 class BadgeCalculator:
@@ -48,7 +49,7 @@ class BadgeCalculator:
             queryset.annotate(
                 total_interactions=(
                     Count('vote', filter=Q(vote__vote_type='like')) +
-                    Count('vote', filter=Q(vote__vote_type='dislike'))
+                    Count('vote', filter=negative_vote_q())
                 )
             ).values_list('total_interactions', flat=True)
         )

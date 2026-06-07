@@ -5,7 +5,7 @@ Cobreix:
 - Accés requereix login i party seleccionada
 - Redirect si voting no actiu
 - GET mostra cançons no votades (exclou les ja votades)
-- POST like/dislike/skip → resposta JSON
+- POST like/dislike/next → resposta JSON
 - POST acció invàlida → JSON error
 """
 import json
@@ -14,7 +14,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from jukebox.models import Party, Song, Vote
+from jukebox.models import Party, Song, Vote, SongSwipeSkip
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -106,6 +106,13 @@ class SongSwipeGetTests(TestCase):
         # Una cançó votada → 4 sense votar
         self.assertEqual(len(response.context['songs']), 4)
 
+    def test_next_songs_excluded(self):
+        SongSwipeSkip.objects.create(
+            user=self.user, song=self.songs[0], party=self.party
+        )
+        response = self.client.get(reverse('song_swipe'))
+        self.assertEqual(len(response.context['songs']), 4)
+
     def test_context_has_votes_left(self):
         response = self.client.get(reverse('song_swipe'))
         self.assertIn('votes_left', response.context)
@@ -168,23 +175,69 @@ class SongSwipePostTests(TestCase):
             ).exists()
         )
 
-    def test_post_skip_creates_skip_vote(self):
-        self.client.post(
-            reverse('song_swipe'),
-            {'action': 'skip', 'song_id': self.song.id},
-        )
-        self.assertTrue(
-            Vote.objects.filter(
-                user=self.user, song=self.song, party=self.party, vote_type='skip'
-            ).exists()
-        )
-
-    def test_post_skip_returns_json(self):
+    def test_post_next_does_not_create_vote(self):
         response = self.client.post(
             reverse('song_swipe'),
-            {'action': 'skip', 'song_id': self.song.id},
+            {'action': 'next', 'song_id': self.song.id},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            Vote.objects.filter(user=self.user, song=self.song, party=self.party).exists()
+        )
+        self.assertTrue(
+            SongSwipeSkip.objects.filter(user=self.user, song=self.song, party=self.party).exists()
+        )
+
+    def test_post_next_does_not_spend_vote(self):
+        response = self.client.post(
+            reverse('song_swipe'),
+            {'action': 'next', 'song_id': self.song.id},
+        )
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['votes_left'], 10)
+
+    def test_post_next_returns_json(self):
+        response = self.client.post(
+            reverse('song_swipe'),
+            {'action': 'next', 'song_id': self.song.id},
         )
         self.assertEqual(response['Content-Type'], 'application/json')
+
+    def test_post_undo_removes_existing_vote(self):
+        Vote.objects.create(
+            user=self.user,
+            song=self.song,
+            party=self.party,
+            vote_type='dislike',
+        )
+
+        response = self.client.post(
+            reverse('song_swipe'),
+            {'action': 'undo', 'song_id': self.song.id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            Vote.objects.filter(user=self.user, song=self.song, party=self.party).exists()
+        )
+
+    def test_post_undo_removes_existing_next(self):
+        SongSwipeSkip.objects.create(
+            user=self.user,
+            song=self.song,
+            party=self.party,
+        )
+
+        response = self.client.post(
+            reverse('song_swipe'),
+            {'action': 'undo', 'song_id': self.song.id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            SongSwipeSkip.objects.filter(user=self.user, song=self.song, party=self.party).exists()
+        )
 
     def test_post_invalid_action_returns_400(self):
         response = self.client.post(

@@ -25,6 +25,7 @@ urlpatterns = [
     path('select-party/', views.select_party, name='select_party'),
     path('set-party/<int:party_id>/', views.set_party, name='set_party'),
     path('unset-party/', views.unset_party, name='unset_party'),
+    path('past-parties/', views.past_parties, name='past_parties'),
     path('party/<int:party_id>/delete/', views.delete_party, name='delete_party'),
     path('party/<int:party_id>/settings/remove_playlist/', views.remove_playlist, name='remove_playlist'),
     path('party/<int:party_id>/settings/assign_playlist/', views.assign_party_playlist, name='assign_party_playlist'),

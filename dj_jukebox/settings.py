@@ -322,10 +322,9 @@ if RENDER_EXTERNAL_HOSTNAME:
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = env_bool("USE_X_FORWARDED_HOST", default=IS_PRODUCTION)
 
-# allauth 65.x: llegeix la IP del client des del header que nginx posa (X-Real-IP).
-# ALLAUTH_TRUSTED_CLIENT_IP_HEADER indica a allauth quin header conté la IP real.
-# Sense això, allauth no pot determinar la IP i llança PermissionDenied al signup/login.
-ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "X-Real-IP" if IS_PRODUCTION else None
+# Render envia X-Forwarded-For (no X-Real-IP). allauth 65.x llegeix el header indicat
+# per determinar la IP del client al rate-limiting. Sense una IP vàlida llança PermissionDenied.
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "X-Forwarded-For" if IS_PRODUCTION else None
 
 SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", default=IS_PRODUCTION)
 CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", default=IS_PRODUCTION)

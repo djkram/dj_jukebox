@@ -176,6 +176,27 @@ def profile(request):
         "profile_role_icon": profile_role_icon,
     })
 
+@login_required
+@require_POST
+def update_profile_name(request):
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
+
+    if not first_name:
+        return JsonResponse({'success': False, 'errors': {'first_name': _('El nom és obligatori.')}}, status=400)
+
+    full_name = f"{first_name} {last_name}".strip()
+    User = get_user_model()
+    if User.objects.exclude(pk=request.user.pk).filter(username=full_name).exists():
+        return JsonResponse({'success': False, 'errors': {'full_name': _('Aquest nom ja està en ús.')}}, status=400)
+
+    request.user.first_name = first_name
+    request.user.last_name = last_name
+    request.user.username = full_name
+    request.user.save(update_fields=['first_name', 'last_name', 'username'])
+    return JsonResponse({'success': True, 'display_name': full_name})
+
+
 def select_party(request):
     # Només mostrem festes públiques que no han acabat
     parties = Party.objects.filter(is_public=True).exclude(party_status=Party.STATUS_FINISHED).order_by('-date')

@@ -21,6 +21,7 @@ urlpatterns = [
     path('login/', RedirectView.as_view(url=reverse_lazy('account_login'), permanent=False)),
     path('register/', RedirectView.as_view(url=reverse_lazy('account_signup'), permanent=False)),
     path('profile/', views.profile, name='profile'),
+    path('profile/update-name/', views.update_profile_name, name='update_profile_name'),
     path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
 
     # NOVES RUTES

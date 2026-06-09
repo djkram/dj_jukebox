@@ -536,6 +536,16 @@
         </div>
 
         <div class="profile-actions-list">
+          <button type="button" class="profile-action-btn" id="edit-name-btn-desktop">
+            <div class="profile-action-btn-left">
+              <div class="profile-action-icon">
+                <span class="material-symbols-outlined">badge</span>
+              </div>
+              <span class="profile-action-text">{% trans "Editar nom complet" %}</span>
+            </div>
+            <span class="material-symbols-outlined profile-action-arrow">chevron_right</span>
+          </button>
+
           <a href="{% url 'account_email' %}" class="profile-action-btn">
             <div class="profile-action-btn-left">
               <div class="profile-action-icon">
@@ -706,6 +716,16 @@
       <h3 class="font-headline font-bold px-2 mb-0" style="font-size: 1.05rem;">{% trans "Preferències" %}</h3>
 
       <div class="mobile-list-stack">
+      <button type="button" id="edit-name-btn-mobile" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg transition-colors" style="border: none; text-align:left; cursor:pointer;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
+            <i class="fas fa-id-badge" style="color: #0040e0;"></i>
+          </div>
+          <span class="font-headline font-semibold" style="font-size: 0.98rem; color: #191c1f;">{% trans "Editar nom complet" %}</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: #c4c5d9;"></i>
+      </button>
+
       <a href="{% url 'account_email' %}" class="w-100 d-flex align-items-center justify-content-between p-3 bg-white rounded-lg text-decoration-none transition-colors" style="border: none;">
         <div class="d-flex align-items-center gap-3">
           <div class="d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #eceef3;">
@@ -825,6 +845,91 @@ document.addEventListener('DOMContentLoaded', function() {
 
   console.log('Handlers attached. Desktop:', !!desktopSelector, 'Mobile:', !!mobileSelector);
 });
+</script>
+
+<!-- ── Edit Name Modal ──────────────────────────────────────────────────── -->
+<div class="modal fade" id="editNameModal" tabindex="-1" aria-labelledby="editNameModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content" style="border-radius:1rem; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="border-bottom:1px solid rgba(196,197,216,0.4); padding:1.25rem 1.5rem 1rem;">
+        <h5 class="modal-title" id="editNameModalLabel" style="font-weight:700; font-size:1rem; color:#181c1e;">{% trans "Editar nom complet" %}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Tancar"><span>&times;</span></button>
+      </div>
+      <div class="modal-body" style="padding:1.25rem 1.5rem;">
+        <div class="row g-3">
+          <div class="col-6">
+            <label for="modal-first-name" style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#747687; display:block; margin-bottom:0.4rem;">{% trans "Nom" %}</label>
+            <input type="text" id="modal-first-name" class="form-control" value="{{ user.first_name }}" autocomplete="off" style="border-radius:0.5rem;">
+          </div>
+          <div class="col-6">
+            <label for="modal-last-name" style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#747687; display:block; margin-bottom:0.4rem;">{% trans "Cognoms" %}</label>
+            <input type="text" id="modal-last-name" class="form-control" value="{{ user.last_name }}" autocomplete="off" style="border-radius:0.5rem;">
+          </div>
+        </div>
+        <div id="name-modal-error" class="alert alert-danger mt-3 mb-0" style="display:none; font-size:0.85rem;"></div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid rgba(196,197,216,0.4); padding:1rem 1.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{% trans "Cancel·lar" %}</button>
+        <button type="button" class="btn btn-primary btn-sm" id="name-modal-save">{% trans "Guardar" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  function openNameModal() {
+    document.getElementById('name-modal-error').style.display = 'none';
+    $('#editNameModal').modal('show');
+  }
+
+  var btnD = document.getElementById('edit-name-btn-desktop');
+  var btnM = document.getElementById('edit-name-btn-mobile');
+  if (btnD) btnD.addEventListener('click', openNameModal);
+  if (btnM) btnM.addEventListener('click', openNameModal);
+
+  document.getElementById('name-modal-save').addEventListener('click', function () {
+    var firstName = document.getElementById('modal-first-name').value.trim();
+    var lastName  = document.getElementById('modal-last-name').value.trim();
+    var errorEl   = document.getElementById('name-modal-error');
+    errorEl.style.display = 'none';
+
+    if (!firstName) {
+      errorEl.textContent = '{% trans "El nom és obligatori." %}';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    var fd = new FormData();
+    fd.append('first_name', firstName);
+    fd.append('last_name', lastName);
+
+    fetch('{% url "update_profile_name" %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.success) {
+        document.querySelectorAll('.profile-user-name').forEach(function (el) {
+          el.textContent = data.display_name;
+        });
+        var mobileH2 = document.querySelector('.mobile-page-shell h2');
+        if (mobileH2) mobileH2.textContent = data.display_name;
+        $('#editNameModal').modal('hide');
+      } else {
+        var msg = data.errors ? Object.values(data.errors).join(' · ') : (data.error || 'Error desconegut');
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+      }
+    })
+    .catch(function () {
+      errorEl.textContent = '{% trans "Error de connexió." %}';
+      errorEl.style.display = 'block';
+    });
+  });
+}());
 </script>
 
 {% endblock %}

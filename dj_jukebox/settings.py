@@ -275,12 +275,15 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Cache
-# FileBasedCache in production: shared across all gunicorn workers (needed for allauth rate limiting)
-# LocMemCache in development: no disk writes, fast
+# Redis in production: shared across all gunicorn workers, in-memory fast
+# LocMemCache in development: no external dependencies
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache_djjukebox',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
     } if IS_PRODUCTION else {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'dj-jukebox',

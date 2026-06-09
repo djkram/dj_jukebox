@@ -111,10 +111,10 @@
             data-email="{{ u.email|lower }}"
             data-dj-parties="{% for p in u_dj_ids %}{{ p.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
           <td>
-            <span class="monitoring-user-avatar">{{ u.username|slice:":1"|upper }}</span>
+            <span class="monitoring-user-avatar">{% if u.first_name %}{{ u.first_name|slice:":1"|upper }}{% else %}{{ u.username|slice:":1"|upper }}{% endif %}</span>
           </td>
           <td>
-            <span class="monitoring-username">{{ u.username }}</span>
+            <span class="monitoring-username">{% if u.get_full_name %}{{ u.get_full_name }}{% else %}{{ u.username }}{% endif %}</span>
             {% if u.is_superuser %}<span class="monitoring-badge superuser">Admin</span>{% endif %}
             {% if u_dj_ids %}<span class="monitoring-badge dj">DJ</span>{% endif %}
           </td>

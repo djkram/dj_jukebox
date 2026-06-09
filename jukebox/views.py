@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext as _
-from allauth.account.forms import SignupForm
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
@@ -152,21 +151,6 @@ def _accept_song_request(song_request, processed_by, charge_user):
     create_song_accepted_notification(song_request, charged_amount=charged_amount)
     return charged_amount
 
-def register(request):
-
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            form.save(request)  # Passa request!
-            return redirect('login')
-    else:
-        form = SignupForm()
-
-    # Afegeix la classe 'form-control' a tots els camps
-    for field in form.fields.values():
-        field.widget.attrs['class'] = 'form-control'
-
-    return render(request, 'jukebox/register.html', {'form': form})
 
 @login_required
 def profile(request):

@@ -3,6 +3,7 @@ services:
     name: dj-jukebox-dev
     env: python
     plan: free
+    autoDeploy: false
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: python manage.py migrate --noinput && python manage.py sync_site && python manage.py setup_production && gunicorn dj_jukebox.wsgi:application --workers 1 --timeout 90
     envVars:

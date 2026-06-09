@@ -1,0 +1,86 @@
+name: Render Deploy (develop)
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  render-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install requests
+        run: pip install requests --quiet
+
+      - name: Ensure Render DB exists and trigger deploy
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          python3 << 'PYEOF'
+          import requests, os, time, sys
+
+          API    = "https://api.render.com/v1"
+          HEADS  = {"Authorization": f"Bearer {os.environ['RENDER_API_KEY']}",
+                    "Accept": "application/json", "Content-Type": "application/json"}
+          SVC_ID = os.environ['RENDER_SERVICE_ID']
+          DB_NAME = "dj-jukebox-db"
+
+          # ── 1. Get owner ID from the service ────────────────────────────────
+          r = requests.get(f"{API}/services/{SVC_ID}", headers=HEADS)
+          r.raise_for_status()
+          owner_id = r.json()["ownerId"]
+          print(f"Owner: {owner_id}")
+
+          # ── 2. Check if DB exists and is available ───────────────────────────
+          r = requests.get(f"{API}/postgres?ownerId={owner_id}&limit=20", headers=HEADS)
+          r.raise_for_status()
+
+          db_ok = False
+          for item in r.json():
+              pg = item.get("postgres", item)
+              if pg.get("name") == DB_NAME:
+                  status = pg.get("status", "")
+                  print(f"DB found: {pg['id']} ({status})")
+                  db_ok = status in ("available", "active")
+                  break
+
+          # ── 3. Create DB if missing or expired ──────────────────────────────
+          if not db_ok:
+              print(f"DB '{DB_NAME}' not available. Creating new one...")
+              r = requests.post(f"{API}/postgres", headers=HEADS, json={
+                  "name":         DB_NAME,
+                  "databaseName": "dj_jukebox",
+                  "databaseUser": "dj_jukebox",
+                  "plan":         "free",
+                  "region":       "oregon",
+                  "version":      "16",
+                  "ownerId":      owner_id,
+              })
+              if not r.ok:
+                  print(f"ERROR creating DB: {r.status_code} {r.text}", file=sys.stderr)
+                  sys.exit(1)
+              db_id = r.json()["id"]
+              print(f"Created DB {db_id}. Waiting for it to become available (max 12 min)...")
+
+              for attempt in range(24):
+                  time.sleep(30)
+                  status = requests.get(f"{API}/postgres/{db_id}", headers=HEADS).json().get("status", "unknown")
+                  print(f"  [{attempt+1}/24] {status}")
+                  if status == "available":
+                      break
+              else:
+                  print("ERROR: DB did not become available in time.", file=sys.stderr)
+                  sys.exit(1)
+
+              print(f"DB {db_id} is ready.")
+
+          # ── 4. Trigger Render deploy ─────────────────────────────────────────
+          print("Triggering Render deploy...")
+          r = requests.post(f"{API}/services/{SVC_ID}/deploys", headers=HEADS, json={})
+          if not r.ok:
+              print(f"ERROR triggering deploy: {r.status_code} {r.text}", file=sys.stderr)
+              sys.exit(1)
+          deploy_id = r.json().get("id", "unknown")
+          print(f"Deploy triggered: {deploy_id}")
+          print(f"https://dashboard.render.com/web/{SVC_ID}/deploys/{deploy_id}")
+          PYEOF

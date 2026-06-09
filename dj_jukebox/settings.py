@@ -379,6 +379,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 ACCOUNT_ADAPTER = 'jukebox.adapter.AccountAdapter'
+ACCOUNT_SIGNUP_FORM_CLASS = 'jukebox.forms.CustomSignupForm'
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 

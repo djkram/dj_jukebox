@@ -7,6 +7,35 @@ from django.utils.translation import gettext_lazy as _
 from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks, SpotifyAuthError
 
+
+class CustomSignupForm(forms.Form):
+    full_name = forms.CharField(
+        label=_('Nom complet'),
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': _('Nom complet')}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Reorder: email first, full_name second, then passwords
+        desired = ['email', 'full_name', 'password1', 'password2']
+        self.fields = {k: self.fields[k] for k in desired if k in self.fields}
+
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get('full_name', '').strip()
+        if not full_name:
+            raise forms.ValidationError(_('El nom complet és obligatori.'))
+        User = get_user_model()
+        if User.objects.filter(username=full_name).exists():
+            raise forms.ValidationError(_('Aquest nom ja està en ús. Tria un altre.'))
+        return full_name
+
+    def signup(self, request, user):
+        full_name = self.cleaned_data.get('full_name', '').strip()
+        if full_name:
+            user.username = full_name
+            user.save(update_fields=['username'])
+
 class PartyForm(forms.ModelForm):
     class Meta:
         model = Party

@@ -1,0 +1,422 @@
+/* ── monitoring.css — admin monitoring page styles ── */
+
+.monitoring-page {
+    padding: 1.5rem 2rem;
+    max-width: 1400px;
+}
+
+/* ── Section headers ─────────────────────────────────────────────────────── */
+.monitoring-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #747687;
+    margin-bottom: 0.75rem;
+    margin-top: 2rem;
+}
+
+.monitoring-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    margin-top: 2rem;
+}
+
+.monitoring-section-header .monitoring-section-title {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* ── KPI Cards ───────────────────────────────────────────────────────────── */
+.monitoring-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.monitoring-kpi-card {
+    background: #ffffff;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 24px rgba(0, 46, 168, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: box-shadow 150ms;
+}
+
+.monitoring-kpi-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 46, 168, 0.12);
+}
+
+.monitoring-kpi-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.monitoring-kpi-icon .material-symbols-outlined {
+    font-size: 1.25rem;
+    display: inline-flex !important;
+}
+
+.monitoring-kpi-icon.blue    { background: rgba(0, 64, 224, 0.1);   color: #0040e0; }
+.monitoring-kpi-icon.purple  { background: rgba(94, 36, 225, 0.1);  color: #5e24e1; }
+.monitoring-kpi-icon.green   { background: rgba(28, 200, 138, 0.1); color: #0d7a52; }
+.monitoring-kpi-icon.orange  { background: rgba(246, 194, 62, 0.12); color: #a87000; }
+.monitoring-kpi-icon.cyan    { background: rgba(0, 188, 212, 0.1);  color: #0097a7; }
+.monitoring-kpi-icon.red     { background: rgba(186, 26, 26, 0.08); color: #ba1a1a; }
+.monitoring-kpi-icon.indigo  { background: rgba(63, 81, 181, 0.1);  color: #3f51b5; }
+.monitoring-kpi-icon.teal    { background: rgba(0, 150, 136, 0.1);  color: #00695c; }
+
+.monitoring-kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #747687;
+}
+
+.monitoring-kpi-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #181c1e;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.monitoring-kpi-sub {
+    font-size: 0.75rem;
+    color: #9a9baf;
+    margin-top: 0.1rem;
+}
+
+/* ── Search input ────────────────────────────────────────────────────────── */
+.monitoring-search-input {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    width: 22rem;
+    outline: none;
+    transition: border-color 150ms, box-shadow 150ms;
+    color: #181c1e;
+    background: #fff;
+}
+
+.monitoring-search-input:focus {
+    border-color: #0040e0;
+    box-shadow: 0 0 0 3px rgba(0, 64, 224, 0.1);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+.monitoring-table-wrap {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 24px rgba(0, 46, 168, 0.07);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.monitoring-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.monitoring-table th {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #747687;
+    border-bottom: 1px solid rgba(196, 197, 216, 0.4);
+    background: #f8f9fc;
+    white-space: nowrap;
+}
+
+.monitoring-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(196, 197, 216, 0.2);
+    vertical-align: middle;
+    color: #2d2f40;
+}
+
+.monitoring-table tbody tr:hover {
+    background: #f4f7fb;
+}
+
+.monitoring-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ── User avatar initial ─────────────────────────────────────────────────── */
+.monitoring-user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e3f0, #c8cbde);
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #434655;
+    flex-shrink: 0;
+}
+
+/* ── Username + badges ───────────────────────────────────────────────────── */
+.monitoring-username {
+    font-weight: 600;
+    color: #181c1e;
+}
+
+.monitoring-email {
+    color: #747687;
+    font-size: 0.8rem;
+}
+
+.monitoring-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+
+.monitoring-badge.superuser {
+    background: rgba(94, 36, 225, 0.12);
+    color: #5e24e1;
+}
+
+.monitoring-badge.dj {
+    background: rgba(0, 150, 136, 0.12);
+    color: #00695c;
+}
+
+/* ── Active dot ──────────────────────────────────────────────────────────── */
+.monitoring-active-dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: #d1d5db;
+    vertical-align: middle;
+}
+
+.monitoring-active-dot.active {
+    background: #1cc88a;
+    box-shadow: 0 0 0 2px rgba(28, 200, 138, 0.2);
+}
+
+/* ── Credits cell ────────────────────────────────────────────────────────── */
+.monitoring-credits {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: #a87000;
+}
+
+/* ── Edit button ─────────────────────────────────────────────────────────── */
+.monitoring-edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.4rem;
+    color: #9a9baf;
+    transition: color 150ms, background 150ms;
+    line-height: 1;
+}
+
+.monitoring-edit-btn:hover {
+    color: #0040e0;
+    background: rgba(0, 64, 224, 0.07);
+}
+
+.monitoring-edit-btn .material-symbols-outlined {
+    font-size: 1.1rem;
+    display: inline-flex !important;
+    vertical-align: middle;
+}
+
+/* ── Party status badges ─────────────────────────────────────────────────── */
+.monitoring-status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.375rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.monitoring-status-hidden          { background: #f1f4f7; color: #747687; }
+.monitoring-status-party_visible   { background: rgba(0, 64, 224, 0.08);   color: #0040e0; }
+.monitoring-status-show_party      { background: rgba(0, 64, 224, 0.13);   color: #0033b3; }
+.monitoring-status-requests_open   { background: rgba(94, 36, 225, 0.1);   color: #5e24e1; }
+.monitoring-status-djjukebox_active{ background: rgba(28, 200, 138, 0.12); color: #0d7a52; }
+.monitoring-status-finished        { background: rgba(186, 26, 26, 0.08);  color: #ba1a1a; }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.monitoring-modal .modal-header {
+    border-bottom: 1px solid rgba(196, 197, 216, 0.4);
+    padding: 1.25rem 1.5rem 1rem;
+}
+
+.monitoring-modal .modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #181c1e;
+}
+
+.monitoring-modal .modal-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.monitoring-modal .modal-footer {
+    border-top: 1px solid rgba(196, 197, 216, 0.4);
+    padding: 1rem 1.5rem;
+}
+
+.monitoring-modal-field label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #747687;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.monitoring-modal-field .form-control {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 150ms, box-shadow 150ms;
+}
+
+.monitoring-modal-field .form-control:focus {
+    border-color: #0040e0;
+    box-shadow: 0 0 0 3px rgba(0, 64, 224, 0.1);
+}
+
+.monitoring-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.monitoring-toggle-label {
+    font-size: 0.85rem;
+    color: #434655;
+}
+
+/* ── DJ party list in modal ──────────────────────────────────────────────── */
+.monitoring-dj-parties-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    border: 1px solid #d1d3e2;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    background: #f8f9fc;
+}
+
+.monitoring-dj-party-option {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    margin: 0;
+    font-weight: normal;
+    transition: background 120ms;
+}
+
+.monitoring-dj-party-option:hover {
+    background: rgba(0, 64, 224, 0.05);
+}
+
+.monitoring-dj-party-option input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #0040e0;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.monitoring-dj-party-name {
+    font-size: 0.85rem;
+    color: #181c1e;
+    font-weight: 500;
+    flex: 1;
+}
+
+.monitoring-dj-party-date {
+    font-size: 0.75rem;
+    color: #9a9baf;
+}
+
+/* ── Toggle switch (reused pattern from dj_dashboard) ────────────────────── */
+.mon-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 2.5rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+}
+
+.mon-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.mon-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #d1d3e2;
+    border-radius: 1rem;
+    transition: background 200ms;
+}
+
+.mon-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    left: 0.2rem;
+    top: 0.2rem;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 200ms;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.mon-toggle-switch input:checked + .mon-toggle-slider {
+    background: #1cc88a;
+}
+
+.mon-toggle-switch input:checked + .mon-toggle-slider::before {
+    transform: translateX(1.1rem);
+}

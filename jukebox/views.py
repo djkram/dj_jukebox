@@ -15,7 +15,7 @@ from django.urls import reverse
 from urllib.parse import urlencode
 
 from .models import Song, Party, Playlist, Vote, VotePackage, SongRequest, Notification, SongSwipeSkip
-from django.db.models import Sum, Count, Q, F
+from django.db.models import Sum, Count, Q, F, Avg
 from django.db import transaction
 from .forms import PartyForm, PartySettingsForm
 from .notifications import (
@@ -1181,6 +1181,118 @@ def dj_backoffice(request):
         'songs': songs,
         'parties': parties,
     })
+
+@user_passes_test(lambda u: u.is_superuser)
+def dj_monitoring(request):
+    user_stats = User.objects.aggregate(
+        total=Count('id'),
+        avg_credits=Avg('credits'),
+    )
+    party_stats = Party.objects.aggregate(
+        total=Count('id'),
+        active=Count('id', filter=~Q(party_status=Party.STATUS_FINISHED) & ~Q(party_status=Party.STATUS_HIDDEN)),
+        finished=Count('id', filter=Q(party_status=Party.STATUS_FINISHED)),
+    )
+    vote_stats = Vote.objects.aggregate(
+        total_likes=Count('id', filter=Q(vote_type='like')),
+    )
+    songs_played = Song.objects.filter(has_played=True).count()
+    requests_accepted = SongRequest.objects.filter(status='accepted').count()
+    paid_purchases = VotePackage.objects.filter(payment_id__isnull=False).count()
+
+    all_parties = Party.objects.order_by('-date')
+
+    users = User.objects.prefetch_related('dj_parties').annotate(
+        vote_count=Count('vote', distinct=True),
+        request_count=Count('songrequest', distinct=True),
+        paid_packages_count=Count(
+            'votepackage',
+            filter=Q(votepackage__payment_id__isnull=False),
+            distinct=True,
+        ),
+    ).order_by('username')
+
+    party_table = Party.objects.annotate(
+        like_count=Count('vote', filter=Q(vote__vote_type='like'), distinct=True),
+        user_count=Count('vote__user', distinct=True),
+        played_count=Count('songs', filter=Q(songs__has_played=True), distinct=True),
+    ).order_by('-date')
+
+    return render(request, 'jukebox/monitoring.html', {
+        'total_users': user_stats['total'] or 0,
+        'avg_credits': round(user_stats['avg_credits'] or 0, 1),
+        'total_parties': party_stats['total'] or 0,
+        'active_parties': party_stats['active'] or 0,
+        'finished_parties': party_stats['finished'] or 0,
+        'total_likes': vote_stats['total_likes'] or 0,
+        'songs_played': songs_played,
+        'requests_accepted': requests_accepted,
+        'paid_purchases': paid_purchases,
+        'users': users,
+        'party_table': party_table,
+        'all_parties': all_parties,
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def update_user(request):
+    import json as _json
+    target = get_object_or_404(User, pk=request.POST.get('user_id'))
+    update_fields = []
+    errors = {}
+
+    if 'credits' in request.POST:
+        try:
+            val = int(request.POST['credits'])
+            if val < 0:
+                raise ValueError
+            target.credits = val
+            update_fields.append('credits')
+        except (ValueError, TypeError):
+            errors['credits'] = 'Valor invàlid'
+
+    if 'is_active' in request.POST:
+        target.is_active = request.POST['is_active'] in ('1', 'true')
+        update_fields.append('is_active')
+
+    if 'username' in request.POST:
+        new_username = request.POST['username'].strip()
+        if not new_username:
+            errors['username'] = 'El nom no pot estar buit'
+        elif User.objects.exclude(pk=target.pk).filter(username=new_username).exists():
+            errors['username'] = 'Aquest nom ja existeix'
+        else:
+            target.username = new_username
+            update_fields.append('username')
+
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors}, status=400)
+    if update_fields:
+        target.save(update_fields=update_fields)
+
+    if 'dj_party_ids' in request.POST:
+        try:
+            new_ids = set(int(x) for x in _json.loads(request.POST['dj_party_ids']))
+        except (ValueError, _json.JSONDecodeError):
+            new_ids = set()
+        current_ids = set(Party.objects.filter(djs=target).values_list('id', flat=True))
+        for party in Party.objects.filter(pk__in=current_ids - new_ids):
+            party.djs.remove(target)
+        for party in Party.objects.filter(pk__in=new_ids - current_ids):
+            party.djs.add(target)
+
+    dj_party_ids = list(Party.objects.filter(djs=target).values_list('id', flat=True))
+    return JsonResponse({
+        'success': True,
+        'user_id': target.id,
+        'credits': target.credits,
+        'is_active': target.is_active,
+        'username': target.username,
+        'dj_party_ids': dj_party_ids,
+        'is_dj': bool(dj_party_ids),
+    })
+
 
 @login_required
 @user_passes_test(is_dj_admin)

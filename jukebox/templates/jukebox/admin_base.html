@@ -136,6 +136,13 @@
                         <span>{% trans "Backoffice" %}</span>
                     </a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'dj_monitoring' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'dj_monitoring' %}">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="material-symbols-outlined">monitoring</span>
+                        <span>{% trans "Monitoring" %}</span>
+                    </a>
+                </li>
                 {% endif %}
 
                 {% if user.is_staff or user.is_superuser or is_party_dj %}

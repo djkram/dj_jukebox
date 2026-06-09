@@ -1,0 +1,379 @@
+{% extends "jukebox/admin_base.html" %}
+{% load static i18n %}
+
+{% block page_title %}Monitoring{% endblock %}
+
+{% block extra_head %}
+<link href="{% static 'jukebox/css/monitoring.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="d-none d-md-block">
+<div class="monitoring-page">
+
+  <!-- ── KPI Row 1 ─────────────────────────────────────────────────────────── -->
+  <div class="monitoring-section-title" style="margin-top:0.5rem;">Indicadors globals</div>
+  <div class="monitoring-kpi-row">
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon blue">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      <div class="monitoring-kpi-label">Total Usuaris</div>
+      <div class="monitoring-kpi-value">{{ total_users }}</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon purple">
+        <span class="material-symbols-outlined">celebration</span>
+      </div>
+      <div class="monitoring-kpi-label">Total Festes</div>
+      <div class="monitoring-kpi-value">{{ total_parties }}</div>
+      <div class="monitoring-kpi-sub">{{ finished_parties }} acabades</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon green">
+        <span class="material-symbols-outlined">thumb_up</span>
+      </div>
+      <div class="monitoring-kpi-label">Total Likes</div>
+      <div class="monitoring-kpi-value">{{ total_likes }}</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon orange">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
+      <div class="monitoring-kpi-label">Compres pagades</div>
+      <div class="monitoring-kpi-value">{{ paid_purchases }}</div>
+      <div class="monitoring-kpi-sub">paquets de vots</div>
+    </div>
+  </div>
+
+  <!-- ── KPI Row 2 ─────────────────────────────────────────────────────────── -->
+  <div class="monitoring-kpi-row">
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon cyan">
+        <span class="material-symbols-outlined">event_available</span>
+      </div>
+      <div class="monitoring-kpi-label">Festes actives</div>
+      <div class="monitoring-kpi-value">{{ active_parties }}</div>
+      <div class="monitoring-kpi-sub">en curs o obertes</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon indigo">
+        <span class="material-symbols-outlined">music_note</span>
+      </div>
+      <div class="monitoring-kpi-label">Cançons posades</div>
+      <div class="monitoring-kpi-value">{{ songs_played }}</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon teal">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <div class="monitoring-kpi-label">Peticions acceptades</div>
+      <div class="monitoring-kpi-value">{{ requests_accepted }}</div>
+    </div>
+    <div class="monitoring-kpi-card">
+      <div class="monitoring-kpi-icon orange">
+        <span class="material-symbols-outlined">toll</span>
+      </div>
+      <div class="monitoring-kpi-label">Crèdits (mitjana)</div>
+      <div class="monitoring-kpi-value">{{ avg_credits }}</div>
+      <div class="monitoring-kpi-sub">per usuari</div>
+    </div>
+  </div>
+
+  <!-- ── Users table ───────────────────────────────────────────────────────── -->
+  <div class="monitoring-section-header">
+    <div class="monitoring-section-title">Usuaris</div>
+    <input type="text" id="user-search" class="monitoring-search-input"
+           placeholder="Cerca per nom o email…" autocomplete="off">
+  </div>
+
+  <div class="monitoring-table-wrap">
+    <table class="monitoring-table" id="users-table">
+      <thead>
+        <tr>
+          <th style="width:2.5rem;"></th>
+          <th>Usuari</th>
+          <th>Email</th>
+          <th>Credits</th>
+          <th>Vots</th>
+          <th>Compres</th>
+          <th>Peticions</th>
+          <th>Registre</th>
+          <th style="text-align:center;">Actiu</th>
+          <th style="width:3rem;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        {% with u_dj_ids=u.dj_parties.all %}
+        <tr data-user-id="{{ u.id }}"
+            data-username="{{ u.username|lower }}"
+            data-email="{{ u.email|lower }}"
+            data-dj-parties="{% for p in u_dj_ids %}{{ p.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+          <td>
+            <span class="monitoring-user-avatar">{{ u.username|slice:":1"|upper }}</span>
+          </td>
+          <td>
+            <span class="monitoring-username">{{ u.username }}</span>
+            {% if u.is_superuser %}<span class="monitoring-badge superuser">Admin</span>{% endif %}
+            {% if u_dj_ids %}<span class="monitoring-badge dj">DJ</span>{% endif %}
+          </td>
+          <td class="monitoring-email">{{ u.email }}</td>
+          <td class="monitoring-credits" data-val="{{ u.credits }}">{{ u.credits }}</td>
+          <td>{{ u.vote_count }}</td>
+          <td>{{ u.paid_packages_count }}</td>
+          <td>{{ u.request_count }}</td>
+          <td style="color:#9a9baf; font-size:0.8rem;">{{ u.date_joined|date:"d/m/Y" }}</td>
+          <td style="text-align:center;">
+            <span class="monitoring-active-dot {% if u.is_active %}active{% endif %}"></span>
+          </td>
+          <td>
+            <button class="monitoring-edit-btn"
+                    data-user-id="{{ u.id }}"
+                    data-username="{{ u.username }}"
+                    data-credits="{{ u.credits }}"
+                    data-is-active="{{ u.is_active|yesno:'true,false' }}"
+                    data-dj-parties="{% for p in u_dj_ids %}{{ p.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                    title="Editar">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
+          </td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr><td colspan="10" style="text-align:center; padding:2rem; color:#9a9baf;">Cap usuari trobat.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:0.75rem; color:#9a9baf; margin-top:0.4rem; text-align:right;">
+    {{ users|length }} usuari{% if users|length != 1 %}s{% endif %}
+  </div>
+
+  <!-- ── Party stats table ─────────────────────────────────────────────────── -->
+  <div class="monitoring-section-title">Estadístiques per festa</div>
+  <div class="monitoring-table-wrap">
+    <table class="monitoring-table">
+      <thead>
+        <tr>
+          <th>Festa</th>
+          <th>Data</th>
+          <th>Estat</th>
+          <th>Likes</th>
+          <th>Usuaris actius</th>
+          <th>Cançons posades</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in party_table %}
+        <tr>
+          <td><span style="font-weight:600;">{{ p.name }}</span></td>
+          <td style="color:#9a9baf; font-size:0.8rem;">{{ p.date|date:"d/m/Y" }}</td>
+          <td>
+            <span class="monitoring-status-badge monitoring-status-{{ p.party_status }}">
+              {{ p.get_party_status_display }}
+            </span>
+          </td>
+          <td>{{ p.like_count }}</td>
+          <td>{{ p.user_count }}</td>
+          <td>{{ p.played_count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center; padding:2rem; color:#9a9baf;">Cap festa.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /monitoring-page -->
+</div><!-- /d-none d-md-block -->
+
+<!-- ── Edit User Modal ───────────────────────────────────────────────────── -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+    <div class="modal-content monitoring-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editUserModalLabel">Editar usuari</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Tancar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-user-id">
+
+        <div class="monitoring-modal-field">
+          <label for="modal-username">Nom d'usuari</label>
+          <input type="text" id="modal-username" class="form-control" autocomplete="off">
+        </div>
+
+        <div class="monitoring-modal-field" style="margin-top:1rem;">
+          <label for="modal-credits">Credits</label>
+          <input type="number" id="modal-credits" min="0" class="form-control">
+        </div>
+
+        <div class="monitoring-modal-field" style="margin-top:1rem;">
+          <label>Compte actiu</label>
+          <div class="monitoring-toggle-row">
+            <label class="mon-toggle-switch">
+              <input type="checkbox" id="modal-is-active">
+              <span class="mon-toggle-slider"></span>
+            </label>
+            <span class="monitoring-toggle-label" id="modal-active-label"></span>
+          </div>
+        </div>
+
+        {% if all_parties %}
+        <div class="monitoring-modal-field" style="margin-top:1.25rem;">
+          <label>Rol DJ — festes assignades</label>
+          <div class="monitoring-dj-parties-list" id="modal-dj-parties">
+            {% for p in all_parties %}
+            <label class="monitoring-dj-party-option">
+              <input type="checkbox" class="dj-party-check" value="{{ p.id }}">
+              <span class="monitoring-dj-party-name">{{ p.name }}</span>
+              <span class="monitoring-dj-party-date">{{ p.date|date:"d/m/Y" }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div id="modal-error" class="alert alert-danger mt-3" style="display:none; font-size:0.85rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel·lar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="modal-save-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ── Search filter ────────────────────────────────────────────────────────
+  document.getElementById('user-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#users-table tbody tr[data-user-id]').forEach(function (row) {
+      const match = !q || row.dataset.username.includes(q) || row.dataset.email.includes(q);
+      row.style.display = match ? '' : 'none';
+    });
+  });
+
+  // ── Active label helper ──────────────────────────────────────────────────
+  function updateActiveLabel(checked) {
+    document.getElementById('modal-active-label').textContent = checked ? 'Actiu' : 'Inactiu';
+  }
+  document.getElementById('modal-is-active').addEventListener('change', function () {
+    updateActiveLabel(this.checked);
+  });
+
+  // ── Open modal ───────────────────────────────────────────────────────────
+  document.querySelectorAll('.monitoring-edit-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const userId   = this.dataset.userId;
+      const username = this.dataset.username;
+      const credits  = this.dataset.credits;
+      const isActive = this.dataset.isActive === 'true';
+      const djPartyIds = (this.dataset.djParties || '').split(',').filter(Boolean);
+
+      document.getElementById('modal-user-id').value = userId;
+      document.getElementById('editUserModalLabel').textContent = 'Editar: ' + username;
+      document.getElementById('modal-username').value = username;
+      document.getElementById('modal-credits').value  = credits;
+      document.getElementById('modal-is-active').checked = isActive;
+      document.getElementById('modal-error').style.display = 'none';
+      updateActiveLabel(isActive);
+
+      // Populate DJ party checkboxes
+      document.querySelectorAll('.dj-party-check').forEach(function (cb) {
+        cb.checked = djPartyIds.includes(cb.value);
+      });
+
+      $('#editUserModal').modal('show');
+    });
+  });
+
+  // ── Save via AJAX ─────────────────────────────────────────────────────────
+  document.getElementById('modal-save-btn').addEventListener('click', function () {
+    const userId   = document.getElementById('modal-user-id').value;
+    const credits  = document.getElementById('modal-credits').value;
+    const username = document.getElementById('modal-username').value.trim();
+    const isActive = document.getElementById('modal-is-active').checked ? '1' : '0';
+    const errorEl  = document.getElementById('modal-error');
+    errorEl.style.display = 'none';
+
+    const checkedPartyIds = Array.from(
+      document.querySelectorAll('.dj-party-check:checked')
+    ).map(function (cb) { return parseInt(cb.value); });
+
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('credits', credits);
+    formData.append('username', username);
+    formData.append('is_active', isActive);
+    formData.append('dj_party_ids', JSON.stringify(checkedPartyIds));
+
+    fetch('{% url "update_user" %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: formData,
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.success) {
+        const row = document.querySelector('tr[data-user-id="' + userId + '"]');
+        if (row) {
+          // credits
+          const creditsCell = row.querySelector('.monitoring-credits');
+          creditsCell.textContent = data.credits;
+          creditsCell.dataset.val = data.credits;
+
+          // active dot
+          row.querySelector('.monitoring-active-dot').classList.toggle('active', data.is_active);
+
+          // username
+          row.dataset.username = data.username.toLowerCase();
+          const nameSpan = row.querySelector('.monitoring-username');
+          if (nameSpan) nameSpan.textContent = data.username;
+
+          // DJ badge — add/remove dynamically
+          const nameCell = nameSpan ? nameSpan.parentElement : null;
+          if (nameCell) {
+            let djBadge = nameCell.querySelector('.monitoring-badge.dj');
+            if (data.is_dj && !djBadge) {
+              djBadge = document.createElement('span');
+              djBadge.className = 'monitoring-badge dj';
+              djBadge.textContent = 'DJ';
+              nameCell.appendChild(djBadge);
+            } else if (!data.is_dj && djBadge) {
+              djBadge.remove();
+            }
+          }
+
+          // update edit button data attrs
+          const editBtn = row.querySelector('.monitoring-edit-btn');
+          editBtn.dataset.credits    = data.credits;
+          editBtn.dataset.isActive   = data.is_active.toString();
+          editBtn.dataset.username   = data.username;
+          editBtn.dataset.djParties  = data.dj_party_ids.join(',');
+          row.dataset.djParties      = data.dj_party_ids.join(',');
+        }
+        $('#editUserModal').modal('hide');
+      } else {
+        const msg = data.errors
+          ? Object.values(data.errors).join(' · ')
+          : (data.error || 'Error desconegut');
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+      }
+    })
+    .catch(function () {
+      errorEl.textContent = 'Error de connexió.';
+      errorEl.style.display = 'block';
+    });
+  });
+}());
+</script>
+{% endblock %}

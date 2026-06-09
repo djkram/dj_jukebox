@@ -259,7 +259,7 @@
     .sl-lcd.sl-lcd-show     { --lc: #1a4a70; --lb: #5bc8ff; --lg: rgba(91,200,255,0.35); }
     .sl-lcd.sl-lcd-requests { --lc: #3a2060; --lb: #c878ff; --lg: rgba(200,120,255,0.35); }
     .sl-lcd.sl-lcd-active   { --lc: #0a3a20; --lb: #00e87a; --lg: rgba(0,232,122,0.4); }
-    .sl-lcd.sl-lcd-finished { --lc: #3a1010; --lb: #ff4444; --lg: rgba(255,68,68,0.35); }
+    .sl-lcd.sl-lcd-finished { --lc: #1a1a1a; --lb: #ffffff; --lg: rgba(255,255,255,0.25); }
     .sl-lcd-inner {
       display: flex;
       align-items: stretch;
@@ -1194,7 +1194,7 @@
   .mob-cdj-panel .sl-lcd.sl-lcd-show     { --lc: #1a4a70; --lb: #5bc8ff; --lg: rgba(91,200,255,0.35); }
   .mob-cdj-panel .sl-lcd.sl-lcd-requests { --lc: #3a2060; --lb: #c878ff; --lg: rgba(200,120,255,0.35); }
   .mob-cdj-panel .sl-lcd.sl-lcd-active   { --lc: #0a3a20; --lb: #00e87a; --lg: rgba(0,232,122,0.4); }
-  .mob-cdj-panel .sl-lcd.sl-lcd-finished { --lc: #3a1010; --lb: #ff4444; --lg: rgba(255,68,68,0.35); }
+  .mob-cdj-panel .sl-lcd.sl-lcd-finished { --lc: #1a1a1a; --lb: #ffffff; --lg: rgba(255,255,255,0.25); }
   .mob-cdj-panel .sl-lcd-inner {
     display: flex;
     align-items: stretch;

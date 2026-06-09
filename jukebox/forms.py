@@ -14,12 +14,8 @@ class CustomSignupForm(forms.Form):
         max_length=150,
         widget=forms.TextInput(attrs={'placeholder': _('Nom complet')}),
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Reorder: email first, full_name second, then passwords
-        desired = ['email', 'full_name', 'password1', 'password2']
-        self.fields = {k: self.fields[k] for k in desired if k in self.fields}
+    # BaseSignupForm reads this to reorder after its own __init__
+    field_order = ['email', 'full_name', 'password1', 'password2']
 
     def clean_full_name(self):
         full_name = self.cleaned_data.get('full_name', '').strip()

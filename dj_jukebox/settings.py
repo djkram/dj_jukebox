@@ -378,8 +378,9 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-ACCOUNT_LOGIN_METHODS = {"email", "username"}   # Pots posar només "email" si vols login només amb email
-ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+ACCOUNT_ADAPTER = 'jukebox.adapter.AccountAdapter'
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_QUERY_EMAIL = True

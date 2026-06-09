@@ -384,7 +384,7 @@
           {% csrf_token %}
           <div class="signup-form-grid">
             {% for field in form %}
-              <div class="signup-form-group {% if field.help_text and field.name != 'password1' %}signup-form-group--full{% endif %}">
+              <div class="signup-form-group {% if field.name == 'email' %}signup-form-group--full{% endif %}">
                 <label for="{{ field.id_for_label }}" class="signup-form-label">{{ field.label }}</label>
                 <input
                   type="{{ field.field.widget.input_type }}"

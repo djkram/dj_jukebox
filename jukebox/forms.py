@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from .models import Party, Playlist, Song
-from .spotify_api import get_user_playlists, get_playlist_tracks
+from .spotify_api import get_user_playlists, get_playlist_tracks, SpotifyAuthError
 
 class PartyForm(forms.ModelForm):
     class Meta:
@@ -92,9 +92,11 @@ class PartySettingsForm(forms.ModelForm):
         # 1) Si no hi ha playlist assignada, carreguem opcions de Spotify
         choices = [('', _('--- Selecciona una playlist ---'))]
         if request and (instance is None or instance.playlist is None):
-            playlists = get_user_playlists(request)
+            try:
+                playlists = get_user_playlists(request)
+            except SpotifyAuthError:
+                playlists = []
             if not playlists and request.user.is_authenticated:
-                # Si no hi ha playlists, potser el token ha expirat
                 choices.append(('', _('⚠️ Reconnecta Spotify per veure playlists')))
             else:
                 for pl in playlists:
@@ -140,10 +142,11 @@ class PartySettingsForm(forms.ModelForm):
 
         if sp_id:
             # ➎ Recuperem o creem l'objecte Playlist
-            pl_data = next(
-                (p for p in get_user_playlists(self.request) if p['id'] == sp_id),
-                None
-            )
+            try:
+                _playlists = get_user_playlists(self.request)
+            except SpotifyAuthError:
+                _playlists = []
+            pl_data = next((p for p in _playlists if p['id'] == sp_id), None)
             defaults = {
                 'name': pl_data['name'],
                 'owner': pl_data['owner']

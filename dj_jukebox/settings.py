@@ -275,8 +275,9 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Cache
-# Redis in production: shared across all gunicorn workers, in-memory fast
-# LocMemCache in development: no external dependencies
+# Redis only on VPS (IS_PRODUCTION + no RENDER_EXTERNAL_HOSTNAME)
+# Render (preprod) and local use LocMemCache — no Redis available there
+IS_VPS = IS_PRODUCTION and not os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -284,7 +285,7 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
-    } if IS_PRODUCTION else {
+    } if IS_VPS else {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'dj-jukebox',
     }

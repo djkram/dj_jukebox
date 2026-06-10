@@ -1,6 +1,7 @@
 # views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.cache import cache
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -15,15 +16,20 @@ from urllib.parse import urlencode
 
 from .models import Song, Party, Playlist, Vote, VotePackage, SongRequest, Notification, SongSwipeSkip
 from django.db.models import Sum, Count, Q, F, Avg
-from django.db import transaction
+from django.db import transaction, connection
+import threading
 from .forms import PartyForm, PartySettingsForm
 from .notifications import (
     create_song_accepted_notification,
+    create_song_queued_notification,
+    create_song_loaded_notification,
+    create_song_rejected_notification,
     create_song_played_notification,
     create_coins_purchased_notification,
 )
 from .spotify_api import (
     SpotifyAuthError,
+    _ensure_valid_user_token,
     _get_songbpm_features,
     _get_acousticbrainz_features,
     add_track_to_playlist,
@@ -43,6 +49,7 @@ from .votes import (
     get_user_available_coins,
     ensure_user_has_free_coins,
     spend_user_coins_for_party,
+    refund_user_coins_for_party,
     sync_party_free_coins_for_existing_users,
 )
 from django.utils import timezone
@@ -100,10 +107,96 @@ def main(request):
     return redirect('song_list')
 
 
+def _add_song_to_party(song_request):
+    """Afegeix la cançó de la petició a la llista de la festa si no hi és. Returns the Song."""
+    spotify_id = (song_request.spotify_id or "").strip()
+    if spotify_id:
+        song, _ = Song.objects.get_or_create(
+            party=song_request.party,
+            spotify_id=spotify_id,
+            defaults={
+                'title': song_request.title,
+                'artist': song_request.artist,
+                'album_image_url': song_request.album_image_url,
+            },
+        )
+    else:
+        song, _ = Song.objects.get_or_create(
+            party=song_request.party,
+            title=song_request.title,
+            artist=song_request.artist,
+            defaults={
+                'spotify_id': f"request-{song_request.id}",
+                'album_image_url': song_request.album_image_url,
+            },
+        )
+    return song
+
+
+def _analyze_and_add_to_spotify(song_id, party_playlist_id, dj_user):
+    """Background thread: BPM/Key analysis + add to Spotify playlist."""
+    import time as _t
+    try:
+        song = Song.objects.get(pk=song_id)
+
+        # BPM/Key — skip if already complete
+        if not (song.bpm and song.key):
+            t0 = _t.time()
+            result = _get_songbpm_features(song.title, song.artist, song.spotify_id)
+            bpm = result.get('bpm') if result else None
+            key = result.get('key') if result else None
+            logger.info("[QUEUE_BG] SongBPM song_id=%s bpm=%s key=%s (%.1fs)", song_id, bpm, key, _t.time() - t0)
+
+            if not bpm and not key:
+                ab = _get_acousticbrainz_features(song.title, song.artist)
+                bpm = ab.get('bpm') if ab else None
+                key = ab.get('key') if ab else None
+                logger.info("[QUEUE_BG] AcousticBrainz song_id=%s bpm=%s key=%s", song_id, bpm, key)
+
+            if not bpm and not key and getattr(song, 'preview_url', None):
+                pr = analyze_from_preview_url(song.preview_url)
+                if pr:
+                    bpm = pr.get('bpm')
+                    key = pr.get('key')
+
+            update_fields = []
+            if bpm and not song.bpm:
+                song.bpm = bpm
+                update_fields.append('bpm')
+            if key and not song.key:
+                song.key = key
+                update_fields.append('key')
+            if result:
+                for field in ('key_text', 'duration', 'popularity', 'energy', 'danceability',
+                              'happiness', 'acousticness', 'instrumentalness', 'liveness',
+                              'speechiness', 'loudness'):
+                    val = result.get(field)
+                    if val is not None and not getattr(song, field, None):
+                        setattr(song, field, val)
+                        update_fields.append(field)
+            if update_fields:
+                song.save(update_fields=update_fields)
+                logger.info("[QUEUE_BG] ✓ Saved song_id=%s fields=%s", song_id, update_fields)
+
+        # Add to Spotify playlist
+        if party_playlist_id and not (song.spotify_id or '').startswith('request-'):
+            try:
+                add_track_to_playlist(dj_user, party_playlist_id, song.spotify_id)
+                logger.info("[QUEUE_BG] ✓ Added song_id=%s to Spotify playlist %s", song_id, party_playlist_id)
+            except Exception:
+                logger.exception("[QUEUE_BG] Spotify playlist add failed song_id=%s", song_id)
+
+    except Exception:
+        logger.exception("[QUEUE_BG] Unexpected error for song_id=%s", song_id)
+    finally:
+        connection.close()
+
+
 def _accept_song_request(song_request, processed_by, charge_user):
+    """Accepta (LEGACY) o carrega (LOAD) una petició."""
     charged_amount = None
     with transaction.atomic():
-        if charge_user:
+        if charge_user and not song_request.coins_charged:
             spent = spend_user_coins_for_party(
                 song_request.user,
                 song_request.party,
@@ -113,35 +206,10 @@ def _accept_song_request(song_request, processed_by, charge_user):
             if not spent:
                 raise ValueError("Insufficient credits")
             charged_amount = song_request.coins_cost
+        elif song_request.coins_charged:
+            charged_amount = song_request.coins_cost
 
-        spotify_id = (song_request.spotify_id or "").strip()
-        if spotify_id:
-            existing_song = Song.objects.filter(
-                party=song_request.party,
-                spotify_id=spotify_id,
-            ).order_by("id").first()
-            if not existing_song:
-                Song.objects.create(
-                    party=song_request.party,
-                    spotify_id=spotify_id,
-                    title=song_request.title,
-                    artist=song_request.artist,
-                    album_image_url=song_request.album_image_url,
-                )
-        else:
-            existing_song = Song.objects.filter(
-                party=song_request.party,
-                title=song_request.title,
-                artist=song_request.artist,
-            ).order_by("id").first()
-            if not existing_song:
-                Song.objects.create(
-                    party=song_request.party,
-                    spotify_id=f"request-{song_request.id}",
-                    title=song_request.title,
-                    artist=song_request.artist,
-                    album_image_url=song_request.album_image_url,
-                )
+        _add_song_to_party(song_request)
 
         song_request.status = 'accepted'
         song_request.processed_at = timezone.now()
@@ -152,12 +220,74 @@ def _accept_song_request(song_request, processed_by, charge_user):
     return charged_amount
 
 
+def _queue_song_request(song_request, processed_by):
+    """Posa la cançó a la maleta: afegeix a la llista, analitza BPM/Key i a la playlist Spotify."""
+    with transaction.atomic():
+        song = _add_song_to_party(song_request)
+        song_request.status = 'queued'
+        song_request.processed_at = timezone.now()
+        song_request.processed_by = processed_by
+        song_request.save(update_fields=['status', 'processed_at', 'processed_by'])
+    create_song_queued_notification(song_request)
+
+    party = song_request.party
+    playlist_id = party.playlist.spotify_id if party.playlist else None
+    threading.Thread(
+        target=_analyze_and_add_to_spotify,
+        args=(song.id, playlist_id, processed_by),
+        daemon=True,
+    ).start()
+
+
+def _load_song_request(song_request, processed_by):
+    """LOAD: confirma la cançó al jukebox actiu. Cobra si no s'ha cobrat. Envia notificació."""
+    with transaction.atomic():
+        if not song_request.coins_charged:
+            spent = spend_user_coins_for_party(
+                song_request.user,
+                song_request.party,
+                song_request.coins_cost,
+                reason='song_request_cost',
+            )
+            if not spent:
+                raise ValueError("Insufficient credits")
+            song_request.coins_charged = True
+
+        _add_song_to_party(song_request)
+        song_request.status = 'accepted'
+        song_request.processed_at = timezone.now()
+        song_request.processed_by = processed_by
+        song_request.save(update_fields=['status', 'processed_at', 'processed_by', 'coins_charged'])
+    create_song_loaded_notification(song_request)
+
+
+def _reject_song_request(song_request, processed_by):
+    """Rebutja la petició. Si els coins havien estat retinguts, els retorna."""
+    with transaction.atomic():
+        if song_request.coins_charged:
+            refund_user_coins_for_party(
+                song_request.user,
+                song_request.party,
+                song_request.coins_cost,
+            )
+        song_request.status = 'rejected'
+        song_request.processed_at = timezone.now()
+        song_request.processed_by = processed_by
+        song_request.save(update_fields=['status', 'processed_at', 'processed_by'])
+    create_song_rejected_notification(song_request)
+
+
 @login_required
 def profile(request):
     user = request.user
-    has_spotify = SocialAccount.objects.filter(user=user, provider="spotify").exists()
+    spotify_account = SocialAccount.objects.filter(user=user, provider="spotify").first()
+    has_spotify = spotify_account is not None
     has_google = SocialAccount.objects.filter(user=user, provider="google").exists()
     is_dj = Party.objects.filter(djs=user).exists()
+
+    if has_spotify:
+        _refresh_spotify_profile(user, spotify_account, request)
+
     if user.is_staff or user.is_superuser:
         profile_role = _("Admin")
         profile_role_icon = "admin_panel_settings"
@@ -175,6 +305,31 @@ def profile(request):
         "profile_role": profile_role,
         "profile_role_icon": profile_role_icon,
     })
+
+
+def _refresh_spotify_profile(user, spotify_account, request):
+    """Refresh Spotify extra_data (images, display_name) to avoid expired CDN URLs."""
+    import requests as http_requests
+    try:
+        token = _ensure_valid_user_token(user)
+        resp = http_requests.get(
+            "https://api.spotify.com/v1/me",
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            return
+        data = resp.json()
+        changed = False
+        for field in ("images", "display_name"):
+            if field in data and spotify_account.extra_data.get(field) != data[field]:
+                spotify_account.extra_data[field] = data[field]
+                changed = True
+        if changed:
+            spotify_account.save(update_fields=["extra_data"])
+            request.session.pop('_avatar_cache_v2', None)
+    except Exception:
+        pass
 
 @login_required
 @require_POST
@@ -954,6 +1109,7 @@ def song_list(request):
     if not party_id:
         return redirect('select_party')
     party = get_object_or_404(Party, pk=party_id)
+    request._party_cache = party
     user = request.user
 
     # Si la festa és visible però la llista no s'ha carregat encara, mostrar espera
@@ -1036,28 +1192,34 @@ def song_list(request):
                 messages.warning(request, error_msg)
             return redirect('song_list')
 
-    # Comptar només els likes per ordenar
-    songs = annotated_songs.order_by('-num_likes', 'title')
-    pending_songs = annotated_songs.filter(has_played=False).order_by('-num_likes', 'title')
+    SONGS_PAGE_SIZE = 15
+
+    # Played songs (avaluat completament — normalment petit)
     played_songs = list(annotated_songs.filter(has_played=True).order_by('-played_at', '-id'))
+
+    # Pending: primer page per al render inicial
+    pending_songs_qs = annotated_songs.filter(has_played=False).order_by('-num_likes', 'title')
+    pending_songs = list(pending_songs_qs[:SONGS_PAGE_SIZE])
+
+    # Compte total ràpid (sense annotations) per als stats i infinite scroll
+    pending_total = party.songs.filter(has_played=False).count()
+    has_more_pending = pending_total > SONGS_PAGE_SIZE
 
     # Obtenir els vots de l'usuari per mostrar els cors/creus marcats
     user_votes = Vote.objects.filter(user=user, party=party).select_related('song')
     user_votes_dict = {v.song_id: v.vote_type for v in user_votes}
 
-    # Estadístiques derivades de querysets ja carregats (0 queries addicionals)
     songs_played = len(played_songs)
-    all_songs_list = list(pending_songs) + played_songs
-    total_songs = len(all_songs_list)
-    songs_remaining = len(list(pending_songs))
-    songs_with_votes = sum(
-        1 for s in all_songs_list
-        if (getattr(s, 'num_likes', 0) or 0) + (getattr(s, 'num_dislikes', 0) or 0) > 0
-    )
-    songs_with_votes_percentage = round((songs_with_votes / total_songs * 100) if total_songs > 0 else 0, 1)
+    songs_remaining = pending_total
+    total_songs = pending_total + songs_played
+    songs_with_votes = 0
+    songs_with_votes_percentage = 0
 
-    # Cançó que està sonant (primera en la cua per vots, ja ordenada)
-    now_playing = pending_songs.first() if hasattr(pending_songs, 'first') else (list(pending_songs)[0] if pending_songs else None)
+    # Cançó que està sonant (primera en la cua per vots)
+    now_playing = pending_songs[0] if pending_songs else None
+
+    # songs queryset per al desktop view (no avaluat si no s'usa)
+    songs = pending_songs_qs
 
     # KPIs amb aggregate combinat (1 query per Vote, 1 per SongRequest)
     thirty_min_ago = timezone.now() - timezone.timedelta(minutes=30)
@@ -1079,12 +1241,16 @@ def song_list(request):
     pending_requests_count = request_stats['pending_count'] or 0
     total_coins_spent = request_stats['total_coins'] or 0
 
-    # KPI actius (OR entre dues taules, es manté separat)
-    active_users = User.objects.filter(
-        Q(vote__party=party) | Q(songrequest__party=party)
-    ).distinct().count()
+    # KPI actius — cached 30s per evitar la OR cross-table en cada request
+    _active_users_key = f'active_users_{party.pk}'
+    active_users = cache.get(_active_users_key)
+    if active_users is None:
+        active_users = User.objects.filter(
+            Q(vote__party=party) | Q(songrequest__party=party)
+        ).distinct().count()
+        cache.set(_active_users_key, active_users, 30)
 
-    # Aplicar badges dinàmics a les cançons (una sola instancia compartida = 1 query)
+    # Aplicar badges dinàmics (pending_songs i played_songs ja són llistes)
     badge_calc = BadgeCalculator(party.songs)
     calculate_and_apply_badges(party, pending_songs, badge_calc)
     calculate_and_apply_badges(party, played_songs, badge_calc)
@@ -1127,6 +1293,61 @@ def song_list(request):
         "voting_enabled": voting_enabled,
         "my_played_votes": my_played_votes,
         "recommended_songs": recommended_songs,
+        "has_more_pending": has_more_pending,
+        "pending_page_size": SONGS_PAGE_SIZE,
+    })
+
+
+@login_required
+def song_list_more(request):
+    """Infinite scroll endpoint: returns next batch of mobile pending song cards as HTML."""
+    party_id = request.session.get('selected_party_id')
+    if not party_id:
+        return JsonResponse({'error': 'no party'}, status=400)
+
+    party = get_object_or_404(Party, pk=party_id)
+    user = request.user
+
+    SONGS_PAGE_SIZE = 15
+    try:
+        offset = max(0, int(request.GET.get('offset', 0)))
+    except (ValueError, TypeError):
+        offset = 0
+
+    from .utils.query_helpers import get_annotated_party_songs
+    pending_qs = get_annotated_party_songs(party, played_filter=False).order_by('-num_likes', 'title')
+    songs = list(pending_qs[offset:offset + SONGS_PAGE_SIZE])
+    pending_total = party.songs.filter(has_played=False).count()
+    has_more = (offset + SONGS_PAGE_SIZE) < pending_total
+
+    badge_calc = BadgeCalculator(party.songs)
+    calculate_and_apply_badges(party, songs, badge_calc)
+
+    song_ids = [s.id for s in songs]
+    user_votes_dict = {
+        v.song_id: v.vote_type
+        for v in Vote.objects.filter(user=user, party=party, song_id__in=song_ids)
+    }
+
+    votes_left = get_user_votes_left(user, party)
+    credits = get_user_available_coins(user, party)
+    voting_enabled = party.party_status in (Party.STATUS_REQUESTS_OPEN, Party.STATUS_DJJUKEBOX_ACTIVE)
+    spotify_context = get_spotify_context_for_view(user)
+
+    from django.template.loader import render_to_string
+    html = render_to_string('jukebox/_song_card_mobile_pending.html', {
+        'songs': songs,
+        'user_votes_dict': user_votes_dict,
+        'voting_enabled': voting_enabled,
+        'votes_left': votes_left,
+        'credits': credits,
+        'has_spotify': spotify_context.get('has_spotify', False),
+    }, request=request)
+
+    return JsonResponse({
+        'html': html,
+        'has_more': has_more,
+        'next_offset': offset + SONGS_PAGE_SIZE,
     })
 
 
@@ -1309,6 +1530,7 @@ def dj_dashboard(request):
         return redirect('select_party')
 
     party = get_object_or_404(Party, pk=party_id)
+    request._party_cache = party
 
     if not (request.user.is_superuser or party.djs.filter(pk=request.user.pk).exists()):
         return redirect('song_list')
@@ -1367,8 +1589,8 @@ def dj_dashboard(request):
     thirty_min_ago = timezone.now() - timezone.timedelta(minutes=30)
     recent_votes = Vote.objects.filter(party=party, created_at__gte=thirty_min_ago).count()
 
-    # 3. Peticions (ja existeix pending_requests més avall)
-    pending_requests_count = SongRequest.objects.filter(party=party, status='pending').count()
+    # 3. Peticions
+
 
     # 4. Temes amb vots
     songs_with_votes = party.songs.annotate(vote_count=Count('vote')).filter(vote_count__gt=0).count()
@@ -1384,20 +1606,21 @@ def dj_dashboard(request):
 
     # Obtenir recomanacions intel·ligents
     recommended_songs = get_recommended_songs(party, limit=6)
-    pending_requests = SongRequest.objects.filter(party=party, status='pending').order_by('created_at')
-    unplayed_requested_spotify_ids = list(
-        party.songs.filter(has_played=False).values_list('spotify_id', flat=True)
-    )
-    accepted_unplayed_requests = SongRequest.objects.filter(
-        party=party,
-        status='accepted',
-        spotify_id__in=unplayed_requested_spotify_ids,
-    ).order_by('-processed_at')
+    pending_requests = list(SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at'))
+    queued_requests  = list(SongRequest.objects.filter(party=party, status='queued').select_related('user').order_by('created_at'))
+    pending_requests_count = len(pending_requests) + len(queued_requests)
 
     unplayed_songs_by_spotify = {
         song.spotify_id: song.id
         for song in party.songs.filter(has_played=False)
     }
+    accepted_unplayed_requests = list(
+        SongRequest.objects.filter(
+            party=party,
+            status='accepted',
+            spotify_id__in=list(unplayed_songs_by_spotify),
+        ).select_related('user').order_by('-processed_at')
+    )
     for req in accepted_unplayed_requests:
         req.linked_song_id = unplayed_songs_by_spotify.get(req.spotify_id)
 
@@ -1410,6 +1633,7 @@ def dj_dashboard(request):
         'played_songs': played_songs_count,
         'recommended_songs': recommended_songs,
         'pending_requests': pending_requests,
+        'queued_requests': queued_requests,
         'accepted_unplayed_requests': accepted_unplayed_requests,
         # Nous KPIs
         'active_users': active_users,
@@ -1843,6 +2067,7 @@ def song_swipe(request):
         return redirect('select_party')
 
     party = get_object_or_404(Party, pk=party_id)
+    request._party_cache = party
     user = request.user
 
     if party.party_status not in (Party.STATUS_REQUESTS_OPEN, Party.STATUS_DJJUKEBOX_ACTIVE):
@@ -1954,6 +2179,27 @@ def request_song(request):
         query = request.GET.get('search', '').strip()
         if query:
             tracks = search_spotify_tracks_public(query, limit=20)
+            if tracks:
+                track_ids = [t['id'] for t in tracks]
+                # Songs already in the party list
+                in_list = set(
+                    Song.objects.filter(party=party, spotify_id__in=track_ids)
+                    .values_list('spotify_id', flat=True)
+                )
+                # Active song requests (pending/queued)
+                requested = dict(
+                    SongRequest.objects.filter(
+                        party=party,
+                        spotify_id__in=track_ids,
+                        status__in=['pending', 'queued'],
+                    ).values_list('spotify_id', 'status')
+                )
+                for track in tracks:
+                    tid = track['id']
+                    if tid in in_list:
+                        track['maleta_status'] = 'in_list'
+                    elif tid in requested:
+                        track['maleta_status'] = requested[tid]
             return JsonResponse({'tracks': tracks})
         return JsonResponse({'tracks': []})
 
@@ -1972,22 +2218,37 @@ def request_song(request):
             return JsonResponse({'success': False, 'error': _('Aquesta cançó ja està a la llista!')}, status=400)
 
         # Comprovar si ja s'ha demanat
-        if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status='pending').exists():
+        if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status__in=['pending', 'queued']).exists():
             return JsonResponse({'success': False, 'error': _('Aquesta cançó ja ha estat demanada i està pendent')}, status=400)
 
-        # Crear petició
-        SongRequest.objects.create(
-            user=user,
-            party=party,
-            title=title,
-            artist=artist,
-            spotify_id=spotify_id,
-            album_image_url=album_image_url,
-            coins_cost=party.song_request_cost,
-            status='pending'
-        )
+        cost = party.song_request_cost
+        available = get_user_available_coins(user, party)
+        if available < cost:
+            return JsonResponse({
+                'success': False,
+                'error': _('No tens prou Coins per fer la petició (tens %(available)s, calen %(cost)s).') % {
+                    'available': available, 'cost': cost,
+                },
+            }, status=400)
 
-        return JsonResponse({'success': True, 'message': _('Petició enviada! Cost: %(cost)s Coins (només si s\'accepta)') % {'cost': party.song_request_cost}})
+        # Retenir coins i crear petició
+        with transaction.atomic():
+            spent = spend_user_coins_for_party(user, party, cost, reason='song_request_hold')
+            if not spent:
+                return JsonResponse({'success': False, 'error': _('No tens prou Coins.')}, status=400)
+            SongRequest.objects.create(
+                user=user,
+                party=party,
+                title=title,
+                artist=artist,
+                spotify_id=spotify_id,
+                album_image_url=album_image_url,
+                coins_cost=cost,
+                coins_charged=True,
+                status='pending',
+            )
+
+        return JsonResponse({'success': True, 'message': _('Petició enviada! S\'han retingut %(cost)s Coins fins que el DJ decideixi.') % {'cost': cost}})
 
     # Llistar peticions de l'usuari per aquesta festa
     user_requests = SongRequest.objects.filter(user=user, party=party).order_by('-created_at')
@@ -2130,73 +2391,81 @@ def manage_song_requests(request):
 
     if request.method == 'POST':
         request_id = request.POST.get('request_id')
-        action = request.POST.get('action')  # 'accept' o 'reject'
-        allow_without_charge = request.POST.get('allow_without_charge') == '1'
-        if not request_id or action not in {'accept', 'reject'}:
+        action = request.POST.get('action')
+        if not request_id or action not in {'queue', 'load', 'reject', 'delete'}:
             return JsonResponse({'success': False, 'error': _('Paràmetres invàlids.')}, status=400)
 
-        try:
-            with transaction.atomic():
-                try:
+        # Delete works on any status — handle before the status-filtered lookup
+        if action == 'delete':
+            try:
+                with transaction.atomic():
                     song_request = SongRequest.objects.select_for_update().get(
-                        pk=request_id,
-                        party=party,
-                        status='pending',
+                        pk=request_id, party=party
                     )
-                except SongRequest.DoesNotExist:
-                    return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
-
-                if action == 'accept':
-                    try:
-                        charged_amount = _accept_song_request(
-                            song_request=song_request,
-                            processed_by=request.user,
-                            charge_user=not allow_without_charge,
+                    if song_request.coins_charged:
+                        refund_user_coins_for_party(
+                            song_request.user, party, song_request.coins_cost
                         )
-                    except ValueError:
-                        if allow_without_charge:
-                            charged_amount = _accept_song_request(
-                                song_request=song_request,
-                                processed_by=request.user,
-                                charge_user=False,
-                            )
-                        else:
-                            song_request.user.refresh_from_db(fields=['credits'])
-                            return JsonResponse({
-                                'success': False,
-                                'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
-                                    'current': get_user_available_coins(song_request.user, party),
-                                    'required': song_request.coins_cost
-                                },
-                            }, status=400)
+                    song_request.delete()
+                return JsonResponse({'success': True, 'message': _('Petició eliminada.')})
+            except SongRequest.DoesNotExist:
+                return JsonResponse({'success': False, 'error': _('Petició no trobada.')}, status=404)
+            except Exception:
+                logger.exception("[REQUESTS] Error eliminant petició request_id=%s party_id=%s", request_id, party.id)
+                return JsonResponse({'success': False, 'error': _('Error intern eliminant la petició.')}, status=500)
 
-                    if charged_amount:
-                        return JsonResponse({
-                            'success': True,
-                            'message': f'Cançó acceptada i afegida! S\'han cobrat {charged_amount} Coins',
-                        })
+        try:
+            song_request = SongRequest.objects.select_for_update().get(
+                pk=request_id,
+                party=party,
+                status__in=['pending', 'queued'],
+            )
+        except SongRequest.DoesNotExist:
+            return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
+
+        try:
+            if action == 'reject':
+                _reject_song_request(song_request, request.user)
+                refund_msg = _(' (%(coins)s Coins retornats)') % {'coins': song_request.coins_cost} if song_request.coins_charged else ''
+                return JsonResponse({'success': True, 'message': _('Petició rebutjada.') + refund_msg})
+
+            elif action == 'queue':
+                _queue_song_request(song_request, request.user)
+                return JsonResponse({'success': True, 'message': _('Cançó afegida a la maleta!')})
+
+            elif action == 'load':
+                if party.party_status != Party.STATUS_DJJUKEBOX_ACTIVE:
+                    return JsonResponse({'success': False, 'error': _('El Jukebox no està actiu.')}, status=400)
+                try:
+                    _load_song_request(song_request, request.user)
+                except ValueError:
+                    song_request.user.refresh_from_db(fields=['credits'])
                     return JsonResponse({
-                        'success': True,
-                        'message': _('Cançó acceptada i afegida sense càrrec'),
-                    })
+                        'success': False,
+                        'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
+                            'current': get_user_available_coins(song_request.user, party),
+                            'required': song_request.coins_cost,
+                        },
+                    }, status=400)
+                return JsonResponse({'success': True, 'message': _('🚀 LOAD! Cançó carregada al Jukebox!')})
 
-                elif action == 'reject':
-                    song_request.status = 'rejected'
-                    song_request.processed_at = timezone.now()
-                    song_request.processed_by = request.user
-                    song_request.save()
-
-                    return JsonResponse({'success': True, 'message': _('Cançó rebutjada (sense càrrec)')})
         except Exception:
             logger.exception("[REQUESTS] Error processant petició request_id=%s action=%s party_id=%s", request_id, action, party.id)
             return JsonResponse({'success': False, 'error': _('Error intern processant la petició.')}, status=500)
 
-    # Llistar totes les peticions pendents
-    pending_requests = SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at')
-    processed_requests = SongRequest.objects.filter(party=party).exclude(status='pending').select_related('user', 'processed_by').order_by('-processed_at')[:20]
+    # Llistar peticions actives (pending + queued) i historial
+    active_requests = SongRequest.objects.filter(
+        party=party, status__in=['pending', 'queued']
+    ).select_related('user').order_by('created_at')
+    processed_requests = SongRequest.objects.filter(
+        party=party
+    ).exclude(status__in=['pending', 'queued']).select_related('user', 'processed_by').order_by('-processed_at')[:20]
 
     return render(request, 'jukebox/manage_song_requests.html', {
         'party': party,
-        'pending_requests': pending_requests,
+        'active_requests': active_requests,
+        'pending_count': active_requests.filter(status='pending').count(),
+        'queued_count': active_requests.filter(status='queued').count(),
         'processed_requests': processed_requests,
+        'is_jukebox_active': party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE,
     })

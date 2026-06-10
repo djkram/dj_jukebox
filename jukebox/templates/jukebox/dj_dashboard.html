@@ -1602,10 +1602,54 @@
                 </a>
                 {% endif %}
             </div>
-            {% elif pending_requests or accepted_unplayed_requests %}
+            {% elif pending_requests or queued_requests or accepted_unplayed_requests %}
             <div class="sonic-space-y-3">
                 {% for req in pending_requests %}
-                <div class="sonic-request-card">
+                <div class="sonic-request-card" id="dash-req-{{ req.id }}" data-coins-cost="{{ req.coins_cost }}" data-username="{{ req.user.username }}">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+                        {% if req.album_image_url %}
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="sonic-request-img">
+                        {% else %}
+                        <div class="sonic-request-img" style="background: #ebeef1; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: #747687;">music_note</span>
+                        </div>
+                        {% endif %}
+                        <div class="sonic-request-content">
+                            <div class="sonic-request-title">{{ req.title }}</div>
+                            <div class="sonic-request-subtitle">{{ req.artist }}</div>
+                            <div class="sonic-request-coins dash-req-status-line">
+                                <span class="material-symbols-outlined dash-req-status-icon" style="font-size: 0.75rem;">payments</span>
+                                <span class="dash-req-status-text">{{ req.user.username }} · {{ req.coins_cost }} Coins</span>
+                                {% if req.coins_charged %}<span style="color:#1e40af;font-size:0.65rem;font-weight:700;"> 🔒</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-req-actions" style="display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center;">
+                        <!-- Rebutjar -->
+                        <button type="button" class="sonic-btn sonic-btn-ghost sonic-btn-sm dash-req-btn"
+                                data-id="{{ req.id }}" data-action="reject" data-party="{{ party.id }}"
+                                style="border-color: #ba1a1a; color: #ba1a1a;"
+                                title="Rebutjar{% if req.coins_charged %} (retorna {{ req.coins_cost }} Coins){% endif %}">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
+                        </button>
+                        <!-- Maleta -->
+                        <button type="button" class="sonic-btn sonic-btn-sm dash-req-btn"
+                                data-id="{{ req.id }}" data-action="queue" data-party="{{ party.id }}"
+                                style="background:#dbeafe;color:#1e40af;border:none;"
+                                title="Posar a la maleta (sense cobrar adicionalment)">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">shopping_bag</span>
+                        </button>
+                        <!-- LOAD -->
+                        <button type="button" class="sonic-btn-posada dash-req-btn{% if not is_djjukebox_active %} disabled{% endif %}"
+                                data-id="{{ req.id }}" data-action="load" data-party="{{ party.id }}"
+                                {% if not is_djjukebox_active %}disabled title="Jukebox no actiu"{% else %}title="LOAD: carregar al Jukebox"{% endif %}>
+                            LOAD
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for req in queued_requests %}
+                <div class="sonic-request-card" id="dash-req-{{ req.id }}" style="border-color: rgba(59,130,246,0.3); background: rgba(239,246,255,0.5);">
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
                         {% if req.album_image_url %}
                         <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="sonic-request-img">
@@ -1618,30 +1662,19 @@
                             <div class="sonic-request-title">{{ req.title }}</div>
                             <div class="sonic-request-subtitle">{{ req.artist }}</div>
                             <div class="sonic-request-coins">
-                                <span class="material-symbols-outlined" style="font-size: 0.75rem;">payments</span>
-                                {{ req.user.username }} · {{ req.coins_cost }} Coins
+                                <span class="material-symbols-outlined" style="font-size: 0.75rem;">shopping_bag</span>
+                                {{ req.user.username }} · Maleta
+                                {% if req.coins_charged %}<span style="color:#1e40af;font-size:0.65rem;font-weight:700;"> 🔒</span>{% endif %}
                             </div>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                        <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form" data-user-credits="{{ req.user.credits }}" data-cost="{{ req.coins_cost }}">
-                            {% csrf_token %}
-                            <input type="hidden" name="party_id" value="{{ party.id }}">
-                            <input type="hidden" name="request_id" value="{{ req.id }}">
-                            <input type="hidden" name="action" value="accept">
-                            <button type="submit" class="sonic-btn sonic-btn-tertiary sonic-btn-sm">
-                                <span class="material-symbols-outlined" style="font-size: 1rem;">check</span>
-                            </button>
-                        </form>
-                        <form method="post" action="{% url 'manage_song_requests' %}" style="margin: 0;" class="dashboard-request-action-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="party_id" value="{{ party.id }}">
-                            <input type="hidden" name="request_id" value="{{ req.id }}">
-                            <input type="hidden" name="action" value="reject">
-                            <button type="submit" class="sonic-btn sonic-btn-ghost sonic-btn-sm" style="border-color: #ba1a1a; color: #ba1a1a;">
-                                <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
-                            </button>
-                        </form>
+                    <div style="display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center;">
+                        <!-- LOAD -->
+                        <button type="button" class="sonic-btn-posada dash-req-btn{% if not is_djjukebox_active %} disabled{% endif %}"
+                                data-id="{{ req.id }}" data-action="load" data-party="{{ party.id }}"
+                                {% if not is_djjukebox_active %}disabled title="Jukebox no actiu"{% else %}title="LOAD: carregar al Jukebox"{% endif %}>
+                            LOAD
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -1990,95 +2023,74 @@ document.addEventListener('DOMContentLoaded', function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  document.querySelectorAll('.dashboard-request-action-form').forEach(function(form) {
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
+  var DASH_REQ_CONFIRMS = {
+    reject: 'Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari.',
+    queue:  'Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment).',
+    load:   '⚡ LOAD: Carregar la cançó al Jukebox ara?',
+  };
+  var DASH_CSRF = '{{ csrf_token }}';
 
-      var actionInput = form.querySelector('input[name="action"]');
-      if (!actionInput) {
-        form.submit();
-        return;
-      }
-      var action = actionInput.value;
-      var userCredits = parseInt(form.dataset.userCredits || '0', 10);
-      var cost = parseInt(form.dataset.cost || '0', 10);
-      var allowWithoutCharge = false;
+  document.querySelectorAll('.dash-req-btn').forEach(function(btn) {
+    if (btn.disabled) return;
+    btn.addEventListener('click', function() {
+      var id     = this.dataset.id;
+      var action = this.dataset.action;
+      var party  = this.dataset.party;
+      var msg    = DASH_REQ_CONFIRMS[action] || 'Confirmar?';
+      if (!confirm(msg)) return;
 
-      if (action === 'accept') {
-        if (userCredits < cost) {
-          showConfirm(
-            'Usuari sense prou coins',
-            `L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment sense cobrar-li?`,
-            function() {
-              allowWithoutCharge = true;
-              submitRequestForm();
+      var triggerBtn = this;
+      triggerBtn.disabled = true;
+
+      var fd = new FormData();
+      fd.append('request_id', id);
+      fd.append('action', action);
+      fd.append('party_id', party);
+
+      fetch('{% url "manage_song_requests" %}', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': DASH_CSRF,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        },
+        body: fd,
+      })
+      .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+      .then(function(result) {
+        if (result.ok && result.data.success) {
+          showDashboardMessage(result.data.message, 'success');
+          var card = document.getElementById('dash-req-' + id);
+          if (card) {
+            if (action === 'queue') {
+              // Transform card in-place: queued styling, remove reject+maleta, keep LOAD
+              card.style.borderColor = 'rgba(59,130,246,0.3)';
+              card.style.background  = 'rgba(239,246,255,0.5)';
+              var icon = card.querySelector('.dash-req-status-icon');
+              if (icon) icon.textContent = 'shopping_bag';
+              var txt = card.querySelector('.dash-req-status-text');
+              if (txt) txt.textContent = card.dataset.username + ' · Maleta';
+              var actions = card.querySelector('.dash-req-actions');
+              if (actions) {
+                Array.from(actions.querySelectorAll('button')).forEach(function(b) {
+                  if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
+                });
+              }
+            } else {
+              card.style.transition = 'opacity 350ms';
+              card.style.opacity = '0';
+              setTimeout(function() { card.remove(); }, 350);
             }
-          );
-          return;
+          }
         } else {
-          showConfirm(
-            'Acceptar petició',
-            `Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`,
-            submitRequestForm
-          );
-          return;
-        }
-      } else {
-        showConfirm(
-          'Rebutjar petició',
-          'Rebutjar aquesta petició? No es cobrarà cap Coin.',
-          submitRequestForm
-        );
-        return;
-      }
-
-      function submitRequestForm() {
-        var formData = new FormData(form);
-        if (allowWithoutCharge) {
-          formData.append('allow_without_charge', '1');
-        }
-
-        fetch(form.action, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-          },
-          body: formData
-        })
-        .then(function(response) {
-          var contentType = response.headers.get('content-type') || '';
-          if (contentType.indexOf('application/json') !== -1) {
-            return response.json().then(function(data) {
-              return { ok: response.ok, data: data };
-            });
-          }
-          return response.text().then(function(text) {
-            return {
-              ok: response.ok,
-              data: {
-                success: false,
-                error: 'Resposta inesperada del servidor (' + response.status + ').'
-              },
-              raw: text
-            };
-          });
-        })
-        .then(function(result) {
-          if (result.ok && result.data.success) {
-            showDashboardMessage(result.data.message, 'success');
-            setTimeout(function() { window.location.reload(); }, 900);
-            return;
-          }
-
           showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
-        })
-        .catch(function(error) {
-          console.error('Error processant la petició:', error);
-          showDashboardMessage('No s\'ha pogut processar la petició.', 'danger');
-        });
-      }
+          triggerBtn.disabled = false;
+        }
+      })
+      .catch(function() {
+        showDashboardMessage('Error de connexió.', 'danger');
+        triggerBtn.disabled = false;
+      });
     });
   });
 });

@@ -630,55 +630,77 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.data.tracks && data.data.tracks.length > 0) {
           let html = isMobile ? '<div class="mobile-list-stack">' : '<div class="request-results-grid">';
           data.data.tracks.forEach(track => {
-            const safeTitle = track.title.replace(/"/g, '&quot;');
-            const safeArtist = track.artist.replace(/"/g, '&quot;');
+            const safeTitle  = escapeHtml(track.title);
+            const safeArtist = escapeHtml(track.artist);
+            const safeImg    = track.album_image_url ? escapeHtml(track.album_image_url) : '';
+            const maletaLabel = track.maleta_status === 'queued' ? 'A la Maleta'
+                              : track.maleta_status === 'pending' ? 'Demanada'
+                              : track.maleta_status === 'in_list' ? 'Ja a la llista'
+                              : null;
+            const maletaStyle = track.maleta_status === 'in_list'
+                              ? 'background:#dcfce7; color:#166534;'
+                              : 'background:#dbeafe; color:#1e40af;';
+            const maletaIcon = track.maleta_status === 'in_list' ? 'check_circle' : 'shopping_bag';
             if (isMobile) {
               html += `
                 <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
                   <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
-                    ${track.album_image_url ?
-                      `<img src="${track.album_image_url}" class="w-100 h-100" style="object-fit: cover;" alt="${safeTitle}">` :
+                    ${safeImg ?
+                      `<img src="${safeImg}" class="w-100 h-100" style="object-fit: cover;" alt="${safeTitle}">` :
                       `<div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
                         <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
                       </div>`
                     }
                   </div>
                   <div class="flex-grow-1 pe-1" style="min-width: 0;">
-                    <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${track.title}</div>
+                    <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${safeTitle}</div>
                     <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
-                      <span class="text-truncate" style="min-width: 0;">${track.artist}</span>
+                      <span class="text-truncate" style="min-width: 0;">${safeArtist}</span>
                     </div>
                   </div>
-                  <button class="request-song-btn border-0 flex-shrink-0 d-inline-flex align-items-center justify-content-center"
-                          style="width: 2.5rem; height: 2.5rem; border-radius: 10px; background: #1cc88a; color: white;"
-                          data-id="${track.id}"
-                          data-title="${safeTitle}"
-                          data-artist="${safeArtist}"
-                          data-image="${track.album_image_url || ''}"
-                          aria-label="Demanar cançó">
-                    <i class="fas fa-plus"></i>
-                  </button>
+                  ${maletaLabel
+                    ? `<div class="flex-shrink-0 d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+                           style="${maletaStyle} font-size:11px; font-weight:600; white-space:nowrap;">
+                         <span class="material-symbols-outlined" style="font-size:14px; font-variation-settings:'FILL' 1;">${maletaIcon}</span>
+                         ${maletaLabel}
+                       </div>`
+                    : `<button class="request-song-btn border-0 flex-shrink-0 d-inline-flex align-items-center justify-content-center"
+                               style="width: 2.5rem; height: 2.5rem; border-radius: 10px; background: #1cc88a; color: white;"
+                               data-id="${track.id}"
+                               data-title="${safeTitle}"
+                               data-artist="${safeArtist}"
+                               data-image="${safeImg}"
+                               aria-label="Demanar cançó">
+                         <i class="fas fa-plus"></i>
+                       </button>`
+                  }
                 </div>
               `;
             } else {
               html += `
                 <div class="request-result-card">
-                  ${track.album_image_url ?
-                    `<img src="${track.album_image_url}" class="request-result-img" alt="${safeTitle}">` :
+                  ${safeImg ?
+                    `<img src="${safeImg}" class="request-result-img" alt="${safeTitle}">` :
                     `<div class="request-result-placeholder">
                       <span class="material-symbols-outlined" style="font-size: 2rem; color: #747687;">music_note</span>
                     </div>`
                   }
-                  <h6 class="request-result-title">${track.title}</h6>
-                  <p class="request-result-artist">${track.artist}</p>
-                  <button class="request-result-btn request-song-btn"
-                          data-id="${track.id}"
-                          data-title="${safeTitle}"
-                          data-artist="${safeArtist}"
-                          data-image="${track.album_image_url || ''}">
-                    <span class="material-symbols-outlined" style="font-size: 1rem;">add</span>
-                    Demanar ({{ request_cost }} Coins)
-                  </button>
+                  <h6 class="request-result-title">${safeTitle}</h6>
+                  <p class="request-result-artist">${safeArtist}</p>
+                  ${maletaLabel
+                    ? `<div class="request-result-btn" style="${maletaStyle} cursor:default; pointer-events:none; display:flex; align-items:center; gap:0.35rem; justify-content:center; font-weight:600;">
+                         <span class="material-symbols-outlined" style="font-size:1rem; font-variation-settings:'FILL' 1;">${maletaIcon}</span>
+                         ${maletaLabel}
+                       </div>`
+                    : `<button class="request-result-btn request-song-btn"
+                               data-id="${track.id}"
+                               data-title="${safeTitle}"
+                               data-artist="${safeArtist}"
+                               data-image="${safeImg}">
+                         <span class="material-symbols-outlined" style="font-size: 1rem;">add</span>
+                         Demanar ({{ request_cost }} Coins)
+                       </button>`
+                  }
                 </div>
               `;
             }

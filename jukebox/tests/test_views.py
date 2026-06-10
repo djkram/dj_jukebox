@@ -841,14 +841,16 @@ class ManageSongRequestsTests(TestCase):
         session['selected_party_id'] = self.party.id
         session.save()
 
-    def test_accept_charges_user_coins(self):
-        """Acceptar una petició cobra les coins a l'usuari"""
+    def test_load_charges_user_coins(self):
+        """LOAD cobra les coins a l'usuari (quan coins_charged=False, flow legacy)"""
+        self.party.party_status = Party.STATUS_DJJUKEBOX_ACTIVE
+        self.party.save()
         self.client.login(username='admin', password='admin')
         self._set_session()
 
         response = self.client.post(
             reverse('manage_song_requests'),
-            {'request_id': self.song_request.id, 'action': 'accept'}
+            {'request_id': self.song_request.id, 'action': 'load'}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -866,8 +868,26 @@ class ManageSongRequestsTests(TestCase):
             spotify_id='req_track_1'
         ).exists())
 
-    def test_reject_does_not_charge(self):
-        """Rebutjar una petició no cobra les coins"""
+    def test_reject_returns_coins_if_charged(self):
+        """Rebutjar una petició amb coins_charged=True retorna els coins"""
+        self.song_request.coins_charged = True
+        self.song_request.save()
+        self.client.login(username='admin', password='admin')
+        self._set_session()
+
+        self.client.post(
+            reverse('manage_song_requests'),
+            {'request_id': self.song_request.id, 'action': 'reject'}
+        )
+
+        self.requester.refresh_from_db()
+        self.assertEqual(self.requester.credits, 30)  # 20 originals + 10 retornats
+
+        self.song_request.refresh_from_db()
+        self.assertEqual(self.song_request.status, 'rejected')
+
+    def test_reject_no_charge_when_coins_not_charged(self):
+        """Rebutjar una petició amb coins_charged=False no modifica els coins"""
         self.client.login(username='admin', password='admin')
         self._set_session()
 
@@ -882,22 +902,14 @@ class ManageSongRequestsTests(TestCase):
         self.song_request.refresh_from_db()
         self.assertEqual(self.song_request.status, 'rejected')
 
-        self.assertFalse(Song.objects.filter(
-            party=self.party,
-            spotify_id='req_track_1'
-        ).exists())
-
-    def test_accept_without_charge_when_insufficient_credits(self):
-        """Acceptar sense cobrar quan l'usuari no té prous coins"""
-        self.requester.credits = 0
-        self.requester.save()
-
+    def test_queue_adds_song_without_charging(self):
+        """Queue afegeix la cançó a la llista sense cobrar coins"""
         self.client.login(username='admin', password='admin')
         self._set_session()
 
         response = self.client.post(
             reverse('manage_song_requests'),
-            {'request_id': self.song_request.id, 'action': 'accept', 'allow_without_charge': '1'}
+            {'request_id': self.song_request.id, 'action': 'queue'}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -905,7 +917,10 @@ class ManageSongRequestsTests(TestCase):
         self.assertTrue(data['success'])
 
         self.requester.refresh_from_db()
-        self.assertEqual(self.requester.credits, 0)
+        self.assertEqual(self.requester.credits, 20)  # sense canvi
+
+        self.song_request.refresh_from_db()
+        self.assertEqual(self.song_request.status, 'queued')
 
         self.assertTrue(Song.objects.filter(party=self.party, spotify_id='req_track_1').exists())
 
@@ -928,8 +943,8 @@ class RequestSongViewTests(TestCase):
         session['selected_party_id'] = self.party.id
         session.save()
 
-    def test_post_creates_song_request(self):
-        """POST crea SongRequest pendent"""
+    def test_post_creates_song_request_and_charges_coins(self):
+        """POST crea SongRequest pendent i reté els coins immediatament"""
         self.client.login(username='user', password='test')
         self._set_session()
 
@@ -947,12 +962,18 @@ class RequestSongViewTests(TestCase):
         data = json.loads(response.content)
         self.assertTrue(data['success'])
 
-        self.assertTrue(SongRequest.objects.filter(
+        req = SongRequest.objects.filter(
             user=self.user,
             party=self.party,
             spotify_id='newtrack123',
-            status='pending'
-        ).exists())
+            status='pending',
+            coins_charged=True,
+        )
+        self.assertTrue(req.exists())
+
+        # Coins retinguts al moment de la petició
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.credits, 40)  # 50 - 10
 
     def test_post_blocked_if_song_already_in_party(self):
         """No es pot demanar una cançó que ja és a la llista"""
@@ -1382,7 +1403,7 @@ class PartyStatusApiTests(TestCase):
 
 
 class ManageSongRequestsAllowWithoutChargeTests(TestCase):
-    """Tests per l'opció allow_without_charge a manage_song_requests."""
+    """Tests per les accions queue/load a manage_song_requests."""
 
     def setUp(self):
         self.client = Client()
@@ -1413,65 +1434,64 @@ class ManageSongRequestsAllowWithoutChargeTests(TestCase):
         session['selected_party_id'] = self.party.id
         session.save()
 
-    def test_accept_without_charge_when_user_has_no_credits(self):
+    def test_queue_works_when_user_has_no_credits(self):
+        """Queue no cobra, per tant funciona fins i tot sense credits"""
         response = self.client.post(
             reverse('manage_song_requests'),
-            {
-                'request_id': self.song_request.id,
-                'action': 'accept',
-                'allow_without_charge': '1',
-            },
+            {'request_id': self.song_request.id, 'action': 'queue'},
         )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertTrue(data['success'])
 
-    def test_accept_without_charge_does_not_deduct_credits(self):
+    def test_queue_does_not_deduct_credits(self):
         self.client.post(
             reverse('manage_song_requests'),
-            {
-                'request_id': self.song_request.id,
-                'action': 'accept',
-                'allow_without_charge': '1',
-            },
+            {'request_id': self.song_request.id, 'action': 'queue'},
         )
         self.user.refresh_from_db()
         self.assertEqual(self.user.credits, 0)
 
-    def test_accept_without_charge_adds_song_to_party(self):
+    def test_queue_adds_song_to_party(self):
         self.client.post(
             reverse('manage_song_requests'),
-            {
-                'request_id': self.song_request.id,
-                'action': 'accept',
-                'allow_without_charge': '1',
-            },
+            {'request_id': self.song_request.id, 'action': 'queue'},
         )
         from jukebox.models import Song
         self.assertTrue(
             Song.objects.filter(party=self.party, spotify_id='awc1').exists()
         )
 
-    def test_accept_with_charge_fails_when_no_credits(self):
+    def test_load_fails_when_no_credits_and_not_precharged(self):
+        """LOAD falla si l'usuari no té credits i coins_charged=False"""
         response = self.client.post(
             reverse('manage_song_requests'),
-            {
-                'request_id': self.song_request.id,
-                'action': 'accept',
-                'allow_without_charge': '0',
-            },
+            {'request_id': self.song_request.id, 'action': 'load'},
         )
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.content)
         self.assertFalse(data['success'])
 
+    def test_load_succeeds_when_coins_precharged(self):
+        """LOAD funciona si els coins ja van ser retinguts al moment de la petició"""
+        self.song_request.coins_charged = True
+        self.song_request.save()
+        # Afegim credits simulant el deducte previ al submit
+        self.user.credits = 0
+        self.user.save()
+
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {'request_id': self.song_request.id, 'action': 'load'},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+
     def test_invalid_action_returns_400(self):
         response = self.client.post(
             reverse('manage_song_requests'),
-            {
-                'request_id': self.song_request.id,
-                'action': 'invalid',
-            },
+            {'request_id': self.song_request.id, 'action': 'invalid'},
         )
         self.assertEqual(response.status_code, 400)
 
@@ -1750,24 +1770,43 @@ class ManageSongRequestsNotificationTests(TestCase):
         session['selected_party_id'] = self.party.id
         session.save()
 
-    def test_accept_creates_notification_for_requester(self):
+    def test_load_creates_song_loaded_notification(self):
+        """LOAD crea una notificació song_loaded per al requester"""
+        self.song_request.coins_charged = True
+        self.song_request.save()
         self.client.post(reverse('manage_song_requests'), {
             'request_id': self.song_request.id,
-            'action': 'accept',
-            'allow_without_charge': '1',
+            'action': 'load',
         })
         self.assertTrue(
             Notification.objects.filter(
                 user=self.requester,
-                type='song_accepted',
+                type='song_loaded',
             ).exists()
         )
 
-    def test_reject_does_not_create_notification(self):
+    def test_queue_creates_song_queued_notification(self):
+        """Queue crea una notificació song_queued per al requester"""
+        self.client.post(reverse('manage_song_requests'), {
+            'request_id': self.song_request.id,
+            'action': 'queue',
+        })
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.requester,
+                type='song_queued',
+            ).exists()
+        )
+
+    def test_reject_creates_song_rejected_notification(self):
+        """Reject crea una notificació song_rejected per al requester"""
         self.client.post(reverse('manage_song_requests'), {
             'request_id': self.song_request.id,
             'action': 'reject',
         })
-        self.assertFalse(
-            Notification.objects.filter(user=self.requester).exists()
+        self.assertTrue(
+            Notification.objects.filter(
+                user=self.requester,
+                type='song_rejected',
+            ).exists()
         )

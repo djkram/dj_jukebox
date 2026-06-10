@@ -1,393 +1,242 @@
 {% extends "jukebox/admin_base.html" %}
-{% block page_title %}Gestionar peticions{% endblock %}
+{% load i18n %}
+{% block page_title %}{% trans "Gestionar peticions" %}{% endblock %}
 {% block content %}
 <style>
-  /* Mobile styles - unchanged */
-  .status-badge {
+  .req-status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.75rem;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    letter-spacing: 0.02em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
     white-space: nowrap;
-    line-height: 1.2;
   }
-  .status-badge i {
-    font-size: 0.7rem;
+  .req-status-badge .dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
   }
-  .status-accepted {
-    background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
-  }
-  .status-rejected {
-    background: linear-gradient(135deg, #e74a3b 0%, #d32f2f 100%);
-  }
-  .status-pending {
-    background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
-    color: #333;
-    text-shadow: none;
-  }
+  .req-status-pending   { background:#fef3c7; color:#92400e; }
+  .req-status-pending .dot { background:#f59e0b; }
+  .req-status-queued    { background:#dbeafe; color:#1e40af; }
+  .req-status-queued .dot { background:#3b82f6; }
+  .req-status-accepted  { background:#dcfce7; color:#166534; }
+  .req-status-accepted .dot { background:#22c55e; }
+  .req-status-loaded    { background:#ede9fe; color:#4c1d95; }
+  .req-status-loaded .dot { background:#7c3aed; }
+  .req-status-rejected  { background:#ffdad6; color:#93000a; }
+  .req-status-rejected .dot { background:#ba1a1a; }
 
-  /* Desktop Sonic Architect styles */
   @media (min-width: 768px) {
-    /* Pending section header */
-    .pending-section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      padding-left: 0.25rem;
+    .req-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; padding-left: 0.25rem;
     }
-    .pending-section-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .req-section-title-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .req-section-marker {
+      width: 0.5rem; height: 1.5rem;
+      background: #5e24e1; border-radius: 9999px;
     }
-    .pending-section-marker {
-      width: 0.5rem;
-      height: 1.5rem;
-      background: #5e24e1;
-      border-radius: 9999px;
-    }
-    .pending-section-title {
+    .req-section-title {
       font-family: 'Epilogue', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 0;
+      font-size: 1.25rem; font-weight: 700; margin: 0;
     }
-    .pending-section-badge {
-      background: #e7deff;
-      color: #20005f;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
+    .req-section-pill {
+      font-size: 0.75rem; font-weight: 700;
+      padding: 0.25rem 0.75rem; border-radius: 9999px;
+      text-transform: uppercase; letter-spacing: -0.02em;
     }
+    .req-section-pill-purple { background:#e7deff; color:#20005f; }
+    .req-section-pill-blue   { background:#dbeafe; color:#1e40af; }
 
-    /* Pending requests table */
-    .pending-table-container {
-      background: #f1f4f7;
-      border-radius: 2rem;
-      padding: 1rem;
-      overflow: hidden;
+    .req-table-container {
+      background: #f1f4f7; border-radius: 2rem;
+      padding: 1rem; overflow: hidden;
     }
-    .pending-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 0.5rem;
+    .req-table {
+      width: 100%; border-collapse: separate; border-spacing: 0 0.5rem;
     }
-    .pending-table thead th {
-      font-size: 0.625rem;
-      font-weight: 700;
-      color: #747687;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 1rem 1rem;
-      text-align: left;
+    .req-table thead th {
+      font-size: 0.625rem; font-weight: 700; color: #747687;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 1rem; text-align: left;
     }
-    .pending-table tbody tr {
-      background: #ffffff;
-      transition: all 200ms ease;
-    }
-    .pending-table tbody tr:hover {
-      background: #e5e8eb;
-    }
-    .pending-table tbody td {
-      padding: 0.75rem 1rem;
-    }
-    .pending-table tbody tr td:first-child {
-      border-radius: 0.75rem 0 0 0.75rem;
-    }
-    .pending-table tbody tr td:last-child {
-      border-radius: 0 0.75rem 0.75rem 0;
-      text-align: right;
-    }
+    .req-table tbody tr { background: #fff; transition: background 200ms; }
+    .req-table tbody tr:hover { background: #e5e8eb; }
+    .req-table tbody td { padding: 0.75rem 1rem; }
+    .req-table tbody tr td:first-child { border-radius: 0.75rem 0 0 0.75rem; }
+    .req-table tbody tr td:last-child  { border-radius: 0 0.75rem 0.75rem 0; text-align: right; }
 
-    /* Album covers */
-    .pending-album-img {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 0.5rem;
-      object-fit: cover;
+    .req-album-img {
+      width: 3rem; height: 3rem; border-radius: 0.5rem; object-fit: cover;
     }
-    .pending-album-placeholder {
-      width: 3rem;
-      height: 3rem;
-      background: #e0e3e6;
-      border-radius: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .req-album-placeholder {
+      width: 3rem; height: 3rem; background: #e0e3e6;
+      border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;
     }
+    .req-song-info { display: flex; align-items: center; gap: 1rem; }
+    .req-song-title { font-weight: 700; color: #181c1e; font-size: 0.875rem; }
+    .req-artist { color: #747687; font-size: 0.75rem; font-weight: 500; margin-top: 0.125rem; }
 
-    /* Song info */
-    .pending-song-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    .req-user-avatar {
+      width: 1.5rem; height: 1.5rem; border-radius: 9999px;
+      background: #dde1ff; display: flex; align-items: center; justify-content: center;
+      font-size: 0.625rem; font-weight: 700; color: #002ea8;
     }
-    .pending-song-title {
-      font-weight: 700;
-      color: #181c1e;
-      font-size: 0.875rem;
-    }
-    .pending-artist {
-      color: #747687;
-      font-size: 0.75rem;
-      font-weight: 500;
-      margin-top: 0.125rem;
-    }
-
-    /* User info */
-    .pending-user-avatar {
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 9999px;
-      background: #dde1ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.625rem;
-      font-weight: 700;
-      color: #002ea8;
-    }
-    .pending-username {
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .pending-credits {
-      font-size: 0.75rem;
-      color: #747687;
-      font-style: italic;
-    }
-
-    /* Status badges */
-    .pending-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.625rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-    }
-    .pending-status-badge .status-dot {
-      width: 0.375rem;
-      height: 0.375rem;
-      border-radius: 9999px;
-    }
-    .pending-status-pending {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    .pending-status-pending .status-dot {
-      background: #f59e0b;
-    }
-    .pending-status-accepted {
-      background: #dcfce7;
-      color: #166534;
-    }
-    .pending-status-accepted .status-dot {
-      background: #22c55e;
-    }
-    .pending-status-rejected {
-      background: #ffdad6;
-      color: #93000a;
-    }
-    .pending-status-rejected .status-dot {
-      background: #ba1a1a;
-    }
+    .req-username { font-size: 0.75rem; font-weight: 600; }
+    .req-credits  { font-size: 0.75rem; color: #747687; font-style: italic; }
 
     /* Action buttons */
-    .pending-actions {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: flex-end;
-    }
-    .pending-btn-accept {
-      padding: 0.5rem 1.25rem;
-      background: #5e24e1;
-      color: white;
-      font-weight: 700;
-      font-size: 0.75rem;
-      border-radius: 0.75rem;
-      border: none;
-      cursor: pointer;
-      transition: transform 100ms ease;
-      font-family: 'Epilogue', sans-serif;
-    }
-    .pending-btn-accept:hover {
-      transform: scale(0.98);
-    }
-    .pending-btn-reject {
-      padding: 0.5rem 1.25rem;
-      background: transparent;
-      color: #434655;
-      font-weight: 700;
-      font-size: 0.75rem;
-      border-radius: 0.75rem;
-      border: none;
-      cursor: pointer;
-      transition: background 200ms ease;
-      font-family: 'Epilogue', sans-serif;
-    }
-    .pending-btn-reject:hover {
-      background: #e0e3e6;
-    }
+    .req-actions { display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; }
 
-    /* History section */
-    .history-section-container {
-      background: #f1f4f7;
-      border-radius: 2rem;
-      padding: 1rem;
-      overflow: hidden;
-      margin-top: 3rem;
+    .req-btn {
+      padding: 0.45rem 1rem;
+      font-weight: 700; font-size: 0.72rem;
+      border-radius: 0.75rem; border: none; cursor: pointer;
+      transition: transform 100ms ease, opacity 100ms;
+      font-family: 'Epilogue', sans-serif;
+      display: inline-flex; align-items: center; gap: 0.35rem;
     }
-    .history-section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .req-btn:hover { transform: scale(0.97); }
+    .req-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .req-btn-reject  { background: transparent; color: #434655; }
+    .req-btn-reject:hover { background: #ffdad6; color: #93000a; }
+    .req-btn-queue   { background: #dbeafe; color: #1e40af; }
+    .req-btn-queue:hover { background: #bfdbfe; }
+    .req-btn-load    { background: #5e24e1; color: white; }
+    .req-btn-load:hover { background: #4a1ab3; }
+    .req-btn-load:disabled { background: #c4c5d8; color: #747687; }
+
+    /* History */
+    .req-history-container {
+      background: #f1f4f7; border-radius: 2rem;
+      padding: 1rem; overflow: hidden; margin-top: 3rem;
+    }
+    .req-history-header {
+      display: flex; align-items: center; justify-content: space-between;
       padding: 1.5rem 1.5rem;
-      border-bottom: 1px solid rgba(224, 227, 230, 0.3);
+      border-bottom: 1px solid rgba(224,227,230,0.3);
     }
-    .history-section-title {
+    .req-history-title {
       font-family: 'Epilogue', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      font-style: italic;
-      margin: 0;
+      font-size: 1.25rem; font-weight: 700; font-style: italic; margin: 0;
     }
-
-    .history-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 0.5rem;
+    .req-empty {
+      padding: 3rem; text-align: center; color: #747687; font-weight: 500;
     }
-    .history-table thead th {
-      font-size: 0.625rem;
-      font-weight: 700;
-      color: #747687;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 1rem 1rem;
-      text-align: left;
-    }
-    .history-table tbody tr {
-      background: #ffffff;
-      transition: all 200ms ease;
-    }
-    .history-table tbody tr:hover {
-      background: #e5e8eb;
-    }
-    .history-table tbody td {
-      padding: 0.75rem 1rem;
-      font-size: 0.8125rem;
-    }
-    .history-table tbody tr td:first-child {
-      border-radius: 0.75rem 0 0 0.75rem;
-    }
-    .history-table tbody tr td:last-child {
-      border-radius: 0 0.75rem 0.75rem 0;
-    }
-
-    .history-album-img {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 0.5rem;
-      object-fit: cover;
-    }
-
-    .history-empty {
-      padding: 3rem;
-      text-align: center;
-      color: #747687;
-      font-weight: 500;
+    .req-coins-held {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      font-size: 0.7rem; color: #1e40af; background: #dbeafe;
+      padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 600;
     }
   }
 </style>
+
 <div class="container-fluid">
-  <!-- Missatges -->
   <div id="message-area" class="mb-3"></div>
 
-  <!-- Desktop Layout -->
+  <!-- ───── Desktop Layout ───── -->
   <div class="d-none d-md-block" style="padding-top: 1rem;">
-    <!-- Peticions pendents -->
-    <section>
-      <div class="pending-section-header">
-        <div class="pending-section-title-wrap">
-          <div class="pending-section-marker"></div>
-          <h3 class="pending-section-title">Peticions pendents</h3>
+
+    <!-- Pending section -->
+    <section class="mb-2">
+      <div class="req-section-header">
+        <div class="req-section-title-wrap">
+          <div class="req-section-marker"></div>
+          <h3 class="req-section-title">{% trans "Peticions pendents" %}</h3>
         </div>
-        <span class="pending-section-badge">{{ pending_requests.count }} Sol·licituds</span>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <span class="req-section-pill req-section-pill-purple">{{ pending_count }} {% trans "Noves" %}</span>
+          <span class="req-section-pill req-section-pill-blue">{{ queued_count }} {% trans "Maleta" %}</span>
+          {% if is_jukebox_active %}
+            <span class="req-section-pill" style="background:#ede9fe;color:#4c1d95;">🟢 Jukebox actiu</span>
+          {% endif %}
+        </div>
       </div>
-      {% if pending_requests %}
-        <div class="pending-table-container">
-          <table class="pending-table">
+
+      {% if active_requests %}
+        <div class="req-table-container">
+          <table class="req-table">
             <thead>
               <tr>
-                <th>Cançó / Artista</th>
-                <th>Usuari</th>
-                <th>Cost</th>
-                <th>Data i Hora</th>
-                <th>Accions</th>
+                <th>{% trans "Cançó / Artista" %}</th>
+                <th>{% trans "Usuari" %}</th>
+                <th>{% trans "Cost" %}</th>
+                <th>{% trans "Data i Hora" %}</th>
+                <th>{% trans "Accions" %}</th>
               </tr>
             </thead>
             <tbody>
-              {% for req in pending_requests %}
-                <tr id="request-desktop-{{ req.id }}">
+              {% for req in active_requests %}
+                <tr id="req-row-{{ req.id }}">
                   <td>
-                    <div class="pending-song-info">
+                    <div class="req-song-info">
                       {% if req.album_image_url %}
-                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="pending-album-img">
+                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="req-album-img">
                       {% else %}
-                        <div class="pending-album-placeholder">
+                        <div class="req-album-placeholder">
                           <span class="material-symbols-outlined">music_note</span>
                         </div>
                       {% endif %}
                       <div>
-                        <div class="pending-song-title">{{ req.title }}</div>
-                        <div class="pending-artist">{{ req.artist }}</div>
+                        <div class="req-song-title">{{ req.title }}</div>
+                        <div class="req-artist">{{ req.artist }}</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                      <div class="pending-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                      <div class="req-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
                       <div>
-                        <div class="pending-username">{{ req.user.username }}</div>
-                        <div class="pending-credits">{{ req.user.credits }} coins</div>
+                        <div class="req-username">{{ req.user.username }}</div>
+                        <div class="req-credits">{{ req.user.credits }} coins</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span class="pending-status-badge pending-status-pending">
-                      <span class="status-dot"></span>
+                    <span class="req-status-badge req-status-{{ req.status }}">
+                      <span class="dot"></span>
                       {{ req.coins_cost }} coins
                     </span>
+                    {% if req.coins_charged %}
+                      <span class="req-coins-held">🔒 retinguts</span>
+                    {% endif %}
                   </td>
                   <td>
-                    <span style="color: #747687; font-size: 0.75rem;">{{ req.created_at|date:"d/m/Y H:i" }}</span>
+                    <span style="color:#747687;font-size:0.75rem;">{{ req.created_at|date:"d/m/Y H:i" }}</span>
                   </td>
                   <td>
-                    <div class="pending-actions">
-                      <button class="pending-btn-accept accept-btn"
-                              data-id="{{ req.id }}"
-                              data-user-credits="{{ req.user.credits }}"
-                              data-cost="{{ req.coins_cost }}">
-                        Acceptar
+                    <div class="req-actions">
+                      <button class="req-btn req-btn-reject action-btn"
+                              data-id="{{ req.id }}" data-action="reject"
+                              title="{% trans 'Rebutjar (retorna coins)' %}">
+                        <i class="fas fa-times"></i> {% trans "Rebutjar" %}
                       </button>
-                      <button class="pending-btn-reject reject-btn"
-                              data-id="{{ req.id }}">
-                        Rebutjar
+                      {% if req.status == 'pending' %}
+                      <button class="req-btn req-btn-queue action-btn"
+                              data-id="{{ req.id }}" data-action="queue"
+                              title="{% trans 'Afegir a la maleta (sense cobrar)' %}">
+                        <i class="fas fa-bag-shopping" style="font-size:0.7rem;"></i>
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">shopping_bag</span>
+                        {% trans "Maleta" %}
+                      </button>
+                      {% endif %}
+                      <button class="req-btn req-btn-load action-btn {% if not is_jukebox_active %}disabled-look{% endif %}"
+                              data-id="{{ req.id }}" data-action="load"
+                              {% if not is_jukebox_active %}disabled title="{% trans 'El Jukebox no està actiu' %}"{% else %}title="{% trans 'LOAD: cobrar i carregar al Jukebox' %}"{% endif %}>
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">bolt</span>
+                        LOAD
+                      </button>
+                      <button class="req-btn action-btn"
+                              data-id="{{ req.id }}" data-action="delete"
+                              title="{% trans 'Eliminar petició' %}"
+                              style="color:#747687;border-color:#e0e0e0;">
+                        <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">delete</span>
                       </button>
                     </div>
                   </td>
@@ -397,355 +246,264 @@
           </table>
         </div>
       {% else %}
-        <div class="history-empty">
-          No hi ha peticions pendents en aquest moment.
-        </div>
+        <div class="req-empty">{% trans "No hi ha peticions actives en aquest moment." %}</div>
       {% endif %}
     </section>
-  </div>
 
-  <!-- Mobile Layout -->
-  <div class="d-md-none">
-    <!-- Peticions pendents -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-warning text-dark">
-        <h4 class="mb-0">
-          <i class="fas fa-clock me-2"></i>
-          Peticions pendents ({{ pending_requests.count }})
-        </h4>
-      </div>
-      <div class="card-body">
-        {% if pending_requests %}
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th style="width: 80px;"></th>
-                  <th>Cançó</th>
-                  <th>Artista</th>
-                  <th>Demanat per</th>
-                  <th>Cost</th>
-                  <th>Data</th>
-                  <th class="text-center" style="width: 200px;">Accions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for req in pending_requests %}
-                  <tr id="request-mobile-{{ req.id }}">
-                    <td>
-                      {% if req.album_image_url %}
-                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                             class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                      {% else %}
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                             style="width: 60px; height: 60px;">
-                          <i class="fas fa-music text-white"></i>
-                        </div>
-                      {% endif %}
-                    </td>
-                    <td><strong>{{ req.title }}</strong></td>
-                    <td>{{ req.artist }}</td>
-                    <td>
-                      <i class="fas fa-user me-1"></i>{{ req.user.username }}
-                      <br>
-                      <small class="text-muted">Coins disponibles: {{ req.user.credits }}</small>
-                    </td>
-                    <td>
-                      <span class="status-badge status-pending">
-                        <i class="fas fa-coins"></i>{{ req.coins_cost }}
-                      </span>
-                    </td>
-                    <td>{{ req.created_at|date:"d/m/Y H:i" }}</td>
-                    <td class="text-center">
-                      <button class="btn btn-success btn-sm me-2 accept-btn"
-                              data-id="{{ req.id }}"
-                              data-user-credits="{{ req.user.credits }}"
-                              data-cost="{{ req.coins_cost }}">
-                        <i class="fas fa-check me-1"></i>Acceptar
-                      </button>
-                      <button class="btn btn-danger btn-sm reject-btn"
-                              data-id="{{ req.id }}">
-                        <i class="fas fa-times me-1"></i>Rebutjar
-                      </button>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          <div class="alert alert-info mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            No hi ha peticions pendents en aquest moment.
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Desktop History Section -->
-  <div class="d-none d-md-block">
-    <section class="history-section-container">
-      <div class="history-section-header">
-        <h3 class="history-section-title">Historial de peticions</h3>
+    <!-- History section -->
+    <section class="req-history-container">
+      <div class="req-history-header">
+        <h3 class="req-history-title">{% trans "Historial de peticions" %}</h3>
       </div>
       {% if processed_requests %}
-        <table class="history-table">
+        <table class="req-table">
           <thead>
             <tr>
-              <th>Cançó / Artista</th>
-              <th>Usuari</th>
-              <th>Estat</th>
-              <th>Processat per</th>
-              <th>Data i Hora</th>
+              <th>{% trans "Cançó / Artista" %}</th>
+              <th>{% trans "Usuari" %}</th>
+              <th>{% trans "Estat" %}</th>
+              <th>{% trans "Processat per" %}</th>
+              <th>{% trans "Data i Hora" %}</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {% for req in processed_requests %}
-              <tr>
+              <tr id="req-row-{{ req.id }}">
                 <td>
-                  <div class="pending-song-info">
+                  <div class="req-song-info">
                     {% if req.album_image_url %}
-                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="history-album-img">
+                      <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="req-album-img">
                     {% else %}
-                      <div class="pending-album-placeholder">
+                      <div class="req-album-placeholder">
                         <span class="material-symbols-outlined">music_note</span>
                       </div>
                     {% endif %}
                     <div>
-                      <div class="pending-song-title">{{ req.title }}</div>
-                      <div class="pending-artist">{{ req.artist }}</div>
+                      <div class="req-song-title">{{ req.title }}</div>
+                      <div class="req-artist">{{ req.artist }}</div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <div class="pending-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
-                    <span class="pending-username">{{ req.user.username }}</span>
+                  <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <div class="req-user-avatar">{{ req.user.username|slice:":2"|upper }}</div>
+                    <span class="req-username">{{ req.user.username }}</span>
                   </div>
                 </td>
                 <td>
-                  {% if req.status == 'accepted' %}
-                    <span class="pending-status-badge pending-status-accepted">
-                      <span class="status-dot"></span>
-                      Acceptat
-                    </span>
-                  {% else %}
-                    <span class="pending-status-badge pending-status-rejected">
-                      <span class="status-dot"></span>
-                      Rebutjada
-                    </span>
-                  {% endif %}
+                  <span class="req-status-badge req-status-{{ req.status }}">
+                    <span class="dot"></span>
+                    {{ req.get_status_display }}
+                  </span>
                 </td>
                 <td>
-                  <span style="color: #434655; font-size: 0.75rem; font-weight: 500; font-style: italic;">
+                  <span style="color:#434655;font-size:0.75rem;font-weight:500;font-style:italic;">
                     {{ req.processed_by.username|default:"-" }}
                   </span>
                 </td>
                 <td>
-                  <span style="color: #747687; font-size: 0.75rem;">{{ req.processed_at|date:"d/m/Y H:i" }}</span>
+                  <span style="color:#747687;font-size:0.75rem;">{{ req.processed_at|date:"d/m/Y H:i" }}</span>
+                </td>
+                <td>
+                  <button class="req-btn action-btn"
+                          data-id="{{ req.id }}" data-action="delete"
+                          title="{% trans 'Eliminar del historial' %}"
+                          style="color:#747687;border-color:#e0e0e0;padding:0.25rem 0.4rem;">
+                    <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">delete</span>
+                  </button>
                 </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       {% else %}
-        <div class="history-empty">
-          Encara no s'ha processat cap petició.
-        </div>
+        <div class="req-empty">{% trans "Encara no s'ha processat cap petició." %}</div>
       {% endif %}
     </section>
   </div>
 
-  <!-- Mobile History Section -->
+  <!-- ───── Mobile Layout ───── -->
   <div class="d-md-none">
-    <div class="card shadow-sm">
-      <div class="card-header bg-secondary text-white">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header" style="background:#5e24e1;color:white;">
         <h4 class="mb-0">
-          <i class="fas fa-history me-2"></i>
-          Historial de peticions
+          <i class="fas fa-list-music me-2"></i>
+          {% trans "Peticions actives" %} ({{ active_requests.count }})
+          {% if is_jukebox_active %}<span class="badge badge-light ml-2" style="color:#5e24e1;">🟢 Jukebox</span>{% endif %}
         </h4>
       </div>
-      <div class="card-body">
-        {% if processed_requests %}
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
-              <thead>
-                <tr>
-                  <th style="width: 60px;"></th>
-                  <th>Cançó</th>
-                  <th>Artista</th>
-                  <th>Usuari</th>
-                  <th>Estat</th>
-                  <th>Processat per</th>
-                  <th>Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for req in processed_requests %}
-                  <tr>
-                    <td>
-                      {% if req.album_image_url %}
-                        <img src="{{ req.album_image_url }}" alt="{{ req.title }}"
-                             class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                      {% else %}
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
-                             style="width: 40px; height: 40px;">
-                          <i class="fas fa-music text-white fa-xs"></i>
-                        </div>
-                      {% endif %}
-                    </td>
-                    <td>{{ req.title }}</td>
-                    <td>{{ req.artist }}</td>
-                    <td>{{ req.user.username }}</td>
-                    <td>
-                      {% if req.status == 'accepted' %}
-                        <span class="status-badge status-accepted">
-                          <i class="fas fa-check-circle"></i>Acceptada
-                        </span>
-                      {% else %}
-                        <span class="status-badge status-rejected">
-                          <i class="fas fa-times-circle"></i>Rebutjada
-                        </span>
-                      {% endif %}
-                    </td>
-                    <td>{{ req.processed_by.username|default:"-" }}</td>
-                    <td>{{ req.processed_at|date:"d/m/Y H:i" }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+      <div class="card-body p-2">
+        {% if active_requests %}
+          {% for req in active_requests %}
+            <div id="req-mobile-{{ req.id }}" class="border rounded p-2 mb-2" style="background:{% if req.status == 'queued' %}#eff6ff{% else %}white{% endif %}">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                {% if req.album_image_url %}
+                  <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="rounded" style="width:48px;height:48px;object-fit:cover;flex-shrink:0;">
+                {% else %}
+                  <div class="rounded bg-secondary d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                    <i class="fas fa-music text-white"></i>
+                  </div>
+                {% endif %}
+                <div style="min-width:0;flex:1;">
+                  <div style="font-weight:700;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ req.title }}</div>
+                  <div style="font-size:0.75rem;color:#747687;">{{ req.artist }}</div>
+                  <div class="d-flex align-items-center gap-1 mt-1">
+                    <span class="req-status-badge req-status-{{ req.status }}">
+                      <span class="dot"></span>{{ req.get_status_display }}
+                    </span>
+                    {% if req.coins_charged %}
+                      <span class="req-coins-held">🔒 {{ req.coins_cost }} coins</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:0.75rem;color:#747687;margin-bottom:0.5rem;">
+                <i class="fas fa-user me-1"></i>{{ req.user.username }} · {{ req.created_at|date:"d/m H:i" }}
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm action-btn" style="background:#ffdad6;color:#93000a;font-weight:700;flex:1;"
+                        data-id="{{ req.id }}" data-action="reject">
+                  <i class="fas fa-times me-1"></i>{% trans "Rebutjar" %}
+                </button>
+                {% if req.status == 'pending' %}
+                <button class="btn btn-sm action-btn" style="background:#dbeafe;color:#1e40af;font-weight:700;flex:1;"
+                        data-id="{{ req.id }}" data-action="queue">
+                  🎒 {% trans "Maleta" %}
+                </button>
+                {% endif %}
+                <button class="btn btn-sm action-btn{% if not is_jukebox_active %} disabled{% endif %}"
+                        style="background:{% if is_jukebox_active %}#5e24e1{% else %}#c4c5d8{% endif %};color:white;font-weight:700;flex:1;"
+                        data-id="{{ req.id }}" data-action="load"
+                        {% if not is_jukebox_active %}disabled{% endif %}>
+                  ⚡ LOAD
+                </button>
+                <button class="btn btn-sm action-btn"
+                        style="background:#f3f4f6;color:#747687;font-weight:700;"
+                        data-id="{{ req.id }}" data-action="delete"
+                        title="{% trans 'Eliminar' %}">
+                  <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;vertical-align:middle;">delete</span>
+                </button>
+              </div>
+            </div>
+          {% endfor %}
         {% else %}
-          <p class="text-muted mb-0">Encara no s'ha processat cap petició.</p>
+          <p class="text-muted text-center p-3 mb-0">{% trans "No hi ha peticions actives." %}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Mobile history -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0"><i class="fas fa-history me-2"></i>{% trans "Historial" %}</h4>
+      </div>
+      <div class="card-body p-2">
+        {% if processed_requests %}
+          {% for req in processed_requests %}
+            <div class="d-flex align-items-center gap-2 border-bottom py-2" id="req-mobile-{{ req.id }}">
+              {% if req.album_image_url %}
+                <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="rounded" style="width:36px;height:36px;object-fit:cover;flex-shrink:0;">
+              {% else %}
+                <div class="rounded bg-secondary d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px;height:36px;">
+                  <i class="fas fa-music text-white fa-xs"></i>
+                </div>
+              {% endif %}
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:0.8rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ req.title }}</div>
+                <div style="font-size:0.7rem;color:#747687;">{{ req.user.username }}</div>
+              </div>
+              <span class="req-status-badge req-status-{{ req.status }}">
+                <span class="dot"></span>{{ req.get_status_display }}
+              </span>
+              <button class="btn btn-sm action-btn"
+                      style="background:none;border:none;color:#c4c5d8;padding:0.25rem;"
+                      data-id="{{ req.id }}" data-action="delete"
+                      title="{% trans 'Eliminar' %}">
+                <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;vertical-align:middle;">delete</span>
+              </button>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted mb-0 p-2">{% trans "Encara no s'ha processat cap petició." %}</p>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 
-<!-- Bootstrap Confirmation Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmModalLabel">Confirmar acció</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="confirmModalBody">
-        <!-- Missatge dinàmic -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel·lar</button>
-        <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirmar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const messageArea = document.getElementById('message-area');
+  const isJukeboxActive = {{ is_jukebox_active|yesno:"true,false" }};
 
-  // Reusable confirm modal function
-  function showConfirm(title, message, onConfirm) {
-    document.getElementById('confirmModalLabel').textContent = title;
-    document.getElementById('confirmModalBody').textContent = message;
-    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-
-    const confirmBtn = document.getElementById('confirmModalBtn');
-    confirmBtn.onclick = () => {
-      modal.hide();
-      onConfirm();
-    };
-
-    modal.show();
-  }
-
-  function showMessage(message, type = 'success') {
+  function showMessage(message, type) {
     messageArea.innerHTML = `
       <div class="alert alert-${type} alert-dismissible fade show" role="alert">
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    `;
+      </div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
-      const alert = messageArea.querySelector('.alert');
-      if (alert) {
-        alert.classList.remove('show');
-        setTimeout(() => messageArea.innerHTML = '', 150);
-      }
+      const el = messageArea.querySelector('.alert');
+      if (el) { el.classList.remove('show'); setTimeout(() => messageArea.innerHTML = '', 150); }
     }, 5000);
   }
 
-  // Acceptar petició
-  document.querySelectorAll('.accept-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const requestId = this.dataset.id;
-      const userCredits = parseInt(this.dataset.userCredits);
-      const cost = parseInt(this.dataset.cost);
+  const ACTION_LABELS = {
+    reject: '{% trans "Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari." %}',
+    queue:  '{% trans "Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment)." %}',
+    load:   '🚀 {% trans "LOAD: Carregar la cançó al Jukebox ara? Es confirmaran els coins." %}',
+    delete: '{% trans "Eliminar la petició? Si els coins estaven retinguts es retornaran a l\'usuari. Aquesta acció no es pot desfer." %}',
+  };
 
-      if (userCredits < cost) {
-        showConfirm(
-          'Usuari sense prou coins',
-          `L'usuari només té ${userCredits} Coins i necessita ${cost}. Vols acceptar igualment sense cobrar-li?`,
-          () => processRequest(requestId, 'accept', true)
-        );
-      } else {
-        showConfirm(
-          'Acceptar petició',
-          `Acceptar aquesta cançó? Es cobraran ${cost} Coins a l'usuari.`,
-          () => processRequest(requestId, 'accept', false)
-        );
-      }
+  document.querySelectorAll('.action-btn').forEach(btn => {
+    if (btn.disabled) return;
+    btn.addEventListener('click', function () {
+      const id     = this.dataset.id;
+      const action = this.dataset.action;
+      if (!confirm(ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}')) return;
+      doAction(id, action, this);
     });
   });
 
-  // Rebutjar petició
-  document.querySelectorAll('.reject-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const requestId = this.dataset.id;
+  function doAction(requestId, action, triggerBtn) {
+    const row = document.getElementById(`req-row-${requestId}`) ||
+                document.getElementById(`req-mobile-${requestId}`);
 
-      showConfirm(
-        'Rebutjar petició',
-        'Rebutjar aquesta petició? No es cobrarà cap Coin.',
-        () => processRequest(requestId, 'reject')
-      );
-    });
-  });
+    if (triggerBtn) triggerBtn.disabled = true;
 
-  function processRequest(requestId, action, allowWithoutCharge = false) {
-    const formData = new FormData();
-    formData.append('request_id', requestId);
-    formData.append('action', action);
-    if (allowWithoutCharge) {
-      formData.append('allow_without_charge', '1');
-    }
+    const fd = new FormData();
+    fd.append('request_id', requestId);
+    fd.append('action', action);
 
     fetch('{% url "manage_song_requests" %}', {
       method: 'POST',
       headers: {
         'X-CSRFToken': '{{ csrf_token }}',
         'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      body: formData
+      body: fd,
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
       if (data.success) {
         showMessage(data.message, 'success');
-        // Recarregar la pàgina després de 1.5 segons per actualitzar tot
-        setTimeout(() => location.reload(), 1500);
+        if (row) {
+          row.style.transition = 'opacity 400ms';
+          row.style.opacity = '0';
+          setTimeout(() => row.remove(), 400);
+        }
       } else {
-        showMessage(data.error || 'Error al processar la petició', 'danger');
+        showMessage(data.error || '{% trans "Error al processar la petició." %}', 'danger');
+        if (triggerBtn) triggerBtn.disabled = false;
       }
     })
-    .catch(error => {
-      console.error('Error:', error);
-      showMessage('Error al processar la petició', 'danger');
+    .catch(() => {
+      showMessage('{% trans "Error de connexió." %}', 'danger');
+      if (triggerBtn) triggerBtn.disabled = false;
     });
   }
 });

@@ -373,6 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const undoBtn = document.getElementById('undo-btn');
 
   let currentIndex = 0;
+  let voteCount = 0; // només like/dislike, no skip
   let lastAction = null; // { type: 'like'|'dislike'|'next', songId: X, index: Y }
   const totalCards = cards.length;
 
@@ -423,9 +424,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!cardStack || cards.length === 0) return;
 
-  // Actualitzar progrés
+  // Actualitzar progrés — barra avança només amb like/dislike, no amb skip
   function updateProgress() {
-    const completedCount = initialCompleted + currentIndex;
+    const completedCount = initialCompleted + voteCount;
     const progress = totalSongs > 0 ? (completedCount / totalSongs) * 100 : 0;
     const remaining = totalCards - currentIndex;
 
@@ -605,6 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Avançar a la següent
       currentIndex++;
+      if (actionType === 'like' || actionType === 'dislike') voteCount++;
       updateProgress();
       nextCard();
     }, 300);
@@ -643,6 +645,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userLikesCount && data.user_likes_count !== undefined) userLikesCount.textContent = data.user_likes_count;
 
         currentIndex = actionToUndo.index;
+        if (actionToUndo.type === 'like' || actionToUndo.type === 'dislike') voteCount = Math.max(0, voteCount - 1);
 
         const card = actionToUndo.card;
         card.classList.remove('d-none');

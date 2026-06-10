@@ -216,8 +216,9 @@ class PartyCoinsGrant(models.Model):
 
 class SongRequest(models.Model):
     STATUS_CHOICES = [
-        ('pending', _('Pendent')),
-        ('accepted', _('Acceptada')),
+        ('pending', _('Demanada')),
+        ('queued', _('Afegida a la Maleta')),
+        ('accepted', _('Posada a la sessió')),
         ('rejected', _('Rebutjada')),
     ]
 
@@ -229,6 +230,7 @@ class SongRequest(models.Model):
     album_image_url = models.URLField(max_length=500, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', db_index=True)
     coins_cost = models.PositiveIntegerField()
+    coins_charged = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
     processed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_requests')
@@ -244,7 +246,10 @@ class SongRequest(models.Model):
 
 class Notification(models.Model):
     TYPE_CHOICES = [
-        ('song_accepted', _('Cançó acceptada')),
+        ('song_accepted', _('Cançó posada a la sessió')),
+        ('song_queued', _('Cançó a la Maleta')),
+        ('song_loaded', _('LOAD: Posada a la sessió')),
+        ('song_rejected', _('Petició no acceptada')),
         ('song_played', _('Cançó reproduïda')),
         ('coins_purchased', _('Coins comprats')),
         ('coins_received', _('Coins rebuts')),

@@ -101,10 +101,53 @@
 
     {% block extra_head %}{% endblock %}
 
+    <style>
+      #page-loader {
+        display: none;
+      }
+      @media (max-width: 767px) {
+        #page-loader {
+          display: flex;
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: linear-gradient(155deg, #0040e0 0%, #2e5bff 60%, #1a3fc4 100%);
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 3rem;
+          transition: opacity 0.4s ease;
+        }
+        #page-loader.fade-out {
+          opacity: 0;
+          pointer-events: none;
+        }
+        .page-loader-logo {
+          width: 180px;
+          filter: drop-shadow(0 4px 24px rgba(0,0,0,0.18));
+        }
+        .page-loader-spinner {
+          width: 44px;
+          height: 44px;
+          border: 3px solid rgba(255,255,255,0.25);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: loader-spin 0.85s linear infinite;
+        }
+        @keyframes loader-spin {
+          to { transform: rotate(360deg); }
+        }
+      }
+    </style>
 
 </head>
 
 <body id="page-top">
+
+  <div id="page-loader">
+    <img class="page-loader-logo" src="{% static 'jukebox/img/DJJukebox_logo.png' %}" alt="DJJukebox">
+    <div class="page-loader-spinner"></div>
+  </div>
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -325,7 +368,9 @@
                                 {% if user_avatar_url %}
                                 <img class="img-profile rounded-circle"
                                      src="{{ user_avatar_url }}"
-                                     alt="{{ user.username }}">
+                                     alt="{{ user.username }}"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
+                                <span class="user-avatar-fallback" style="display:none">{{ user_avatar_initial|default:"U" }}</span>
                                 {% else %}
                                 <span class="user-avatar-fallback">{{ user_avatar_initial|default:"U" }}</span>
                                 {% endif %}
@@ -596,6 +641,38 @@
             isPulling = false;
         }, { passive: true });
     });
+    </script>
+
+    <script>
+    (function () {
+      var loader = document.getElementById('page-loader');
+      if (!loader) return;
+
+      function hideLoader() {
+        loader.classList.add('fade-out');
+        setTimeout(function () { loader.style.display = 'none'; }, 400);
+      }
+
+      if (document.readyState === 'complete') {
+        hideLoader();
+      } else {
+        window.addEventListener('load', hideLoader);
+      }
+
+      // Mostra el loader en navegació entre pàgines (mobile)
+      if (window.innerWidth < 768) {
+        document.addEventListener('click', function (e) {
+          var link = e.target.closest('a[href]');
+          if (!link) return;
+          var href = link.getAttribute('href');
+          if (!href || href.startsWith('#') || href.startsWith('javascript') || link.target === '_blank') return;
+          if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+          loader.style.display = 'flex';
+          loader.style.opacity = '1';
+          loader.classList.remove('fade-out');
+        });
+      }
+    }());
     </script>
 
 </body>

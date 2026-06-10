@@ -23,12 +23,16 @@ def selected_party(request):
     party = None
     is_party_dj = False
     if party_id:
-        try:
-            party = Party.objects.get(id=party_id)
-            if request.user.is_authenticated and not request.user.is_superuser:
-                is_party_dj = party.djs.filter(pk=request.user.pk).exists()
-        except Party.DoesNotExist:
-            party = None
+        cached = getattr(request, '_party_cache', None)
+        if cached and cached.pk == party_id:
+            party = cached
+        else:
+            try:
+                party = Party.objects.get(id=party_id)
+            except Party.DoesNotExist:
+                party = None
+        if party and request.user.is_authenticated and not request.user.is_superuser:
+            is_party_dj = party.djs.filter(pk=request.user.pk).exists()
     return {'selected_party': party, 'is_party_dj': is_party_dj}
 
 
@@ -39,6 +43,10 @@ def user_avatar(request):
     display_name = None
 
     if user and user.is_authenticated:
+        cached = request.session.get('_avatar_cache_v2')
+        if cached:
+            return cached
+
         spotify_account = SocialAccount.objects.filter(
             user=user,
             provider="spotify",
@@ -52,6 +60,15 @@ def user_avatar(request):
         display_name = (display_name or user.get_full_name().strip() or user.username or user.email or "U").strip()
         display_name = display_name[:1].upper() + display_name[1:]
         avatar_initial = display_name[0].upper()
+
+        result = {
+            "user_avatar_url": avatar_url,
+            "user_avatar_initial": avatar_initial,
+            "user_display_name": display_name,
+        }
+        if avatar_url:
+            request.session['_avatar_cache_v2'] = result
+        return result
 
     return {
         "user_avatar_url": avatar_url,

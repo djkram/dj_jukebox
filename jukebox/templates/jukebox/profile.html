@@ -390,7 +390,9 @@
     <div class="profile-avatar-section">
       <div class="profile-avatar">
         {% if user_avatar_url %}
-          <img src="{{ user_avatar_url }}" alt="{{ user.username }}">
+          <img src="{{ user_avatar_url }}" alt="{{ user.username }}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="profile-avatar-placeholder" style="display:none">{{ user_avatar_initial|default:"U" }}</div>
         {% else %}
           <div class="profile-avatar-placeholder">{{ user_avatar_initial|default:"U" }}</div>
         {% endif %}
@@ -625,7 +627,11 @@
       <div class="position-relative">
         <div class="rounded-xl overflow-hidden" style="width: 6.25rem; height: 6.25rem; box-shadow: 0 20px 40px -15px rgba(0, 64, 224, 0.08); border: 3px solid white;">
           {% if user_avatar_url %}
-            <img src="{{ user_avatar_url }}" alt="{{ user.username }}" class="w-100 h-100" style="object-fit: cover;">
+            <img src="{{ user_avatar_url }}" alt="{{ user.username }}" class="w-100 h-100" style="object-fit: cover;"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="w-100 h-100 align-items-center justify-content-center" style="display:none; background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
+              <span class="text-white" style="font-size: 2.35rem; font-weight: 800;">{{ user_avatar_initial|default:"U" }}</span>
+            </div>
           {% else %}
             <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #0040e0 0%, #2e5bff 100%);">
               <span class="text-white" style="font-size: 2.35rem; font-weight: 800;">{{ user_avatar_initial|default:"U" }}</span>

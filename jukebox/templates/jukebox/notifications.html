@@ -61,6 +61,18 @@
       background: rgba(0,227,253,0.15);
       color: #00e3fd;
     }
+    .notif-icon-queued {
+      background: rgba(59,130,246,0.15);
+      color: #3b82f6;
+    }
+    .notif-icon-loaded {
+      background: rgba(28,200,138,0.15);
+      color: #1cc88a;
+    }
+    .notif-icon-rejected {
+      background: rgba(186,26,26,0.1);
+      color: #ba1a1a;
+    }
 
     .notif-content {
       flex-grow: 1;
@@ -327,9 +339,9 @@
         {% for notification in notifications %}
           <div class="notif-card {% if not notification.is_read %}unread{% endif %}">
             <!-- Icon -->
-            <div class="notif-icon {% if notification.type == 'song_accepted' %}notif-icon-accepted{% elif notification.type == 'song_played' %}notif-icon-played{% elif notification.type == 'coins_purchased' %}notif-icon-purchased{% elif notification.type == 'coins_received' %}notif-icon-received{% endif %}">
+            <div class="notif-icon {% if notification.type == 'song_accepted' or notification.type == 'song_loaded' %}notif-icon-loaded{% elif notification.type == 'song_queued' %}notif-icon-queued{% elif notification.type == 'song_rejected' %}notif-icon-rejected{% elif notification.type == 'song_played' %}notif-icon-played{% elif notification.type == 'coins_purchased' %}notif-icon-purchased{% elif notification.type == 'coins_received' %}notif-icon-received{% endif %}">
               <span class="material-symbols-outlined">
-                {% if notification.type == 'song_accepted' %}check_circle{% elif notification.type == 'song_played' %}play_circle{% elif notification.type == 'coins_purchased' %}shopping_cart{% elif notification.type == 'coins_received' %}card_giftcard{% endif %}
+                {% if notification.type == 'song_accepted' or notification.type == 'song_loaded' %}queue_music{% elif notification.type == 'song_queued' %}shopping_bag{% elif notification.type == 'song_rejected' %}cancel{% elif notification.type == 'song_played' %}play_circle{% elif notification.type == 'coins_purchased' %}shopping_cart{% elif notification.type == 'coins_received' %}card_giftcard{% endif %}
               </span>
             </div>
 
@@ -355,17 +367,22 @@
 
               <!-- Type-specific content -->
               <div class="notif-meta">
-                {% if notification.type == 'song_accepted' %}
+                {% if notification.type == 'song_accepted' or notification.type == 'song_loaded' %}
+                  <span class="notif-meta-badge coins">
+                    <span class="material-symbols-outlined" style="font-size: 0.875rem;">monetization_on</span>
+                    {% trans "Coins cobrats:" %} {{ notification.amount }}
+                  </span>
+                {% elif notification.type == 'song_queued' %}
+                  <span class="notif-meta-badge" style="background:#dbeafe;color:#1e40af;">
+                    <span class="material-symbols-outlined" style="font-size: 0.875rem;">lock</span>
+                    {% trans "Coins retinguts" %}
+                  </span>
+                {% elif notification.type == 'song_rejected' %}
                   {% if notification.amount is not None %}
-                    <span class="notif-meta-badge coins">
-                      <span class="material-symbols-outlined" style="font-size: 0.875rem;">monetization_on</span>
-                      {% trans "Cost:" %} {{ notification.amount }} {% trans "Coins" %}
-                    </span>
-                  {% else %}
-                    <span class="notif-meta-badge free">
-                      <span class="material-symbols-outlined" style="font-size: 0.875rem;">card_giftcard</span>
-                      {% trans "Sense càrrec" %}
-                    </span>
+                  <span class="notif-meta-badge free">
+                    <span class="material-symbols-outlined" style="font-size: 0.875rem;">undo</span>
+                    +{{ notification.amount }} {% trans "Coins retornats" %}
+                  </span>
                   {% endif %}
                 {% elif notification.type == 'song_played' %}
                   {% if notification.song and notification.song.album_image_url %}
@@ -395,12 +412,30 @@
 
             <div class="notif-info-list">
               <div class="notif-info-item">
-                <div class="notif-info-item-icon notif-icon-accepted">
-                  <span class="material-symbols-outlined">check</span>
+                <div class="notif-info-item-icon notif-icon-queued">
+                  <span class="material-symbols-outlined">shopping_bag</span>
                 </div>
                 <div>
-                  <span class="notif-info-item-label">{% trans "Cançó acceptada" %}</span>
-                  <p class="notif-info-item-text">{% trans "El DJ accepta la teva petició" %}</p>
+                  <span class="notif-info-item-label">{% trans "Afegida a la Maleta" %}</span>
+                  <p class="notif-info-item-text">{% trans "El DJ ha guardat la teva petició. Els coins queden retinguts." %}</p>
+                </div>
+              </div>
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-loaded">
+                  <span class="material-symbols-outlined">queue_music</span>
+                </div>
+                <div>
+                  <span class="notif-info-item-label">{% trans "Posada a la sessió" %}</span>
+                  <p class="notif-info-item-text">{% trans "El DJ fa LOAD: la cançó entra a la sessió i es confirmen els coins." %}</p>
+                </div>
+              </div>
+              <div class="notif-info-item">
+                <div class="notif-info-item-icon notif-icon-rejected">
+                  <span class="material-symbols-outlined">cancel</span>
+                </div>
+                <div>
+                  <span class="notif-info-item-label">{% trans "Petició no acceptada" %}</span>
+                  <p class="notif-info-item-text">{% trans "El DJ no ha acceptat la petició. Els coins retinguts et són retornats." %}</p>
                 </div>
               </div>
               <div class="notif-info-item">
@@ -409,25 +444,7 @@
                 </div>
                 <div>
                   <span class="notif-info-item-label">{% trans "Cançó reproduïda" %}</span>
-                  <p class="notif-info-item-text">{% trans "S'ha reproduït una cançó votada" %}</p>
-                </div>
-              </div>
-              <div class="notif-info-item">
-                <div class="notif-info-item-icon notif-icon-purchased">
-                  <span class="material-symbols-outlined">shopping_cart</span>
-                </div>
-                <div>
-                  <span class="notif-info-item-label">{% trans "Compra realitzada" %}</span>
-                  <p class="notif-info-item-text">{% trans "Coins afegits al teu saldo" %}</p>
-                </div>
-              </div>
-              <div class="notif-info-item">
-                <div class="notif-info-item-icon notif-icon-received">
-                  <span class="material-symbols-outlined">card_giftcard</span>
-                </div>
-                <div>
-                  <span class="notif-info-item-label">{% trans "Coins de regal" %}</span>
-                  <p class="notif-info-item-text">{% trans "Has rebut coins gratuïts" %}</p>
+                  <p class="notif-info-item-text">{% trans "S'ha reproduït una cançó que has votat" %}</p>
                 </div>
               </div>
             </div>
@@ -481,22 +498,48 @@
       <!-- Notifications Bento-ish List -->
       <div class="mobile-list-stack">
         {% for notification in notifications %}
-          {% if notification.type == 'song_accepted' %}
-            <!-- Song Accepted -->
-            <div class="mobile-notification-card position-relative bg-white p-2 d-flex align-items-start border {% if not notification.is_read %}border-primary{% else %}border-transparent{% endif %}" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 64, 224, 0.06), 0 8px 10px -6px rgba(0, 64, 224, 0.06); gap: 0.75rem;">
-              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #dde1ff;">
-                <i class="fas fa-check-circle" style="font-size: 1.125rem; color: #0040e0;"></i>
+          {% if notification.type == 'song_accepted' or notification.type == 'song_loaded' %}
+            <!-- Posada a la sessió -->
+            <div class="mobile-notification-card position-relative bg-white p-2 d-flex align-items-start border {% if not notification.is_read %}border-primary{% else %}border-transparent{% endif %}" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,64,224,0.06), 0 8px 10px -6px rgba(0,64,224,0.06); gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #d1fae5;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #059669; font-variation-settings:'FILL' 1;">queue_music</span>
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-start mb-1">
                   <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
                   <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
                 </div>
-                <p class="mb-2" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
-                <div class="px-2 py-1 rounded-pill d-inline-flex align-items-center" style="background: #eceef3; gap: 0.25rem;">
-                  <i class="fas fa-play-circle" style="font-size: 0.7rem; color: #0040e0;"></i>
-                  <span class="fw-semibold" style="font-size: 0.65rem; color: #0040e0;">{% trans "Up Next" %}</span>
+                <p class="mb-0" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
+              </div>
+            </div>
+
+          {% elif notification.type == 'song_queued' %}
+            <!-- Afegida a la Maleta -->
+            <div class="mobile-notification-card position-relative bg-white p-2 d-flex align-items-start border {% if not notification.is_read %}border-primary{% else %}border-transparent{% endif %}" style="border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(59,130,246,0.06), 0 8px 10px -6px rgba(59,130,246,0.06); gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #dbeafe;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #3b82f6; font-variation-settings:'FILL' 1;">shopping_bag</span>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
+                  <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
                 </div>
+                <p class="mb-0" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
+              </div>
+            </div>
+
+          {% elif notification.type == 'song_rejected' %}
+            <!-- Petició no acceptada -->
+            <div class="mobile-notification-card position-relative bg-white p-2 d-flex align-items-start border {% if not notification.is_read %}border-transparent{% else %}border-transparent{% endif %}" style="border-radius: 12px; background: #fff8f8 !important; gap: 0.75rem;">
+              <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem; background: #ffdad6;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #ba1a1a; font-variation-settings:'FILL' 1;">cancel</span>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <p class="fw-bold mb-0" style="font-size: 0.8rem; color: #191c1f;">{{ notification.title }}</p>
+                  <span style="font-size: 0.6rem; color: #747688;">{{ notification.created_at|timesince }}</span>
+                </div>
+                <p class="mb-0" style="font-size: 0.75rem; color: #434656; line-height: 1.3;">{{ notification.message }}</p>
               </div>
             </div>
 

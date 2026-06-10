@@ -83,6 +83,17 @@ def spend_user_coins_for_party(user, party, amount, reason='coins_spent'):
     return True
 
 
+def refund_user_coins_for_party(user, party, amount, reason='song_request_refund'):
+    """Retorna coins a l'usuari (refund d'una petició rebutjada)."""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    if amount <= 0:
+        return
+    with transaction.atomic():
+        User.objects.filter(pk=user.pk).update(credits=F('credits') + amount)
+    user.refresh_from_db(fields=['credits'])
+
+
 def sync_party_free_coins_for_existing_users(party, previous_free_coins=0):
     """
     Quan l'admin puja els coins gratuïts de la festa, actualitza els usuaris

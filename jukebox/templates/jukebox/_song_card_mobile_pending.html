@@ -1,0 +1,90 @@
+{% load dict_filters %}
+{% load i18n %}
+{% for song in songs %}
+<div class="song-card mobile-bag-song-card" data-song-id="{{ song.id }}" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
+  <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
+    <div class="position-relative album-cover-container overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
+      {% if song.album_image_url %}
+        <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
+      {% else %}
+        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #e7e8ed;">
+          <i class="fas fa-music" style="color: #747688; font-size: 0.875rem;"></i>
+        </div>
+      {% endif %}
+      {% if has_spotify %}
+      <div class="play-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+           style="background: rgba(0, 0, 0, 0.7); opacity: 0; transition: opacity 0.2s; cursor: pointer; border-radius: 8px;">
+        <button class="spotify-play-btn btn p-0 border-0 bg-transparent"
+                data-song-id="{{ song.id }}"
+                data-spotify-id="{{ song.spotify_id }}"
+                style="color: white; font-size: 1.25rem; line-height: 1;">
+          <i class="fas fa-play"></i>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+    <div class="flex-grow-1 pe-1" style="min-width: 0;">
+      <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
+      <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
+        <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
+        <span class="badge flex-shrink-0" style="background-color: {{ song.badge_bg }}; color: {{ song.badge_text }}; font-size: 0.6rem; padding: 0.25rem 0.4rem; font-weight: 600;">
+          {{ song.badge_label }}
+        </span>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto ps-2">
+      {% if voting_enabled %}
+      {% if user_votes_dict|get_item:song.id %}
+        <div class="mobile-vote-controls">
+          {% if user_votes_dict|get_item:song.id == 'like' %}
+            <form method="post" action="{% url 'song_list' %}">{% csrf_token %}
+              <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+              <button type="submit" class="mobile-vote-btn mobile-vote-btn-positive mobile-vote-btn-active" aria-label="{% trans 'Desfer vot positiu' %}" title="{% trans 'Desfer vot' %}">
+                <i class="fas fa-caret-up"></i>
+              </button>
+            </form>
+            <button class="mobile-vote-btn mobile-vote-btn-locked" disabled aria-label="{% trans 'Vot negatiu no seleccionat' %}">
+              <i class="fas fa-caret-down"></i>
+            </button>
+          {% elif user_votes_dict|get_item:song.id == 'dislike' or user_votes_dict|get_item:song.id == 'skip' %}
+            <button class="mobile-vote-btn mobile-vote-btn-locked" disabled aria-label="{% trans 'Vot positiu no seleccionat' %}">
+              <i class="fas fa-caret-up"></i>
+            </button>
+            <form method="post" action="{% url 'song_list' %}">{% csrf_token %}
+              <input type="hidden" name="unvote_song_id" value="{{ song.id }}">
+              <button type="submit" class="mobile-vote-btn mobile-vote-btn-negative mobile-vote-btn-active" aria-label="{% trans 'Desfer vot negatiu' %}" title="{% trans 'Desfer vot' %}">
+                <i class="fas fa-caret-down"></i>
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% else %}
+        {% if votes_left > 0 or credits > 0 %}
+          <div class="mobile-vote-controls">
+            <form method="post" action="{% url 'song_list' %}">{% csrf_token %}
+              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+              <input type="hidden" name="vote_type" value="like">
+              <button type="submit" class="mobile-vote-btn mobile-vote-btn-positive" aria-label="{% trans 'Vot positiu' %}">
+                <i class="fas fa-caret-up"></i>
+              </button>
+            </form>
+            <form method="post" action="{% url 'song_list' %}">{% csrf_token %}
+              <input type="hidden" name="vote_song_id" value="{{ song.id }}">
+              <input type="hidden" name="vote_type" value="dislike">
+              <button type="submit" class="mobile-vote-btn mobile-vote-btn-negative" aria-label="{% trans 'Vot negatiu' %}">
+                <i class="fas fa-caret-down"></i>
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <a href="{% url 'buy_votes' %}" class="text-decoration-none pe-0 mobile-vote-controls" aria-label="{% trans 'Necessites vots per votar' %}">
+            <span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-up"></i></span>
+            <span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-down"></i></span>
+          </a>
+        {% endif %}
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}

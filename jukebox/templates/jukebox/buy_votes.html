@@ -384,13 +384,13 @@
           <!-- Pack 2 (Featured) -->
           <form method="post">
             {% csrf_token %}
-            <input type="hidden" name="votes" value="25">
+            <input type="hidden" name="votes" value="30">
             <button type="submit" class="coins-package-card featured" style="border: none; width: 100%;">
               <div class="coins-package-badge">{% trans "Més popular" %}</div>
               <div class="coins-package-icon">
                 <span class="material-symbols-outlined" style="font-size: 2.5rem; font-variation-settings: 'FILL' 1;">poker_chip</span>
               </div>
-              <div class="coins-package-amount">{% trans "25 Coins" %}</div>
+              <div class="coins-package-amount">{% trans "30 Coins" %}</div>
               <div class="coins-package-label">{% trans "Pack Estàndard" %}</div>
               <div class="coins-package-price">5€</div>
               <div class="coins-package-btn">{% trans "Comprar" %}</div>
@@ -673,7 +673,7 @@
 
     <!-- Value Bundles (Bento Grid Style) -->
     <section class="mobile-group-stack">
-      <!-- Pro Pack (Highlighted/Featured) — 5€ / 25 Coins -->
+      <!-- Pro Pack (Highlighted/Featured) — 5€ / 30 Coins -->
       <div class="position-relative overflow-hidden d-flex align-items-center justify-content-between" style="background: #2e5bff; color: #efefff; padding: 0.85rem 1rem; border-radius: 1.1rem; gap: 0.75rem;">
         <div class="position-absolute" style="top: -1rem; right: -1rem; width: 6rem; height: 6rem; background: rgba(0, 227, 253, 0.2); border-radius: 50%; filter: blur(2rem);"></div>
         <div style="position: relative; z-index: 1;">
@@ -682,7 +682,7 @@
             <span class="font-bold text-uppercase" style="font-size: 0.55rem; letter-spacing: 0.08em;">{% trans "MÉS POPULAR" %}</span>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem; line-height: 1.1;">{% trans "25 Coins" %}</h3>
+            <h3 class="font-headline font-bold mb-0" style="font-size: 1.25rem; line-height: 1.1;">{% trans "30 Coins" %}</h3>
             <span class="font-headline" style="font-size: 1.4rem; font-weight: 900; line-height: 1;">5€</span>
           </div>
           <p class="font-body mb-0" style="font-size: 0.72rem; opacity: 0.8;">{% trans "Millor preu" %}</p>
@@ -690,7 +690,7 @@
         <div style="position: relative; z-index: 1; flex-shrink: 0;">
           <form method="post">
             {% csrf_token %}
-            <input type="hidden" name="votes" value="25">
+            <input type="hidden" name="votes" value="30">
             <button type="submit" class="px-3 py-2 rounded-pill font-bold" style="background: white; color: #0040e0; font-size: 0.78rem; border: none;">{% trans "Compra Ara" %}</button>
           </form>
         </div>

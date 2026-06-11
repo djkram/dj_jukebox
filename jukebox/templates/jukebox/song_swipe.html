@@ -1,6 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
 {% load static %}
-{% block page_title %}Busca Match{% endblock %}
+{% block page_title %}Busca Match{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 {% block extra_head %}<link href="{% static 'jukebox/css/song_swipe.css' %}" rel="stylesheet">{% endblock %}
 {% block content %}
 

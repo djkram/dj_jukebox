@@ -1,6 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
 
-{% block page_title %}DJ Dashboard{% endblock %}
+{% block page_title %}DJ Dashboard{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 
 {% block content %}
 

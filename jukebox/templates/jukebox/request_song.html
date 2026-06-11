@@ -1,5 +1,5 @@
 {% extends "jukebox/admin_base.html" %}
-{% block page_title %}Demanar cançó{% endblock %}
+{% block page_title %}Demanar cançó{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 {% block content %}
 
 <style>

@@ -2,7 +2,7 @@
 {% extends "jukebox/admin_base.html" %}
 {% load socialaccount static l10n %}
 
-{% block page_title %}Settings festa{% endblock %}
+{% block page_title %}Settings festa{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'jukebox/vendor/leaflet/leaflet.css' %}">

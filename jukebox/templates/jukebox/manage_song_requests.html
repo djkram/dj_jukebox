@@ -1,6 +1,6 @@
 {% extends "jukebox/admin_base.html" %}
 {% load i18n %}
-{% block page_title %}{% trans "Gestionar peticions" %}{% endblock %}
+{% block page_title %}{% trans "Gestionar peticions" %}{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 {% block content %}
 <style>
   .req-status-badge {

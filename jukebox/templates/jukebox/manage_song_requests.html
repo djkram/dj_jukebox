@@ -235,8 +235,8 @@
                       <button class="req-btn action-btn"
                               data-id="{{ req.id }}" data-action="delete"
                               title="{% trans 'Eliminar petició' %}"
-                              style="color:#747687;border-color:#e0e0e0;">
-                        <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">delete</span>
+                              style="color:#747687;">
+                        <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;">delete</span>
                       </button>
                     </div>
                   </td>
@@ -309,8 +309,8 @@
                   <button class="req-btn action-btn"
                           data-id="{{ req.id }}" data-action="delete"
                           title="{% trans 'Eliminar del historial' %}"
-                          style="color:#747687;border-color:#e0e0e0;padding:0.25rem 0.4rem;">
-                    <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">delete</span>
+                          style="color:#747687;padding:0.45rem 0.65rem;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;">delete</span>
                   </button>
                 </td>
               </tr>
@@ -458,14 +458,14 @@ document.addEventListener('DOMContentLoaded', function () {
     delete: '{% trans "Eliminar la petició? Si els coins estaven retinguts es retornaran a l\'usuari. Aquesta acció no es pot desfer." %}',
   };
 
-  document.querySelectorAll('.action-btn').forEach(btn => {
-    if (btn.disabled) return;
-    btn.addEventListener('click', function () {
-      const id     = this.dataset.id;
-      const action = this.dataset.action;
-      if (!confirm(ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}')) return;
-      doAction(id, action, this);
-    });
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.action-btn');
+    if (!btn || btn.disabled) return;
+    const id     = btn.dataset.id;
+    const action = btn.dataset.action;
+    if (!id || !action) return;
+    if (!confirm(ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}')) return;
+    doAction(id, action, btn);
   });
 
   function doAction(requestId, action, triggerBtn) {

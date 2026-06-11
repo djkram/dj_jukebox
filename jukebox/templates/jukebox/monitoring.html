@@ -120,6 +120,35 @@
       <span class="monitoring-health-val">{{ python_version }}</span>
     </div>
 
+    {% if cpu_pct is not None %}
+    <div class="monitoring-health-chip {% if cpu_pct >= 90 %}err{% elif cpu_pct >= 70 %}warn{% else %}ok{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">CPU</span>
+      <span class="monitoring-health-val">{{ cpu_pct|floatformat:0 }}%</span>
+    </div>
+    {% endif %}
+
+    {% if ram_pct is not None %}
+    <div class="monitoring-health-chip {% if ram_pct >= 90 %}err{% elif ram_pct >= 75 %}warn{% else %}ok{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">RAM</span>
+      <span class="monitoring-health-val">{{ ram_pct|floatformat:0 }}% · {{ ram_used_mb }} MB</span>
+    </div>
+    {% endif %}
+
+    {% if resp_avg_ms is not None %}
+    <div class="monitoring-health-chip {% if resp_avg_ms >= 2000 %}err{% elif resp_avg_ms >= 500 %}warn{% else %}ok{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">Càrrega avg·p95</span>
+      <span class="monitoring-health-val">{{ resp_avg_ms }}ms · {{ resp_p95_ms }}ms</span>
+    </div>
+    {% else %}
+    <div class="monitoring-health-chip neutral">
+      <span class="monitoring-health-label">Càrrega</span>
+      <span class="monitoring-health-val">—</span>
+    </div>
+    {% endif %}
+
     {% if recent_errors %}
     <div class="monitoring-health-chip err" style="flex:1; min-width:0;">
       <span class="monitoring-health-dot"></span>
@@ -251,6 +280,176 @@
 
 </div><!-- /monitoring-page -->
 </div><!-- /d-none d-md-block -->
+
+<!-- ── Mobile layout ─────────────────────────────────────────────────────── -->
+<div class="d-block d-md-none">
+<div class="mobile-page-content mobile-page-content--tight mobile-page-stack">
+<div class="mobile-group-stack" style="gap: 0.5rem;">
+
+  <!-- Top nav: back to Dashboard -->
+  <section>
+    <div class="mobile-segmented">
+      <a href="{% url 'dj_dashboard' %}" class="mobile-segmented-item">Dashboard</a>
+      {% if selected_party %}<a href="{% url 'party_settings' selected_party.id %}" class="mobile-segmented-item">Settings</a>{% endif %}
+      <span class="mobile-segmented-item is-active" style="background:#eef2ff;color:#0040e0;">Monitor</span>
+    </div>
+  </section>
+
+  <!-- Server health chips -->
+  <section>
+    <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#747687;margin-bottom:0.4rem;">Salut del servidor</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+      <div class="monitoring-health-chip {% if db_ok %}ok{% else %}err{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">DB</span>
+        <span class="monitoring-health-val">{{ db_engine }}{% if db_size_mb %} · {{ db_size_mb }}MB{% endif %}</span>
+      </div>
+      <div class="monitoring-health-chip {% if cache_ok %}ok{% else %}warn{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">Cache</span>
+        <span class="monitoring-health-val">{% if cache_ok %}OK{% else %}ERR{% endif %}</span>
+      </div>
+      <div class="monitoring-health-chip {% if debug_mode %}warn{% else %}ok{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">Mode</span>
+        <span class="monitoring-health-val">{% if debug_mode %}DEBUG{% else %}PROD{% endif %}</span>
+      </div>
+      {% if cpu_pct is not None %}
+      <div class="monitoring-health-chip {% if cpu_pct >= 90 %}err{% elif cpu_pct >= 70 %}warn{% else %}ok{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">CPU</span>
+        <span class="monitoring-health-val">{{ cpu_pct|floatformat:0 }}%</span>
+      </div>
+      {% endif %}
+      {% if ram_pct is not None %}
+      <div class="monitoring-health-chip {% if ram_pct >= 90 %}err{% elif ram_pct >= 75 %}warn{% else %}ok{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">RAM</span>
+        <span class="monitoring-health-val">{{ ram_pct|floatformat:0 }}% · {{ ram_used_mb }}MB</span>
+      </div>
+      {% endif %}
+      {% if resp_avg_ms is not None %}
+      <div class="monitoring-health-chip {% if resp_avg_ms >= 2000 %}err{% elif resp_avg_ms >= 500 %}warn{% else %}ok{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">P50·P95</span>
+        <span class="monitoring-health-val">{{ resp_avg_ms }}·{{ resp_p95_ms }}ms</span>
+      </div>
+      {% endif %}
+      <div class="monitoring-health-chip {% if recent_errors %}err{% else %}ok{% endif %}">
+        <span class="monitoring-health-dot"></span>
+        <span class="monitoring-health-label">Errors</span>
+        <span class="monitoring-health-val">{{ recent_errors|length }}</span>
+      </div>
+    </div>
+    {% if recent_errors %}
+    <div class="monitoring-error-log" style="margin-top:0.5rem;">
+      {% for err in recent_errors %}<div class="monitoring-error-line">{{ err }}</div>{% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- KPI grid 2×4 -->
+  <section>
+    <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#747687;margin-bottom:0.4rem;">Indicadors globals</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon blue"><span class="material-symbols-outlined">group</span></span>
+        <div>
+          <div class="monitoring-stat-label">Usuaris</div>
+          <div class="monitoring-stat-value">{{ total_users }}</div>
+          <div class="monitoring-stat-sub">{{ avg_credits }} coins/u</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon purple"><span class="material-symbols-outlined">celebration</span></span>
+        <div>
+          <div class="monitoring-stat-label">Festes</div>
+          <div class="monitoring-stat-value">{{ total_parties }}</div>
+          <div class="monitoring-stat-sub">{{ active_parties }} actives</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon green"><span class="material-symbols-outlined">thumb_up</span></span>
+        <div>
+          <div class="monitoring-stat-label">Vots</div>
+          <div class="monitoring-stat-value">{{ total_votes }}</div>
+          <div class="monitoring-stat-sub">{{ total_likes }} likes</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon teal"><span class="material-symbols-outlined">music_note</span></span>
+        <div>
+          <div class="monitoring-stat-label">Cançons</div>
+          <div class="monitoring-stat-value">{{ songs_played }}</div>
+          <div class="monitoring-stat-sub">posades</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon orange"><span class="material-symbols-outlined">queue_music</span></span>
+        <div>
+          <div class="monitoring-stat-label">Peticions</div>
+          <div class="monitoring-stat-value">{{ total_requests }}</div>
+          <div class="monitoring-stat-sub">{{ pending_requests }} pend.</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon gold"><span class="material-symbols-outlined">toll</span></span>
+        <div>
+          <div class="monitoring-stat-label">Coins circ.</div>
+          <div class="monitoring-stat-value">{{ total_credits }}</div>
+          <div class="monitoring-stat-sub">{{ avg_credits }} mig/u</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon cyan"><span class="material-symbols-outlined">shopping_cart</span></span>
+        <div>
+          <div class="monitoring-stat-label">Compres</div>
+          <div class="monitoring-stat-value">{{ paid_purchases }}</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon indigo"><span class="material-symbols-outlined">payments</span></span>
+        <div>
+          <div class="monitoring-stat-label">Coins cobrats</div>
+          <div class="monitoring-stat-value">{{ total_coins_charged }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- User list compact -->
+  <section>
+    <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#747687;margin-bottom:0.4rem;">Usuaris</div>
+    {% for u in users %}
+    <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;background:#fff;border-radius:0.6rem;box-shadow:0 1px 6px rgba(0,46,168,0.06);margin-bottom:0.35rem;">
+      <span class="monitoring-user-avatar">{{ u.username|slice:":1"|upper }}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:0.85rem;color:#181c1e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          {{ u.username }}
+          {% if u.is_superuser %}<span class="monitoring-badge superuser">Admin</span>{% endif %}
+        </div>
+        <div style="font-size:0.72rem;color:#747687;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ u.email }}</div>
+      </div>
+      <div style="display:flex;gap:0.65rem;flex-shrink:0;text-align:right;">
+        <div>
+          <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#9a9baf;">Coins</div>
+          <div class="monitoring-credits" style="font-size:0.85rem;">{{ u.credits }}</div>
+        </div>
+        <div>
+          <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#9a9baf;">Vots</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#434655;font-variant-numeric:tabular-nums;">{{ u.vote_count }}</div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="monitoring-active-dot {% if u.is_active %}active{% endif %}"></span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+</div>
+</div>
+</div><!-- /d-block d-md-none -->
 
 <!-- ── Edit User Modal ───────────────────────────────────────────────────── -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">

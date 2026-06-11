@@ -1468,6 +1468,34 @@ def dj_monitoring(request):
     python_version = f"{_sys.version_info.major}.{_sys.version_info.minor}.{_sys.version_info.micro}"
     django_version = f"{_django.VERSION[0]}.{_django.VERSION[1]}.{_django.VERSION[2]}"
 
+    # ── CPU / RAM ─────────────────────────────────────────────────────────────
+    cpu_pct = None
+    ram_pct = None
+    ram_used_mb = None
+    try:
+        import psutil as _psutil
+        cpu_pct = _psutil.cpu_percent(interval=0.1)
+        _vm = _psutil.virtual_memory()
+        ram_pct = round(_vm.percent, 1)
+        ram_used_mb = _vm.used // (1024 * 1024)
+    except Exception:
+        pass
+
+    # ── Response time stats (from ResponseTimingMiddleware) ───────────────────
+    resp_avg_ms = None
+    resp_p95_ms = None
+    resp_samples = 0
+    try:
+        _samples = cache.get('_mon_resp_times') or []
+        resp_samples = len(_samples)
+        if _samples:
+            _sorted = sorted(_samples)
+            resp_avg_ms = round(sum(_sorted) / len(_sorted))
+            p95_idx = max(0, int(len(_sorted) * 0.95) - 1)
+            resp_p95_ms = round(_sorted[p95_idx])
+    except Exception:
+        pass
+
     # ── Recent server errors (last 200 log lines) ─────────────────────────────
     recent_errors = []
     log_path = _os.path.join(settings.BASE_DIR, 'server.log')
@@ -1531,6 +1559,13 @@ def dj_monitoring(request):
         'django_version': django_version,
         'debug_mode': settings.DEBUG,
         'recent_errors': recent_errors,
+        # CPU / RAM / Response time
+        'cpu_pct': cpu_pct,
+        'ram_pct': ram_pct,
+        'ram_used_mb': ram_used_mb,
+        'resp_avg_ms': resp_avg_ms,
+        'resp_p95_ms': resp_p95_ms,
+        'resp_samples': resp_samples,
         # Tables
         'users': users,
         'party_table': party_table,
@@ -1702,6 +1737,69 @@ def dj_dashboard(request):
     for req in accepted_unplayed_requests:
         req.linked_song_id = unplayed_songs_by_spotify.get(req.spotify_id)
 
+    # ── Monitoring data (superuser only — no overhead for regular DJs) ──────────
+    mon = {}
+    if request.user.is_superuser:
+        import sys as _sys, os as _os, django as _django
+        # CPU / RAM
+        try:
+            import psutil as _psutil
+            mon['cpu_pct'] = _psutil.cpu_percent(interval=0.1)
+            _vm = _psutil.virtual_memory()
+            mon['ram_pct'] = round(_vm.percent, 1)
+            mon['ram_used_mb'] = _vm.used // (1024 * 1024)
+        except Exception:
+            pass
+        # Response times
+        try:
+            _samples = cache.get('_mon_resp_times') or []
+            if _samples:
+                _s = sorted(_samples)
+                mon['resp_avg_ms'] = round(sum(_s) / len(_s))
+                mon['resp_p95_ms'] = round(_s[max(0, int(len(_s) * 0.95) - 1)])
+        except Exception:
+            pass
+        # DB / cache status
+        try:
+            connection.ensure_connection()
+            mon['db_ok'] = True
+        except Exception:
+            mon['db_ok'] = False
+        try:
+            cache.set('_mon_h2', 1, 10)
+            mon['cache_ok'] = cache.get('_mon_h2') == 1
+        except Exception:
+            mon['cache_ok'] = False
+        # Global app KPIs
+        _ustats = User.objects.aggregate(total=Count('id'), avg_credits=Avg('credits'))
+        mon['g_users'] = _ustats['total'] or 0
+        mon['g_avg_credits'] = round(_ustats['avg_credits'] or 0, 1)
+        mon['g_active_parties'] = Party.objects.filter(
+            ~Q(party_status=Party.STATUS_FINISHED) & ~Q(party_status=Party.STATUS_HIDDEN)
+        ).count()
+        mon['g_total_parties'] = Party.objects.count()
+        mon['g_total_votes'] = Vote.objects.count()
+        mon['g_songs_played'] = Song.objects.filter(has_played=True).count()
+        mon['g_pending_requests'] = SongRequest.objects.filter(status__in=['pending', 'queued']).count()
+        # Recent errors
+        _recent_errors = 0
+        try:
+            _log = _os.path.join(settings.BASE_DIR, 'server.log')
+            with open(_log, 'rb') as _f:
+                _f.seek(0, 2); _sz = _f.tell()
+                _f.seek(-min(_sz, 32768), 2)
+                for _line in _f.read().decode('utf-8', errors='replace').splitlines():
+                    if 'Internal Server Error' in _line or ('ERROR' in _line and 'dj_jukebox' in _line):
+                        _recent_errors += 1
+            _recent_errors = min(_recent_errors, 99)
+        except Exception:
+            pass
+        mon['recent_errors'] = _recent_errors
+        # User list
+        mon['users'] = User.objects.annotate(
+            vote_count=Count('vote', distinct=True),
+        ).order_by('username').values('id', 'username', 'credits', 'is_active', 'is_superuser', 'vote_count')
+
     context = {
         'party': party,
         'pending_songs': pending_songs,
@@ -1725,6 +1823,8 @@ def dj_dashboard(request):
         'party_status_label': party_status_label,
         'party_status_help': party_status_help,
         'party_status_step': party_status_step,
+        # Monitoring (superuser only)
+        'mon': mon,
     }
     return render(request, 'jukebox/dj_dashboard.html', context)
 

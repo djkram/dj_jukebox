@@ -188,6 +188,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    'jukebox.middleware.ResponseTimingMiddleware',
 ]
 
 ROOT_URLCONF = 'dj_jukebox.urls'

@@ -1,6 +1,9 @@
 {% extends "jukebox/admin_base.html" %}
+{% load static %}
 
 {% block page_title %}DJ Dashboard{% if party %} · {{ party.name }}{% endif %}{% endblock %}
+
+{% block extra_head %}<link href="{% static 'jukebox/css/monitoring.css' %}" rel="stylesheet">{% endblock %}
 
 {% block content %}
 
@@ -2106,6 +2109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <a href="{% url 'dj_dashboard' %}" class="mobile-segmented-item is-active">Dashboard</a>
         {% if request.user.is_superuser %}
         <a href="{% url 'party_settings' party.id %}" class="mobile-segmented-item">Settings</a>
+        <a href="{% url 'dj_monitoring' %}" class="mobile-segmented-item">Monitor</a>
         {% endif %}
       </div>
     </section>
@@ -2487,6 +2491,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         {% endif %}
       </div>
+
     </section>
   </main>
 </div>
@@ -2496,7 +2501,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var dashboardPanels = {
     bag: document.getElementById('dashboard-mobile-tab-bag'),
     requests: document.getElementById('dashboard-mobile-tab-requests'),
-    played: document.getElementById('dashboard-mobile-tab-played')
+    played: document.getElementById('dashboard-mobile-tab-played'),
   };
 
   dashboardTabButtons.forEach(function(button) {
@@ -2518,10 +2523,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!panel) return;
         if (key === target) {
           panel.classList.remove('d-none');
-          panel.classList.add('d-flex');
+          panel.style.display = 'flex';
         } else {
           panel.classList.add('d-none');
-          panel.classList.remove('d-flex');
+          panel.style.display = '';
         }
       });
     });

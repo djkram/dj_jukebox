@@ -36,3 +36,4 @@ scrapling==0.4.7
 curl_cffi==0.15.0
 playwright==1.59.0
 browserforge==1.2.4
+psutil==7.2.2

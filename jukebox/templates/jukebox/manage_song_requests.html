@@ -433,48 +433,36 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const messageArea = document.getElementById('message-area');
-  const isJukeboxActive = {{ is_jukebox_active|yesno:"true,false" }};
+(function () {
+  var messageArea = document.getElementById('message-area');
+
+  var ACTION_LABELS = {
+    reject: '{% trans "Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari." %}',
+    queue:  '{% trans "Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment)." %}',
+    load:   '{% trans "LOAD: Carregar la cançó al Jukebox ara? Es confirmaran els coins." %}',
+    delete: '{% trans "Eliminar la petició? Aquesta acció no es pot desfer." %}',
+  };
 
   function showMessage(message, type) {
-    messageArea.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>`;
+    if (!messageArea) return;
+    messageArea.innerHTML =
+      '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+      message +
+      '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => {
-      const el = messageArea.querySelector('.alert');
-      if (el) { el.classList.remove('show'); setTimeout(() => messageArea.innerHTML = '', 150); }
+    setTimeout(function () {
+      var el = messageArea.querySelector('.alert');
+      if (el) { el.classList.remove('show'); setTimeout(function () { messageArea.innerHTML = ''; }, 150); }
     }, 5000);
   }
 
-  const ACTION_LABELS = {
-    reject: '{% trans "Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari." %}',
-    queue:  '{% trans "Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment)." %}',
-    load:   '🚀 {% trans "LOAD: Carregar la cançó al Jukebox ara? Es confirmaran els coins." %}',
-    delete: '{% trans "Eliminar la petició? Si els coins estaven retinguts es retornaran a l\'usuari. Aquesta acció no es pot desfer." %}',
-  };
-
-  document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.action-btn');
-    if (!btn || btn.disabled) return;
-    const id     = btn.dataset.id;
-    const action = btn.dataset.action;
-    if (!id || !action) return;
-    if (!confirm(ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}')) return;
-    doAction(id, action, btn);
-  });
-
   function doAction(requestId, action, triggerBtn) {
-    const row = document.getElementById(`req-row-${requestId}`) ||
-                document.getElementById(`req-mobile-${requestId}`);
+    var desktopRow = document.getElementById('req-row-' + requestId);
+    var mobileRow  = document.getElementById('req-mobile-' + requestId);
 
     if (triggerBtn) triggerBtn.disabled = true;
 
-    const fd = new FormData();
+    var fd = new FormData();
     fd.append('request_id', requestId);
     fd.append('action', action);
 
@@ -487,25 +475,54 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       body: fd,
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
       if (data.success) {
-        showMessage(data.message, 'success');
-        if (row) {
+        showMessage(data.message || '{% trans "Fet!" %}', 'success');
+        [desktopRow, mobileRow].forEach(function (row) {
+          if (!row) return;
           row.style.transition = 'opacity 400ms';
           row.style.opacity = '0';
-          setTimeout(() => row.remove(), 400);
+          setTimeout(function () { if (row.parentNode) row.parentNode.removeChild(row); }, 400);
+        });
+        if (action === 'queue') {
+          var card = document.querySelector('[data-req-id="' + requestId + '"]');
+          if (card) {
+            card.style.borderColor = 'rgba(59,130,246,0.3)';
+            card.style.background  = 'rgba(239,246,255,0.5)';
+            var icon = card.querySelector('.dash-req-status-icon');
+            if (icon) icon.textContent = 'shopping_bag';
+            var txt = card.querySelector('.dash-req-status-text');
+            if (txt) txt.textContent = (card.dataset.username || '') + ' · Maleta';
+            var actions = card.querySelector('.dash-req-actions');
+            if (actions) {
+              Array.from(actions.querySelectorAll('button')).forEach(function (b) {
+                if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.parentNode.removeChild(b);
+              });
+            }
+          }
         }
       } else {
         showMessage(data.error || '{% trans "Error al processar la petició." %}', 'danger');
         if (triggerBtn) triggerBtn.disabled = false;
       }
     })
-    .catch(() => {
+    .catch(function () {
       showMessage('{% trans "Error de connexió." %}', 'danger');
       if (triggerBtn) triggerBtn.disabled = false;
     });
   }
-});
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.action-btn') : null;
+    if (!btn || btn.disabled) return;
+    var id     = btn.getAttribute('data-id');
+    var action = btn.getAttribute('data-action');
+    if (!id || !action) return;
+    var msg = ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}';
+    if (!window.confirm(msg)) return;
+    doAction(id, action, btn);
+  });
+}());
 </script>
 {% endblock %}

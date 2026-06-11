@@ -11,74 +11,138 @@
 <div class="d-none d-md-block">
 <div class="monitoring-page">
 
-  <!-- ── KPI Row 1 ─────────────────────────────────────────────────────────── -->
+  <!-- ── KPI Grid ───────────────────────────────────────────────────────────── -->
   <div class="monitoring-section-title" style="margin-top:0.5rem;">Indicadors globals</div>
-  <div class="monitoring-kpi-row">
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon blue">
-        <span class="material-symbols-outlined">group</span>
+  <div class="monitoring-stat-grid">
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon blue"><span class="material-symbols-outlined">group</span></span>
+      <div>
+        <div class="monitoring-stat-label">Usuaris</div>
+        <div class="monitoring-stat-value">{{ total_users }}</div>
       </div>
-      <div class="monitoring-kpi-label">Total Usuaris</div>
-      <div class="monitoring-kpi-value">{{ total_users }}</div>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon purple">
-        <span class="material-symbols-outlined">celebration</span>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon purple"><span class="material-symbols-outlined">celebration</span></span>
+      <div>
+        <div class="monitoring-stat-label">Festes</div>
+        <div class="monitoring-stat-value">{{ total_parties }}</div>
+        <div class="monitoring-stat-sub">{{ active_parties }} actives · {{ finished_parties }} acabades</div>
       </div>
-      <div class="monitoring-kpi-label">Total Festes</div>
-      <div class="monitoring-kpi-value">{{ total_parties }}</div>
-      <div class="monitoring-kpi-sub">{{ finished_parties }} acabades</div>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon green">
-        <span class="material-symbols-outlined">thumb_up</span>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon indigo"><span class="material-symbols-outlined">thumb_up</span></span>
+      <div>
+        <div class="monitoring-stat-label">Vots totals</div>
+        <div class="monitoring-stat-value">{{ total_votes }}</div>
+        <div class="monitoring-stat-sub">{{ total_likes }} likes</div>
       </div>
-      <div class="monitoring-kpi-label">Total Likes</div>
-      <div class="monitoring-kpi-value">{{ total_likes }}</div>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon orange">
-        <span class="material-symbols-outlined">payments</span>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon teal"><span class="material-symbols-outlined">music_note</span></span>
+      <div>
+        <div class="monitoring-stat-label">Cançons</div>
+        <div class="monitoring-stat-value">{{ songs_played }}</div>
+        <div class="monitoring-stat-sub">de {{ total_songs }} posades</div>
       </div>
-      <div class="monitoring-kpi-label">Compres pagades</div>
-      <div class="monitoring-kpi-value">{{ paid_purchases }}</div>
-      <div class="monitoring-kpi-sub">paquets de vots</div>
     </div>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon green"><span class="material-symbols-outlined">inbox</span></span>
+      <div>
+        <div class="monitoring-stat-label">Peticions</div>
+        <div class="monitoring-stat-value">{{ total_requests }}</div>
+        <div class="monitoring-stat-sub">{{ pending_requests }} pend · {{ queued_requests }} maleta · {{ requests_rejected }} reb.</div>
+      </div>
+    </div>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon orange"><span class="material-symbols-outlined">toll</span></span>
+      <div>
+        <div class="monitoring-stat-label">Coins circulació</div>
+        <div class="monitoring-stat-value">{{ total_credits }}</div>
+        <div class="monitoring-stat-sub">{{ avg_credits }} mig/usuari</div>
+      </div>
+    </div>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon gold"><span class="material-symbols-outlined">payments</span></span>
+      <div>
+        <div class="monitoring-stat-label">Compres pagades</div>
+        <div class="monitoring-stat-value">{{ paid_purchases }}</div>
+        <div class="monitoring-stat-sub">paquets de vots</div>
+      </div>
+    </div>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon cyan"><span class="material-symbols-outlined">monetization_on</span></span>
+      <div>
+        <div class="monitoring-stat-label">Coins cobrats</div>
+        <div class="monitoring-stat-value">{{ total_coins_charged }}</div>
+        <div class="monitoring-stat-sub">per peticions</div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- ── KPI Row 2 ─────────────────────────────────────────────────────────── -->
-  <div class="monitoring-kpi-row">
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon cyan">
-        <span class="material-symbols-outlined">event_available</span>
-      </div>
-      <div class="monitoring-kpi-label">Festes actives</div>
-      <div class="monitoring-kpi-value">{{ active_parties }}</div>
-      <div class="monitoring-kpi-sub">en curs o obertes</div>
+  <!-- ── Server health ─────────────────────────────────────────────────────── -->
+  <div class="monitoring-section-title">Salut del servidor</div>
+  <div class="monitoring-health-bar">
+
+    <div class="monitoring-health-chip {% if db_ok %}ok{% else %}err{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">DB</span>
+      <span class="monitoring-health-val">{{ db_engine }}{% if db_size_mb %} · {{ db_size_mb }} MB{% endif %}</span>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon indigo">
-        <span class="material-symbols-outlined">music_note</span>
-      </div>
-      <div class="monitoring-kpi-label">Cançons posades</div>
-      <div class="monitoring-kpi-value">{{ songs_played }}</div>
+
+    <div class="monitoring-health-chip {% if cache_ok %}ok{% else %}warn{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">Cache</span>
+      <span class="monitoring-health-val">{% if cache_ok %}OK{% else %}Error{% endif %}</span>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon teal">
-        <span class="material-symbols-outlined">check_circle</span>
-      </div>
-      <div class="monitoring-kpi-label">Peticions acceptades</div>
-      <div class="monitoring-kpi-value">{{ requests_accepted }}</div>
+
+    <div class="monitoring-health-chip {% if debug_mode %}warn{% else %}ok{% endif %}">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">Mode</span>
+      <span class="monitoring-health-val">{% if debug_mode %}DEBUG{% else %}PRODUCCIÓ{% endif %}</span>
     </div>
-    <div class="monitoring-kpi-card">
-      <div class="monitoring-kpi-icon orange">
-        <span class="material-symbols-outlined">toll</span>
-      </div>
-      <div class="monitoring-kpi-label">Crèdits (mitjana)</div>
-      <div class="monitoring-kpi-value">{{ avg_credits }}</div>
-      <div class="monitoring-kpi-sub">per usuari</div>
+
+    <div class="monitoring-health-chip neutral">
+      <span class="monitoring-health-label">Django</span>
+      <span class="monitoring-health-val">{{ django_version }}</span>
     </div>
+
+    <div class="monitoring-health-chip neutral">
+      <span class="monitoring-health-label">Python</span>
+      <span class="monitoring-health-val">{{ python_version }}</span>
+    </div>
+
+    {% if recent_errors %}
+    <div class="monitoring-health-chip err" style="flex:1; min-width:0;">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">Errors recents</span>
+      <span class="monitoring-health-val" style="font-weight:700;">{{ recent_errors|length }}</span>
+    </div>
+    {% else %}
+    <div class="monitoring-health-chip ok">
+      <span class="monitoring-health-dot"></span>
+      <span class="monitoring-health-label">Errors recents</span>
+      <span class="monitoring-health-val">0</span>
+    </div>
+    {% endif %}
+
   </div>
+
+  {% if recent_errors %}
+  <div class="monitoring-error-log">
+    {% for err in recent_errors %}
+    <div class="monitoring-error-line">{{ err }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- ── Users table ───────────────────────────────────────────────────────── -->
   <div class="monitoring-section-header">
@@ -283,7 +347,6 @@
       document.getElementById('modal-error').style.display = 'none';
       updateActiveLabel(isActive);
 
-      // Populate DJ party checkboxes
       document.querySelectorAll('.dj-party-check').forEach(function (cb) {
         cb.checked = djPartyIds.includes(cb.value);
       });
@@ -325,20 +388,13 @@
       if (data.success) {
         const row = document.querySelector('tr[data-user-id="' + userId + '"]');
         if (row) {
-          // credits
           const creditsCell = row.querySelector('.monitoring-credits');
           creditsCell.textContent = data.credits;
           creditsCell.dataset.val = data.credits;
-
-          // active dot
           row.querySelector('.monitoring-active-dot').classList.toggle('active', data.is_active);
-
-          // username
           row.dataset.username = data.username.toLowerCase();
           const nameSpan = row.querySelector('.monitoring-username');
           if (nameSpan) nameSpan.textContent = data.username;
-
-          // DJ badge — add/remove dynamically
           const nameCell = nameSpan ? nameSpan.parentElement : null;
           if (nameCell) {
             let djBadge = nameCell.querySelector('.monitoring-badge.dj');
@@ -351,8 +407,6 @@
               djBadge.remove();
             }
           }
-
-          // update edit button data attrs
           const editBtn = row.querySelector('.monitoring-edit-btn');
           editBtn.dataset.credits    = data.credits;
           editBtn.dataset.isActive   = data.is_active.toString();

@@ -29,74 +29,148 @@
     margin-bottom: 0;
 }
 
-/* ── KPI Cards ───────────────────────────────────────────────────────────── */
-.monitoring-kpi-row {
+/* ── Compact stat chips (replaces old large KPI cards) ───────────────────── */
+.monitoring-stat-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
 }
 
-.monitoring-kpi-card {
+.monitoring-stat-chip {
     background: #ffffff;
-    padding: 1.25rem 1.5rem;
+    padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 24px rgba(0, 46, 168, 0.07);
+    box-shadow: 0 2px 12px rgba(0, 46, 168, 0.06);
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    align-items: flex-start;
+    gap: 0.65rem;
     transition: box-shadow 150ms;
 }
 
-.monitoring-kpi-card:hover {
-    box-shadow: 0 8px 32px rgba(0, 46, 168, 0.12);
+.monitoring-stat-chip:hover {
+    box-shadow: 0 4px 20px rgba(0, 46, 168, 0.1);
 }
 
-.monitoring-kpi-icon {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.5rem;
-    display: flex;
+.monitoring-stat-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.45rem;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
 }
 
-.monitoring-kpi-icon .material-symbols-outlined {
-    font-size: 1.25rem;
+.monitoring-stat-icon .material-symbols-outlined {
+    font-size: 1.05rem;
     display: inline-flex !important;
 }
 
-.monitoring-kpi-icon.blue    { background: rgba(0, 64, 224, 0.1);   color: #0040e0; }
-.monitoring-kpi-icon.purple  { background: rgba(94, 36, 225, 0.1);  color: #5e24e1; }
-.monitoring-kpi-icon.green   { background: rgba(28, 200, 138, 0.1); color: #0d7a52; }
-.monitoring-kpi-icon.orange  { background: rgba(246, 194, 62, 0.12); color: #a87000; }
-.monitoring-kpi-icon.cyan    { background: rgba(0, 188, 212, 0.1);  color: #0097a7; }
-.monitoring-kpi-icon.red     { background: rgba(186, 26, 26, 0.08); color: #ba1a1a; }
-.monitoring-kpi-icon.indigo  { background: rgba(63, 81, 181, 0.1);  color: #3f51b5; }
-.monitoring-kpi-icon.teal    { background: rgba(0, 150, 136, 0.1);  color: #00695c; }
+.monitoring-stat-icon.blue   { background: rgba(0, 64, 224, 0.1);   color: #0040e0; }
+.monitoring-stat-icon.purple { background: rgba(94, 36, 225, 0.1);  color: #5e24e1; }
+.monitoring-stat-icon.green  { background: rgba(28, 200, 138, 0.1); color: #0d7a52; }
+.monitoring-stat-icon.orange { background: rgba(246, 194, 62, 0.12); color: #a87000; }
+.monitoring-stat-icon.gold   { background: rgba(251, 191, 36, 0.13); color: #b45309; }
+.monitoring-stat-icon.cyan   { background: rgba(0, 188, 212, 0.1);  color: #0097a7; }
+.monitoring-stat-icon.red    { background: rgba(186, 26, 26, 0.08); color: #ba1a1a; }
+.monitoring-stat-icon.indigo { background: rgba(63, 81, 181, 0.1);  color: #3f51b5; }
+.monitoring-stat-icon.teal   { background: rgba(0, 150, 136, 0.1);  color: #00695c; }
 
-.monitoring-kpi-label {
-    font-size: 0.7rem;
+.monitoring-stat-label {
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: #747687;
+    line-height: 1.2;
 }
 
-.monitoring-kpi-value {
-    font-size: 2rem;
+.monitoring-stat-value {
+    font-size: 1.55rem;
     font-weight: 900;
     color: #181c1e;
     line-height: 1.1;
     letter-spacing: -0.03em;
 }
 
-.monitoring-kpi-sub {
-    font-size: 0.75rem;
+.monitoring-stat-sub {
+    font-size: 0.7rem;
     color: #9a9baf;
     margin-top: 0.1rem;
+    line-height: 1.3;
 }
+
+/* ── Server health bar ───────────────────────────────────────────────────── */
+.monitoring-health-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+}
+
+.monitoring-health-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.monitoring-health-chip.ok      { background: rgba(28, 200, 138, 0.1); color: #0d7a52; }
+.monitoring-health-chip.warn    { background: rgba(246, 194, 62, 0.13); color: #a87000; }
+.monitoring-health-chip.err     { background: rgba(186, 26, 26, 0.09); color: #ba1a1a; }
+.monitoring-health-chip.neutral { background: #f4f7fb; color: #434655; }
+
+.monitoring-health-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ok   .monitoring-health-dot { background: #1cc88a; }
+.warn .monitoring-health-dot { background: #f6c23e; }
+.err  .monitoring-health-dot { background: #ba1a1a; }
+
+.monitoring-health-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.7;
+}
+
+.monitoring-health-val {
+    font-size: 0.8rem;
+}
+
+/* ── Recent error log ────────────────────────────────────────────────────── */
+.monitoring-error-log {
+    background: #fff5f5;
+    border: 1px solid rgba(186, 26, 26, 0.15);
+    border-radius: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.72rem;
+    color: #7a2020;
+    max-height: 10rem;
+    overflow-y: auto;
+}
+
+.monitoring-error-line {
+    padding: 0.1rem 0;
+    border-bottom: 1px solid rgba(186, 26, 26, 0.07);
+    word-break: break-all;
+}
+
+.monitoring-error-line:last-child { border-bottom: none; }
 
 /* ── Search input ────────────────────────────────────────────────────────── */
 .monitoring-search-input {

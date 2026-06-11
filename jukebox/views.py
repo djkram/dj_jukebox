@@ -1410,9 +1410,15 @@ def dj_backoffice(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def dj_monitoring(request):
+    import sys as _sys
+    import os as _os
+    import django as _django
+
+    # ── App KPIs ──────────────────────────────────────────────────────────────
     user_stats = User.objects.aggregate(
         total=Count('id'),
         avg_credits=Avg('credits'),
+        total_credits=Sum('credits'),
     )
     party_stats = Party.objects.aggregate(
         total=Count('id'),
@@ -1420,11 +1426,64 @@ def dj_monitoring(request):
         finished=Count('id', filter=Q(party_status=Party.STATUS_FINISHED)),
     )
     vote_stats = Vote.objects.aggregate(
+        total_votes=Count('id'),
         total_likes=Count('id', filter=Q(vote_type='like')),
     )
+    request_stats = SongRequest.objects.aggregate(
+        total=Count('id'),
+        pending=Count('id', filter=Q(status='pending')),
+        queued=Count('id', filter=Q(status='queued')),
+        accepted=Count('id', filter=Q(status='accepted')),
+        rejected=Count('id', filter=Q(status='rejected')),
+    )
+    total_songs = Song.objects.count()
     songs_played = Song.objects.filter(has_played=True).count()
-    requests_accepted = SongRequest.objects.filter(status='accepted').count()
     paid_purchases = VotePackage.objects.filter(payment_id__isnull=False).count()
+    total_coins_charged = SongRequest.objects.filter(
+        coins_charged=True
+    ).aggregate(total=Sum('coins_cost'))['total'] or 0
+
+    # ── Server health ─────────────────────────────────────────────────────────
+    try:
+        connection.ensure_connection()
+        db_ok = True
+    except Exception:
+        db_ok = False
+
+    try:
+        cache.set('_mon_health', 1, 10)
+        cache_ok = cache.get('_mon_health') == 1
+    except Exception:
+        cache_ok = False
+
+    db_engine = settings.DATABASES['default']['ENGINE'].split('.')[-1]
+    db_name = settings.DATABASES['default'].get('NAME', '')
+    db_size_mb = None
+    if db_engine == 'sqlite3' and db_name:
+        try:
+            db_size_mb = round(_os.path.getsize(db_name) / 1024 / 1024, 1)
+        except OSError:
+            pass
+
+    python_version = f"{_sys.version_info.major}.{_sys.version_info.minor}.{_sys.version_info.micro}"
+    django_version = f"{_django.VERSION[0]}.{_django.VERSION[1]}.{_django.VERSION[2]}"
+
+    # ── Recent server errors (last 200 log lines) ─────────────────────────────
+    recent_errors = []
+    log_path = _os.path.join(settings.BASE_DIR, 'server.log')
+    try:
+        with open(log_path, 'rb') as f:
+            f.seek(0, 2)
+            size = f.tell()
+            chunk = min(size, 32768)
+            f.seek(-chunk, 2)
+            tail = f.read().decode('utf-8', errors='replace')
+        for line in tail.splitlines():
+            if 'Internal Server Error' in line or ('ERROR' in line and 'dj_jukebox' in line):
+                recent_errors.append(line.strip())
+        recent_errors = recent_errors[-10:]
+    except (OSError, IOError):
+        pass
 
     all_parties = Party.objects.order_by('-date')
 
@@ -1445,15 +1504,34 @@ def dj_monitoring(request):
     ).order_by('-date')
 
     return render(request, 'jukebox/monitoring.html', {
+        # App KPIs
         'total_users': user_stats['total'] or 0,
         'avg_credits': round(user_stats['avg_credits'] or 0, 1),
+        'total_credits': user_stats['total_credits'] or 0,
         'total_parties': party_stats['total'] or 0,
         'active_parties': party_stats['active'] or 0,
         'finished_parties': party_stats['finished'] or 0,
+        'total_votes': vote_stats['total_votes'] or 0,
         'total_likes': vote_stats['total_likes'] or 0,
+        'total_songs': total_songs,
         'songs_played': songs_played,
-        'requests_accepted': requests_accepted,
+        'total_requests': request_stats['total'] or 0,
+        'pending_requests': request_stats['pending'] or 0,
+        'queued_requests': request_stats['queued'] or 0,
+        'requests_accepted': request_stats['accepted'] or 0,
+        'requests_rejected': request_stats['rejected'] or 0,
         'paid_purchases': paid_purchases,
+        'total_coins_charged': total_coins_charged,
+        # Server health
+        'db_ok': db_ok,
+        'cache_ok': cache_ok,
+        'db_engine': db_engine,
+        'db_size_mb': db_size_mb,
+        'python_version': python_version,
+        'django_version': django_version,
+        'debug_mode': settings.DEBUG,
+        'recent_errors': recent_errors,
+        # Tables
         'users': users,
         'party_table': party_table,
         'all_parties': all_parties,

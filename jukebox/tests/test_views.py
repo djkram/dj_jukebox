@@ -924,6 +924,45 @@ class ManageSongRequestsTests(TestCase):
 
         self.assertTrue(Song.objects.filter(party=self.party, spotify_id='req_track_1').exists())
 
+    def test_delete_removes_processed_request(self):
+        """Delete elimina també peticions de l'historial."""
+        self.song_request.status = 'accepted'
+        self.song_request.processed_at = timezone.now()
+        self.song_request.processed_by = self.superuser
+        self.song_request.save()
+        self.client.login(username='admin', password='admin')
+        self._set_session()
+
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {'request_id': self.song_request.id, 'action': 'delete'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data['success'])
+        self.assertFalse(SongRequest.objects.filter(pk=self.song_request.pk).exists())
+
+    def test_delete_refunds_charged_request(self):
+        """Delete retorna coins si la petició eliminada ja els tenia cobrats."""
+        self.song_request.status = 'accepted'
+        self.song_request.coins_charged = True
+        self.song_request.processed_at = timezone.now()
+        self.song_request.processed_by = self.superuser
+        self.song_request.save()
+        self.client.login(username='admin', password='admin')
+        self._set_session()
+
+        response = self.client.post(
+            reverse('manage_song_requests'),
+            {'request_id': self.song_request.id, 'action': 'delete'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.requester.refresh_from_db()
+        self.assertEqual(self.requester.credits, 30)
+        self.assertFalse(SongRequest.objects.filter(pk=self.song_request.pk).exists())
+
 
 class RequestSongViewTests(TestCase):
     """Tests per la view request_song (cerca i peticions)"""

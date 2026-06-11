@@ -234,6 +234,7 @@
                       </button>
                       <button class="req-btn action-btn"
                               data-id="{{ req.id }}" data-action="delete"
+                              onclick="console.log('[manage-requests] inline trash click', { requestId: '{{ req.id }}', source: 'desktop-active', button: this, event: event });"
                               title="{% trans 'Eliminar petició' %}"
                               style="color:#747687;">
                         <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;">delete</span>
@@ -308,6 +309,7 @@
                 <td>
                   <button class="req-btn action-btn"
                           data-id="{{ req.id }}" data-action="delete"
+                          onclick="console.log('[manage-requests] inline trash click', { requestId: '{{ req.id }}', source: 'desktop-history', button: this, event: event });"
                           title="{% trans 'Eliminar del historial' %}"
                           style="color:#747687;padding:0.45rem 0.65rem;">
                     <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;">delete</span>
@@ -381,6 +383,7 @@
                 <button class="btn btn-sm action-btn"
                         style="background:#f3f4f6;color:#747687;font-weight:700;"
                         data-id="{{ req.id }}" data-action="delete"
+                        onclick="console.log('[manage-requests] inline trash click', { requestId: '{{ req.id }}', source: 'mobile-active', button: this, event: event });"
                         title="{% trans 'Eliminar' %}">
                   <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;vertical-align:middle;">delete</span>
                 </button>
@@ -419,6 +422,7 @@
               <button class="btn btn-sm action-btn"
                       style="background:none;border:none;color:#c4c5d8;padding:0.25rem;"
                       data-id="{{ req.id }}" data-action="delete"
+                      onclick="console.log('[manage-requests] inline trash click', { requestId: '{{ req.id }}', source: 'mobile-history', button: this, event: event });"
                       title="{% trans 'Eliminar' %}">
                 <span class="material-symbols-outlined" style="font-size:1rem;line-height:1;vertical-align:middle;">delete</span>
               </button>
@@ -432,15 +436,50 @@
   </div>
 </div>
 
+<!-- Confirm action modal (Bootstrap 4) -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" role="dialog" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-1">
+        <h6 class="modal-title font-weight-bold" id="confirmActionModalLabel">{% trans "Confirmar acció" %}</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body pt-1">
+        <p id="confirmActionMessage" class="mb-0 text-sm"></p>
+      </div>
+      <div class="modal-footer border-0 pt-1">
+        <button type="button" class="btn btn-sm btn-light" data-dismiss="modal">{% trans "Cancel·lar" %}</button>
+        <button type="button" class="btn btn-sm btn-danger" id="confirmActionOk">{% trans "Confirmar" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% trans "Rebutjar la petició? Els coins retinguts seran retornats a l'usuari." as reject_label %}
+{% trans "Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment)." as queue_label %}
+{% trans "LOAD: Carregar la cançó al Jukebox ara? Es confirmaran els coins." as load_label %}
+{% trans "Eliminar la petició? Aquesta acció no es pot desfer." as delete_label %}
+{% trans "Confirmar acció?" as confirm_action_label %}
+{% trans "Fet!" as done_label %}
+{% trans "Error al processar la petició." as process_error_label %}
+{% trans "Error de connexió." as connection_error_label %}
 <script>
 (function () {
   var messageArea = document.getElementById('message-area');
+  var confirmModal = document.getElementById('confirmActionModal');
+  var confirmMessage = document.getElementById('confirmActionMessage');
+  var confirmOkBtn = document.getElementById('confirmActionOk');
+  var _pendingId = null;
+  var _pendingAction = null;
+  var _pendingBtn = null;
 
   var ACTION_LABELS = {
-    reject: '{% trans "Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari." %}',
-    queue:  '{% trans "Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment)." %}',
-    load:   '{% trans "LOAD: Carregar la cançó al Jukebox ara? Es confirmaran els coins." %}',
-    delete: '{% trans "Eliminar la petició? Aquesta acció no es pot desfer." %}',
+    reject: '{{ reject_label|escapejs }}',
+    queue:  '{{ queue_label|escapejs }}',
+    load:   '{{ load_label|escapejs }}',
+    delete: '{{ delete_label|escapejs }}',
   };
 
   function showMessage(message, type) {
@@ -448,7 +487,7 @@
     messageArea.innerHTML =
       '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
       message +
-      '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+      '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(function () {
       var el = messageArea.querySelector('.alert');
@@ -478,7 +517,7 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       if (data.success) {
-        showMessage(data.message || '{% trans "Fet!" %}', 'success');
+        showMessage(data.message || '{{ done_label|escapejs }}', 'success');
         [desktopRow, mobileRow].forEach(function (row) {
           if (!row) return;
           row.style.transition = 'opacity 400ms';
@@ -503,12 +542,12 @@
           }
         }
       } else {
-        showMessage(data.error || '{% trans "Error al processar la petició." %}', 'danger');
+        showMessage(data.error || '{{ process_error_label|escapejs }}', 'danger');
         if (triggerBtn) triggerBtn.disabled = false;
       }
     })
     .catch(function () {
-      showMessage('{% trans "Error de connexió." %}', 'danger');
+      showMessage('{{ connection_error_label|escapejs }}', 'danger');
       if (triggerBtn) triggerBtn.disabled = false;
     });
   }
@@ -519,9 +558,47 @@
     var id     = btn.getAttribute('data-id');
     var action = btn.getAttribute('data-action');
     if (!id || !action) return;
-    var msg = ACTION_LABELS[action] || '{% trans "Confirmar acció?" %}';
-    if (!window.confirm(msg)) return;
-    doAction(id, action, btn);
+    if (action === 'delete') {
+      console.log('[manage-requests] trash button clicked', {
+        requestId: id,
+        button: btn,
+        clickedElement: e.target
+      });
+    }
+    var msg = ACTION_LABELS[action] || '{{ confirm_action_label|escapejs }}';
+    _pendingId     = id;
+    _pendingAction = action;
+    _pendingBtn    = btn;
+    if (confirmMessage) confirmMessage.textContent = msg;
+    if (confirmModal && window.jQuery && typeof jQuery(confirmModal).modal === 'function') {
+      jQuery(confirmModal).modal('show');
+    } else if (window.confirm(msg)) {
+      doAction(id, action, btn);
+    }
+  });
+
+  if (confirmOkBtn) {
+    confirmOkBtn.addEventListener('click', function () {
+      var requestId = _pendingId;
+      var action = _pendingAction;
+      var triggerBtn = _pendingBtn;
+      _pendingId = _pendingAction = _pendingBtn = null;
+
+      if (window.jQuery && confirmModal && typeof jQuery(confirmModal).modal === 'function') {
+        jQuery(confirmModal).modal('hide');
+      }
+      if (requestId && action) {
+        doAction(requestId, action, triggerBtn);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.jQuery && confirmModal) {
+      jQuery(confirmModal).on('hidden.bs.modal', function () {
+        _pendingId = _pendingAction = _pendingBtn = null;
+      });
+    }
   });
 }());
 </script>

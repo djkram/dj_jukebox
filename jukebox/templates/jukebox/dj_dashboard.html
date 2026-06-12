@@ -1649,14 +1649,6 @@
                                 title="Posar a la maleta (sense cobrar adicionalment)">
                             <span class="material-symbols-outlined" style="font-size: 1rem;">shopping_bag</span>
                         </button>
-                        <!-- LOAD -->
-                        {% if is_djjukebox_active %}
-                        <button type="button" class="sonic-btn-posada dash-req-btn"
-                                data-id="{{ req.id }}" data-action="load" data-party="{{ party.id }}"
-                                title="LOAD: carregar al Jukebox">
-                            LOAD
-                        </button>
-                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -2049,71 +2041,83 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   var DASH_CSRF = '{{ csrf_token }}';
 
-  document.querySelectorAll('.dash-req-btn').forEach(function(btn) {
-    if (btn.disabled) return;
-    btn.addEventListener('click', function() {
-      var id        = this.dataset.id;
-      var action    = this.dataset.action;
-      var party     = this.dataset.party;
-      var triggerBtn = this;
-      var title = DASH_REQ_TITLES[action] || 'Confirmar';
-      var msg   = DASH_REQ_CONFIRMS[action] || 'Confirmar?';
+  var isJukeboxActive = {{ is_djjukebox_active|yesno:"true,false" }};
 
-      showConfirm(title, msg, function() {
-        triggerBtn.disabled = true;
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.dash-req-btn');
+    if (!btn || btn.disabled) return;
 
-        var fd = new FormData();
-        fd.append('request_id', id);
-        fd.append('action', action);
-        fd.append('party_id', party);
+    var id        = btn.dataset.id;
+    var action    = btn.dataset.action;
+    var party     = btn.dataset.party;
+    var triggerBtn = btn;
+    var title = DASH_REQ_TITLES[action] || 'Confirmar';
+    var msg   = DASH_REQ_CONFIRMS[action] || 'Confirmar?';
 
-        fetch('{% url "manage_song_requests" %}', {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': DASH_CSRF,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-          },
-          body: fd,
-        })
-        .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
-        .then(function(result) {
-          if (result.ok && result.data.success) {
-            showDashboardMessage(result.data.message, 'success');
-            var card = document.getElementById('dash-req-' + id);
-            if (card) {
-              if (action === 'queue') {
-                // Transform card in-place: queued styling, remove reject+maleta, keep LOAD
-                card.style.borderColor = 'rgba(59,130,246,0.3)';
-                card.style.background  = 'rgba(239,246,255,0.5)';
-                var icon = card.querySelector('.dash-req-status-icon');
-                if (icon) icon.textContent = 'shopping_bag';
-                var txt = card.querySelector('.dash-req-status-text');
-                if (txt) txt.textContent = card.dataset.username + ' · Maleta';
-                var actions = card.querySelector('.dash-req-actions');
-                if (actions) {
-                  Array.from(actions.querySelectorAll('button')).forEach(function(b) {
-                    if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
-                  });
+    showConfirm(title, msg, function() {
+      triggerBtn.disabled = true;
+
+      var fd = new FormData();
+      fd.append('request_id', id);
+      fd.append('action', action);
+      fd.append('party_id', party);
+
+      fetch('{% url "manage_song_requests" %}', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': DASH_CSRF,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        },
+        body: fd,
+      })
+      .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+      .then(function(result) {
+        if (result.ok && result.data.success) {
+          showDashboardMessage(result.data.message, 'success');
+          var card = document.getElementById('dash-req-' + id);
+          if (card) {
+            if (action === 'queue') {
+              card.style.borderColor = 'rgba(59,130,246,0.3)';
+              card.style.background  = 'rgba(239,246,255,0.5)';
+              var icon = card.querySelector('.dash-req-status-icon');
+              if (icon) icon.textContent = 'shopping_bag';
+              var txt = card.querySelector('.dash-req-status-text');
+              if (txt) txt.textContent = (card.dataset.username || '') + ' · Maleta';
+              var actions = card.querySelector('.dash-req-actions');
+              if (actions) {
+                Array.from(actions.querySelectorAll('button')).forEach(function(b) {
+                  if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
+                });
+                if (isJukeboxActive) {
+                  var loadBtn = document.createElement('button');
+                  loadBtn.type = 'button';
+                  loadBtn.className = 'sonic-btn-posada dash-req-btn';
+                  loadBtn.dataset.id = id;
+                  loadBtn.dataset.action = 'load';
+                  loadBtn.dataset.party = party;
+                  loadBtn.title = 'LOAD: carregar al Jukebox';
+                  loadBtn.textContent = 'LOAD';
+                  actions.appendChild(loadBtn);
                 }
-              } else {
-                card.style.transition = 'opacity 350ms';
-                card.style.opacity = '0';
-                setTimeout(function() {
-                  card.remove();
-                  if (action === 'load') { window.location.reload(); }
-                }, 350);
               }
+            } else {
+              card.style.transition = 'opacity 350ms';
+              card.style.opacity = '0';
+              setTimeout(function() {
+                card.remove();
+                if (action === 'load') { window.location.reload(); }
+              }, 350);
             }
-          } else {
-            showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
-            triggerBtn.disabled = false;
           }
-        })
-        .catch(function() {
-          showDashboardMessage('Error de connexió.', 'danger');
+        } else {
+          showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
           triggerBtn.disabled = false;
-        });
+        }
+      })
+      .catch(function() {
+        showDashboardMessage('Error de connexió.', 'danger');
+        triggerBtn.disabled = false;
       });
     });
   });

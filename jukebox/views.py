@@ -26,6 +26,7 @@ from .notifications import (
     create_song_rejected_notification,
     create_song_played_notification,
     create_coins_purchased_notification,
+    create_coins_received_notification,
 )
 from .spotify_api import (
     SpotifyAuthError,
@@ -2691,10 +2692,12 @@ def manage_song_requests(request):
                     song_request = SongRequest.objects.select_for_update().get(
                         pk=request_id, party=party
                     )
+                    refunded = 0
                     if song_request.coins_charged:
                         refund_user_coins_for_party(
                             song_request.user, party, song_request.coins_cost
                         )
+                        refunded = song_request.coins_cost
                     # If queued, the song was added to party.songs — remove it if safe
                     if song_request.status == 'queued' and song_request.spotify_id:
                         Song.objects.filter(
@@ -2703,7 +2706,14 @@ def manage_song_requests(request):
                             has_played=False,
                             num_likes=0,
                         ).delete()
+                    # Delete linked notifications so they disappear from the user's bell
+                    Notification.objects.filter(song_request=song_request).delete()
                     song_request.delete()
+                if refunded:
+                    create_coins_received_notification(
+                        song_request.user, refunded,
+                        reason=_('Petició cancel·lada: "%(title)s"') % {'title': song_request.title},
+                    )
                 return JsonResponse({'success': True, 'message': _('Petició eliminada.')})
             except SongRequest.DoesNotExist:
                 return JsonResponse({'success': False, 'error': _('Petició no trobada.')}, status=404)

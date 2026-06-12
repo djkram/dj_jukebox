@@ -2698,13 +2698,15 @@ def manage_song_requests(request):
                             song_request.user, party, song_request.coins_cost
                         )
                         refunded = song_request.coins_cost
-                    # If queued, the song was added to party.songs — remove it if safe
+                    # If queued, remove the song only if it was created by this request
+                    # (created_at >= request created_at means it didn't exist before the request)
                     if song_request.status == 'queued' and song_request.spotify_id:
                         Song.objects.filter(
                             party=party,
                             spotify_id=song_request.spotify_id,
                             has_played=False,
                             num_likes=0,
+                            created_at__gte=song_request.created_at,
                         ).delete()
                     # Delete linked notifications so they disappear from the user's bell
                     Notification.objects.filter(song_request=song_request).delete()

@@ -8,6 +8,8 @@ from .models import Party, Playlist, Song
 from .spotify_api import get_user_playlists, get_playlist_tracks, SpotifyAuthError
 
 
+
+
 class CustomSignupForm(forms.Form):
     full_name = forms.CharField(
         label=_('Nom complet'),

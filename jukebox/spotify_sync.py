@@ -2,7 +2,7 @@
 
 from django.utils import timezone
 from .models import Party, Song
-from .spotify_api import get_playlist_tracks_basic
+from .spotify_api import get_playlist_tracks_basic, remove_duplicate_tracks_from_playlist
 import logging
 
 logger = logging.getLogger(__name__)
@@ -59,28 +59,66 @@ def sync_playlist_with_spotify(party_id):
             logger.warning(f"[SYNC] Party {party_id} - No tracks found in Spotify playlist")
             return {'error': 'No tracks found in Spotify playlist'}
 
-        spotify_ids = {track['id'] for track in spotify_tracks}
+        # 1b. Eliminar duplicats de la playlist de Spotify (usa token del primer owner)
+        owner_user = party.owners.first()
+        if owner_user:
+            try:
+                dupes_removed = remove_duplicate_tracks_from_playlist(
+                    owner_user, playlist.spotify_id, spotify_tracks
+                )
+                if dupes_removed:
+                    logger.info(f"[SYNC] Party {party_id} - Eliminades {dupes_removed} ocurrències duplicades de Spotify")
+                    spotify_tracks = get_playlist_tracks_basic(playlist.spotify_id)
+            except Exception:
+                logger.warning(f"[SYNC] Party {party_id} - No s'han pogut eliminar duplicats de Spotify", exc_info=True)
+
+        # 1c. Deduplica la llista en memòria (una entrada per spotify_id)
+        seen: set = set()
+        unique_tracks = []
+        for tr in spotify_tracks:
+            if tr['id'] not in seen:
+                seen.add(tr['id'])
+                unique_tracks.append(tr)
+        spotify_ids = seen
 
         # 2. Obtenir tracks locals actuals
-        local_songs = party.songs.all()
-        local_ids = set(local_songs.values_list('spotify_id', flat=True))
+        local_ids = set(party.songs.values_list('spotify_id', flat=True))
+
+        # 2b. Eliminar duplicats de la DB
+        from django.db.models import Count
+        dupes_qs = (
+            party.songs.values('spotify_id')
+            .annotate(cnt=Count('id'))
+            .filter(cnt__gt=1)
+        )
+        for row in dupes_qs:
+            candidates = list(
+                party.songs.filter(spotify_id=row['spotify_id'])
+                .extra(select={'completeness': 'CASE WHEN bpm IS NOT NULL AND key IS NOT NULL THEN 2 '
+                                              'WHEN bpm IS NOT NULL OR key IS NOT NULL THEN 1 ELSE 0 END'})
+                .order_by('-completeness', 'id')
+            )
+            keep_id = candidates[0].id
+            party.songs.filter(spotify_id=row['spotify_id']).exclude(pk=keep_id).delete()
 
         # 3. Detectar nous tracks (a Spotify però no a BD)
+        local_ids = set(party.songs.values_list('spotify_id', flat=True))
         new_ids = spotify_ids - local_ids
         added_count = 0
 
-        for track in spotify_tracks:
+        for track in unique_tracks:
             if track['id'] in new_ids:
-                Song.objects.create(
+                Song.objects.get_or_create(
                     party=party,
-                    title=track['title'],
-                    artist=track['artist'],
                     spotify_id=track['id'],
-                    album_image_url=track.get('album_image_url'),
-                    preview_url=track.get('preview_url'),
-                    # BPM/Key seran analitzats després per auto-analyze
-                    bpm=None,
-                    key=None,
+                    defaults={
+                        'title': track['title'],
+                        'artist': track['artist'],
+                        'album_image_url': track.get('album_image_url'),
+                        'preview_url': track.get('preview_url'),
+                        'bpm': None,
+                        'key': None,
+                    },
                 )
                 added_count += 1
                 logger.debug(f"[SYNC] Party {party_id} - Added: {track['title']} - {track['artist']}")

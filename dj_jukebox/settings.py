@@ -172,6 +172,11 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'jukebox.User'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 SITE_ID = 1
 SITE_DOMAIN = os.environ.get("SITE_DOMAIN", RENDER_EXTERNAL_HOSTNAME or "127.0.0.1:8000")
 SITE_NAME = os.environ.get("SITE_NAME", SITE_DOMAIN)
@@ -385,6 +390,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 ACCOUNT_ADAPTER = 'jukebox.adapter.AccountAdapter'
 ACCOUNT_SIGNUP_FORM_CLASS = 'jukebox.forms.CustomSignupForm'
+ACCOUNT_FORMS = {'login': 'jukebox.login_form.CustomLoginForm'}
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 

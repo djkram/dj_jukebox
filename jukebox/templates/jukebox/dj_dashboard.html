@@ -1,5 +1,5 @@
 {% extends "jukebox/admin_base.html" %}
-{% load static %}
+{% load static dict_filters %}
 
 {% block page_title %}DJ Dashboard{% if party %} · {{ party.name }}{% endif %}{% endblock %}
 
@@ -1421,7 +1421,7 @@
             <div class="dashboard-reco-grid">
                 {% for song in recommended_songs|slice:":6" %}
                 <div class="dashboard-reco-card">
-                    <div class="dashboard-reco-img">
+                    <div class="dashboard-reco-img" style="position:relative;">
                         {% if song.album_image_url %}
                         <img src="{{ song.album_image_url }}" alt="{{ song.title }}">
                         {% else %}
@@ -1429,6 +1429,11 @@
                             <span class="material-symbols-outlined" style="color:rgba(255,255,255,0.25);font-size:2rem;">music_note</span>
                         </div>
                         {% endif %}
+                        {% with bag_pos=pending_song_positions|get_item:song.id %}
+                        {% if bag_pos %}
+                        <span style="position:absolute;top:0.3rem;right:0.3rem;background:#5e24e1;color:#fff;font-size:0.62rem;font-weight:800;line-height:1;padding:0.18rem 0.38rem;border-radius:999px;letter-spacing:0.02em;">#{{ bag_pos }}</span>
+                        {% endif %}
+                        {% endwith %}
                     </div>
                     <div class="dashboard-reco-info" style="display:flex;align-items:center;gap:0.4rem;">
                         <div style="flex:1;min-width:0;">
@@ -1490,6 +1495,7 @@
                 <table class="sonic-table">
                     <thead>
                         <tr>
+                            <th class="text-center" style="width: 2.2rem;">#</th>
                             <th>Cançó</th>
                             <th class="text-center">BPM</th>
                             <th class="text-center">Key</th>
@@ -1505,6 +1511,7 @@
                     <tbody id="dashboard-bag-tbody">
                     {% for song in pending_songs %}
                         <tr data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id|default:'' }}">
+                            <td class="text-center" style="font-weight: 800; font-size: 0.95rem; color: #5e24e1; width: 2.2rem; padding-right: 0;">{{ forloop.counter }}</td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
                                     {% if song.album_image_url %}
@@ -1643,11 +1650,13 @@
                             <span class="material-symbols-outlined" style="font-size: 1rem;">shopping_bag</span>
                         </button>
                         <!-- LOAD -->
-                        <button type="button" class="sonic-btn-posada dash-req-btn{% if not is_djjukebox_active %} disabled{% endif %}"
+                        {% if is_djjukebox_active %}
+                        <button type="button" class="sonic-btn-posada dash-req-btn"
                                 data-id="{{ req.id }}" data-action="load" data-party="{{ party.id }}"
-                                {% if not is_djjukebox_active %}disabled title="Jukebox no actiu"{% else %}title="LOAD: carregar al Jukebox"{% endif %}>
+                                title="LOAD: carregar al Jukebox">
                             LOAD
                         </button>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -1673,11 +1682,13 @@
                     </div>
                     <div style="display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center;">
                         <!-- LOAD -->
-                        <button type="button" class="sonic-btn-posada dash-req-btn{% if not is_djjukebox_active %} disabled{% endif %}"
+                        {% if is_djjukebox_active %}
+                        <button type="button" class="sonic-btn-posada dash-req-btn"
                                 data-id="{{ req.id }}" data-action="load" data-party="{{ party.id }}"
-                                {% if not is_djjukebox_active %}disabled title="Jukebox no actiu"{% else %}title="LOAD: carregar al Jukebox"{% endif %}>
+                                title="LOAD: carregar al Jukebox">
                             LOAD
                         </button>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -2026,73 +2037,83 @@ document.addEventListener('DOMContentLoaded', function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  var DASH_REQ_TITLES = {
+    reject: 'Rebutjar petició',
+    queue:  'Afegir a la maleta',
+    load:   '⚡ LOAD',
+  };
   var DASH_REQ_CONFIRMS = {
     reject: 'Rebutjar la petició? Els coins retinguts seran retornats a l\'usuari.',
     queue:  'Afegir a la maleta? La cançó entrarà a la llista (sense cobrar adicionalment).',
-    load:   '⚡ LOAD: Carregar la cançó al Jukebox ara?',
+    load:   'Carregar la cançó al Jukebox ara? Es marcarà com a sonada.',
   };
   var DASH_CSRF = '{{ csrf_token }}';
 
   document.querySelectorAll('.dash-req-btn').forEach(function(btn) {
     if (btn.disabled) return;
     btn.addEventListener('click', function() {
-      var id     = this.dataset.id;
-      var action = this.dataset.action;
-      var party  = this.dataset.party;
-      var msg    = DASH_REQ_CONFIRMS[action] || 'Confirmar?';
-      if (!confirm(msg)) return;
-
+      var id        = this.dataset.id;
+      var action    = this.dataset.action;
+      var party     = this.dataset.party;
       var triggerBtn = this;
-      triggerBtn.disabled = true;
+      var title = DASH_REQ_TITLES[action] || 'Confirmar';
+      var msg   = DASH_REQ_CONFIRMS[action] || 'Confirmar?';
 
-      var fd = new FormData();
-      fd.append('request_id', id);
-      fd.append('action', action);
-      fd.append('party_id', party);
+      showConfirm(title, msg, function() {
+        triggerBtn.disabled = true;
 
-      fetch('{% url "manage_song_requests" %}', {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': DASH_CSRF,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-        },
-        body: fd,
-      })
-      .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
-      .then(function(result) {
-        if (result.ok && result.data.success) {
-          showDashboardMessage(result.data.message, 'success');
-          var card = document.getElementById('dash-req-' + id);
-          if (card) {
-            if (action === 'queue') {
-              // Transform card in-place: queued styling, remove reject+maleta, keep LOAD
-              card.style.borderColor = 'rgba(59,130,246,0.3)';
-              card.style.background  = 'rgba(239,246,255,0.5)';
-              var icon = card.querySelector('.dash-req-status-icon');
-              if (icon) icon.textContent = 'shopping_bag';
-              var txt = card.querySelector('.dash-req-status-text');
-              if (txt) txt.textContent = card.dataset.username + ' · Maleta';
-              var actions = card.querySelector('.dash-req-actions');
-              if (actions) {
-                Array.from(actions.querySelectorAll('button')).forEach(function(b) {
-                  if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
-                });
+        var fd = new FormData();
+        fd.append('request_id', id);
+        fd.append('action', action);
+        fd.append('party_id', party);
+
+        fetch('{% url "manage_song_requests" %}', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': DASH_CSRF,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          },
+          body: fd,
+        })
+        .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+        .then(function(result) {
+          if (result.ok && result.data.success) {
+            showDashboardMessage(result.data.message, 'success');
+            var card = document.getElementById('dash-req-' + id);
+            if (card) {
+              if (action === 'queue') {
+                // Transform card in-place: queued styling, remove reject+maleta, keep LOAD
+                card.style.borderColor = 'rgba(59,130,246,0.3)';
+                card.style.background  = 'rgba(239,246,255,0.5)';
+                var icon = card.querySelector('.dash-req-status-icon');
+                if (icon) icon.textContent = 'shopping_bag';
+                var txt = card.querySelector('.dash-req-status-text');
+                if (txt) txt.textContent = card.dataset.username + ' · Maleta';
+                var actions = card.querySelector('.dash-req-actions');
+                if (actions) {
+                  Array.from(actions.querySelectorAll('button')).forEach(function(b) {
+                    if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
+                  });
+                }
+              } else {
+                card.style.transition = 'opacity 350ms';
+                card.style.opacity = '0';
+                setTimeout(function() {
+                  card.remove();
+                  if (action === 'load') { window.location.reload(); }
+                }, 350);
               }
-            } else {
-              card.style.transition = 'opacity 350ms';
-              card.style.opacity = '0';
-              setTimeout(function() { card.remove(); }, 350);
             }
+          } else {
+            showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
+            triggerBtn.disabled = false;
           }
-        } else {
-          showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');
+        })
+        .catch(function() {
+          showDashboardMessage('Error de connexió.', 'danger');
           triggerBtn.disabled = false;
-        }
-      })
-      .catch(function() {
-        showDashboardMessage('Error de connexió.', 'danger');
-        triggerBtn.disabled = false;
+        });
       });
     });
   });
@@ -2254,6 +2275,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     {{ song.artist }}
                   </div>
                 </div>
+                {% with bag_pos=pending_song_positions|get_item:song.id %}
+                {% if bag_pos %}
+                <span class="position-absolute" style="top:0.22rem;left:0.22rem;background:#5e24e1;color:#fff;font-size:0.55rem;font-weight:800;line-height:1;padding:0.15rem 0.3rem;border-radius:999px;">#{{ bag_pos }}</span>
+                {% endif %}
+                {% endwith %}
                 {% if is_djjukebox_active %}
                 <form method="post" action="{% url 'mark_song_played' song.id %}" class="position-absolute mb-0" style="right: 0.22rem; top: 0.18rem;">
                   {% csrf_token %}
@@ -2282,6 +2308,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div id="dashboard-mobile-tab-bag" class="mobile-list-stack">
         {% for song in pending_songs %}
           <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
+            <div class="flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 1.5rem; font-size: 0.85rem; font-weight: 800; color: #5e24e1;">{{ forloop.counter }}</div>
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">

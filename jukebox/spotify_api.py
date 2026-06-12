@@ -876,10 +876,12 @@ def get_playlist_tracks_basic(playlist_id):
     logger.info(f"[SPOTIFY] {len(all_items)} tracks trobats a la playlist")
 
     out = []
+    position = 0
     for it in all_items:
         tr = it.get("track") or {}
         sid = tr.get("id")
         if not sid:
+            position += 1
             continue
 
         title = tr.get("name")
@@ -894,6 +896,7 @@ def get_playlist_tracks_basic(playlist_id):
                 "[SPOTIFY] Track ignorat per metadata incompleta: id=%s title=%s artists=%s",
                 sid, title, artists
             )
+            position += 1
             continue
 
         # Obtenir la imatge de l'àlbum (normalment hi ha 3 mides, agafem la mitjana)
@@ -907,6 +910,7 @@ def get_playlist_tracks_basic(playlist_id):
 
         out.append({
             "id": sid,
+            "position": position,
             "title": title,
             "artist": ", ".join(artist_names),
             "album_image_url": album_image_url,
@@ -914,6 +918,7 @@ def get_playlist_tracks_basic(playlist_id):
             "bpm": None,
             "key": None,
         })
+        position += 1
 
     return out
 
@@ -1227,3 +1232,52 @@ def remove_track_from_playlist(request_or_user, playlist_id, track_id):
     except Exception as e:
         logger.error(f"[SPOTIFY] Error eliminant {track_id} de la playlist {playlist_id}: {e}")
         raise
+
+
+def remove_duplicate_tracks_from_playlist(request_or_user, playlist_id, tracks):
+    """
+    Detecta i elimina ocurrències duplicades a la playlist de Spotify.
+    Per cada spotify_id que apareix més d'una vegada, manté la primera
+    ocurrència (posició més baixa) i elimina les posteriors.
+
+    Args:
+        tracks: llista retornada per get_playlist_tracks_basic (amb 'position')
+    Returns:
+        nombre d'ocurrències eliminades de Spotify
+    """
+    from collections import defaultdict
+
+    positions_by_id = defaultdict(list)
+    for track in tracks:
+        if track.get('id') and track.get('position') is not None:
+            positions_by_id[track['id']].append(track['position'])
+
+    items_to_remove = []
+    for track_id, positions in positions_by_id.items():
+        if len(positions) > 1:
+            duplicate_positions = sorted(positions)[1:]  # elimina totes excepte la primera
+            items_to_remove.append({
+                "uri": f"spotify:track:{track_id}",
+                "positions": duplicate_positions,
+            })
+
+    if not items_to_remove:
+        return 0
+
+    removed_count = sum(len(item["positions"]) for item in items_to_remove)
+
+    # Spotify permet màx 100 items per crida
+    for i in range(0, len(items_to_remove), 100):
+        batch = items_to_remove[i:i + 100]
+        try:
+            _run_spotify_call(
+                request_or_user,
+                "playlist_remove_duplicates",
+                lambda sp, b=batch: sp.playlist_remove_specific_occurrences_of_items(playlist_id, b),
+            )
+        except Exception as e:
+            logger.error(f"[SPOTIFY] Error eliminant duplicats de {playlist_id}: {e}")
+            raise
+
+    logger.info(f"[SPOTIFY] Eliminades {removed_count} ocurrències duplicades de {playlist_id}")
+    return removed_count

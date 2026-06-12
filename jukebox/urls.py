@@ -37,6 +37,7 @@ urlpatterns = [
     path('party/<int:party_id>/process-playlist/', views.process_playlist_songs, name='process_playlist_songs'),
     path('party/<int:party_id>/process-features/', views.process_song_features, name='process_song_features'),
     path('party/<int:party_id>/analyze-song/<int:song_id>/', views.analyze_song_audio, name='analyze_song_audio'),
+    path('party/<int:party_id>/update-song/<int:song_id>/', views.update_song_metadata, name='update_song_metadata'),
     path('party/<int:party_id>/settings/save-location/', views.save_party_location, name='save_party_location'),
     path('party/<int:party_id>/settings/search-tracks/', views.party_settings_search_tracks, name='party_settings_search_tracks'),
     path('party/<int:party_id>/settings/add-track/', views.add_track_to_party_playlist, name='add_track_to_party_playlist'),

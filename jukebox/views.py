@@ -34,6 +34,7 @@ from .spotify_api import (
     _get_acousticbrainz_features,
     add_track_to_playlist,
     remove_track_from_playlist,
+    remove_duplicate_tracks_from_playlist,
     get_user_playlists,
 
     get_playlist_tracks_basic,
@@ -253,12 +254,16 @@ def _load_song_request(song_request, processed_by):
                 raise ValueError("Insufficient credits")
             song_request.coins_charged = True
 
-        _add_song_to_party(song_request)
+        song = _add_song_to_party(song_request)
+        song.has_played = True
+        song.played_at = timezone.now()
+        song.save(update_fields=['has_played', 'played_at'])
         song_request.status = 'accepted'
         song_request.processed_at = timezone.now()
         song_request.processed_by = processed_by
         song_request.save(update_fields=['status', 'processed_at', 'processed_by', 'coins_charged'])
     create_song_loaded_notification(song_request)
+    create_song_played_notification(song)
 
 
 def _reject_song_request(song_request, processed_by):
@@ -659,6 +664,38 @@ def assign_party_playlist(request, party_id):
     })
 
 
+def _dedup_party_songs(party):
+    """
+    Elimina cançons duplicades de la festa (mateix spotify_id).
+    Manté la que té dades més completes (bpm+key > bpm > key > cap), i en cas
+    d'empat la de pk menor. Retorna el nombre de registres eliminats.
+    """
+    from django.db.models import Min, Count
+    dupes = (
+        party.songs
+        .values('spotify_id')
+        .annotate(cnt=Count('id'))
+        .filter(cnt__gt=1)
+    )
+    removed = 0
+    for row in dupes:
+        songs_qs = party.songs.filter(spotify_id=row['spotify_id']).order_by(
+            # Prioritza: té bpm I key → té bpm → té key → res
+            # False<True en ordre ascendent, volem True primer → descendent
+        )
+        candidates = list(
+            party.songs.filter(spotify_id=row['spotify_id'])
+            .extra(select={'completeness': 'CASE WHEN bpm IS NOT NULL AND key IS NOT NULL THEN 2 '
+                                          'WHEN bpm IS NOT NULL OR key IS NOT NULL THEN 1 '
+                                          'ELSE 0 END'})
+            .order_by('-completeness', 'id')
+        )
+        keep_id = candidates[0].id
+        n, _ = party.songs.filter(spotify_id=row['spotify_id']).exclude(pk=keep_id).delete()
+        removed += n
+    return removed
+
+
 @login_required
 @user_passes_test(is_dj_admin)
 @require_POST
@@ -679,20 +716,45 @@ def process_playlist_songs(request, party_id):
         return JsonResponse({'error': _('No playlist ID provided')}, status=400)
 
     try:
-        # Obtenir les cançons de Spotify (ràpid, només metadata)
+        # Obtenir les cançons de Spotify (ràpid, només metadata + posició)
         tracks = get_playlist_tracks_basic(spotify_playlist_id)
 
-        # Crear un set amb els spotify_ids de la playlist actual
-        spotify_ids_in_playlist = {tr['id'] for tr in tracks}
+        # ── 1. Eliminar duplicats de la playlist de Spotify ──────────────
+        spotify_removed_dupes = 0
+        playlist_id = party.playlist.spotify_id if party.playlist else spotify_playlist_id
+        try:
+            spotify_removed_dupes = remove_duplicate_tracks_from_playlist(
+                request, playlist_id, tracks
+            )
+            if spotify_removed_dupes:
+                logger.info("[PROCESS_SONGS] Eliminades %d ocurrències duplicades de Spotify (party_id=%s)",
+                            spotify_removed_dupes, party_id)
+                # Re-fetch tracks ja sense duplicats
+                tracks = get_playlist_tracks_basic(spotify_playlist_id)
+        except Exception:
+            logger.warning("[PROCESS_SONGS] No s'han pogut eliminar duplicats de Spotify (party_id=%s)", party_id, exc_info=True)
+
+        # ── 2. Deduplica DB: si hi ha cançons duplicades (mateix spotify_id), en queda una ──
+        db_removed_dupes = _dedup_party_songs(party)
+        if db_removed_dupes:
+            logger.info("[PROCESS_SONGS] Eliminades %d cançons duplicades de la DB (party_id=%s)",
+                        db_removed_dupes, party_id)
+
+        # ── 3. Construir llista deduplicada de Spotify (una entrada per spotify_id) ──
+        seen_ids: set = set()
+        unique_tracks = []
+        for tr in tracks:
+            if tr['id'] not in seen_ids:
+                seen_ids.add(tr['id'])
+                unique_tracks.append(tr)
+
+        spotify_ids_in_playlist = seen_ids
 
         # Obtenir les cançons existents a la DB
-        existing_songs = party.songs.all()
-        existing_spotify_ids = {song.spotify_id for song in existing_songs}
+        existing_spotify_ids = set(party.songs.values_list('spotify_id', flat=True))
 
-        # Identificar cançons a afegir (noves a la playlist)
+        # Identificar cançons a afegir (noves a la playlist) i a eliminar
         new_spotify_ids = spotify_ids_in_playlist - existing_spotify_ids
-
-        # Identificar cançons a eliminar (ja no estan a la playlist)
         removed_spotify_ids = existing_spotify_ids - spotify_ids_in_playlist
 
         # Eliminar cançons que ja no estan a la playlist
@@ -701,9 +763,9 @@ def process_playlist_songs(request, party_id):
 
         # Afegir noves cançons
         new_songs_count = 0
-        for tr in tracks:
+        for tr in unique_tracks:
             if tr['id'] in new_spotify_ids:
-                song_obj, created = Song.objects.get_or_create(
+                _, created = Song.objects.get_or_create(
                     party=party,
                     spotify_id=tr['id'],
                     defaults={
@@ -718,6 +780,10 @@ def process_playlist_songs(request, party_id):
 
         # Preparar missatge informatiu
         message_parts = []
+        if spotify_removed_dupes:
+            message_parts.append(f'{spotify_removed_dupes} duplicats eliminats de Spotify')
+        if db_removed_dupes:
+            message_parts.append(f'{db_removed_dupes} duplicats eliminats de la DB')
         if new_songs_count > 0:
             message_parts.append(f'{new_songs_count} cançons noves afegides')
         if removed_spotify_ids:
@@ -729,9 +795,11 @@ def process_playlist_songs(request, party_id):
 
         return JsonResponse({
             'success': True,
-            'total': len(tracks),
+            'total': len(unique_tracks),
             'new_songs': new_songs_count,
             'removed_songs': len(removed_spotify_ids),
+            'spotify_dupes_removed': spotify_removed_dupes,
+            'db_dupes_removed': db_removed_dupes,
             'message': message
         })
     except SpotifyAuthError:
@@ -983,6 +1051,45 @@ def process_song_features(request, party_id):
         return JsonResponse({
             'error': _('No s\'han pogut processar les metadades de les cançons.')
         }, status=500)
+
+
+@login_required
+@user_passes_test(is_dj_admin)
+@require_POST
+def update_song_metadata(request, party_id, song_id):
+    party = get_object_or_404(Party, pk=party_id)
+    if err := _party_dj_check(request, party):
+        return err
+    song = get_object_or_404(Song, pk=song_id, party=party)
+
+    bpm_raw = request.POST.get('bpm', '').strip()
+    key_raw = request.POST.get('key', '').strip().upper()
+
+    if bpm_raw:
+        try:
+            bpm = float(bpm_raw)
+            if not (20 <= bpm <= 300):
+                return JsonResponse({'success': False, 'error': 'BPM ha d\'estar entre 20 i 300'}, status=400)
+            song.bpm = bpm
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'BPM invàlid'}, status=400)
+    else:
+        song.bpm = None
+
+    valid_keys = [f"{n}{l}" for n in range(1, 13) for l in ('A', 'B')]
+    if key_raw:
+        if key_raw not in valid_keys:
+            return JsonResponse({'success': False, 'error': 'Clau Camelot invàlida'}, status=400)
+        song.key = key_raw
+    else:
+        song.key = None
+
+    song.save(update_fields=['bpm', 'key'])
+    return JsonResponse({
+        'success': True,
+        'bpm': round(song.bpm) if song.bpm else None,
+        'key': song.key,
+    })
 
 
 @login_required
@@ -1717,6 +1824,9 @@ def dj_dashboard(request):
     # Alternativa: comptar VotePackages creats per aquesta party (conversions coins->vots)
     vote_conversions_count = VotePackage.objects.filter(party=party).count()
 
+    # Mapa posició a la maleta: song.id → número d'ordre (1-based)
+    pending_song_positions = {song.id: i + 1 for i, song in enumerate(pending_songs)}
+
     # Obtenir recomanacions intel·ligents
     recommended_songs = get_recommended_songs(party, limit=6)
     pending_requests = list(SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at'))
@@ -1808,6 +1918,7 @@ def dj_dashboard(request):
         'total_votes': total_votes,
         'played_songs': played_songs_count,
         'recommended_songs': recommended_songs,
+        'pending_song_positions': pending_song_positions,
         'pending_requests': pending_requests,
         'queued_requests': queued_requests,
         'accepted_unplayed_requests': accepted_unplayed_requests,

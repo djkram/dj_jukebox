@@ -1248,6 +1248,14 @@
                       {% else %}
                         <span class="text-success"><span class="material-symbols-outlined" style="font-size: 1.125rem;">check_circle</span></span>
                       {% endif %}
+                      <button class="settings-action-btn edit-song-btn"
+                              data-song-id="{{ song.id }}"
+                              data-song-title="{{ song.title|escapejs }}"
+                              data-bpm="{{ song.bpm|floatformat:0|default:'' }}"
+                              data-key="{{ song.key|default:'' }}"
+                              title="Edita BPM i Key manualment">
+                        <span class="material-symbols-outlined" style="font-size: 1.125rem;">edit</span>
+                      </button>
                       {% if has_spotify %}
                       <button class="settings-action-btn delete delete-song-btn"
                               data-song-id="{{ song.id }}"
@@ -1558,6 +1566,15 @@
                       <i class="fas fa-chart-line"></i>
                     </button>
                   {% endif %}
+                  <button class="btn btn-sm btn-outline-secondary edit-song-btn flex-shrink-0"
+                          data-song-id="{{ song.id }}"
+                          data-song-title="{{ song.title|escapejs }}"
+                          data-bpm="{{ song.bpm|floatformat:0|default:'' }}"
+                          data-key="{{ song.key|default:'' }}"
+                          style="font-size: 0.7rem; padding: 0.25rem 0.5rem;"
+                          title="Edita BPM i Key manualment">
+                    <i class="fas fa-pen"></i>
+                  </button>
                   {% if has_spotify %}
                   <button class="btn btn-sm btn-outline-danger delete-song-btn flex-shrink-0"
                           data-song-id="{{ song.id }}"
@@ -1772,7 +1789,49 @@
   </div>
 </div>
 
-{# ── SCRIPT PER FILTRAT EN VIU ─────────────────────────────────────────── #}
+{# ── MODAL EDITAR BPM / KEY ───────────────────────────────────────────── #}
+<div class="modal fade" id="editSongModal" tabindex="-1" aria-labelledby="editSongModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editSongModalLabel">Edita BPM i Key</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="editSongTitle" class="mb-3" style="font-size: 0.82rem; font-weight: 600; color: #191c1f; line-height: 1.2;"></p>
+        <div class="mb-3">
+          <label for="editSongBpm" class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">BPM</label>
+          <input type="number" id="editSongBpm" class="form-control form-control-sm" min="20" max="300" step="1" placeholder="Ex: 128">
+        </div>
+        <div class="mb-0">
+          <label for="editSongKey" class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Clau (Camelot)</label>
+          <select id="editSongKey" class="form-control form-control-sm">
+            <option value="">— Sense clau —</option>
+            <option value="1A">1A</option><option value="1B">1B</option>
+            <option value="2A">2A</option><option value="2B">2B</option>
+            <option value="3A">3A</option><option value="3B">3B</option>
+            <option value="4A">4A</option><option value="4B">4B</option>
+            <option value="5A">5A</option><option value="5B">5B</option>
+            <option value="6A">6A</option><option value="6B">6B</option>
+            <option value="7A">7A</option><option value="7B">7B</option>
+            <option value="8A">8A</option><option value="8B">8B</option>
+            <option value="9A">9A</option><option value="9B">9B</option>
+            <option value="10A">10A</option><option value="10B">10B</option>
+            <option value="11A">11A</option><option value="11B">11B</option>
+            <option value="12A">12A</option><option value="12B">12B</option>
+          </select>
+        </div>
+        <div id="editSongError" class="mt-2 text-danger" style="font-size: 0.78rem; display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel·lar</button>
+        <button type="button" class="btn btn-primary btn-sm" id="editSongSaveBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── SCRIPT PER FILTRAT EN VIU ───────────────────────────────────────────── #}
 <script>
 function escapeHtml(str) {
   return String(str == null ? '' : str)
@@ -2797,6 +2856,96 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.querySelectorAll('.delete-song-btn').forEach(bindDeleteButton);
+
+  // ── Edit BPM / Key modal ──────────────────────────────────────────────
+  var updateSongUrlTemplate = '{% url "update_song_metadata" party.id 0 %}';
+  var editSongModal = new bootstrap.Modal(document.getElementById('editSongModal'));
+  var editSongSaveBtn = document.getElementById('editSongSaveBtn');
+  var editSongBpmInput = document.getElementById('editSongBpm');
+  var editSongKeySelect = document.getElementById('editSongKey');
+  var editSongError = document.getElementById('editSongError');
+  var editSongCurrentId = null;
+
+  function openEditSongModal(btn) {
+    editSongCurrentId = btn.dataset.songId;
+    document.getElementById('editSongTitle').textContent = btn.dataset.songTitle || '';
+    editSongBpmInput.value = btn.dataset.bpm || '';
+    editSongKeySelect.value = btn.dataset.key || '';
+    editSongError.style.display = 'none';
+    editSongError.textContent = '';
+    editSongSaveBtn.disabled = false;
+    editSongModal.show();
+  }
+
+  function bindEditSongButton(btn) {
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function() { openEditSongModal(this); });
+  }
+
+  editSongSaveBtn.addEventListener('click', function() {
+    if (!editSongCurrentId) return;
+    var bpm = editSongBpmInput.value.trim();
+    var key = editSongKeySelect.value;
+    editSongError.style.display = 'none';
+    editSongSaveBtn.disabled = true;
+
+    var url = updateSongUrlTemplate.replace('/0/', '/' + editSongCurrentId + '/');
+    var fd = new FormData();
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    fd.append('bpm', bpm);
+    fd.append('key', key);
+
+    fetch(url, { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.success) {
+          editSongError.textContent = data.error || 'Error desconegut';
+          editSongError.style.display = 'block';
+          editSongSaveBtn.disabled = false;
+          return;
+        }
+        // Update desktop row cells
+        var desktopRow = document.querySelector('tr[data-song-id="' + editSongCurrentId + '"]');
+        if (desktopRow) {
+          var bpmCell = desktopRow.querySelector('.bpm-cell');
+          var keyCell = desktopRow.querySelector('.key-cell');
+          if (bpmCell) bpmCell.innerHTML = data.bpm
+            ? '<span class="settings-bpm-badge">' + data.bpm + ' BPM</span>'
+            : '<span class="text-muted">-</span>';
+          if (keyCell) keyCell.innerHTML = data.key
+            ? '<span class="camelot-key camelot-' + data.key + '">' + data.key + '</span>'
+            : '<span class="text-muted">-</span>';
+          // Update edit button data attrs
+          desktopRow.querySelectorAll('.edit-song-btn').forEach(function(b) {
+            b.dataset.bpm = data.bpm || '';
+            b.dataset.key = data.key || '';
+          });
+        }
+        // Update mobile card cells
+        var mobileCard = document.querySelector('[data-song-row][data-song-id="' + editSongCurrentId + '"]');
+        if (mobileCard) {
+          var bpmCellM = mobileCard.querySelector('.bpm-cell-mobile');
+          var keyCellM = mobileCard.querySelector('.key-cell-mobile');
+          if (bpmCellM) bpmCellM.textContent = data.bpm || '-';
+          if (keyCellM) keyCellM.innerHTML = data.key
+            ? '<span class="camelot-key camelot-' + data.key + '" style="font-size: 0.7rem; padding: 0.15rem 0.35rem;">' + data.key + '</span>'
+            : '-';
+          mobileCard.querySelectorAll('.edit-song-btn').forEach(function(b) {
+            b.dataset.bpm = data.bpm || '';
+            b.dataset.key = data.key || '';
+          });
+        }
+        editSongModal.hide();
+      })
+      .catch(function() {
+        editSongError.textContent = 'Error de connexió';
+        editSongError.style.display = 'block';
+        editSongSaveBtn.disabled = false;
+      });
+  });
+
+  document.querySelectorAll('.edit-song-btn').forEach(bindEditSongButton);
 
   bulkAnalyzeButtons.forEach(function(btn) {
     btn.addEventListener('click', function(e) {

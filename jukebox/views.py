@@ -2695,6 +2695,14 @@ def manage_song_requests(request):
                         refund_user_coins_for_party(
                             song_request.user, party, song_request.coins_cost
                         )
+                    # If queued, the song was added to party.songs — remove it if safe
+                    if song_request.status == 'queued' and song_request.spotify_id:
+                        Song.objects.filter(
+                            party=party,
+                            spotify_id=song_request.spotify_id,
+                            has_played=False,
+                            num_likes=0,
+                        ).delete()
                     song_request.delete()
                 return JsonResponse({'success': True, 'message': _('Petició eliminada.')})
             except SongRequest.DoesNotExist:

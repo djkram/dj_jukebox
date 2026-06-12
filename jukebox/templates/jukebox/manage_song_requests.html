@@ -226,12 +226,14 @@
                         {% trans "Maleta" %}
                       </button>
                       {% endif %}
+                      {% if req.status == 'queued' %}
                       <button class="req-btn req-btn-load action-btn {% if not is_jukebox_active %}disabled-look{% endif %}"
                               data-id="{{ req.id }}" data-action="load"
                               {% if not is_jukebox_active %}disabled title="{% trans 'El Jukebox no està actiu' %}"{% else %}title="{% trans 'LOAD: cobrar i carregar al Jukebox' %}"{% endif %}>
                         <span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">bolt</span>
                         LOAD
                       </button>
+                      {% endif %}
                       <button class="req-btn action-btn"
                               data-id="{{ req.id }}" data-action="delete"
                               onclick="console.log('[manage-requests] inline trash click', { requestId: '{{ req.id }}', source: 'desktop-active', button: this, event: event });"
@@ -374,12 +376,14 @@
                   🎒 {% trans "Maleta" %}
                 </button>
                 {% endif %}
+                {% if req.status == 'queued' %}
                 <button class="btn btn-sm action-btn{% if not is_jukebox_active %} disabled{% endif %}"
                         style="background:{% if is_jukebox_active %}#5e24e1{% else %}#c4c5d8{% endif %};color:white;font-weight:700;flex:1;"
                         data-id="{{ req.id }}" data-action="load"
                         {% if not is_jukebox_active %}disabled{% endif %}>
                   ⚡ LOAD
                 </button>
+                {% endif %}
                 <button class="btn btn-sm action-btn"
                         style="background:#f3f4f6;color:#747687;font-weight:700;"
                         data-id="{{ req.id }}" data-action="delete"
@@ -495,6 +499,28 @@
     }, 5000);
   }
 
+  var isJukeboxActive = {{ is_jukebox_active|yesno:"true,false" }};
+
+  function injectLoadBtn(actionsEl, requestId, desktop) {
+    var existing = actionsEl.querySelector('[data-action="load"]');
+    if (existing) return;
+    var deleteBtn = actionsEl.querySelector('[data-action="delete"]');
+    var btn = document.createElement('button');
+    if (desktop) {
+      btn.className = 'req-btn req-btn-load action-btn' + (isJukeboxActive ? '' : ' disabled-look');
+      btn.title = isJukeboxActive ? '{% trans "LOAD: cobrar i carregar al Jukebox"|escapejs %}' : '{% trans "El Jukebox no està actiu"|escapejs %}';
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:0.9rem;line-height:1;">bolt</span> LOAD';
+    } else {
+      btn.className = 'btn btn-sm action-btn' + (isJukeboxActive ? '' : ' disabled');
+      btn.style.cssText = 'background:' + (isJukeboxActive ? '#5e24e1' : '#c4c5d8') + ';color:white;font-weight:700;flex:1;';
+      btn.textContent = '⚡ LOAD';
+    }
+    btn.setAttribute('data-id', requestId);
+    btn.setAttribute('data-action', 'load');
+    if (!isJukeboxActive) btn.disabled = true;
+    actionsEl.insertBefore(btn, deleteBtn || null);
+  }
+
   function doAction(requestId, action, triggerBtn) {
     var desktopRow = document.getElementById('req-row-' + requestId);
     var mobileRow  = document.getElementById('req-mobile-' + requestId);
@@ -518,28 +544,38 @@
     .then(function (data) {
       if (data.success) {
         showMessage(data.message || '{{ done_label|escapejs }}', 'success');
-        [desktopRow, mobileRow].forEach(function (row) {
-          if (!row) return;
-          row.style.transition = 'opacity 400ms';
-          row.style.opacity = '0';
-          setTimeout(function () { if (row.parentNode) row.parentNode.removeChild(row); }, 400);
-        });
         if (action === 'queue') {
-          var card = document.querySelector('[data-req-id="' + requestId + '"]');
-          if (card) {
-            card.style.borderColor = 'rgba(59,130,246,0.3)';
-            card.style.background  = 'rgba(239,246,255,0.5)';
-            var icon = card.querySelector('.dash-req-status-icon');
-            if (icon) icon.textContent = 'shopping_bag';
-            var txt = card.querySelector('.dash-req-status-text');
-            if (txt) txt.textContent = (card.dataset.username || '') + ' · Maleta';
-            var actions = card.querySelector('.dash-req-actions');
-            if (actions) {
-              Array.from(actions.querySelectorAll('button')).forEach(function (b) {
-                if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.parentNode.removeChild(b);
-              });
+          // Update desktop row in place
+          if (desktopRow) {
+            var badge = desktopRow.querySelector('.req-status-badge');
+            if (badge) badge.className = 'req-status-badge req-status-queued';
+            var actionsDiv = desktopRow.querySelector('.req-actions');
+            if (actionsDiv) {
+              var queueBtn = actionsDiv.querySelector('[data-action="queue"]');
+              if (queueBtn) queueBtn.parentNode.removeChild(queueBtn);
+              injectLoadBtn(actionsDiv, requestId, true);
             }
           }
+          // Update mobile row in place
+          if (mobileRow) {
+            mobileRow.style.background = '#eff6ff';
+            var mobileBadge = mobileRow.querySelector('.req-status-badge');
+            if (mobileBadge) mobileBadge.className = 'req-status-badge req-status-queued';
+            var mobileActions = mobileRow.querySelector('.d-flex.gap-2');
+            if (mobileActions) {
+              var mobileQueueBtn = mobileActions.querySelector('[data-action="queue"]');
+              if (mobileQueueBtn) mobileQueueBtn.parentNode.removeChild(mobileQueueBtn);
+              injectLoadBtn(mobileActions, requestId, false);
+            }
+          }
+          if (triggerBtn) triggerBtn.disabled = false;
+        } else {
+          [desktopRow, mobileRow].forEach(function (row) {
+            if (!row) return;
+            row.style.transition = 'opacity 400ms';
+            row.style.opacity = '0';
+            setTimeout(function () { if (row.parentNode) row.parentNode.removeChild(row); }, 400);
+          });
         }
       } else {
         showMessage(data.error || '{{ process_error_label|escapejs }}', 'danger');

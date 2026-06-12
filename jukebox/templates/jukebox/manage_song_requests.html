@@ -570,8 +570,10 @@
     _pendingAction = action;
     _pendingBtn    = btn;
     if (confirmMessage) confirmMessage.textContent = msg;
-    if (confirmModal && window.jQuery && typeof jQuery(confirmModal).modal === 'function') {
-      jQuery(confirmModal).modal('show');
+    if (confirmModal && window.bootstrap && window.bootstrap.Modal) {
+      var bsModal = new bootstrap.Modal(confirmModal);
+      confirmModal._bsModal = bsModal;
+      bsModal.show();
     } else if (window.confirm(msg)) {
       doAction(id, action, btn);
     }
@@ -584,22 +586,15 @@
       var triggerBtn = _pendingBtn;
       _pendingId = _pendingAction = _pendingBtn = null;
 
-      if (window.jQuery && confirmModal && typeof jQuery(confirmModal).modal === 'function') {
-        jQuery(confirmModal).modal('hide');
+      if (confirmModal && confirmModal._bsModal) {
+        confirmModal._bsModal.hide();
+        confirmModal._bsModal = null;
       }
       if (requestId && action) {
         doAction(requestId, action, triggerBtn);
       }
     });
   }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    if (window.jQuery && confirmModal) {
-      jQuery(confirmModal).on('hidden.bs.modal', function () {
-        _pendingId = _pendingAction = _pendingBtn = null;
-      });
-    }
-  });
 }());
 </script>
 {% endblock %}

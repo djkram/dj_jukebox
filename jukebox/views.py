@@ -237,7 +237,6 @@ def _load_song_request(song_request, processed_by):
         song_request.processed_by = processed_by
         song_request.save(update_fields=['status', 'processed_at', 'processed_by', 'coins_charged'])
     create_song_loaded_notification(song_request)
-    create_song_played_notification(song)
 
 
 def _reject_song_request(song_request, processed_by):
@@ -1316,10 +1315,10 @@ def song_list(request):
     my_played_votes = vote_stats['my_played_votes'] or 0
 
     request_stats = SongRequest.objects.filter(party=party).aggregate(
-        pending_count=Count('id', filter=Q(status='pending')),
+        active_count=Count('id', filter=Q(status__in=['pending', 'queued'])),
         total_coins=Sum('coins_cost', filter=Q(status='accepted')),
     )
-    pending_requests_count = request_stats['pending_count'] or 0
+    pending_requests_count = request_stats['active_count'] or 0
     total_coins_spent = request_stats['total_coins'] or 0
 
     # KPI actius — cached 30s per evitar la OR cross-table en cada request
@@ -1454,7 +1453,7 @@ def party_status_api(request):
     my_played_votes = Vote.objects.filter(
         user=user, party=party, vote_type='like', song__has_played=True
     ).count()
-    pending_requests_count = SongRequest.objects.filter(party=party, status='pending').count()
+    pending_requests_count = SongRequest.objects.filter(party=party, status__in=['pending', 'queued']).count()
     User = get_user_model()
     active_users = User.objects.filter(
         Q(vote__party=party) | Q(songrequest__party=party)
@@ -1742,9 +1741,10 @@ def dj_dashboard(request):
     is_djjukebox_active = party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE
     party_status_step_map = {
         Party.STATUS_HIDDEN: 0,
-        Party.STATUS_SHOW_PARTY: 1,
-        Party.STATUS_REQUESTS_OPEN: 2,
-        Party.STATUS_DJJUKEBOX_ACTIVE: 3,
+        Party.STATUS_PARTY_VISIBLE: 1,
+        Party.STATUS_SHOW_PARTY: 2,
+        Party.STATUS_REQUESTS_OPEN: 3,
+        Party.STATUS_DJJUKEBOX_ACTIVE: 4,
     }
     is_party_finished = party.party_status == Party.STATUS_FINISHED
     party_status_step = party_status_step_map.get(party.party_status, 0)
@@ -2466,8 +2466,37 @@ def request_song(request):
             return JsonResponse({'tracks': tracks})
         return JsonResponse({'tracks': []})
 
-    # Enviar petició
+    # Enviar o cancel·lar petició
     if request.method == 'POST':
+        # Cancel·lar petició pròpia (pending only — queued ja ha estat acceptada pel DJ)
+        if request.POST.get('action') == 'cancel':
+            request_id = request.POST.get('request_id')
+            if not request_id:
+                return JsonResponse({'success': False, 'error': _('Petició no especificada.')}, status=400)
+            try:
+                with transaction.atomic():
+                    song_request = SongRequest.objects.select_for_update().get(
+                        pk=request_id, party=party, user=user, status='pending',
+                    )
+                    refunded = 0
+                    if song_request.coins_charged:
+                        refund_user_coins_for_party(user, party, song_request.coins_cost)
+                        refunded = song_request.coins_cost
+                    Notification.objects.filter(song_request=song_request).delete()
+                    title_saved = song_request.title
+                    song_request.delete()
+                if refunded:
+                    create_coins_received_notification(
+                        user, refunded,
+                        reason=_('Petició cancel·lada: "%(title)s"') % {'title': title_saved},
+                    )
+                return JsonResponse({'success': True, 'message': _('Petició cancel·lada. %(coins)s Coins retornats.') % {'coins': refunded}})
+            except SongRequest.DoesNotExist:
+                return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
+            except Exception:
+                logger.exception("[REQUESTS] Error cancel·lant petició request_id=%s", request_id)
+                return JsonResponse({'success': False, 'error': _('Error intern cancel·lant la petició.')}, status=500)
+
         spotify_id = request.POST.get('spotify_id')
         title = request.POST.get('title')
         artist = request.POST.get('artist')

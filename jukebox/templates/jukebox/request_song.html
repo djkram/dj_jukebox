@@ -388,6 +388,7 @@
               <th>Estat</th>
               <th>Cost</th>
               <th>Data</th>
+              <th style="width: 40px;"></th>
             </tr>
           </thead>
           <tbody>
@@ -428,6 +429,15 @@
                 </td>
                 <td class="request-history-cell-last">
                   <span style="font-size: 0.75rem; color: #747687;">{{ req.created_at|date:"d/m/Y H:i" }}</span>
+                </td>
+                <td style="padding: 0.5rem 0.5rem 0.5rem 0;">
+                  {% if req.status == 'pending' %}
+                    <button class="cancel-request-btn" data-id="{{ req.id }}" data-title="{{ req.title|escapejs }}"
+                      style="background: none; border: none; cursor: pointer; color: #ba1a1a; padding: 0.2rem;"
+                      title="Cancel·lar petició">
+                      <span class="material-symbols-outlined" style="font-size: 1.1rem; vertical-align: middle;">delete</span>
+                    </button>
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}
@@ -557,6 +567,13 @@
             <div class="d-flex flex-column align-items-end flex-shrink-0" style="min-width: 2.5rem;">
               <span class="d-block" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">{{ req.created_at|date:"d/m" }}</span>
               <span class="d-block mt-1" style="color: #747688; font-size: 0.65rem; line-height: 1.1;">{{ req.created_at|date:"H:i" }}</span>
+              {% if req.status == 'pending' %}
+                <button class="cancel-request-btn mt-1" data-id="{{ req.id }}" data-title="{{ req.title|escapejs }}"
+                  style="background: none; border: none; cursor: pointer; color: #ba1a1a; padding: 0; line-height: 1;"
+                  title="Cancel·lar petició">
+                  <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">delete</span>
+                </button>
+              {% endif %}
             </div>
           </div>
         {% endfor %}
@@ -772,6 +789,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter') {
       searchSongs();
     }
+  });
+
+  function cancelRequest(requestId, title) {
+    if (!confirm('Cancel·lar la petició "' + title + '"? Els Coins et seran retornats.')) return;
+    const formData = new FormData();
+    formData.append('action', 'cancel');
+    formData.append('request_id', requestId);
+    fetch('{% url "request_song" %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      body: formData,
+    })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (ok && data.success) {
+        showMessage(data.message, 'success');
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showMessage(data.error || 'Error cancel·lant la petició', 'danger');
+      }
+    })
+    .catch(() => showMessage('Error de connexió', 'danger'));
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.cancel-request-btn');
+    if (!btn) return;
+    cancelRequest(btn.dataset.id, btn.dataset.title);
   });
 });
 </script>

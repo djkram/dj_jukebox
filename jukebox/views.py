@@ -2667,14 +2667,14 @@ def manage_song_requests(request):
                             song_request.user, party, song_request.coins_cost
                         )
                         refunded = song_request.coins_cost
-                    # If queued, remove the song only if it was created by this request
-                    # and has no votes (vote is the related name on the Vote FK to Song)
+                    # If queued, remove the song added by this request (it can't have
+                    # pre-existed: creation-time check prevents duplicate requests).
+                    # Only delete if still unplayed and has no votes.
                     if song_request.status == 'queued' and song_request.spotify_id:
                         Song.objects.filter(
                             party=party,
                             spotify_id=song_request.spotify_id,
                             has_played=False,
-                            created_at__gte=song_request.created_at,
                             vote__isnull=True,
                         ).delete()
                     # Delete linked notifications so they disappear from the user's bell

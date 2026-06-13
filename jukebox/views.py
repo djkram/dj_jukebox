@@ -2722,39 +2722,40 @@ def manage_song_requests(request):
                 return JsonResponse({'success': False, 'error': _('Error intern eliminant la petició.')}, status=500)
 
         try:
-            song_request = SongRequest.objects.select_for_update().get(
-                pk=request_id,
-                party=party,
-                status__in=['pending', 'queued'],
-            )
-        except SongRequest.DoesNotExist:
-            return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
-
-        try:
-            if action == 'reject':
-                _reject_song_request(song_request, request.user)
-                refund_msg = _(' (%(coins)s Coins retornats)') % {'coins': song_request.coins_cost} if song_request.coins_charged else ''
-                return JsonResponse({'success': True, 'message': _('Petició rebutjada.') + refund_msg})
-
-            elif action == 'queue':
-                _queue_song_request(song_request, request.user)
-                return JsonResponse({'success': True, 'message': _('Cançó afegida a la maleta!')})
-
-            elif action == 'load':
-                if party.party_status != Party.STATUS_DJJUKEBOX_ACTIVE:
-                    return JsonResponse({'success': False, 'error': _('El Jukebox no està actiu.')}, status=400)
+            with transaction.atomic():
                 try:
-                    _load_song_request(song_request, request.user)
-                except ValueError:
-                    song_request.user.refresh_from_db(fields=['credits'])
-                    return JsonResponse({
-                        'success': False,
-                        'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
-                            'current': get_user_available_coins(song_request.user, party),
-                            'required': song_request.coins_cost,
-                        },
-                    }, status=400)
-                return JsonResponse({'success': True, 'message': _('🚀 LOAD! Cançó carregada al Jukebox!')})
+                    song_request = SongRequest.objects.select_for_update().get(
+                        pk=request_id,
+                        party=party,
+                        status__in=['pending', 'queued'],
+                    )
+                except SongRequest.DoesNotExist:
+                    return JsonResponse({'success': False, 'error': _('Petició no trobada o ja processada.')}, status=404)
+
+                if action == 'reject':
+                    _reject_song_request(song_request, request.user)
+                    refund_msg = _(' (%(coins)s Coins retornats)') % {'coins': song_request.coins_cost} if song_request.coins_charged else ''
+                    return JsonResponse({'success': True, 'message': _('Petició rebutjada.') + refund_msg})
+
+                elif action == 'queue':
+                    _queue_song_request(song_request, request.user)
+                    return JsonResponse({'success': True, 'message': _('Cançó afegida a la maleta!')})
+
+                elif action == 'load':
+                    if party.party_status != Party.STATUS_DJJUKEBOX_ACTIVE:
+                        return JsonResponse({'success': False, 'error': _('El Jukebox no està actiu.')}, status=400)
+                    try:
+                        _load_song_request(song_request, request.user)
+                    except ValueError:
+                        song_request.user.refresh_from_db(fields=['credits'])
+                        return JsonResponse({
+                            'success': False,
+                            'error': _('L\'usuari no té prou Coins (%(current)s/%(required)s)') % {
+                                'current': get_user_available_coins(song_request.user, party),
+                                'required': song_request.coins_cost,
+                            },
+                        }, status=400)
+                    return JsonResponse({'success': True, 'message': _('🚀 LOAD! Cançó carregada al Jukebox!')})
 
         except Exception:
             logger.exception("[REQUESTS] Error processant petició request_id=%s action=%s party_id=%s", request_id, action, party.id)

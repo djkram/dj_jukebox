@@ -194,33 +194,6 @@ def _analyze_and_add_to_spotify(song_id, party_playlist_id, dj_user):
         connection.close()
 
 
-def _accept_song_request(song_request, processed_by, charge_user):
-    """Accepta (LEGACY) o carrega (LOAD) una petició."""
-    charged_amount = None
-    with transaction.atomic():
-        if charge_user and not song_request.coins_charged:
-            spent = spend_user_coins_for_party(
-                song_request.user,
-                song_request.party,
-                song_request.coins_cost,
-                reason='song_request_cost',
-            )
-            if not spent:
-                raise ValueError("Insufficient credits")
-            charged_amount = song_request.coins_cost
-        elif song_request.coins_charged:
-            charged_amount = song_request.coins_cost
-
-        _add_song_to_party(song_request)
-
-        song_request.status = 'accepted'
-        song_request.processed_at = timezone.now()
-        song_request.processed_by = processed_by
-        song_request.save(update_fields=['status', 'processed_at', 'processed_by'])
-
-    create_song_accepted_notification(song_request, charged_amount=charged_amount)
-    return charged_amount
-
 
 def _queue_song_request(song_request, processed_by):
     """Posa la cançó a la maleta: afegeix a la llista, analitza BPM/Key i a la playlist Spotify."""
@@ -2503,14 +2476,6 @@ def request_song(request):
         if not spotify_id or not title or not artist:
             return JsonResponse({'success': False, 'error': _('Dades incompletes')}, status=400)
 
-        # Comprovar si la cançó ja està a la llista
-        if party.songs.filter(spotify_id=spotify_id).exists():
-            return JsonResponse({'success': False, 'error': _('Aquesta cançó ja està a la llista!')}, status=400)
-
-        # Comprovar si ja s'ha demanat
-        if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status__in=['pending', 'queued']).exists():
-            return JsonResponse({'success': False, 'error': _('Aquesta cançó ja ha estat demanada i està pendent')}, status=400)
-
         cost = party.song_request_cost
         available = get_user_available_coins(user, party)
         if available < cost:
@@ -2521,8 +2486,12 @@ def request_song(request):
                 },
             }, status=400)
 
-        # Retenir coins i crear petició
+        # Retenir coins i crear petició — comprovacions dins la transacció per evitar race conditions
         with transaction.atomic():
+            if party.songs.filter(spotify_id=spotify_id).exists():
+                return JsonResponse({'success': False, 'error': _('Aquesta cançó ja està a la llista!')}, status=400)
+            if SongRequest.objects.filter(party=party, spotify_id=spotify_id, status__in=['pending', 'queued']).exists():
+                return JsonResponse({'success': False, 'error': _('Aquesta cançó ja ha estat demanada i està pendent')}, status=400)
             spent = spend_user_coins_for_party(user, party, cost, reason='song_request_hold')
             if not spent:
                 return JsonResponse({'success': False, 'error': _('No tens prou Coins.')}, status=400)
@@ -2699,14 +2668,14 @@ def manage_song_requests(request):
                         )
                         refunded = song_request.coins_cost
                     # If queued, remove the song only if it was created by this request
-                    # (created_at >= request created_at means it didn't exist before the request)
+                    # and has no votes (vote is the related name on the Vote FK to Song)
                     if song_request.status == 'queued' and song_request.spotify_id:
                         Song.objects.filter(
                             party=party,
                             spotify_id=song_request.spotify_id,
                             has_played=False,
-                            num_likes=0,
                             created_at__gte=song_request.created_at,
+                            vote__isnull=True,
                         ).delete()
                     # Delete linked notifications so they disappear from the user's bell
                     Notification.objects.filter(song_request=song_request).delete()

@@ -796,6 +796,10 @@
                 background: #dbeafe;
             }
 
+            #dashboard-bag-tbody.filter-requests-only tr:not(.bag-row-request) {
+                display: none;
+            }
+
             .mobile-empty-state {
                 padding: 0.9rem;
                 text-align: center;

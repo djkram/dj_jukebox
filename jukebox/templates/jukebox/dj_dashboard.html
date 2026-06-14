@@ -1482,6 +1482,14 @@
                         style="height: 3rem; padding-left: 2.6rem; border: 1px solid rgba(116, 118, 136, 0.18); border-radius: 0.8rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.03);"
                     >
                   </div>
+                  {% if queued_req_by_spotify %}
+                  <button id="bag-filter-requests-btn" type="button"
+                    class="sonic-btn sonic-btn-sm"
+                    style="height:3rem;display:flex;align-items:center;gap:0.35rem;white-space:nowrap;background:#fff;border:1.5px solid #1e40af;color:#1e40af;border-radius:0.8rem;padding:0 0.9rem;font-size:0.8rem;font-weight:700;">
+                    <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">inbox</span>
+                    Peticions
+                  </button>
+                  {% endif %}
                   <a id="dashboard-bag-search-spotify-btn"
                      href="#"
                      class="sonic-btn sonic-btn-tertiary sonic-btn-sm d-none"
@@ -1905,6 +1913,21 @@ document.addEventListener('DOMContentLoaded', function() {
       onUpdate: function (rawQuery) {
         if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
         if (bagSpotifyBtn) bagSpotifyBtn.classList.toggle('d-none', !rawQuery);
+      }
+    });
+  }
+
+  var bagFilterRequestsBtn = document.getElementById('bag-filter-requests-btn');
+  if (bagFilterRequestsBtn && bagTbody) {
+    bagFilterRequestsBtn.addEventListener('click', function() {
+      var isActive = bagTbody.classList.toggle('filter-requests-only');
+      if (isActive) {
+        bagFilterRequestsBtn.style.background = '#1e40af';
+        bagFilterRequestsBtn.style.color = '#fff';
+        if (input) { input.value = ''; input.dispatchEvent(new Event('input')); }
+      } else {
+        bagFilterRequestsBtn.style.background = '#fff';
+        bagFilterRequestsBtn.style.color = '#1e40af';
       }
     });
   }

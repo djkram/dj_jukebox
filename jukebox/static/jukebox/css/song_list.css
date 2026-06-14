@@ -1120,8 +1120,8 @@
       gap: 0.2rem;
     }
     .mobile-vote-btn {
-      width: 2rem;
-      height: 2rem;
+      width: 3.25rem;
+      height: 3.25rem;
       border: 0;
       border-radius: 999px;
       background: transparent;
@@ -1130,9 +1130,10 @@
       align-items: center;
       justify-content: center;
       transition: all 200ms ease;
+      flex-shrink: 0;
     }
     .mobile-vote-btn i {
-      font-size: 1.35rem;
+      font-size: 1.85rem;
       line-height: 1;
     }
     .mobile-vote-btn-positive {

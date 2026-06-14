@@ -645,12 +645,16 @@
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem;">
                   {% for song in recommended_songs %}
-                    <div class="bg-white p-1 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    {% with is_req=recommended_req_by_spotify|get_item:song.spotify_id %}
+                    <div class="bg-white p-1 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);{% if is_req %}outline:2px solid #1e40af;{% endif %}">
                       <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
                         {% if song.album_image_url %}
                           <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
                         {% else %}
                           <div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-music" style="color:#747688;font-size:1rem;"></i></div>
+                        {% endif %}
+                        {% if is_req %}
+                          <div class="position-absolute" style="top:0.22rem;right:0.22rem;background:#1e40af;color:#fff;font-size:0.52rem;font-weight:800;padding:0.07rem 0.28rem;border-radius:3px;letter-spacing:0.04em;">PETICIÓ</div>
                         {% endif %}
                         <div class="position-absolute d-flex flex-column" style="left:0.22rem;right:0.22rem;bottom:0.22rem;gap:0.16rem;">
                           <div style="font-size:0.67rem;font-weight:700;color:#191c1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.02;background:#fff;padding:0.07rem 0.26rem;border-radius:3px;">{{ song.title }}</div>
@@ -662,6 +666,7 @@
                         {% if song.num_likes > 0 %}<span style="font-size:0.8rem;color:#e74c3c;font-weight:800;">{{ song.num_likes }}<i class="fas fa-heart ms-1" style="font-size:0.65rem;"></i></span>{% endif %}
                       </div>
                     </div>
+                    {% endwith %}
                   {% endfor %}
                 </div>
               </div>
@@ -1259,8 +1264,9 @@
             <div style="padding: 0.75rem 0 0.4rem; font-size: 0.75rem; font-weight: 700; color: #a0a3b1; text-transform: uppercase; letter-spacing: 0.07em;">Els més votats per sonar</div>
             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; padding: 0.5rem 0;">
             {% for song in recommended_songs %}
+              {% with is_req=recommended_req_by_spotify|get_item:song.spotify_id %}
               <div>
-                <div class="bg-white p-1 h-100 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div class="bg-white p-1 h-100 d-flex flex-column" style="border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);{% if is_req %}outline:2px solid #1e40af;{% endif %}">
                   <div class="rounded overflow-hidden position-relative" style="aspect-ratio: 1 / 0.72; background: #eceef3;">
                     {% if song.album_image_url %}
                       <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;" loading="lazy">
@@ -1268,6 +1274,9 @@
                       <div class="w-100 h-100 d-flex align-items-center justify-content-center">
                         <i class="fas fa-music" style="color: #747688; font-size: 1rem;"></i>
                       </div>
+                    {% endif %}
+                    {% if is_req %}
+                      <div class="position-absolute" style="top:0.22rem;right:0.22rem;background:#1e40af;color:#fff;font-size:0.52rem;font-weight:800;padding:0.07rem 0.28rem;border-radius:3px;letter-spacing:0.04em;">PETICIÓ</div>
                     {% endif %}
                     <div class="position-absolute d-flex flex-column" style="left: 0.22rem; right: 0.22rem; bottom: 0.22rem; gap: 0.16rem;">
                       <div style="font-size: 0.67rem; font-weight: 700; color: #191c1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.02; background: #fff; padding: 0.07rem 0.26rem; border-radius: 3px;">{{ song.title }}</div>
@@ -1280,6 +1289,7 @@
                   </div>
                 </div>
               </div>
+              {% endwith %}
             {% empty %}
               <div class="mobile-empty-state" style="grid-column: 1/-1;">{% trans "No hi ha recomanacions disponibles." %}</div>
             {% endfor %}
@@ -2483,6 +2493,122 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fallback: load all immediately
     loadMore();
   }
+}());
+</script>
+
+<script>
+(function() {
+  var CSRF = '{{ csrf_token }}';
+  var VOTE_URL = '{% url "song_list" %}';
+  var BUY_URL  = '{% url "buy_votes" %}';
+
+  function voteControlsHTML(songId, userVote, hasVotesOrCredits) {
+    if (userVote === 'like') {
+      return '<div class="mobile-vote-controls">'
+        + '<form method="post" action="' + VOTE_URL + '">'
+        + '<input type="hidden" name="csrfmiddlewaretoken" value="' + CSRF + '">'
+        + '<input type="hidden" name="unvote_song_id" value="' + songId + '">'
+        + '<button type="submit" class="mobile-vote-btn mobile-vote-btn-positive mobile-vote-btn-active"><i class="fas fa-caret-up"></i></button>'
+        + '</form>'
+        + '<button class="mobile-vote-btn mobile-vote-btn-locked" disabled><i class="fas fa-caret-down"></i></button>'
+        + '</div>';
+    }
+    if (userVote === 'dislike' || userVote === 'skip') {
+      return '<div class="mobile-vote-controls">'
+        + '<button class="mobile-vote-btn mobile-vote-btn-locked" disabled><i class="fas fa-caret-up"></i></button>'
+        + '<form method="post" action="' + VOTE_URL + '">'
+        + '<input type="hidden" name="csrfmiddlewaretoken" value="' + CSRF + '">'
+        + '<input type="hidden" name="unvote_song_id" value="' + songId + '">'
+        + '<button type="submit" class="mobile-vote-btn mobile-vote-btn-negative mobile-vote-btn-active"><i class="fas fa-caret-down"></i></button>'
+        + '</form>'
+        + '</div>';
+    }
+    if (hasVotesOrCredits) {
+      return '<div class="mobile-vote-controls">'
+        + '<form method="post" action="' + VOTE_URL + '">'
+        + '<input type="hidden" name="csrfmiddlewaretoken" value="' + CSRF + '">'
+        + '<input type="hidden" name="vote_song_id" value="' + songId + '">'
+        + '<input type="hidden" name="vote_type" value="like">'
+        + '<button type="submit" class="mobile-vote-btn mobile-vote-btn-positive"><i class="fas fa-caret-up"></i></button>'
+        + '</form>'
+        + '<form method="post" action="' + VOTE_URL + '">'
+        + '<input type="hidden" name="csrfmiddlewaretoken" value="' + CSRF + '">'
+        + '<input type="hidden" name="vote_song_id" value="' + songId + '">'
+        + '<input type="hidden" name="vote_type" value="dislike">'
+        + '<button type="submit" class="mobile-vote-btn mobile-vote-btn-negative"><i class="fas fa-caret-down"></i></button>'
+        + '</form>'
+        + '</div>';
+    }
+    return '<a href="' + BUY_URL + '" class="text-decoration-none pe-0 mobile-vote-controls">'
+      + '<span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-up"></i></span>'
+      + '<span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-down"></i></span>'
+      + '</a>';
+  }
+
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (!form.closest('.mobile-vote-controls')) return;
+    e.preventDefault();
+
+    var fd = new FormData(form);
+    var songId = fd.get('vote_song_id') || fd.get('unvote_song_id');
+    if (!songId) return;
+
+    var card = form.closest('[data-song-id]');
+    if (!card) return;
+    card.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+
+    fetch(form.action || VOTE_URL, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': CSRF },
+      body: fd,
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        card.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+        return;
+      }
+      var hasMore = data.votes_left > 0 || data.credits > 0;
+
+      // Update this card's vote controls
+      var container = card.querySelector('.ms-auto.ps-2');
+      if (container) container.innerHTML = voteControlsHTML(songId, data.user_vote, hasMore);
+
+      // If no votes left, lock all other unvoted cards
+      if (!hasMore) {
+        document.querySelectorAll('.mobile-bag-song-card').forEach(function(c) {
+          if (c === card) return;
+          var cc = c.querySelector('.ms-auto.ps-2');
+          if (!cc) return;
+          var hasActive = cc.querySelector('.mobile-vote-btn-active');
+          if (!hasActive) {
+            cc.innerHTML = '<a href="' + BUY_URL + '" class="text-decoration-none pe-0 mobile-vote-controls">'
+              + '<span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-up"></i></span>'
+              + '<span class="mobile-vote-btn mobile-vote-btn-locked"><i class="fas fa-caret-down"></i></span>'
+              + '</a>';
+          }
+        });
+      }
+
+      // Update KPI displays
+      ['slLVotsMeus', 'slLVotsMeus3'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.textContent = data.votes_left;
+          el.style.color = data.votes_left === 0 ? '#ff4444' : '';
+          el.style.textShadow = data.votes_left === 0 ? '0 0 10px rgba(255,68,68,0.5)' : '';
+        }
+      });
+      var fets = document.getElementById('slLFets');
+      if (fets) fets.textContent = parseInt(fets.textContent || '0', 10) + (data.user_vote ? 1 : -1);
+      var fets3 = document.getElementById('slLFets3');
+      if (fets3) fets3.textContent = parseInt(fets3.textContent || '0', 10) + (data.user_vote ? 1 : -1);
+    })
+    .catch(function() {
+      card.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+    });
+  });
 }());
 </script>
 {% endblock %}

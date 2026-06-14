@@ -212,6 +212,13 @@ def _queue_song_request(song_request, processed_by):
         song_request.processed_at = timezone.now()
         song_request.processed_by = processed_by
         song_request.save(update_fields=['status', 'processed_at', 'processed_by', 'coins_charged'])
+        # El demandant compta com a vot positiu automàticament
+        Vote.objects.get_or_create(
+            user=song_request.user,
+            song=song,
+            party=song_request.party,
+            defaults={'vote_type': 'like'},
+        )
     create_song_queued_notification(song_request)
 
     party = song_request.party
@@ -1389,9 +1396,18 @@ def song_list(request):
 
     # Recomanacions intel·ligents (harmonia + BPM + vots)
     from .recommendation import get_recommended_songs
-    recommended_songs = get_recommended_songs(party, limit=6) if party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE else []
+    recommended_songs = get_recommended_songs(party, limit=9) if party.party_status == Party.STATUS_DJJUKEBOX_ACTIVE else []
     if recommended_songs:
         calculate_and_apply_badges(party, recommended_songs, badge_calc)
+
+    # Peticions a la maleta per marcar-les a les recomanacions
+    queued_req_by_spotify = {}
+    if recommended_songs:
+        queued_spotify_ids = [s.spotify_id for s in recommended_songs if s.spotify_id]
+        queued_reqs = SongRequest.objects.filter(
+            party=party, status='queued', spotify_id__in=queued_spotify_ids
+        )
+        queued_req_by_spotify = {r.spotify_id: r for r in queued_reqs}
 
     # Obtenir context Spotify (token i has_spotify)
     spotify_context = get_spotify_context_for_view(user)
@@ -1421,6 +1437,7 @@ def song_list(request):
         "voting_enabled": voting_enabled,
         "my_played_votes": my_played_votes,
         "recommended_songs": recommended_songs,
+        "recommended_req_by_spotify": queued_req_by_spotify,
         "has_more_pending": has_more_pending,
         "pending_page_size": SONGS_PAGE_SIZE,
     })
@@ -1850,7 +1867,7 @@ def dj_dashboard(request):
     pending_song_positions = {song.id: i + 1 for i, song in enumerate(pending_songs)}
 
     # Obtenir recomanacions intel·ligents
-    recommended_songs = get_recommended_songs(party, limit=6)
+    recommended_songs = get_recommended_songs(party, limit=9)
     pending_requests = list(SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at'))
     queued_requests  = list(SongRequest.objects.filter(party=party, status='queued').select_related('user').order_by('created_at'))
     pending_requests_count = len(pending_requests)

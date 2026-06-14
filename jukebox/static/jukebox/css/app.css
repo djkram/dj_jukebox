@@ -792,14 +792,6 @@
                 border-left: 3px solid #1e40af;
             }
 
-            tr.bag-row-request td {
-                background: #dbeafe;
-            }
-
-            #dashboard-bag-tbody.filter-requests-only tr:not(.bag-row-request) {
-                display: none;
-            }
-
             .mobile-empty-state {
                 padding: 0.9rem;
                 text-align: center;
@@ -813,6 +805,14 @@
                 display: none;
             }
         }
+        tr.bag-row-request td {
+            background: #dbeafe;
+        }
+
+        #dashboard-bag-tbody.filter-requests-only tr:not(.bag-row-request) {
+            display: none;
+        }
+
         .user-avatar-fallback {
             width: 2rem;
             height: 2rem;

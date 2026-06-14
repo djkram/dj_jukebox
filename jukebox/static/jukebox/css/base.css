@@ -787,6 +787,11 @@
                 background: rgba(28, 200, 138, 0.05);
             }
 
+            .mobile-list-card.mobile-list-card--request {
+                background: rgba(219, 234, 254, 0.4);
+                border-left: 3px solid #1e40af;
+            }
+
             .mobile-empty-state {
                 padding: 0.9rem;
                 text-align: center;

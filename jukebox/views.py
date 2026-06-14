@@ -196,13 +196,22 @@ def _analyze_and_add_to_spotify(song_id, party_playlist_id, dj_user):
 
 
 def _queue_song_request(song_request, processed_by):
-    """Posa la cançó a la maleta: afegeix a la llista, analitza BPM/Key i a la playlist Spotify."""
+    """Posa la cançó a la maleta: cobra coins, afegeix a la llista, analitza BPM/Key i a la playlist Spotify."""
     with transaction.atomic():
         song = _add_song_to_party(song_request)
+        if not song_request.coins_charged:
+            spent = spend_user_coins_for_party(
+                song_request.user,
+                song_request.party,
+                song_request.coins_cost,
+                reason='song_request_cost',
+            )
+            if spent:
+                song_request.coins_charged = True
         song_request.status = 'queued'
         song_request.processed_at = timezone.now()
         song_request.processed_by = processed_by
-        song_request.save(update_fields=['status', 'processed_at', 'processed_by'])
+        song_request.save(update_fields=['status', 'processed_at', 'processed_by', 'coins_charged'])
     create_song_queued_notification(song_request)
 
     party = song_request.party
@@ -1815,21 +1824,10 @@ def dj_dashboard(request):
     recommended_songs = get_recommended_songs(party, limit=6)
     pending_requests = list(SongRequest.objects.filter(party=party, status='pending').select_related('user').order_by('created_at'))
     queued_requests  = list(SongRequest.objects.filter(party=party, status='queued').select_related('user').order_by('created_at'))
-    pending_requests_count = len(pending_requests) + len(queued_requests)
+    pending_requests_count = len(pending_requests)
 
-    unplayed_songs_by_spotify = {
-        song.spotify_id: song.id
-        for song in party.songs.filter(has_played=False)
-    }
-    accepted_unplayed_requests = list(
-        SongRequest.objects.filter(
-            party=party,
-            status='accepted',
-            spotify_id__in=list(unplayed_songs_by_spotify),
-        ).select_related('user').order_by('-processed_at')
-    )
-    for req in accepted_unplayed_requests:
-        req.linked_song_id = unplayed_songs_by_spotify.get(req.spotify_id)
+    # Dict spotify_id → SongRequest per marcar cançons de la maleta que venen de peticions
+    queued_req_by_spotify = {req.spotify_id: req for req in queued_requests if req.spotify_id}
 
     # ── Monitoring data (superuser only — no overhead for regular DJs) ──────────
     mon = {}
@@ -1904,8 +1902,7 @@ def dj_dashboard(request):
         'recommended_songs': recommended_songs,
         'pending_song_positions': pending_song_positions,
         'pending_requests': pending_requests,
-        'queued_requests': queued_requests,
-        'accepted_unplayed_requests': accepted_unplayed_requests,
+        'queued_req_by_spotify': queued_req_by_spotify,
         # Nous KPIs
         'active_users': active_users,
         'recent_votes': recent_votes,
@@ -1987,6 +1984,14 @@ def mark_song_played(request, song_id):
     song.has_played = True
     song.played_at = timezone.now()
     song.save(update_fields=['has_played', 'played_at'])
+
+    # Finalitza qualsevol petició (queued) vinculada a aquesta cançó
+    if song.spotify_id and song.party_id:
+        SongRequest.objects.filter(
+            party_id=song.party_id,
+            spotify_id=song.spotify_id,
+            status='queued',
+        ).update(status='accepted', processed_at=timezone.now())
 
     create_song_played_notification(song)
 

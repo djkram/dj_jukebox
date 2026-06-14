@@ -309,6 +309,10 @@
       background: rgba(186,26,26,0.15);
       color: #ba1a1a;
     }
+    .request-status-queued {
+      background: rgba(30,64,175,0.12);
+      color: #1e40af;
+    }
     .request-history-empty {
       text-align: center;
       padding: 3rem 1rem;
@@ -412,6 +416,8 @@
                 <td class="request-history-cell">
                   {% if req.status == 'pending' %}
                     <span class="request-status-badge request-status-pending">Pendent</span>
+                  {% elif req.status == 'queued' %}
+                    <span class="request-status-badge request-status-queued">A la maleta</span>
                   {% elif req.status == 'accepted' %}
                     <span class="request-status-badge request-status-accepted">Acceptada</span>
                   {% else %}

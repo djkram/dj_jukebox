@@ -419,22 +419,22 @@
           <span class="material-symbols-outlined" style="color: #f6c23e;">monetization_on</span>
         </div>
         <div>
-          <p class="profile-stat-label">{% trans "Els teus Coins" %}</p>
-          <p class="profile-stat-value">{{ user.credits }}</p>
+          <p class="profile-stat-label">{% trans "Coins comprats" %}</p>
+          <p class="profile-stat-value">{{ purchased_coins }}</p>
         </div>
       </div>
       <div class="profile-stat-card">
-        <div class="profile-stat-icon" style="background: rgba(0,64,224,0.15);">
-          <span class="material-symbols-outlined" style="color: #0040e0;">how_to_vote</span>
+        <div class="profile-stat-icon" style="background: rgba(28,200,138,0.15);">
+          <span class="material-symbols-outlined" style="color: #1cc88a;">card_giftcard</span>
         </div>
         <div>
-          <p class="profile-stat-label">{% trans "Estat" %}</p>
-          <p class="profile-stat-value" style="font-size: 1rem;">{% if user.credits > 0 %}{% trans "Actiu" %}{% else %}{% trans "Inactiu" %}{% endif %}</p>
+          <p class="profile-stat-label">{% trans "Coins obsequi" %}</p>
+          <p class="profile-stat-value" style="color:#1cc88a;">{{ gift_coins }}</p>
         </div>
       </div>
       <a href="{% url 'buy_votes' %}" class="profile-stat-card" style="text-decoration: none; color: inherit;">
-        <div class="profile-stat-icon" style="background: rgba(28,200,138,0.15);">
-          <span class="material-symbols-outlined" style="color: #1cc88a;">shopping_cart</span>
+        <div class="profile-stat-icon" style="background: rgba(0,64,224,0.15);">
+          <span class="material-symbols-outlined" style="color: #0040e0;">shopping_cart</span>
         </div>
         <div>
           <p class="profile-stat-label">{% trans "Comprar més" %}</p>

@@ -33,7 +33,7 @@ class Party(models.Model):
         (STATUS_SHOW_PARTY, _('Mostrar festa i llista')),
         (STATUS_REQUESTS_OPEN, _('Obrir peticions')),
         (STATUS_DJJUKEBOX_ACTIVE, _('Iniciar Jukebox')),
-        (STATUS_FINISHED, _('Acabar festa')),
+        (STATUS_FINISHED, _('Festa acabada')),
     ]
 
     name = models.CharField(max_length=200)

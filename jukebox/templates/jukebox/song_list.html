@@ -671,6 +671,8 @@
                 </div>
               </div>
               {% endif %}
+            {% elif party.party_status == 'finished' %}
+              {# festa acabada — no mostrem res aquí, el LCD ja ho diu #}
             {% else %}
               <div id="desktop-jukebox-inactive" style="margin-bottom:1.5rem;padding-bottom:1.5rem;text-align:center;border-bottom:1px solid rgba(0,0,0,0.08);">
                 <div class="desktop-inactive-msg" style="display:none;flex-direction:column;align-items:center;gap:0.6rem;">
@@ -1204,6 +1206,15 @@
               </div>
             </div>
           {% empty %}
+            {% if party.party_status == 'finished' %}
+            <div style="padding: 2rem 1.25rem; text-align: center; color: #9ca3af; font-size: 0.85rem;">Encara no hi ha temes marcats com a posats.</div>
+            {% elif party.party_status == 'djjukebox_active' %}
+            <div style="padding: 2rem 1.25rem; text-align: center; display:flex; flex-direction:column; align-items:center; gap:0.75rem;">
+              <div style="width:3rem;height:3rem;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play-circle" style="color:#4f46e5;font-size:1.4rem;"></i></div>
+              <div style="font-weight:700;font-size:1rem;color:#191c1f;line-height:1.3;">El Jukebox és actiu — encara no s'ha posat cap tema</div>
+              <div style="font-size:0.85rem;color:#747688;line-height:1.5;max-width:260px;">Quan el DJ marqui un tema com a posat, apareixerà aquí.</div>
+            </div>
+            {% else %}
             <div id="sonat-inactive-msgs" style="padding: 2rem 1.25rem; text-align: center;">
 
               {% comment %}Missatge 0{% endcomment %}
@@ -1256,6 +1267,7 @@
               }
             })();
             </script>
+            {% endif %}
           {% endfor %}
         </section>
 
@@ -1294,6 +1306,8 @@
               <div class="mobile-empty-state" style="grid-column: 1/-1;">{% trans "No hi ha recomanacions disponibles." %}</div>
             {% endfor %}
             </div>
+          {% elif party.party_status == 'finished' %}
+            <div style="padding: 2rem 1.25rem; text-align: center; color: #9ca3af; font-size: 0.85rem;">La festa ha acabat — recomanacions desactivades.</div>
           {% else %}
             <div id="jukebox-inactive-msgs" style="padding: 2rem 1.25rem; text-align: center;">
 

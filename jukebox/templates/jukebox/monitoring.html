@@ -62,9 +62,18 @@
     <div class="monitoring-stat-chip">
       <span class="monitoring-stat-icon orange"><span class="material-symbols-outlined">toll</span></span>
       <div>
-        <div class="monitoring-stat-label">Coins circulació</div>
+        <div class="monitoring-stat-label">Coins comprats</div>
         <div class="monitoring-stat-value">{{ total_credits }}</div>
         <div class="monitoring-stat-sub">{{ avg_credits }} mig/usuari</div>
+      </div>
+    </div>
+
+    <div class="monitoring-stat-chip">
+      <span class="monitoring-stat-icon" style="background:rgba(28,200,138,0.15);"><span class="material-symbols-outlined" style="color:#1cc88a;">card_giftcard</span></span>
+      <div>
+        <div class="monitoring-stat-label">Coins obsequi actius</div>
+        <div class="monitoring-stat-value" style="color:#1cc88a;">{{ total_gift_coins_active }}</div>
+        <div class="monitoring-stat-sub">festes no acabades</div>
       </div>
     </div>
 
@@ -187,7 +196,8 @@
           <th style="width:2.5rem;"></th>
           <th>Usuari</th>
           <th>Email</th>
-          <th>Credits</th>
+          <th>Coins comprats</th>
+          <th>Obsequi actiu</th>
           <th>Vots</th>
           <th>Compres</th>
           <th>Peticions</th>
@@ -213,6 +223,7 @@
           </td>
           <td class="monitoring-email">{{ u.email }}</td>
           <td class="monitoring-credits" data-val="{{ u.credits }}">{{ u.credits }}</td>
+          <td style="color:#1cc88a;font-weight:{% if u.gift_coins_active %}700{% else %}400{% endif %};">{{ u.gift_coins_active|default:0 }}</td>
           <td>{{ u.vote_count }}</td>
           <td>{{ u.paid_packages_count }}</td>
           <td>{{ u.request_count }}</td>
@@ -395,9 +406,17 @@
       <div class="monitoring-stat-chip">
         <span class="monitoring-stat-icon gold"><span class="material-symbols-outlined">toll</span></span>
         <div>
-          <div class="monitoring-stat-label">Coins circ.</div>
+          <div class="monitoring-stat-label">Coins comprats</div>
           <div class="monitoring-stat-value">{{ total_credits }}</div>
           <div class="monitoring-stat-sub">{{ avg_credits }} mig/u</div>
+        </div>
+      </div>
+      <div class="monitoring-stat-chip">
+        <span class="monitoring-stat-icon" style="background:rgba(28,200,138,0.15);"><span class="material-symbols-outlined" style="color:#1cc88a;">card_giftcard</span></span>
+        <div>
+          <div class="monitoring-stat-label">Obsequi actiu</div>
+          <div class="monitoring-stat-value" style="color:#1cc88a;">{{ total_gift_coins_active }}</div>
+          <div class="monitoring-stat-sub">festes actives</div>
         </div>
       </div>
       <div class="monitoring-stat-chip">
@@ -432,8 +451,12 @@
       </div>
       <div style="display:flex;gap:0.65rem;flex-shrink:0;text-align:right;">
         <div>
-          <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#9a9baf;">Coins</div>
+          <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#9a9baf;">Comprats</div>
           <div class="monitoring-credits" style="font-size:0.85rem;">{{ u.credits }}</div>
+        </div>
+        <div>
+          <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#1cc88a;">Obsequi</div>
+          <div style="font-size:0.85rem;font-weight:700;color:#1cc88a;font-variant-numeric:tabular-nums;">{{ u.gift_coins_active|default:0 }}</div>
         </div>
         <div>
           <div style="font-size:0.56rem;font-weight:700;text-transform:uppercase;color:#9a9baf;">Vots</div>

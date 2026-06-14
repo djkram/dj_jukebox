@@ -1417,7 +1417,9 @@
                     Recomanacions intel·ligents
                 </h3>
             </div>
-            {% if recommended_songs %}
+            {% if party.party_status == 'finished' %}
+            <div style="color:#9ca3af;font-size:0.85rem;padding:0.5rem 0;">La festa ha acabat — recomanacions desactivades.</div>
+            {% elif recommended_songs %}
             <div class="dashboard-reco-grid">
                 {% for song in recommended_songs|slice:":9" %}
                 {% with is_req=queued_req_by_spotify|get_item:song.spotify_id %}
@@ -1508,15 +1510,15 @@
                         <tr>
                             <th class="text-center" style="width: 2.2rem;">#</th>
                             <th>Cançó</th>
-                            <th class="text-center">BPM</th>
-                            <th class="text-center">Key</th>
-                            <th class="text-center">
+                            <th class="text-center" style="width:4rem;padding-left:0.4rem;padding-right:0.4rem;">BPM</th>
+                            <th class="text-center" style="width:3.5rem;padding-left:0.4rem;padding-right:0.4rem;">Key</th>
+                            <th class="text-center" style="width:2.5rem;padding-left:0.4rem;padding-right:0.4rem;">
                                 <span class="material-symbols-outlined" style="color: #e74a3b; font-size: 1rem;">favorite</span>
                             </th>
-                            <th class="text-center">
+                            <th class="text-center" style="width:2.5rem;padding-left:0.4rem;padding-right:0.4rem;">
                                 <span class="material-symbols-outlined" style="color: #858796; font-size: 1rem;">heart_broken</span>
                             </th>
-                            <th class="text-right"></th>
+                            <th class="text-right" style="width:5rem;padding-left:0.4rem;padding-right:0.75rem;"></th>
                         </tr>
                     </thead>
                     <tbody id="dashboard-bag-tbody">
@@ -1549,27 +1551,27 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" style="padding-left:0.4rem;padding-right:0.4rem;">
                                 {% if song.bpm %}
                                 <span class="sonic-badge-primary">{{ song.bpm|floatformat:0 }}</span>
                                 {% else %}
                                 <span style="color: #c4c5d8;">—</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" style="padding-left:0.4rem;padding-right:0.4rem;">
                                 {% if song.key %}
                                 <span class="camelot-key camelot-{{ song.key }}">{{ song.key }}</span>
                                 {% else %}
                                 <span style="color: #c4c5d8;">—</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" style="padding-left:0.4rem;padding-right:0.4rem;">
                                 <span style="font-weight: 700; color: #e74a3b;">{{ song.num_likes }}</span>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" style="padding-left:0.4rem;padding-right:0.4rem;">
                                 <span style="font-weight: 700; color: #858796;">{{ song.num_dislikes }}</span>
                             </td>
-                            <td class="text-right">
+                            <td class="text-right" style="padding-left:0.4rem;padding-right:0.75rem;">
                                 {% if is_djjukebox_active %}
                                 <form method="post" action="{% url 'mark_song_played' song.id %}" style="margin: 0;">
                                     {% csrf_token %}
@@ -1626,14 +1628,7 @@
             </div>
             {% if not party.allow_song_requests %}
             <div class="requests-disabled-state">
-                <span class="material-symbols-outlined">block</span>
-                <p>Les peticions de cançons estan <strong>desactivades</strong> per a aquesta festa.<br>Activa l'interruptor de dalt o ves a la configuració per habilitar-les.</p>
-                {% if request.user.is_superuser %}
-                <a href="{% url 'party_settings' party.id %}" class="requests-disabled-settings-btn">
-                    <span class="material-symbols-outlined" style="font-size: 1rem;">settings</span>
-                    Ves a Configuració
-                </a>
-                {% endif %}
+                <p style="color:#9ca3af;font-size:0.85rem;margin:0;">Peticions desactivades</p>
             </div>
             {% elif pending_requests %}
             <div class="sonic-space-y-3">
@@ -2194,9 +2189,11 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- Recommendations -->
-    {% if recommended_songs %}
     <section class="mobile-section-header">
       <span class="mobile-kicker">SELECCIONS INTEL·LIGENTS</span>
+      {% if party.party_status == 'finished' %}
+      <p style="color:#9ca3af;font-size:0.8rem;margin:0.5rem 0 0;">La festa ha acabat — recomanacions desactivades.</p>
+      {% elif recommended_songs %}
       <div class="mobile-card-grid mobile-card-grid--3">
         {% for song in recommended_songs|slice:":9" %}
           {% with is_req=queued_req_by_spotify|get_item:song.spotify_id %}
@@ -2240,8 +2237,8 @@ document.addEventListener('DOMContentLoaded', function() {
           {% endwith %}
         {% endfor %}
       </div>
+      {% endif %}
     </section>
-    {% endif %}
 
     <section class="mobile-group-stack">
       <div class="mobile-segmented">

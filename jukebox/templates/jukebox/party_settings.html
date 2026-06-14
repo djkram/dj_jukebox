@@ -1921,31 +1921,32 @@ document.addEventListener('DOMContentLoaded', function() {
     throw new Error((result.data && result.data.error) || fallbackMessage || 'Error desconegut');
   }
 
-  // Filtrat de cançons
-  var input = document.getElementById('song-search');
-  if (input) {
-    input.addEventListener('input', function() {
-      var q = input.value.trim().toLowerCase();
-      document.querySelectorAll('table tbody tr').forEach(function(row) {
-        var titleArtist = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
-        var bpm = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
-        var key = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
-        row.style.display = (titleArtist.includes(q) || bpm.includes(q) || key.includes(q)) ? '' : 'none';
-      });
-    });
-  }
+  // Filtrat de cançons — desktop
+  SongFilter.init(document.getElementById('song-search'), {
+    rows: '#songs-table-body tr',
+    fields: function (row) {
+      return [
+        row.cells[0] ? row.cells[0].textContent : '',
+        row.cells[1] ? row.cells[1].textContent : '',
+        row.cells[2] ? row.cells[2].textContent : ''
+      ];
+    }
+  });
 
-  var mobileInput = document.getElementById('song-search-mobile');
-  if (mobileInput) {
-    mobileInput.addEventListener('input', function() {
-      var q = mobileInput.value.trim().toLowerCase();
-      document.querySelectorAll('[data-song-row]').forEach(function(row) {
-        var title = row.querySelector('[data-song-title]').textContent.toLowerCase();
-        var artist = row.querySelector('[data-song-artist]').textContent.toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q) || row.textContent.toLowerCase().includes(q)) ? '' : 'none';
-      });
-    });
-  }
+  // Filtrat de cançons — mòbil
+  SongFilter.init(document.getElementById('song-search-mobile'), {
+    rows: '[data-song-row]',
+    fields: function (row) {
+      var bpmEl = row.querySelector('.bpm-cell-mobile');
+      var keyEl = row.querySelector('.key-cell-mobile');
+      return [
+        row.querySelector('[data-song-title]') ? row.querySelector('[data-song-title]').textContent : '',
+        row.querySelector('[data-song-artist]') ? row.querySelector('[data-song-artist]').textContent : '',
+        bpmEl ? bpmEl.textContent : '',
+        keyEl ? keyEl.textContent : ''
+      ];
+    }
+  });
 
   // Gestió del botó "Recarregar cançons"
   var reloadBtn = document.getElementById('reloadSongsBtn');

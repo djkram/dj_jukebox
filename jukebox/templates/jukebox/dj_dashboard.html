@@ -1947,31 +1947,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (input && bagTbody) {
-    input.addEventListener('input', function() {
-      var q = input.value.trim().toLowerCase();
-      var rawQuery = input.value.trim();
-      var visibleCount = 0;
-
-      bagTbody.querySelectorAll('tr').forEach(function(row) {
-        var titleCell = row.cells && row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
-        var isMatch = titleCell.includes(q);
-        row.style.display = isMatch ? '' : 'none';
-        if (isMatch) visibleCount += 1;
-      });
-
-      if (bagNoResults) {
-        if (rawQuery && visibleCount === 0) {
-          bagNoResults.classList.remove('d-none');
-          if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
-        } else {
-          bagNoResults.classList.add('d-none');
-          if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
-        }
-      }
-
-      if (bagSpotifyBtn) {
-        if (rawQuery.length > 0) bagSpotifyBtn.classList.remove('d-none');
-        else bagSpotifyBtn.classList.add('d-none');
+    SongFilter.init(input, {
+      rows: '#dashboard-bag-tbody tr',
+      fields: function (row) {
+        return [
+          row.cells[1] ? row.cells[1].textContent : '',
+          row.cells[2] ? row.cells[2].textContent : '',
+          row.cells[3] ? row.cells[3].textContent : ''
+        ];
+      },
+      noResults: bagNoResults,
+      onUpdate: function (rawQuery) {
+        if (spotifyResultsPanel) spotifyResultsPanel.classList.add('d-none');
+        if (bagSpotifyBtn) bagSpotifyBtn.classList.toggle('d-none', !rawQuery);
       }
     });
   }
@@ -2075,16 +2063,17 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function(result) {
         if (result.ok && result.data.success) {
           showDashboardMessage(result.data.message, 'success');
-          var card = document.getElementById('dash-req-' + id) || document.getElementById('dash-req-mobile-' + id);
-          if (card) {
-            if (action === 'queue') {
-              card.style.borderColor = 'rgba(59,130,246,0.3)';
-              card.style.background  = 'rgba(239,246,255,0.5)';
-              var icon = card.querySelector('.dash-req-status-icon');
+          var desktopCard = document.getElementById('dash-req-' + id);
+          var mobileCard  = document.getElementById('dash-req-mobile-' + id);
+          if (action === 'queue') {
+            if (desktopCard) {
+              desktopCard.style.borderColor = 'rgba(59,130,246,0.3)';
+              desktopCard.style.background  = 'rgba(239,246,255,0.5)';
+              var icon = desktopCard.querySelector('.dash-req-status-icon');
               if (icon) icon.textContent = 'shopping_bag';
-              var txt = card.querySelector('.dash-req-status-text');
-              if (txt) txt.textContent = (card.dataset.username || '') + ' · Maleta';
-              var actions = card.querySelector('.dash-req-actions');
+              var txt = desktopCard.querySelector('.dash-req-status-text');
+              if (txt) txt.textContent = (desktopCard.dataset.username || '') + ' · Maleta';
+              var actions = desktopCard.querySelector('.dash-req-actions');
               if (actions) {
                 Array.from(actions.querySelectorAll('button')).forEach(function(b) {
                   if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
@@ -2101,13 +2090,16 @@ document.addEventListener('DOMContentLoaded', function() {
                   actions.appendChild(loadBtn);
                 }
               }
-              // Mobile: swap queue/reject buttons for LOAD
-              var mobileActionsDiv = card.querySelector('.d-flex.gap-1.flex-shrink-0');
+            }
+            if (mobileCard) {
+              mobileCard.style.borderColor = 'rgba(59,130,246,0.3)';
+              mobileCard.style.background  = 'rgba(239,246,255,0.5)';
+              var mobileActionsDiv = mobileCard.querySelector('.d-flex.gap-1.flex-shrink-0');
               if (mobileActionsDiv) {
                 Array.from(mobileActionsDiv.querySelectorAll('button')).forEach(function(b) {
                   if (b.dataset.action === 'reject' || b.dataset.action === 'queue') b.remove();
                 });
-                var statusSpan = card.querySelector('.text-truncate + .flex-shrink-0');
+                var statusSpan = mobileCard.querySelector('.text-truncate + .flex-shrink-0');
                 if (statusSpan) statusSpan.textContent = '🛍 Maleta';
                 if (isJukeboxActive) {
                   var mobileLoadBtn = document.createElement('button');
@@ -2121,14 +2113,16 @@ document.addEventListener('DOMContentLoaded', function() {
                   mobileActionsDiv.appendChild(mobileLoadBtn);
                 }
               }
-            } else {
-              card.style.transition = 'opacity 350ms';
-              card.style.opacity = '0';
-              setTimeout(function() {
-                card.remove();
-                if (action === 'load') { window.location.reload(); }
-              }, 350);
             }
+          } else {
+            var doReload = action === 'load';
+            [desktopCard, mobileCard].forEach(function(c) {
+              if (!c) return;
+              c.style.transition = 'opacity 350ms';
+              c.style.opacity = '0';
+              setTimeout(function() { c.remove(); }, 350);
+            });
+            if (doReload) { setTimeout(function() { window.location.reload(); }, 400); }
           }
         } else {
           showDashboardMessage(result.data.error || 'No s\'ha pogut processar la petició.', 'danger');

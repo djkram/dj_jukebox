@@ -1059,29 +1059,49 @@
           <div class="mob-hotcue-wrap">
             <div class="mob-hotcue-label"><span>HOT CUE</span></div>
             <div class="mob-hotcue-bar">
-              {% if party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
+              {% if party.party_status == 'finished' %}
+              <span class="mob-hotcue-btn mob-hotcue-btn--disabled" style="--hc-color:#c878ff;">
+                <span class="material-symbols-outlined">swipe</span>
+                <span>Match</span>
+              </span>
+              {% elif party.party_status == 'requests_open' or party.party_status == 'djjukebox_active' %}
               <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn mob-hotcue-btn--pulse" style="--hc-color:#c878ff;">
-              {% else %}
-              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn" style="--hc-color:#3a2540;">
-              {% endif %}
                 <span class="material-symbols-outlined">swipe</span>
                 <span>Match</span>
               </a>
+              {% else %}
+              <a href="{% url 'song_swipe' %}" class="mob-hotcue-btn" style="--hc-color:#3a2540;">
+                <span class="material-symbols-outlined">swipe</span>
+                <span>Match</span>
+              </a>
+              {% endif %}
               {% if party.allow_song_requests %}
               <a href="{% url 'request_song' %}" class="mob-hotcue-btn" style="--hc-color:#4488ff;">
                 <span class="material-symbols-outlined">add_circle</span>
                 <span>Peticions</span>
               </a>
+              {% elif party.party_status == 'finished' %}
+              <span class="mob-hotcue-btn mob-hotcue-btn--disabled" style="--hc-color:#4488ff;">
+                <span class="material-symbols-outlined">notifications</span>
+                <span>Alertes</span>
+              </span>
               {% else %}
               <a href="{% url 'notifications' %}" class="mob-hotcue-btn" style="--hc-color:#4488ff;">
                 <span class="material-symbols-outlined">notifications</span>
                 <span>Alertes</span>
               </a>
               {% endif %}
+              {% if party.party_status == 'finished' %}
+              <span class="mob-hotcue-btn mob-hotcue-btn--disabled" style="--hc-color:#00cc66;">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span>Compra</span>
+              </span>
+              {% else %}
               <a href="{% url 'buy_votes' %}" class="mob-hotcue-btn" style="--hc-color:#00cc66;">
                 <span class="material-symbols-outlined">shopping_cart</span>
                 <span>Compra</span>
               </a>
+              {% endif %}
               <a href="{% url 'select_party' %}" class="mob-hotcue-btn" style="--hc-color:#ff4444;">
                 <span class="material-symbols-outlined">swap_horiz</span>
                 <span>Canviar</span>
@@ -1095,14 +1115,14 @@
         <!-- Song Tabs Header -->
         <section>
           <div class="mobile-segmented">
-            <button type="button" class="mobile-song-tab mobile-segmented-item is-active" data-mobile-tab="bag">{% trans "Maleta del DJ" %}</button>
-            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="recommended">{% trans "Propers temes" %}</button>
-            <button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="played">{% trans "El que ha sonat" %}</button>
+            <button type="button" class="mobile-song-tab mobile-segmented-item{% if party.party_status != 'finished' %} is-active{% endif %}" data-mobile-tab="bag">{% trans "Maleta del DJ" %}</button>
+            {% if party.party_status != 'finished' %}<button type="button" class="mobile-song-tab mobile-segmented-item" data-mobile-tab="recommended">{% trans "Propers temes" %}</button>{% endif %}
+            <button type="button" class="mobile-song-tab mobile-segmented-item{% if party.party_status == 'finished' %} is-active{% endif %}" data-mobile-tab="played">{% trans "El que ha sonat" %}</button>
           </div>
         </section>
 
         <!-- Song List -->
-        <section id="mobile-tab-bag" class="mobile-group-stack" style="gap: 0.5rem;">
+        <section id="mobile-tab-bag" class="mobile-group-stack{% if party.party_status == 'finished' %} d-none{% endif %}" style="gap: 0.5rem;">
           <div>
             <div class="mobile-search-shell mobile-search-shell--aligned">
               <i class="fas fa-filter" style="color: #747688; font-size: 0.9rem;"></i>
@@ -1134,7 +1154,7 @@
           </div>
         </section>
 
-        <section id="mobile-tab-played" class="d-none mobile-list-stack">
+        <section id="mobile-tab-played" class="{% if party.party_status != 'finished' %}d-none {% endif %}mobile-list-stack">
           {% for song in played_songs %}
             <div class="song-card" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}">
               <div class="mobile-list-card d-flex align-items-center gap-2 p-2">
@@ -1796,67 +1816,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Filtrat de cançons desktop - Pending songs
-  var searchPendingInput = document.getElementById('search-pending');
-  if (searchPendingInput) {
-    searchPendingInput.addEventListener('input', function() {
-      var q = searchPendingInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.pending-song-row');
+  // Filtrat de cançons — desktop pending
+  SongFilter.init(document.getElementById('search-pending'), {
+    rows: '.pending-song-row',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; }
+  });
 
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
+  // Filtrat de cançons — desktop played
+  SongFilter.init(document.getElementById('search-played'), {
+    rows: '.played-song-row',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; }
+  });
 
-  // Filtrat de cançons desktop - Played songs
-  var searchPlayedInput = document.getElementById('search-played');
-  if (searchPlayedInput) {
-    searchPlayedInput.addEventListener('input', function() {
-      var q = searchPlayedInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.played-song-row');
-
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
-
-  var mobileInput = document.getElementById('mobile-song-search');
-  if (mobileInput) {
-    var noResultsBox = document.getElementById('mobile-bag-no-results');
-    var spotifySearchBtn = document.getElementById('mobile-bag-search-spotify-btn');
-
-    mobileInput.addEventListener('input', function() {
-      var q = mobileInput.value.trim().toLowerCase();
-      var rawQuery = mobileInput.value.trim();
-      var cards = document.querySelectorAll('.mobile-bag-song-card');
-      var visibleCount = 0;
-
-      cards.forEach(function(card) {
-        var title = card.getAttribute('data-song-title').toLowerCase();
-        var artist = card.getAttribute('data-song-artist').toLowerCase();
-        var isMatch = (title.includes(q) || artist.includes(q));
-        card.style.display = isMatch ? '' : 'none';
-        if (isMatch) visibleCount += 1;
-      });
-
-      if (noResultsBox) {
-        if (rawQuery && visibleCount === 0) {
-          noResultsBox.classList.remove('d-none');
-          if (spotifySearchBtn) {
-            spotifySearchBtn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
-          }
-        } else {
-          noResultsBox.classList.add('d-none');
-        }
-      }
-    });
-  }
+  // Filtrat de cançons — mòbil
+  SongFilter.init(document.getElementById('mobile-song-search'), {
+    rows: '.mobile-bag-song-card',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; },
+    noResults: document.getElementById('mobile-bag-no-results'),
+    onUpdate: function (rawQuery) {
+      var btn = document.getElementById('mobile-bag-search-spotify-btn');
+      if (btn && rawQuery) btn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
+    }
+  });
 });
 
 // ── LCD clocks (single merged timer) ────────────────────────────────────

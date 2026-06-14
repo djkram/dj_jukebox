@@ -1944,7 +1944,10 @@ def update_party_status(request, party_id):
 
     party.party_status = requested_status
     party.jukebox_starts_at = jukebox_starts_at
-    party.save(update_fields=['party_status', 'jukebox_starts_at', 'is_jukebox_active'])
+    if requested_status == Party.STATUS_FINISHED:
+        party.allow_song_requests = False
+    update_fields = ['party_status', 'jukebox_starts_at', 'is_jukebox_active', 'allow_song_requests']
+    party.save(update_fields=update_fields)
 
     logger.info("[PARTY_STATUS] party_id=%s status=%s", party_id, party.party_status)
     return redirect('dj_dashboard')

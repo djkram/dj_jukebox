@@ -1587,3 +1587,12 @@
   .mob-cdj-panel .mob-hotcue-btn--pulse span:last-child {
     color: #c878ff;
   }
+  .mob-cdj-panel .mob-hotcue-btn--disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .mob-cdj-panel .mob-hotcue-btn--disabled::after {
+    background: #333;
+    box-shadow: none;
+  }

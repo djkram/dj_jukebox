@@ -52,6 +52,7 @@ class Party(models.Model):
     jukebox_starts_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista d'activació del DJJukebox"))
     jukebox_ends_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista de fi del DJJukebox"))
     party_ends_at = models.TimeField(null=True, blank=True, help_text=_("Hora prevista de fi de la festa"))
+    finished_at = models.DateTimeField(null=True, blank=True, help_text=_("Moment exacte en què la festa va ser marcada com acabada"))
     is_jukebox_active = models.BooleanField(default=True, help_text=_("Indica si el jukebox està actiu per aquesta festa"))
     auto_sync_playlist = models.BooleanField(default=False, help_text=_("Sincronitzar automàticament amb Spotify cada 5 minuts"))
     last_sync_at = models.DateTimeField(null=True, blank=True, help_text=_("Última sincronització exitosa"))

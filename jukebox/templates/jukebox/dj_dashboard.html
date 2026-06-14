@@ -1604,12 +1604,12 @@
     <!-- COLUMNA DRETA (40%) -->
     <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
 
-        <!-- Temes demanats -->
+        <!-- Peticions pendents -->
         <section>
             <div class="sonic-section-header">
                 <h3 class="sonic-section-title">
                     <span class="material-symbols-outlined sonic-text-tertiary">queue_music</span>
-                    Temes demanats
+                    Peticions pendents
                 </h3>
                 <div class="req-toggle-wrap">
                   <span class="req-toggle-label">Peticions</span>
@@ -1673,7 +1673,7 @@
             {% else %}
             <div class="sonic-card" style="text-align: center; padding: 2rem 1rem; color: #747687;">
                 <span class="material-symbols-outlined" style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block;">inbox</span>
-                <div style="font-size: 0.875rem;">No hi ha temes demanats</div>
+                <div style="font-size: 0.875rem;">No hi ha peticions pendents</div>
             </div>
             {% endif %}
         </section>
@@ -2419,7 +2419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {% else %}
           <div class="mobile-empty-state">
             <i class="fas fa-inbox fa-2x mb-2"></i>
-            <p class="mb-0">No hi ha temes demanats</p>
+            <p class="mb-0">No hi ha peticions pendents</p>
           </div>
         {% endif %}
       </div>

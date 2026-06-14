@@ -1762,11 +1762,12 @@
                         {% endif %}
                         <span style="font-size:0.625rem;font-weight:700;color:#e74a3b;">{{ song.num_likes }}</span>
                         <span class="material-symbols-outlined" style="color:#e74a3b;font-size:0.75rem;">favorite</span>
-                        <form method="post" action="{% url 'unmark_song_played' song.id %}" style="margin:0;">
+                        <form method="post" action="{% url 'unmark_song_played' song.id %}" style="margin:0;" class="unplay-form">
                             {% csrf_token %}
-                            <button type="submit" title="Treure de l'historial"
+                            <button type="button" title="Treure de l'historial"
                                 style="background:none;border:none;padding:0.1rem 0.2rem;cursor:pointer;color:#c4c5d8;line-height:1;border-radius:4px;"
-                                onmouseover="this.style.color='#e74a3b'" onmouseout="this.style.color='#c4c5d8'">
+                                onmouseover="this.style.color='#e74a3b'" onmouseout="this.style.color='#c4c5d8'"
+                                onclick="var f=this.closest('form');showConfirm('Treure de l\'historial','Segur que vols treure aquesta cançó de l\'historial?',function(){f.submit();})">
                                 <span class="material-symbols-outlined" style="font-size:0.95rem;">delete</span>
                             </button>
                         </form>

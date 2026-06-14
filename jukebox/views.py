@@ -1970,6 +1970,20 @@ def update_party_status(request, party_id):
     update_fields = ['party_status', 'jukebox_starts_at', 'is_jukebox_active', 'allow_song_requests', 'finished_at']
     party.save(update_fields=update_fields)
 
+    # Retornar coins de peticions pendents (no acceptades) en acabar la festa
+    if requested_status == Party.STATUS_FINISHED:
+        pending_reqs = list(
+            SongRequest.objects.filter(party=party, status='pending', coins_charged=True)
+            .select_related('user')
+        )
+        for req in pending_reqs:
+            refund_user_coins_for_party(req.user, party, req.coins_cost, reason='party_ended_refund')
+            req.status = 'rejected'
+            req.processed_at = timezone.now()
+            req.processed_by = request.user
+            req.save(update_fields=['status', 'processed_at', 'processed_by'])
+            create_song_rejected_notification(req)
+
     logger.info("[PARTY_STATUS] party_id=%s status=%s", party_id, party.party_status)
     return redirect('dj_dashboard')
 

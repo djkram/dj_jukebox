@@ -2244,8 +2244,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="played">Posats</button>
       </div>
 
-      <div id="dashboard-mobile-tab-bag">
-        <div class="mobile-search-shell mobile-search-shell--aligned mb-2">
+      <div id="dashboard-mobile-tab-bag" style="display:flex;flex-direction:column;gap:0.5rem;">
+        <div class="mobile-search-shell mobile-search-shell--aligned">
           <i class="fas fa-search" style="color:#747687;font-size:0.9rem;flex-shrink:0;"></i>
           <input id="mobile-bag-search" type="search" placeholder="Cerca a la maleta..." autocomplete="off">
         </div>
@@ -2470,17 +2470,19 @@ document.addEventListener('DOMContentLoaded', function() {
     played: document.getElementById('dashboard-mobile-tab-played'),
   };
 
-  // Mobile bag search filter
+  // Mobile bag search filter (uses SongFilter for accent-insensitive matching)
   var mobileBagSearch = document.getElementById('mobile-bag-search');
-  var mobileBagList   = document.getElementById('dashboard-mobile-bag-list');
-  if (mobileBagSearch && mobileBagList) {
-    mobileBagSearch.addEventListener('input', function() {
-      var q = this.value.toLowerCase().trim();
-      mobileBagList.querySelectorAll('.mobile-list-card').forEach(function(card) {
-        var title  = card.getAttribute('data-title') || '';
-        var artist = card.getAttribute('data-artist') || '';
-        card.style.display = (!q || title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
+  if (mobileBagSearch) {
+    SongFilter.init(mobileBagSearch, {
+      rows: '#dashboard-mobile-bag-list .mobile-list-card',
+      fields: function(card) {
+        return [
+          card.getAttribute('data-title') || '',
+          card.getAttribute('data-artist') || '',
+        ];
+      },
+      noResults: null,
+      onUpdate: null,
     });
   }
 
@@ -2503,7 +2505,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!panel) return;
         if (key === target) {
           panel.classList.remove('d-none');
-          panel.style.display = 'flex';
+          // bag panel uses its own inline flex-direction:column — don't override
+          if (key !== 'bag') panel.style.display = 'flex';
         } else {
           panel.classList.add('d-none');
           panel.style.display = '';

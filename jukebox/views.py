@@ -249,7 +249,8 @@ def _load_song_request(song_request, processed_by):
 
 
 def _reject_song_request(song_request, processed_by):
-    """Rebutja la petició. Si els coins havien estat retinguts, els retorna."""
+    """Rebutja la petició. Si els coins havien estat retinguts, els retorna.
+    Si estava en estat queued, elimina la cançó de la festa (permetre re-petició)."""
     with transaction.atomic():
         if song_request.coins_charged:
             refund_user_coins_for_party(
@@ -257,6 +258,13 @@ def _reject_song_request(song_request, processed_by):
                 song_request.party,
                 song_request.coins_cost,
             )
+        if song_request.status == 'queued' and song_request.spotify_id:
+            Song.objects.filter(
+                party=song_request.party,
+                spotify_id=song_request.spotify_id,
+                has_played=False,
+                vote__isnull=True,
+            ).delete()
         song_request.status = 'rejected'
         song_request.processed_at = timezone.now()
         song_request.processed_by = processed_by

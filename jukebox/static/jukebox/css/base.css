@@ -793,7 +793,7 @@
             }
 
             tr.bag-row-request td {
-                background: rgba(219, 234, 254, 0.25);
+                background: #dbeafe;
             }
 
             .mobile-empty-state {

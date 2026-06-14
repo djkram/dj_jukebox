@@ -1735,7 +1735,7 @@
                 </h3>
             </div>
             <div class="sonic-history-container">
-                {% for song in played_songs_list|slice:":10" %}
+                {% for song in played_songs_list %}
                 <div class="sonic-history-item {% if is_djjukebox_active and forloop.first %}dashboard-history-item-current{% endif %}">
                     <span class="dashboard-history-order {% if is_djjukebox_active and forloop.first %}is-current{% endif %}">{{ song.display_order }}</span>
                     {% if song.album_image_url %}

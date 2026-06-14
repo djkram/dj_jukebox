@@ -14,7 +14,7 @@ from django.conf import settings
 from django.urls import reverse
 from urllib.parse import urlencode
 
-from .models import Song, Party, Playlist, Vote, VotePackage, SongRequest, Notification, SongSwipeSkip
+from .models import Song, Party, Playlist, Vote, VotePackage, SongRequest, Notification, SongSwipeSkip, PartyCoinsGrant
 from django.db.models import Sum, Count, Q, F, Avg
 from django.db import transaction, connection
 import threading
@@ -79,6 +79,22 @@ import stripe
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _get_user_coin_breakdown(user):
+    """Returns (purchased_coins, gift_coins_active_parties)."""
+    purchased = user.credits
+    active_statuses = [
+        Party.STATUS_PARTY_VISIBLE,
+        Party.STATUS_SHOW_PARTY,
+        Party.STATUS_REQUESTS_OPEN,
+        Party.STATUS_DJJUKEBOX_ACTIVE,
+    ]
+    gift = PartyCoinsGrant.objects.filter(
+        user=user,
+        party__party_status__in=active_statuses,
+    ).aggregate(total=Sum('coins_granted'))['total'] or 0
+    return purchased, max(0, gift)
 
 
 def _party_dj_check(request, party):
@@ -299,6 +315,7 @@ def profile(request):
     else:
         profile_role = _("Jukebox Member")
         profile_role_icon = "person"
+    purchased_coins, gift_coins = _get_user_coin_breakdown(user)
     return render(request, "jukebox/profile.html", {
         "user": user,
         "has_spotify": has_spotify,
@@ -306,6 +323,8 @@ def profile(request):
         "spotify_connect_enabled": user_can_connect_spotify(user),
         "profile_role": profile_role,
         "profile_role_icon": profile_role_icon,
+        "purchased_coins": purchased_coins,
+        "gift_coins": gift_coins,
     })
 
 
@@ -355,7 +374,6 @@ def update_profile_name(request):
 
 
 def select_party(request):
-    # Mostrem festes actives + festes acabades fa menys de 24h (transició visible)
     from datetime import timedelta
     cutoff = timezone.now() - timedelta(hours=24)
     parties = Party.objects.filter(is_public=True).exclude(
@@ -420,6 +438,11 @@ def set_party(request, party_id):
 
     request.session['selected_party_id'] = party.id
     messages.success(request, _("T'has unit a la festa: %(name)s") % {'name': party.name})
+    ua = request.META.get('HTTP_USER_AGENT', '').lower()
+    is_mobile = any(k in ua for k in ('mobile', 'android', 'iphone', 'ipad', 'ipod'))
+    voting_active = party.party_status in (Party.STATUS_REQUESTS_OPEN, Party.STATUS_DJJUKEBOX_ACTIVE)
+    if is_mobile and voting_active:
+        return redirect('song_swipe')
     return redirect("main")
 
 def unset_party(request):
@@ -432,7 +455,6 @@ def unset_party(request):
 def past_parties(request):
     from datetime import timedelta
     cutoff = timezone.now() - timedelta(hours=24)
-    # Festes acabades: finished_at fa >24h, o finished_at NULL (migrades sense timestamp)
     parties = Party.objects.filter(is_public=True, party_status=Party.STATUS_FINISHED).filter(
         Q(finished_at__lt=cutoff) | Q(finished_at__isnull=True)
     ).order_by('-date')
@@ -1587,6 +1609,16 @@ def dj_monitoring(request):
     total_coins_charged = SongRequest.objects.filter(
         coins_charged=True
     ).aggregate(total=Sum('coins_cost'))['total'] or 0
+    active_statuses = [
+        Party.STATUS_PARTY_VISIBLE,
+        Party.STATUS_SHOW_PARTY,
+        Party.STATUS_REQUESTS_OPEN,
+        Party.STATUS_DJJUKEBOX_ACTIVE,
+    ]
+    total_gift_coins_active = PartyCoinsGrant.objects.filter(
+        party__party_status__in=active_statuses,
+        coins_granted__gt=0,
+    ).aggregate(total=Sum('coins_granted'))['total'] or 0
 
     # ── Server health ─────────────────────────────────────────────────────────
     try:
@@ -1668,6 +1700,11 @@ def dj_monitoring(request):
             filter=Q(votepackage__payment_id__isnull=False),
             distinct=True,
         ),
+        gift_coins_active=Sum(
+            'partycoinsgrant__coins_granted',
+            filter=Q(partycoinsgrant__party__party_status__in=active_statuses)
+                  & Q(partycoinsgrant__coins_granted__gt=0),
+        ),
     ).order_by('username')
 
     party_table = Party.objects.annotate(
@@ -1695,6 +1732,7 @@ def dj_monitoring(request):
         'requests_rejected': request_stats['rejected'] or 0,
         'paid_purchases': paid_purchases,
         'total_coins_charged': total_coins_charged,
+        'total_gift_coins_active': total_gift_coins_active,
         # Server health
         'db_ok': db_ok,
         'cache_ok': cache_ok,
@@ -2166,10 +2204,13 @@ def buy_votes(request):
                     "error": "Error processant el pagament. Si us plau, torna-ho a provar més tard."
                 })
 
+    purchased_coins, gift_coins = _get_user_coin_breakdown(user)
     return render(request, "jukebox/buy_votes.html", {
         "party": party,
         "credits": get_user_available_coins(user, party),
         "votes_left": votes_left,
+        "purchased_coins": purchased_coins,
+        "gift_coins": gift_coins,
     })
 
 @login_required

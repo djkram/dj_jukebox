@@ -338,8 +338,18 @@
           <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1;">monetization_on</span>
         </div>
         <div>
-          <div class="coins-stat-label">{% trans "Coins actuals" %}</div>
-          <div class="coins-stat-value">{{ credits }}</div>
+          <div class="coins-stat-label">{% trans "Coins comprats" %}</div>
+          <div class="coins-stat-value">{{ purchased_coins }}</div>
+        </div>
+      </div>
+
+      <div class="coins-stat-card">
+        <div class="coins-stat-icon" style="background:rgba(28,200,138,0.15);">
+          <span class="material-symbols-outlined" style="font-size: 1.875rem; font-variation-settings: 'FILL' 1; color:#1cc88a;">card_giftcard</span>
+        </div>
+        <div>
+          <div class="coins-stat-label">{% trans "Coins obsequi" %}</div>
+          <div class="coins-stat-value" style="color:#1cc88a;">{{ gift_coins }}</div>
         </div>
       </div>
 

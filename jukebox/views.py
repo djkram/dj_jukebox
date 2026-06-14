@@ -1931,6 +1931,7 @@ def dj_dashboard(request):
         'recommended_songs': recommended_songs,
         'pending_song_positions': pending_song_positions,
         'pending_requests': pending_requests,
+        'queued_requests': queued_requests,
         'queued_req_by_spotify': queued_req_by_spotify,
         # Nous KPIs
         'active_users': active_users,

@@ -1512,8 +1512,8 @@
                     {% load dict_filters %}
                     {% for song in pending_songs %}
                         {% with req=queued_req_by_spotify|get_item:song.spotify_id %}
-                        <tr data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id|default:'' }}">
-                            <td class="text-center" style="font-weight: 800; font-size: 0.95rem; color: #5e24e1; width: 2.2rem; padding-right: 0;">{{ forloop.counter }}</td>
+                        <tr class="{% if req %}bag-row-request{% endif %}" data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id|default:'' }}">
+                            <td class="text-center" style="font-weight: 800; font-size: 0.95rem; color: {% if req %}#1e40af{% else %}#5e24e1{% endif %}; width: 2.2rem; padding-right: 0;">{{ forloop.counter }}</td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
                                     {% if song.album_image_url %}
@@ -1525,10 +1525,7 @@
                                     {% endif %}
                                     <div style="min-width: 0;">
                                         <div class="sonic-table-title">{{ song.title }}</div>
-                                        <div style="display:flex;align-items:center;gap:0.35rem;">
-                                            <div class="sonic-table-subtitle">{{ song.artist }}</div>
-                                            {% if req %}<span style="font-size:0.6rem;font-weight:700;color:#1e40af;background:#dbeafe;padding:0.05rem 0.3rem;border-radius:999px;white-space:nowrap;">📩 {{ req.user.username }}</span>{% endif %}
-                                        </div>
+                                        <div class="sonic-table-subtitle">{{ song.artist }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -2219,7 +2216,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {% for song in pending_songs %}
           {% with req=queued_req_by_spotify|get_item:song.spotify_id %}
           <div class="mobile-list-card d-flex align-items-center gap-2 p-2{% if req %} mobile-list-card--request{% endif %}">
-            <div class="flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 1.5rem; font-size: 0.85rem; font-weight: 800; color: #5e24e1;">{{ forloop.counter }}</div>
+            <div class="flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 1.5rem; font-size: 0.85rem; font-weight: 800; color: {% if req %}#1e40af{% else %}#5e24e1{% endif %};">{{ forloop.counter }}</div>
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">
@@ -2233,7 +2230,6 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="fw-semibold mb-0" style="font-size: 16px !important; color: #191c1f; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ song.title }}</div>
               <div class="d-flex align-items-center gap-1 mt-1" style="min-width: 0; color: #434656; font-size: 12px !important; line-height: 1.05;">
                 <span class="text-truncate" style="min-width: 0; flex: 1 1 auto;">{{ song.artist }}</span>
-                {% if req %}<span style="font-size:0.6rem;font-weight:700;color:#1e40af;background:#dbeafe;padding:0.05rem 0.3rem;border-radius:999px;flex-shrink:0;">📩 {{ req.user.username }}</span>{% endif %}
                 {% if song.bpm %}
                   <span class="flex-shrink-0">{{ song.bpm|floatformat:0 }} BPM</span>
                 {% endif %}

@@ -950,6 +950,19 @@ def delete_song_from_party_playlist(request, party_id, song_id):
         if party.playlist and song.spotify_id:
             remove_track_from_playlist(request, party.playlist.spotify_id, song.spotify_id)
 
+        # Retornar coins si la cançó tenia una petició associada (queued)
+        if song.spotify_id:
+            queued_req = SongRequest.objects.filter(
+                party=party, spotify_id=song.spotify_id, status='queued', coins_charged=True
+            ).select_related('user').first()
+            if queued_req:
+                refund_user_coins_for_party(queued_req.user, party, queued_req.coins_cost, reason='song_deleted_refund')
+                queued_req.status = 'rejected'
+                queued_req.processed_at = timezone.now()
+                queued_req.processed_by = request.user
+                queued_req.save(update_fields=['status', 'processed_at', 'processed_by'])
+                create_song_rejected_notification(queued_req)
+
         song.delete()
 
         pending_analysis_count = party.songs.filter(

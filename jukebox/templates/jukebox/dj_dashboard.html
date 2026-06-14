@@ -1513,7 +1513,16 @@
                     {% for song in pending_songs %}
                         {% with req=queued_req_by_spotify|get_item:song.spotify_id %}
                         <tr class="{% if req %}bag-row-request{% endif %}" data-song-id="{{ song.id }}" data-spotify-id="{{ song.spotify_id|default:'' }}">
-                            <td class="text-center" style="font-weight: 800; font-size: 0.95rem; color: {% if req %}#1e40af{% else %}#5e24e1{% endif %}; width: 2.2rem; padding-right: 0;">{{ forloop.counter }}</td>
+                            <td class="text-center" style="width: 2.2rem; padding-right: 0; vertical-align: middle;">
+                              {% if req %}
+                                <div style="display:flex;flex-direction:column;align-items:center;gap:0.05rem;">
+                                  <span style="font-weight:800;font-size:0.95rem;color:#1e40af;line-height:1;">{{ forloop.counter }}</span>
+                                  <span class="material-symbols-outlined" style="font-size:0.85rem;color:#1e40af;font-variation-settings:'FILL' 1;">inbox</span>
+                                </div>
+                              {% else %}
+                                <span style="font-weight:800;font-size:0.95rem;color:#5e24e1;">{{ forloop.counter }}</span>
+                              {% endif %}
+                            </td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
                                     {% if song.album_image_url %}
@@ -2216,7 +2225,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {% for song in pending_songs %}
           {% with req=queued_req_by_spotify|get_item:song.spotify_id %}
           <div class="mobile-list-card d-flex align-items-center gap-2 p-2{% if req %} mobile-list-card--request{% endif %}">
-            <div class="flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 1.5rem; font-size: 0.85rem; font-weight: 800; color: {% if req %}#1e40af{% else %}#5e24e1{% endif %};">{{ forloop.counter }}</div>
+            <div class="flex-shrink-0 d-flex flex-column align-items-center justify-content-center" style="width: 1.5rem; gap: 0.05rem;">
+              <span style="font-size:0.85rem;font-weight:800;color:{% if req %}#1e40af{% else %}#5e24e1{% endif %};line-height:1;">{{ forloop.counter }}</span>
+              {% if req %}<span class="material-symbols-outlined" style="font-size:0.8rem;color:#1e40af;font-variation-settings:'FILL' 1;">inbox</span>{% endif %}
+            </div>
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
                 <img src="{{ song.album_image_url }}" alt="{{ song.title }}" class="w-100 h-100" style="object-fit: cover;">

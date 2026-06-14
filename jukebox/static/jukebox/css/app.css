@@ -792,6 +792,10 @@
                 border-left: 3px solid #1e40af;
             }
 
+            tr.bag-row-request td {
+                background: rgba(219, 234, 254, 0.25);
+            }
+
             .mobile-empty-state {
                 padding: 0.9rem;
                 text-align: center;

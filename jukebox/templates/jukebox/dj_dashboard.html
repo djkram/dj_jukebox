@@ -2244,13 +2244,18 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="dashboard-mobile-tab mobile-segmented-item" data-dashboard-tab="played">Posats</button>
       </div>
 
-      <div id="dashboard-mobile-tab-bag" class="mobile-list-stack">
+      <div id="dashboard-mobile-tab-bag">
+        <div class="mobile-search-shell mobile-search-shell--aligned mb-2">
+          <i class="fas fa-search" style="color:#747687;font-size:0.9rem;flex-shrink:0;"></i>
+          <input id="mobile-bag-search" type="search" placeholder="Cerca a la maleta..." autocomplete="off">
+        </div>
+        <div id="dashboard-mobile-bag-list" class="mobile-list-stack">
         {% for song in pending_songs %}
           {% with req=queued_req_by_spotify|get_item:song.spotify_id %}
-          <div class="mobile-list-card d-flex align-items-center gap-2 p-2{% if req %} mobile-list-card--request{% endif %}">
+          <div class="mobile-list-card d-flex align-items-center gap-2 p-2{% if req %} mobile-list-card--request{% endif %}" data-title="{{ song.title|lower }}" data-artist="{{ song.artist|lower }}">
             <div class="flex-shrink-0 d-flex flex-column align-items-center justify-content-center" style="width: 1.5rem; gap: 0.05rem;">
               <span style="font-size:0.85rem;font-weight:800;color:{% if req %}#1e40af{% else %}#5e24e1{% endif %};line-height:1;">{{ forloop.counter }}</span>
-              {% if req %}<span class="material-symbols-outlined" style="font-size:0.8rem;color:#1e40af;font-variation-settings:'FILL' 1;">inbox</span>{% endif %}
+              {% if req %}<i class="fas fa-envelope" style="font-size:0.7rem;color:#1e40af;"></i>{% endif %}
             </div>
             <div class="overflow-hidden flex-shrink-0" style="width: 2.75rem; height: 2.75rem; border-radius: 8px;">
               {% if song.album_image_url %}
@@ -2297,7 +2302,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <p class="mb-0">Sense cançons a la cua</p>
           </div>
         {% endfor %}
-      </div>
+        </div>{# /dashboard-mobile-bag-list #}
+      </div>{# /dashboard-mobile-tab-bag #}
 
       <div id="dashboard-mobile-tab-played" class="d-none mobile-list-stack">
         {% for song in played_songs_list %}
@@ -2422,6 +2428,34 @@ document.addEventListener('DOMContentLoaded', function() {
             <p class="mb-0">No hi ha peticions pendents</p>
           </div>
         {% endif %}
+
+        {% if queued_requests %}
+        <div style="margin-top:0.75rem;">
+          <span style="display:block;font-size:0.72rem;font-weight:700;letter-spacing:0.07em;color:#1e40af;text-transform:uppercase;margin-bottom:0.4rem;padding-left:0.25rem;">
+            <i class="fas fa-envelope" style="margin-right:0.3rem;"></i>A la maleta
+          </span>
+          <div class="mobile-list-stack">
+          {% for req in queued_requests %}
+            <div class="mobile-list-card mobile-list-card--request d-flex align-items-center gap-2 p-2">
+              <div class="overflow-hidden flex-shrink-0" style="width:2.5rem;height:2.5rem;border-radius:8px;">
+                {% if req.album_image_url %}
+                  <img src="{{ req.album_image_url }}" alt="{{ req.title }}" class="w-100 h-100" style="object-fit:cover;">
+                {% else %}
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#e7e8ed;">
+                    <i class="fas fa-music" style="color:#747688;font-size:0.875rem;"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-grow-1" style="min-width:0;">
+                <div style="font-size:0.88rem;font-weight:700;color:#191c1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ req.title }}</div>
+                <div style="font-size:0.72rem;color:#434656;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ req.artist }} · {{ req.user.username }}</div>
+              </div>
+              <span style="font-size:0.65rem;font-weight:700;color:#1e40af;white-space:nowrap;flex-shrink:0;">{{ req.coins_cost }} C</span>
+            </div>
+          {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
 
     </section>
@@ -2435,6 +2469,20 @@ document.addEventListener('DOMContentLoaded', function() {
     requests: document.getElementById('dashboard-mobile-tab-requests'),
     played: document.getElementById('dashboard-mobile-tab-played'),
   };
+
+  // Mobile bag search filter
+  var mobileBagSearch = document.getElementById('mobile-bag-search');
+  var mobileBagList   = document.getElementById('dashboard-mobile-bag-list');
+  if (mobileBagSearch && mobileBagList) {
+    mobileBagSearch.addEventListener('input', function() {
+      var q = this.value.toLowerCase().trim();
+      mobileBagList.querySelectorAll('.mobile-list-card').forEach(function(card) {
+        var title  = card.getAttribute('data-title') || '';
+        var artist = card.getAttribute('data-artist') || '';
+        card.style.display = (!q || title.includes(q) || artist.includes(q)) ? '' : 'none';
+      });
+    });
+  }
 
   dashboardTabButtons.forEach(function(button) {
     button.addEventListener('click', function() {

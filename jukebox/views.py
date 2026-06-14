@@ -1957,7 +1957,19 @@ def update_party_status(request, party_id):
     if requested_status == Party.STATUS_FINISHED:
         party.allow_song_requests = False
         if party.finished_at is None:
-            party.finished_at = timezone.now()
+            if party.party_ends_at:
+                from datetime import timedelta
+                tz = timezone.get_current_timezone()
+                base_date = party.date.astimezone(tz).date()
+                end_naive = datetime.combine(base_date, party.party_ends_at)
+                end_dt = timezone.make_aware(end_naive, tz)
+                # Cross-midnight: si l'hora de fi < hora d'inici, acaba l'endemà
+                start_time = party.jukebox_starts_at or party.date.astimezone(tz).time()
+                if party.party_ends_at < start_time:
+                    end_dt += timedelta(days=1)
+                party.finished_at = end_dt
+            else:
+                party.finished_at = timezone.now()
     update_fields = ['party_status', 'jukebox_starts_at', 'is_jukebox_active', 'allow_song_requests', 'finished_at']
     party.save(update_fields=update_fields)
 

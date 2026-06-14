@@ -331,8 +331,13 @@ def update_profile_name(request):
 
 
 def select_party(request):
-    # Només mostrem festes públiques que no han acabat
-    parties = Party.objects.filter(is_public=True).exclude(party_status=Party.STATUS_FINISHED).order_by('-date')
+    # Mostrem festes actives + festes acabades fa menys de 24h (transició visible)
+    from datetime import timedelta
+    cutoff = timezone.now() - timedelta(hours=24)
+    parties = Party.objects.filter(is_public=True).exclude(
+        party_status=Party.STATUS_FINISHED,
+        finished_at__lt=cutoff,
+    ).order_by('-date')
 
     # Processar entrada de codi
     code_error = None
@@ -401,7 +406,12 @@ def unset_party(request):
     return redirect('select_party')
 
 def past_parties(request):
-    parties = Party.objects.filter(is_public=True, party_status=Party.STATUS_FINISHED).order_by('-date')
+    from datetime import timedelta
+    cutoff = timezone.now() - timedelta(hours=24)
+    # Festes acabades: finished_at fa >24h, o finished_at NULL (migrades sense timestamp)
+    parties = Party.objects.filter(is_public=True, party_status=Party.STATUS_FINISHED).filter(
+        Q(finished_at__lt=cutoff) | Q(finished_at__isnull=True)
+    ).order_by('-date')
     return render(request, "jukebox/past_parties.html", {"parties": parties})
 
 @login_required
@@ -1946,7 +1956,9 @@ def update_party_status(request, party_id):
     party.jukebox_starts_at = jukebox_starts_at
     if requested_status == Party.STATUS_FINISHED:
         party.allow_song_requests = False
-    update_fields = ['party_status', 'jukebox_starts_at', 'is_jukebox_active', 'allow_song_requests']
+        if party.finished_at is None:
+            party.finished_at = timezone.now()
+    update_fields = ['party_status', 'jukebox_starts_at', 'is_jukebox_active', 'allow_song_requests', 'finished_at']
     party.save(update_fields=update_fields)
 
     logger.info("[PARTY_STATUS] party_id=%s status=%s", party_id, party.party_status)

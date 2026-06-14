@@ -1809,8 +1809,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Reusable confirm modal function
-  function showConfirm(title, message, onConfirm) {
+  // Reusable confirm modal function (global so inline onclick can call it)
+  window.showConfirm = function showConfirm(title, message, onConfirm) {
     document.getElementById('confirmModalLabel').textContent = title;
     document.getElementById('confirmModalBody').textContent = message;
     const modal = new bootstrap.Modal(document.getElementById('confirmModal'));

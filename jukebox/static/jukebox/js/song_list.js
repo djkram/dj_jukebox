@@ -438,67 +438,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Filtrat de cançons desktop - Pending songs
-  var searchPendingInput = document.getElementById('search-pending');
-  if (searchPendingInput) {
-    searchPendingInput.addEventListener('input', function() {
-      var q = searchPendingInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.pending-song-row');
+  // Filtrat de cançons — desktop pending
+  SongFilter.init(document.getElementById('search-pending'), {
+    rows: '.pending-song-row',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; }
+  });
 
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
+  // Filtrat de cançons — desktop played
+  SongFilter.init(document.getElementById('search-played'), {
+    rows: '.played-song-row',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; }
+  });
 
-  // Filtrat de cançons desktop - Played songs
-  var searchPlayedInput = document.getElementById('search-played');
-  if (searchPlayedInput) {
-    searchPlayedInput.addEventListener('input', function() {
-      var q = searchPlayedInput.value.trim().toLowerCase();
-      var rows = document.querySelectorAll('.played-song-row');
-
-      rows.forEach(function(row) {
-        var title = (row.getAttribute('data-song-title') || '').toLowerCase();
-        var artist = (row.getAttribute('data-song-artist') || '').toLowerCase();
-        row.style.display = (title.includes(q) || artist.includes(q)) ? '' : 'none';
-      });
-    });
-  }
-
-  var mobileInput = document.getElementById('mobile-song-search');
-  if (mobileInput) {
-    var noResultsBox = document.getElementById('mobile-bag-no-results');
-    var spotifySearchBtn = document.getElementById('mobile-bag-search-spotify-btn');
-
-    mobileInput.addEventListener('input', function() {
-      var q = mobileInput.value.trim().toLowerCase();
-      var rawQuery = mobileInput.value.trim();
-      var cards = document.querySelectorAll('.mobile-bag-song-card');
-      var visibleCount = 0;
-
-      cards.forEach(function(card) {
-        var title = card.getAttribute('data-song-title').toLowerCase();
-        var artist = card.getAttribute('data-song-artist').toLowerCase();
-        var isMatch = (title.includes(q) || artist.includes(q));
-        card.style.display = isMatch ? '' : 'none';
-        if (isMatch) visibleCount += 1;
-      });
-
-      if (noResultsBox) {
-        if (rawQuery && visibleCount === 0) {
-          noResultsBox.classList.remove('d-none');
-          if (spotifySearchBtn) {
-            spotifySearchBtn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
-          }
-        } else {
-          noResultsBox.classList.add('d-none');
-        }
-      }
-    });
-  }
+  // Filtrat de cançons — mòbil
+  SongFilter.init(document.getElementById('mobile-song-search'), {
+    rows: '.mobile-bag-song-card',
+    fields: function (row) { return [row.dataset.songTitle || '', row.dataset.songArtist || '']; },
+    noResults: document.getElementById('mobile-bag-no-results'),
+    onUpdate: function (rawQuery) {
+      var btn = document.getElementById('mobile-bag-search-spotify-btn');
+      if (btn && rawQuery) btn.href = 'https://open.spotify.com/search/' + encodeURIComponent(rawQuery);
+    }
+  });
 });
 
 // ── LCD clocks ────────────────────────────────────────────────────────────
